@@ -4,20 +4,20 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.library.utils.TagUtil;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class ServantTileEntity extends MantleBlockEntity implements IServantLogic {
-  private static final String TAG_MASTER_POS = "masterPos";
+  private static final String TAG_MASTER_POS = "masterOffset";
   private static final String TAG_MASTER_BLOCK = "masterBlock";
 
   @Getter
@@ -77,9 +77,8 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
 
   @Override
   public void notifyMasterOfChange(BlockPos pos, BlockState state) {
-    if (validateMaster()) {
-      assert masterPos != null;
-      BlockEntityHelper.get(IMasterLogic.class, level, masterPos).ifPresent(te -> te.notifyChange(this, pos, state));
+    if (level != null && masterPos != null && validateMaster() && level.getBlockEntity(masterPos) instanceof IMasterLogic te) {
+      te.notifyChange(pos, state);
     }
   }
 
@@ -111,7 +110,7 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
    * @param tags  NBT to read
    */
   protected void readMaster(CompoundTag tags) {
-    BlockPos masterPos = TagUtil.readPos(tags, TAG_MASTER_POS);
+    BlockPos masterPos = TagUtil.readOptionalPos(tags, TAG_MASTER_POS, this.worldPosition);
     Block masterBlock = null;
     // if the master position is valid, get the master block
     if (masterPos != null && tags.contains(TAG_MASTER_BLOCK, Tag.TAG_STRING)) {
@@ -137,10 +136,11 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
    * Writes the master position and master block to the given compound
    * @param tags  Tags
    */
+  @SuppressWarnings({"UnusedReturnValue"})
   protected CompoundTag writeMaster(CompoundTag tags) {
     if (masterPos != null && masterBlock != null) {
-      tags.put(TAG_MASTER_POS, TagUtil.writePos(masterPos));
-      tags.putString(TAG_MASTER_BLOCK, Objects.requireNonNull(BuiltInRegistries.BLOCK.getKey(masterBlock)).toString());
+      tags.put(TAG_MASTER_POS, NbtUtils.writeBlockPos(masterPos.subtract(this.worldPosition)));
+      tags.putString(TAG_MASTER_BLOCK, Loadables.BLOCK.getKey(masterBlock).toString());
     }
     return tags;
   }

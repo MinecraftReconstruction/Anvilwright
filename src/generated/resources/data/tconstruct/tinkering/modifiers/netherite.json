@@ -1,7 +1,5 @@
 {
-  "type": "tconstruct:composable",
-  "level_display": "tconstruct:single_level",
-  "tooltip_display": "always",
+  "level_display": "tconstruct:no_levels",
   "modules": [
     {
       "type": "tconstruct:rarity",
@@ -12,45 +10,49 @@
       "flag": "tconstruct:indestructible"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:durability",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.2,
       "operation": "multiply_base",
-      "value": 0.2
+      "stat": "tconstruct:durability"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:armor_toughness",
+      "type": "tconstruct:stat_boost",
+      "flat": 1.0,
       "operation": "add",
-      "value": 1.0
+      "stat": "tconstruct:armor_toughness"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:knockback_resistance",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.05,
       "operation": "add",
-      "value": 0.05
+      "stat": "tconstruct:knockback_resistance"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:attack_damage",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.2,
       "operation": "multiply_base",
-      "value": 0.2
+      "stat": "tconstruct:attack_damage"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:mining_speed",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.25,
       "operation": "multiply_base",
-      "value": 0.25
+      "stat": "tconstruct:mining_speed"
     },
     {
-      "type": "tconstruct:tool_stat",
+      "type": "tconstruct:set_stat",
       "stat": "tconstruct:harvest_tier",
       "value": "minecraft:netherite"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:velocity",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.1,
       "operation": "multiply_base",
-      "value": 0.1
+      "stat": "tconstruct:velocity"
+    },
+    {
+      "type": "tconstruct:volatile_flag",
+      "flag": "tconstruct:netherite"
     }
   ]
 }

@@ -7,39 +7,34 @@ import slimeknights.tconstruct.library.modifiers.ModifierManager.ModifiersLoaded
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/** Supplier that will return a modifier from a datapack, automatically updating to the new instance when datapacks reload */
-public class DynamicModifier<T> extends LazyModifier {
+/**
+ * Supplier that will return a modifier from a datapack, automatically updating to the new instance when datapacks reload.
+ * Extends {@link StaticModifier} to make it easier to migrate a static modifier to a dynamic one without breaking binary compatability on the field.
+ */
+public class DynamicModifier extends StaticModifier<Modifier> {
   /** List of all dynamic modifiers, to clear cache when modifiers reload */
   private static final AtomicInteger INVALIDATION_COUNTER = new AtomicInteger(0);
 
-  /** Filter for the modifier, must be of this type to return */
-  private final Class<T> classFilter;
-  /** Last count of the invalation counter, if this is smaller than the global, time to invalidate */
+  /** Last count of the invalidation counter, if this is smaller than the global, time to invalidate */
   private int invalidationCount = -1;
 
   /**
    * Creates a new instance.
    * Creating an instance of a dynamic modifier is considered "expensive", as it will never be garbage collected
    * @param id           Modifier ID to fetch
-   * @param classFilter  expected type for the modifier
    */
-  public DynamicModifier(ModifierId id, Class<T> classFilter) {
+  public DynamicModifier(ModifierId id) {
     super(id);
-    this.classFilter = classFilter;
   }
 
-  /** Returns true if this static modifier has a value. A return of true here means {@link #get()} will not throw */
   @Override
   public boolean isBound() {
-    return super.isBound() && classFilter.isInstance(getUnchecked());
+    return ModifierManager.INSTANCE.isDynamicModifiersLoaded() && getUnchecked() != ModifierManager.INSTANCE.getDefaultValue();
   }
 
   @Override
   protected Modifier getUnchecked() {
-    if (invalidationCount < INVALIDATION_COUNTER.get()) {
-      result = null;
-    }
-    if (result == null) {
+    if (result == null || invalidationCount < INVALIDATION_COUNTER.get()) {
       result = ModifierManager.getValue(id);
       invalidationCount = INVALIDATION_COUNTER.get();
     }
@@ -54,26 +49,18 @@ public class DynamicModifier<T> extends LazyModifier {
   @Override
   public Modifier get() {
     if (!ModifierManager.INSTANCE.isDynamicModifiersLoaded()) {
-      throw new IllegalStateException("Cannot fetch a dynamic modifiers before datapacks load");
+      throw new IllegalStateException("Cannot fetch a dynamic modifiers before datapacks are loaded");
     }
     Modifier result = getUnchecked();
     if (result == ModifierManager.INSTANCE.getDefaultValue()) {
-      throw new IllegalStateException("Dynamic modifier for " + id + " returned " + ModifierManager.EMPTY + ", this typically means the modifier is not registered");
-    }
-    if (!classFilter.isInstance(result)) {
-      throw new IllegalStateException("Dynamic modifier is not the required type");
+      throw new IllegalStateException("Dynamic modifier for " + id + " returned " + ModifierId.EMPTY + ", this typically means the modifier is not registered");
     }
     return result;
   }
 
-  /** Same as {@link #get()}, but fetches the modifier as the expected type. Separate to allow the expected type to be an interface */
-  public T asType() {
-    return classFilter.cast(get());
-  }
-
   @Override
   public String toString() {
-    return "DynamicModifier{" + id + ",filter=" + classFilter.getSimpleName() + '}';
+    return "DynamicModifier{" + id + '}';
   }
 
   /** Registers event listeners with the forge event bus */

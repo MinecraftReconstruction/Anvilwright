@@ -8,7 +8,6 @@ import net.minecraft.world.entity.player.Inventory;
 import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
-import slimeknights.tconstruct.library.client.RenderUtils;
 import slimeknights.tconstruct.smeltery.block.entity.controller.MelterBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule;
 import slimeknights.tconstruct.smeltery.client.screen.module.GuiFuelModule;
@@ -16,13 +15,11 @@ import slimeknights.tconstruct.smeltery.client.screen.module.GuiMeltingModule;
 import slimeknights.tconstruct.smeltery.client.screen.module.GuiTankModule;
 import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 
-import javax.annotation.Nullable;
-
 public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> implements IScreenWithFluidTank {
   private static final ResourceLocation BACKGROUND = TConstruct.getResource("textures/gui/melter.png");
-  private static final ElementScreen SCALA = new ElementScreen(176, 0, 52, 52, 256, 256);
-  private static final ElementScreen FUEL_SLOT = new ElementScreen(176, 52, 18, 36, 256, 256);
-  private static final ElementScreen FUEL_TANK = new ElementScreen(194, 52, 14, 38, 256, 256);
+  private static final ElementScreen SCALA = new ElementScreen(BACKGROUND, 176, 0, 52, 52, 256, 256);
+  private static final ElementScreen FUEL_SLOT = new ElementScreen(BACKGROUND, 176, 52, 18, 36, 256, 256);
+  private static final ElementScreen FUEL_TANK = new ElementScreen(BACKGROUND, 194, 52, 14, 38, 256, 256);
 
   private final GuiMeltingModule melting;
   private final GuiFuelModule fuel;
@@ -32,8 +29,8 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
     MelterBlockEntity te = container.getTile();
     if (te != null) {
       FuelModule fuelModule = te.getFuelModule();
-      melting = new GuiMeltingModule(this, te.getMeltingInventory(), fuelModule::getTemperature, slot -> true);
-      fuel = new GuiFuelModule(this, fuelModule, 153, 32, 12, 36, 152, 15, container.isHasFuelSlot());
+      melting = new GuiMeltingModule(this, te.getItemHandler(), 0, fuelModule::getTemperature, slot -> true, BACKGROUND);
+      fuel = new GuiFuelModule(this, fuelModule, 153, 32, 12, 36, 152, 15, container.isHasFuelSlot(), BACKGROUND);
       tank = new GuiTankModule(this, te.getTank(), 90, 16, 52, 52, MelterContainerMenu.TOOLTIP_FORMAT);
     } else {
       melting = null;
@@ -57,11 +54,11 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
     if (fuel != null) {
       // draw the correct background for the fuel type
       if (menu.isHasFuelSlot()) {
-        FUEL_SLOT.draw(graphics, BACKGROUND, leftPos + 150, topPos + 31);
+        FUEL_SLOT.draw(graphics, leftPos + 150, topPos + 31);
       } else {
-        FUEL_TANK.draw(graphics, BACKGROUND, leftPos + 152, topPos + 31);
+        FUEL_TANK.draw(graphics, leftPos + 152, topPos + 31);
       }
-      fuel.draw(graphics, BACKGROUND);
+      fuel.draw(graphics);
     }
 
     // fluids
@@ -80,12 +77,11 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
     if (fuel != null) fuel.renderHighlight(graphics, checkX, checkY);
 
     // scala
-    RenderUtils.setup(BACKGROUND);
-    SCALA.draw(graphics, BACKGROUND, 90, 16);
+    SCALA.draw(graphics, 90, 16, 100);
 
     // heat bars
     if (melting != null) {
-      melting.drawHeatBars(graphics, BACKGROUND);
+      melting.drawHeatBars(graphics);
     }
   }
 
@@ -103,20 +99,43 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
     if (fuel != null) fuel.addTooltip(graphics, mouseX, mouseY, true);
   }
 
-  @Nullable
   @Override
-  public Object getIngredientUnderMouse(double mouseX, double mouseY) {
-    Object ingredient = null;
-    int checkX = (int) mouseX - leftPos;
-    int checkY = (int) mouseY - topPos;
+  public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    assert minecraft != null && minecraft.player != null && minecraft.gameMode != null;
+    if (!minecraft.player.isSpectator() && (button == 0 || button == 1) && !menu.getCarried().isEmpty()) {
+      int checkX = (int)mouseX - leftPos;
+      int checkY = (int)mouseY - topPos;
+      // left-clicking the fluid puts it in the held item (button 0/2)
+      // right-clicking or left clicking the empty spot dumps the item (button 1/3)
+
+      // try tank first
+      if (tank != null && tank.tryClick(checkX, checkY, button, 0)) {
+        return true;
+      }
+      // then try fuel
+      if (fuel != null && fuel.tryClick(checkX, checkY, button, 2)) {
+        return true;
+      }
+    }
+    return super.mouseClicked(mouseX, mouseY, button);
+  }
+
+  @Override
+  public FluidLocation getFluidUnderMouse(int mouseX, int mouseY) {
+    int checkX = mouseX - leftPos;
+    int checkY = mouseY - topPos;
 
     // try fuel first, its faster
-    if (fuel != null)
-      ingredient = fuel.getIngredient(checkX, checkY);
-
-    if (tank != null && ingredient == null)
-      ingredient = tank.getIngreientUnderMouse(checkX, checkY);
-
-    return ingredient;
+    if (fuel != null) {
+      FluidLocation ingredient = fuel.getFluidUnderMouse(checkX, checkY);
+      if (ingredient != null) {
+        return ingredient;
+      }
+    }
+    // melter tanks are about as fast
+    if (tank != null) {
+      return tank.getFluidUnderMouse(checkX, checkY);
+    }
+    return null;
   }
 }

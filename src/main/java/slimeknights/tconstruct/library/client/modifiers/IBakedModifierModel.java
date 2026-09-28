@@ -6,14 +6,18 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import slimeknights.mantle.util.ItemLayerPixels;
+import slimeknights.tconstruct.library.client.modifiers.model.ModifierModel;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Modifier model for a particular tool. One copy of a class with this interface exists per modifier per tool
+ * Modifier model for a particular tool. One copy of a class with this interface exists per modifier per tool.
+ * @see ModifierModel
  */
 public interface IBakedModifierModel {
   Mesh EMPTY_MESH = RendererAccess.INSTANCE.getRenderer().meshBuilder().build();
@@ -27,7 +31,7 @@ public interface IBakedModifierModel {
    */
   @Nullable
   default Object getCacheKey(IToolStackView tool, ModifierEntry modifier) {
-    return modifier.getId();
+    return modifier == ModifierEntry.EMPTY ? null : modifier.getId();
   }
 
   /**
@@ -38,8 +42,8 @@ public interface IBakedModifierModel {
    * @param transforms       Transforms
    * @param isLarge          If true, use the large sprites and quads
    * @param startTintIndex   First tint index that can be used for this model. Use with {@link #getTintIndexes()} and {@link #getTint(IToolStackView, ModifierEntry, int)}, if neither is used this index will not work
+   * @param quadConsumer     Consumer accepting modifier quads. Note you are expected to add quads in top down order, that is whatever you want visible should be added first.
    * @param pixels           Item layer pixels to reduce z-fighting. Pass into methods from {@link slimeknights.mantle.client.model.util.MantleItemLayerModel}
-   * @return  List of baked quads
    */
   Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels);
 

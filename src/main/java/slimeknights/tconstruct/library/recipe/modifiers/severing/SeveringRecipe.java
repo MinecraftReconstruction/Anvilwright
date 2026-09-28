@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.util.LazySpawnEggItem;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -16,29 +15,38 @@ import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.container.IEmptyContainer;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Recipe to convert an entity into a head or other item for the severing modifier
  */
 @RequiredArgsConstructor
 public class SeveringRecipe implements ICustomOutputRecipe<IEmptyContainer> {
+  protected static LoadableField<EntityIngredient,SeveringRecipe> ENTITY_FIELD = EntityIngredient.LOADABLE.requiredField("entity", r -> r.ingredient);
+  protected static LoadableField<Float,SeveringRecipe> BASE_CHANCE_FIELD = FloatLoadable.PERCENT.defaultField("per_level_chance", 0.05f, true, r -> r.baseChance);
+  protected static LoadableField<Float,SeveringRecipe> LOOTING_BONUS_FIELD = FloatLoadable.PERCENT.defaultField("looting_bonus", 0.01f, true, r -> r.lootingBonus);
+  /** Loader instance */
+  public static final RecordLoadable<SeveringRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(), ENTITY_FIELD,
+    ItemOutput.Loadable.REQUIRED_STACK.requiredField("result", r -> r.output),
+    BASE_CHANCE_FIELD, LOOTING_BONUS_FIELD,
+    SeveringRecipe::new);
+
   @Getter
   private final ResourceLocation id;
+  @Getter
   protected final EntityIngredient ingredient;
   protected final ItemOutput output;
+  protected final float baseChance;
+  protected final float lootingBonus;
 
-  @SuppressWarnings("rawtypes")
-  private List<EntityType> entityInputs;
-  private List<ItemStack> itemInputs;
+  /** @deprecated use {@link #SeveringRecipe(ResourceLocation, EntityIngredient, ItemOutput, float, float)} */
+  @Deprecated(forRemoval = true)
+  public SeveringRecipe(ResourceLocation id, EntityIngredient ingredient, ItemOutput output) {
+    this(id, ingredient, output, 0.05f, 0.01f);
+  }
 
   /**
    * Checks if the recipe matches the given type
@@ -47,6 +55,11 @@ public class SeveringRecipe implements ICustomOutputRecipe<IEmptyContainer> {
    */
   public boolean matches(EntityType<?> type) {
     return ingredient.test(type);
+  }
+
+  /** Gets the chance of this recipe. */
+  public float getChance(float level, float looting) {
+    return level * (baseChance + lootingBonus * looting);
   }
 
   /**
@@ -108,29 +121,5 @@ public class SeveringRecipe implements ICustomOutputRecipe<IEmptyContainer> {
   @Override
   public boolean matches(IEmptyContainer inv, Level worldIn) {
     return false;
-  }
-
-  /** Serializer for this recipe */
-  public static class Serializer extends LoggingRecipeSerializer<SeveringRecipe> {
-    @Override
-    public SeveringRecipe fromJson(ResourceLocation id, JsonObject json) {
-      EntityIngredient ingredient = EntityIngredient.deserialize(JsonHelper.getElement(json, "entity"));
-      ItemOutput output = ItemOutput.fromJson(JsonHelper.getElement(json, "result"));
-      return new SeveringRecipe(id, ingredient, output);
-    }
-
-    @Nullable
-    @Override
-    protected SeveringRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      EntityIngredient ingredient = EntityIngredient.read(buffer);
-      ItemOutput output = ItemOutput.read(buffer);
-      return new SeveringRecipe(id, ingredient, output);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, SeveringRecipe recipe) {
-      recipe.ingredient.write(buffer);
-      recipe.output.write(buffer);
-    }
   }
 }

@@ -29,10 +29,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Class handling the loading of modifier models
+ * Class handling the loading of modifier models.
+ * @deprecated use {@link ModifierModelMapManager}
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Log4j2
@@ -144,6 +147,7 @@ public class ModifierModelManager implements IEarlySafeManagerReloadListener, Id
    * @param modifierId    Specific modifier ID
    * @return  Path to the modifier
    */
+  @SuppressWarnings("removal")
   private static Material getModifierTexture(ResourceLocation modifierRoot, ResourceLocation modifierId, String suffix) {
     return new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation(modifierRoot.getNamespace(), modifierRoot.getPath() + modifierId.getNamespace() + "_" + modifierId.getPath() + suffix));
   }
@@ -180,7 +184,20 @@ public class ModifierModelManager implements IEarlySafeManagerReloadListener, Id
    * @param largeModifierRoots  List of modifier roots for large tools, null if the tool is not large
    * @return  Map of models
    */
-  public static Map<ModifierId,IBakedModifierModel> getModelsForTool(List<ResourceLocation> smallModifierRoots, List<ResourceLocation> largeModifierRoots, Collection<Material> textures) {
+  public static Map<ModifierId,IBakedModifierModel> getModelsForTool(Function<Material,TextureAtlasSprite> spriteGetter, List<ResourceLocation> smallModifierRoots, List<ResourceLocation> largeModifierRoots) {
+    return getModelsForTool(spriteGetter, smallModifierRoots, largeModifierRoots, Set.of(), Set.of());
+  }
+
+  /**
+   * Gets a map of all models for the given tool
+   *
+   * @param smallModifierRoots List of modifier roots for small tools
+   * @param largeModifierRoots List of modifier roots for large tools, null if the tool is not large
+   * @param skip               Modifiers in the given collection will be skipped on parsing
+   * @param blacklist          Models in this blacklist are skipped when parsing. Used to suppress problematic models in legacy parsing.
+   * @return Map of models
+   */
+  public static Map<ModifierId,IBakedModifierModel> getModelsForTool(Function<Material,TextureAtlasSprite> spriteGetter, List<ResourceLocation> smallModifierRoots, List<ResourceLocation> largeModifierRoots, Collection<ModifierId> skip, Set<IUnbakedModifierModel> blacklist) {
     // if we have no modifier models, or both lists of modifier roots are empty, nothing to do
     if (modifierModels.isEmpty() || (smallModifierRoots.isEmpty() && largeModifierRoots.isEmpty())) {
       return Collections.emptyMap();
@@ -190,17 +207,19 @@ public class ModifierModelManager implements IEarlySafeManagerReloadListener, Id
     ImmutableMap.Builder<ModifierId,IBakedModifierModel> modelMap = ImmutableMap.builder();
 
     // create two texture adders, so we only log on the final option if missing
-    Predicate<Material> textureAdder = DynamicTextureLoader.getTextureAdder(textures, Config.CLIENT.logMissingModifierTextures.get());
+    Predicate<Material> validator = DynamicTextureLoader.getTextureValidator(spriteGetter, Config.CLIENT.logMissingModifierTextures.get());
 
     // load each modifier
     for (Entry<ModifierId, IUnbakedModifierModel> entry : modifierModels.entrySet()) {
       ModifierId id = entry.getKey();
       IUnbakedModifierModel model = entry.getValue();
-      IBakedModifierModel toolModel = model.forTool(
-        name -> getTexture(smallModifierRoots, textureAdder, id, name),
-        name -> getTexture(largeModifierRoots, textureAdder, id, name));
-      if (toolModel != null) {
-        modelMap.put(id, toolModel);
+      if (!skip.contains(id) && !blacklist.contains(model)) {
+        IBakedModifierModel toolModel = model.forTool(
+          name -> getTexture(smallModifierRoots, validator, id, name),
+          name -> getTexture(largeModifierRoots, validator, id, name));
+        if (toolModel != null) {
+          modelMap.put(id, toolModel);
+        }
       }
     }
 

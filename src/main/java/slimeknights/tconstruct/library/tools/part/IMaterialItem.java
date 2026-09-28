@@ -2,41 +2,60 @@ package slimeknights.tconstruct.library.tools.part;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
+import slimeknights.tconstruct.library.materials.IMaterialUser;
+import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.library.utils.NBTTags;
+
+import java.util.function.Consumer;
 
 /**
  * Items implementing this interface contain a material
  */
-public interface IMaterialItem extends ItemLike {
+public interface IMaterialItem extends ItemLike, IMaterialUser {
+  /** Tag used in NBT for the material ID */
+  String MATERIAL_TAG = "Material";
+
   /**
    * Returns the material ID of the part this itemstack holds.
    *
-   * @return Material ID or {@link IMaterial#UNKNOWN_ID} if invalid
+   * @return Material ID or {@link MaterialId#UNKNOWN} if invalid
    */
   MaterialVariantId getMaterial(ItemStack stack);
 
-  /** Returns the item with the given material, bypassing material validation */
-  default ItemStack withMaterialForDisplay(MaterialVariantId materialId) {
-    ItemStack stack = new ItemStack(this);
-    stack.getOrCreateTag().putString(NBTTags.PART_MATERIAL, materialId.toString());
+  /** Sets the material on the existing stack. */
+  default ItemStack setMaterial(ItemStack stack, MaterialVariantId material) {
+    if (canUseMaterial(material.getId())) {
+      return setMaterialForced(stack, material);
+    }
     return stack;
+  }
+
+  /** Sets the material on the existing stack, bypassing the valid material check. */
+  default ItemStack setMaterialForced(ItemStack stack, MaterialVariantId material) {
+    // FIXME: it is odd that we assume the NBT format in this method but not in getMaterial, should be consistent in the implementation location
+    stack.getOrCreateTag().putString(MATERIAL_TAG, material.toString());
+    return stack;
+  }
+
+  /** Returns the item with the given material, bypassing material validation */
+  default ItemStack withMaterialForDisplay(MaterialVariantId material) {
+    // TODO 1.21: ditch this in favor of setMaterialForDisplay?
+    return setMaterialForced(new ItemStack(this), material);
   }
 
   /** Returns the item with the given material, validating it */
   default ItemStack withMaterial(MaterialVariantId material) {
-    if (canUseMaterial(material.getId())) {
-      return withMaterialForDisplay(material);
-    }
-    return new ItemStack(this);
+    return setMaterial(new ItemStack(this), material);
   }
 
   /**
    * Returns true if the material can be used for this toolpart
    */
+  @Override
   default boolean canUseMaterial(MaterialId mat) {
     return true;
   }
@@ -44,6 +63,35 @@ public interface IMaterialItem extends ItemLike {
   /** Returns true if the material can be used for this toolpart, simply an alias for {@link #canUseMaterial(MaterialId)} */
   default boolean canUseMaterial(IMaterial mat) {
     return canUseMaterial(mat.getIdentifier());
+  }
+
+  /** Adds all variants of the material item to the given item stack list */
+  default void addVariants(Consumer<ItemStack> items, String showOnlyMaterial) {
+    if (MaterialRegistry.isFullyLoaded()) {
+      // TODO: filter is not the best for the different material stat types
+      // if a specific material is set in the config, try adding that as search tab only
+      boolean added = false;
+      if (!showOnlyMaterial.isEmpty()) {
+        MaterialVariantId materialId = MaterialVariantId.tryParse(showOnlyMaterial);
+        if (materialId != null && canUseMaterial(materialId.getId())) {
+          items.accept(this.withMaterialForDisplay(materialId));
+          added = true;
+        }
+      }
+      // add all applicable materials to the tab, and possibly to serach
+      if (!added) {
+        for (IMaterial material : MaterialRegistry.getInstance().getVisibleMaterials()) {
+          MaterialId id = material.getIdentifier();
+          if (this.canUseMaterial(id)) {
+            items.accept(this.withMaterial(id));
+            // if filter is set we wanted just the 1 item
+            if (!showOnlyMaterial.isEmpty()) {
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -55,7 +103,7 @@ public interface IMaterialItem extends ItemLike {
     if ((stack.getItem() instanceof IMaterialItem)) {
       return ((IMaterialItem) stack.getItem()).getMaterial(stack);
     }
-    return IMaterial.UNKNOWN_ID;
+    return MaterialId.UNKNOWN;
   }
 
   /**
@@ -66,15 +114,28 @@ public interface IMaterialItem extends ItemLike {
    */
   static ItemStack withMaterial(ItemStack stack, MaterialVariantId material) {
     Item item = stack.getItem();
-    if (item instanceof IMaterialItem) {
-      ItemStack output = ((IMaterialItem) item).withMaterial(material);
-      if (stack.hasTag()) {
-        assert stack.getTag() != null;
-        assert output.getTag() != null;
-        output.getTag().merge(stack.getTag());
-      }
-      return output;
+    if (item instanceof IMaterialItem materialItem) {
+      return materialItem.setMaterial(stack.copy(), material);
     }
     return stack;
   }
+
+
+  /** Material item instance to use as a fallback to ensure a nonnull material item in some contexts */
+  IMaterialItem EMPTY = new IMaterialItem() {
+    @Override
+    public Item asItem() {
+      return Items.AIR;
+    }
+
+    @Override
+    public MaterialVariantId getMaterial(ItemStack stack) {
+      return MaterialId.UNKNOWN;
+    }
+
+    @Override
+    public boolean canUseMaterial(IMaterial mat) {
+      return false;
+    }
+  };
 }

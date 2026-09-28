@@ -5,6 +5,14 @@ import net.minecraft.network.chat.Component;
 /** Tool stat which contains a numeric value */
 public interface INumericToolStat<T extends Number> extends IToolStat<T> {
   /**
+   * Updates the base value to the passed value. If applied multiple times, consecutive update calls act identical to {@link #add(ModifierStatsBuilder, double)}
+   * @param builder  Builder instance
+   * @param value    Amount to add
+   */
+  @Override
+  void update(ModifierStatsBuilder builder, T value);
+
+  /**
    * Adds the given value to the stat
    * @param builder  Builder instance
    * @param value    Amount to add
@@ -12,9 +20,16 @@ public interface INumericToolStat<T extends Number> extends IToolStat<T> {
   void add(ModifierStatsBuilder builder, double value);
 
   /**
-   * Multiplies the stat by the given value. Multiplication is applied after all addiiton
+   * Adds the given percentage to the tool. If called multiple times, values get summed rather than multiplied together.
    * @param builder  Builder instance
-   * @param factor   Amount to multiply
+   * @param value    Percentage to add. For example. 0.25 will multiply the final value by 1.25
+   */
+  void percent(ModifierStatsBuilder builder, double value);
+
+  /**
+   * Multiplies the stat by the given value. Multiplication is applied after all addition
+   * @param builder  Builder instance
+   * @param factor   Amount to multiply. For example. 0.25 will multiply the final value by 0.25
    */
   void multiply(ModifierStatsBuilder builder, double factor);
 
@@ -31,11 +46,6 @@ public interface INumericToolStat<T extends Number> extends IToolStat<T> {
 
 
   /** Implementations */
-
-  @Override
-  default void update(ModifierStatsBuilder builder, T value) {
-    add(builder, value.doubleValue());
-  }
 
   @Override
   default Component formatValue(T value) {

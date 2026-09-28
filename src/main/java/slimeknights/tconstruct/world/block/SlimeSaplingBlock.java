@@ -14,9 +14,8 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import javax.annotation.Nonnull;
 
 public class SlimeSaplingBlock extends SaplingBlock {
-
-  private final SlimeType foliageType;
-  public SlimeSaplingBlock(AbstractTreeGrower treeIn, SlimeType foliageType, Properties properties) {
+  private final FoliageType foliageType;
+  public SlimeSaplingBlock(AbstractTreeGrower treeIn, FoliageType foliageType, Properties properties) {
     super(treeIn, properties);
     this.foliageType = foliageType;
   }
@@ -33,6 +32,7 @@ public class SlimeSaplingBlock extends SaplingBlock {
     return TinkerWorld.SLIME_PLANT_TYPE;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   @Deprecated
   public boolean canBeReplaced(BlockState state, BlockPlaceContext useContext) {

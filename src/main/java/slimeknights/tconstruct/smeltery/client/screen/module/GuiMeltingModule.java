@@ -17,12 +17,6 @@ import java.util.function.Predicate;
 
 @AllArgsConstructor
 public class GuiMeltingModule {
-  // progress bars
-  private static final ScalableElementScreen PROGRESS_BAR = new ScalableElementScreen(176, 150, 3, 16, 256, 256);
-  private static final ScalableElementScreen NO_HEAT_BAR = new ScalableElementScreen(179, 150, 3, 16, 256, 256);
-  private static final ScalableElementScreen NO_SPACE_BAR = new ScalableElementScreen(182, 150, 3, 16, 256, 256);
-  private static final ScalableElementScreen UNMELTABLE_BAR = new ScalableElementScreen(185, 150, 3, 16, 256, 256);
-
   // progress bar tooltips
   private static final Component TOOLTIP_NO_HEAT = Component.translatable(TConstruct.makeTranslationKey("gui", "melting.no_heat"));
   private static final Component TOOLTIP_NO_SPACE = Component.translatable(TConstruct.makeTranslationKey("gui", "melting.no_space"));
@@ -30,9 +24,14 @@ public class GuiMeltingModule {
 
   private final AbstractContainerScreen<?> screen;
   private final MeltingModuleInventory inventory;
+  private final int indexOffset;
   private final IntSupplier temperature;
   private final Predicate<Slot> slotPredicate;
+  private final ProgressBars progressBars;
 
+  public GuiMeltingModule(AbstractContainerScreen<?> screen, MeltingModuleInventory inventory, int indexOffset, IntSupplier temperature, Predicate<Slot> slotPredicate, ResourceLocation background) {
+    this(screen, inventory, indexOffset, temperature, slotPredicate, makeProgressBars(background));
+  }
 
   /**
    * Draws the heat bars on each slot
@@ -43,24 +42,23 @@ public class GuiMeltingModule {
       Slot slot = screen.getMenu().slots.get(i);
       if (slot.hasItem() && slotPredicate.test(slot)) {
         // determine the bar to draw and the progress
-        ScalableElementScreen bar = PROGRESS_BAR;
+        ScalableElementScreen bar = progressBars.progress;
 
-        int index = slot.getSlotIndex();
+        int index = slot.getSlotIndex(); // note this is the inventory index, not the index in the slots list
         int currentTemp = inventory.getCurrentTime(index);
         int requiredTime = inventory.getRequiredTime(index);
 
         // no required time means unmeltable
         float progress = 1f;
         if (requiredTime == 0) {
-          bar = UNMELTABLE_BAR;
+          bar = progressBars.unmeltable;
         }
         else if (inventory.getRequiredTemp(index) > temperature) {
-          bar = NO_HEAT_BAR;
+          bar = progressBars.noHeat;
         }
         // -1 error state if no space
         else if (currentTemp < 0) {
-          bar = NO_SPACE_BAR;
-          progress = 1f;
+          bar = progressBars.noSpace;
         }
         // scale back normal progress if too large
         else if (currentTemp <= requiredTime) {
@@ -87,8 +85,8 @@ public class GuiMeltingModule {
       // must have a stack
       if (slot.hasItem() && slotPredicate.test(slot)) {
         // mouse must be within the slot
-        if (GuiUtil.isHovered(checkX, checkY, slot.x - 5, slot.y - 1, PROGRESS_BAR.w + 1, PROGRESS_BAR.h + 2)) {
-          int index = slot.getSlotIndex();
+        if (GuiUtil.isHovered(checkX, checkY, slot.x - 5, slot.y - 1, progressBars.width() + 1, progressBars.height() + 2)) {
+          int index = slot.getSlotIndex(); // note this is the inventory index, not the index in the slots list
           Component tooltip = null;
 
           // NaN means 0 progress for 0 need, unmeltable
@@ -114,5 +112,39 @@ public class GuiMeltingModule {
         }
       }
     }
+  }
+
+  /** Contains all common progress bars */
+  public record ProgressBars(ScalableElementScreen progress, ScalableElementScreen noHeat, ScalableElementScreen noSpace, ScalableElementScreen unmeltable) {
+    public ProgressBars {
+      assert sameSize(progress, noHeat);
+      assert sameSize(progress, noSpace);
+      assert sameSize(progress, unmeltable);
+    }
+
+    /** Checks that two elements are the same size */
+    private static boolean sameSize(ElementScreen left, ElementScreen right) {
+      return left.w == right.w && left.h == right.h && left.texW == right.texW && left.texH == right.texH;
+    }
+
+    /** Gets the progress bar width */
+    public int width() {
+      return progress.w;
+    }
+
+    /** Gets the progress bar height */
+    public int height() {
+      return progress.h;
+    }
+  }
+
+  /** Creates all 4 progress bars at the common location */
+  public static ProgressBars makeProgressBars(ResourceLocation background) {
+    return new ProgressBars(
+      new ScalableElementScreen(background, 176, 150, 3, 16, 256, 256),
+      new ScalableElementScreen(background, 179, 150, 3, 16, 256, 256),
+      new ScalableElementScreen(background, 182, 150, 3, 16, 256, 256),
+      new ScalableElementScreen(background, 185, 150, 3, 16, 256, 256)
+    );
   }
 }

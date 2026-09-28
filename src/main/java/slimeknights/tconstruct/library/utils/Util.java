@@ -8,10 +8,14 @@ import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -19,11 +23,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import slimeknights.mantle.util.DataLoadedConditionContext;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -77,6 +83,17 @@ public class Util {
     return net.minecraft.Util.makeDescriptionId(base, name);
   }
 
+  /**
+   * Makes a translatable component for the given name, using {@link #makeTranslationKey(String, ResourceLocation)}.
+   * @param base       Base name, such as "block" or "gui"
+   * @param name       Object name
+   * @param arguments  Arguments for translated component
+   * @return  Translated component
+   */
+  public static Component makeTranslation(String base, @Nullable ResourceLocation name, Object... arguments) {
+    return Component.translatable(makeTranslationKey(base, name), arguments);
+  }
+
   /** Same as {@link net.minecraft.Util#make(Supplier)} */
   public static <T> T make(Supplier<T> supplier) {
     return supplier.get();
@@ -114,6 +131,23 @@ public class Util {
     return value > 0 ? 1 : -1;
   }
 
+  /** Creates a new array by copying the first and appending all elements in the second. */
+  @SafeVarargs
+  public static <T> T[] append(T[] first, T... second) {
+    T[] result = Arrays.copyOf(first, first.length + second.length);
+    System.arraycopy(second, 0, result, first.length, second.length);
+    return result;
+  }
+
+  /** Creates a new array by copying the second array and appending all elements in the first. */
+  @SuppressWarnings("unchecked")
+  @SafeVarargs
+  public static <T> T[] prepend(T[] first, T... second) {
+    T[] result = (T[]) Arrays.copyOf(second, first.length + second.length, first.getClass());
+    System.arraycopy(first, 0, result, second.length, first.length);
+    return result;
+  }
+
   /**
    * Obtains a direction based on the difference between two positions
    * @param pos       Tile position
@@ -134,6 +168,29 @@ public class Util {
   /** Converts an ARGB color to a ABGR color or vice versa */
   public static int translateColorBGR(int color) {
     return (color & 0xFF00FF00) | (((color & 0x00FF0000) >> 16) & 0x000000FF) | (((color & 0x000000FF) << 16) & 0x00FF0000);
+  }
+
+  /** Calculates the given color */
+  private static int calcColor(DyeColor color) {
+    float[] diffuse = color.getTextureDiffuseColors();
+    return FastColor.ARGB32.color(255, Math.round(255 * diffuse[0]), Math.round(255 * diffuse[1]), Math.round(255 * diffuse[2]));
+  }
+
+  /** Array of tints for each dye color */
+  private static final int[] DYE_TINTS = new int[16];
+
+  /** Gets the diffuse color for the given dye color */
+  public static int getColor(DyeColor color) {
+    int id = color.getId();
+    // protect against dumb mods extending dye colors array
+    if (id >= 0 && id < DYE_TINTS.length) {
+      int argb = DYE_TINTS[id];
+      if (argb == 0) {
+        DYE_TINTS[id] = argb = calcColor(color);
+      }
+      return argb;
+    }
+    return calcColor(color);
   }
 
   /** Gets the slot type from a hand */
@@ -160,8 +217,52 @@ public class Util {
     return new BlockHitResult(toHitVec(pos, empty ? sideHit.getOpposite() : sideHit), sideHit, pos, false);
   }
 
+  /** Offsets a hit result to the given position. Comparable to {@link BlockHitResult#withPosition(BlockPos)} except it also offsets the hit location. */
+  public static BlockHitResult offset(BlockHitResult hit, BlockPos offset) {
+    BlockPos pos = hit.getBlockPos();
+    if (pos.equals(offset)) {
+      return hit;
+    }
+    return new BlockHitResult(hit.getLocation().add(offset.getX() - pos.getX(), offset.getY() - pos.getY(), offset.getZ() - pos.getZ()), hit.getDirection(), offset, hit.isInside());
+  }
+
+  /** Offsets a use context to the given position. */
+  public static UseOnContext offset(UseOnContext context, BlockPos offset) {
+    BlockPos pos = context.getClickedPos();
+    if (pos.equals(offset)) {
+      return context;
+    }
+    return new UseOnContext(context.getLevel(), context.getPlayer(), context.getHand(), context.getItemInHand(), offset(context.getHitResult(), offset));
+  }
+
+  /** Tests the given list of conditions using {@link DataLoadedConditionContext#INSTANCE} to see if all pass. */
+  public static boolean testConditions(ICondition[] conditions) {
+    for (ICondition condition : conditions) {
+      if (!condition.test(DataLoadedConditionContext.INSTANCE)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /** Creates a new client block entity data packet with better generics than the vanilla method */
   public static <B extends BlockEntity> ClientboundBlockEntityDataPacket createBEPacket(B be, Function<? super B,CompoundTag> tagFunction) {
     return new ClientboundBlockEntityDataPacket(be.getBlockPos(), be.getType(), tagFunction.apply(be));
+  }
+
+  /** Cache of neo forge status, to make lookups faster in hot code */
+  private static Boolean IS_NEO_FORGE = null;
+
+  /** Checks if we are currently running on NeoForge as opposed to Forge. Allows branching solutions for each loader if needed */
+  public static boolean isNeo() {
+    if (IS_NEO_FORGE == null) {
+      IS_NEO_FORGE = ModList.get().getModContainerById("forge").filter(mod -> mod.getModInfo().getDisplayName().equals("NeoForge")).isPresent();
+    }
+    return IS_NEO_FORGE;
+  }
+
+  /** Checks if we are currently running on Forge as opposed to NeoForge. Allows branching solutions for each loader if needed */
+  public static boolean isForge() {
+    return !isNeo();
   }
 }

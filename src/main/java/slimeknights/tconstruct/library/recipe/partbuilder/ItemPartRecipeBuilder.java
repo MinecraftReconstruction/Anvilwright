@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.recipe.partbuilder;
 
-import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -8,55 +7,46 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
-import slimeknights.tconstruct.tables.TinkerTables;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
+/** Builder for {@link ItemPartRecipe} */
+@Accessors(chain = true)
 @RequiredArgsConstructor(staticName = "item")
 public class ItemPartRecipeBuilder extends AbstractRecipeBuilder<ItemPartRecipeBuilder> {
-  private final MaterialId materialId;
-  private final ResourceLocation pattern;
-  private final int cost;
+  private final Pattern pattern;
   private final ItemOutput result;
-  @Setter @Accessors(chain = true)
-  private Ingredient patternItem;
+  @Setter
+  private Ingredient patternItem = IPartBuilderRecipe.DEFAULT_PATTERNS;
+  private MaterialId materialId = MaterialId.UNKNOWN;
+  private int cost = 0;
+  @Setter
+  private ResourceLocation titleKey = null;
+
+  /** Creates a builder for the given pattern ID */
+  public static ItemPartRecipeBuilder item(ResourceLocation pattern, ItemOutput result) {
+    return item(new Pattern(pattern), result);
+  }
+
+  /** Sets the material Id and cost */
+  public ItemPartRecipeBuilder material(MaterialId material, int cost) {
+    this.materialId = material;
+    this.cost = cost;
+    return this;
+  }
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, BuiltInRegistries.ITEM.getKey(result.get().getItem()));
+    save(consumer, Loadables.ITEM.getKey(result.get().getItem()));
   }
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
     ResourceLocation advancementId = buildOptionalAdvancement(id, "parts");
-    consumer.accept(new Finished(id, advancementId));
-  }
-
-  private class Finished extends AbstractFinishedRecipe {
-    public Finished(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      json.addProperty("material", materialId.toString());
-      json.addProperty("pattern", pattern.toString());
-      if (patternItem != null) {
-        json.add("pattern_item", patternItem.toJson());
-      }
-      json.addProperty("cost", cost);
-      json.add("result", result.serialize());
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerTables.itemPartBuilderSerializer.get();
-    }
+    consumer.accept(new LoadableFinishedRecipe<>(new ItemPartRecipe(id, materialId, pattern, patternItem, cost, result, titleKey), ItemPartRecipe.LOADER, advancementId));
   }
 }

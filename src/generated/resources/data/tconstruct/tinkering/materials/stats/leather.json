@@ -1,8 +1,15 @@
 {
   "stats": {
-    "tconstruct:repair_kit": {
-      "durability": 150
+    "tconstruct:binding": {},
+    "tconstruct:bowstring": {},
+    "tconstruct:cuirass": {},
+    "tconstruct:laces": {
+      "repair_amount": 97
     },
-    "tconstruct:extra": {}
+    "tconstruct:maille": {},
+    "tconstruct:repair_kit": {},
+    "tconstruct:skull": {
+      "durability": 97
+    }
   }
 }

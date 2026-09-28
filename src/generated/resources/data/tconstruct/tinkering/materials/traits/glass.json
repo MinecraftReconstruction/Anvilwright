@@ -1,13 +1,17 @@
 {
   "perStat": {
-    "tconstruct:skull": [
+    "tconstruct:ammo": [
       {
-        "name": "tconstruct:self_destructive",
-        "level": 1
+        "level": 1,
+        "name": "tconstruct:amorphous"
       },
       {
-        "name": "tconstruct:creeper_disguise",
-        "level": 1
+        "level": 1,
+        "name": "tconstruct:smashing_ammo"
+      },
+      {
+        "level": 1,
+        "name": "tconstruct:spilling_rod"
       }
     ]
   }

@@ -11,37 +11,27 @@ import slimeknights.tconstruct.library.modifiers.TinkerHooks;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.tools.modules.combat.BlockingModule;
 
-public class BlockingModifier extends NoLevelsModifier implements GeneralInteractionModifierHook {
+/** @deprecated use {@link slimeknights.tconstruct.tools.modules.combat.BlockingModule} */
+@Deprecated(forRemoval = true)
+public class BlockingModifier extends NoLevelsModifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
-    hookBuilder.addHook(this, TinkerHooks.CHARGEABLE_INTERACT);
+    hookBuilder.addModule(BlockingModule.INSTANCE);
   }
 
   @Override
-  public InteractionResult onToolUse(IToolStackView tool, ModifierEntry modifier, Player player, InteractionHand hand, InteractionSource source) {
-    if (source == InteractionSource.RIGHT_CLICK && !tool.isBroken()) {
-      ModifierUtil.startUsingItem(tool, modifier.getId(), player, hand);
-      return InteractionResult.CONSUME;
-    }
-    return InteractionResult.PASS;
+  public int getPriority() {
+    return 50; // late as many modifiers have special blocking interactions
   }
 
-  @Override
-  public int getUseDuration(IToolStackView tool, ModifierEntry modifier) {
-    return 72000;
-  }
-
-  @Override
-  public UseAnim getUseAction(IToolStackView tool, ModifierEntry modifier) {
-    return UseAnim.BLOCK;
-  }
-
-  @Override
-  public boolean canPerformAction(IToolStackView tool, int level, ToolAction toolAction) {
-    return toolAction == ToolActions.SHIELD_BLOCK;
+  /** @deprecated use {@link ModifierUtil#blockWhileCharging(IToolStackView, UseAnim)} */
+  @Deprecated(forRemoval = true)
+  public static UseAnim blockWhileCharging(IToolStackView tool, UseAnim fallback) {
+    return ModifierUtil.blockWhileCharging(tool, fallback);
   }
 }

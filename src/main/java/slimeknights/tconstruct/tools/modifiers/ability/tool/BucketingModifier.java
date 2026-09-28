@@ -38,19 +38,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.impl.TankModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataKeys;
-import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.definition.module.ToolModuleHooks;
-import slimeknights.tconstruct.library.tools.definition.module.interaction.DualOptionInteraction;
-import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.item.ModifiableItem;
+import slimeknights.tconstruct.library.modifiers.modules.behavior.ShowOffhandModule;
+import slimeknights.tconstruct.library.modifiers.modules.build.StatBoostModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.tools.modules.interaction.BucketModule;
+import slimeknights.tconstruct.tools.modules.interaction.TankInteractionModule;
 
 @SuppressWarnings("removal")
 public class BucketingModifier extends TankModifier implements BlockInteractionModifierHook, GeneralInteractionModifierHook {
@@ -58,10 +53,17 @@ public class BucketingModifier extends TankModifier implements BlockInteractionM
     super(FluidConstants.BUCKET);
   }
 
+/** @deprecated use {@link BucketModule}, {@link ToolTankHelper#TANK_HANDLER}, {@link TankInteractionModule}, and {@link ShowOffhandModule} */
+@Deprecated(forRemoval = true)
+public class BucketingModifier extends Modifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
     super.registerHooks(hookBuilder);
-    hookBuilder.addHook(this, TinkerHooks.BLOCK_INTERACT, TinkerHooks.GENERAL_INTERACT);
+    hookBuilder.addModule(ToolTankHelper.TANK_HANDLER);
+    hookBuilder.addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).flat(FluidType.BUCKET_VOLUME));
+    hookBuilder.addModule(new TankInteractionModule(InteractionSource.ARMOR));
+    hookBuilder.addModule(new BucketModule(FluidPredicate.ANY));
+    hookBuilder.addModule(ShowOffhandModule.ALLOW_BROKEN);
   }
 
   @Override

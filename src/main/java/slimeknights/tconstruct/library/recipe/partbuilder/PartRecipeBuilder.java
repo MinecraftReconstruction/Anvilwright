@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.recipe.partbuilder;
 
-import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -8,29 +7,24 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
-import slimeknights.tconstruct.tables.TinkerTables;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
-/**
- * Builder for a material item part crafting recipe
- */
+/** Builder for a material item part crafting recipe in {@link PartRecipe}. */
+@Setter
 @Accessors(chain = true)
 @RequiredArgsConstructor(staticName = "partRecipe")
 public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> {
   private final IMaterialItem output;
   private final int outputAmount;
-  @Setter
   private int cost = 1;
-  @Setter
-  private ResourceLocation pattern = null;
-  @Setter
-  private Ingredient patternItem;
+  private Pattern pattern = null;
+  private Ingredient patternItem = IPartBuilderRecipe.DEFAULT_PATTERNS;
+  private boolean allowUncraftable = false;
 
   /**
    * Creates a new part recipe that outputs a single item
@@ -41,9 +35,25 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
     return partRecipe(output, 1);
   }
 
+  /** Sets the pattern in the builder */
+  public PartRecipeBuilder setPattern(Pattern pattern) {
+    this.pattern = pattern;
+    return this;
+  }
+
+  /** Sets the pattern in the builder */
+  public PartRecipeBuilder setPattern(ResourceLocation pattern) {
+    return setPattern(new Pattern(pattern));
+  }
+
+  /** Sets the pattern to match the given item */
+  public PartRecipeBuilder setPattern(ItemLike pattern) {
+    return setPattern(Pattern.fromItem(pattern));
+  }
+
   @Override
   public void save(Consumer<FinishedRecipe> consumerIn) {
-    this.save(consumerIn, BuiltInRegistries.ITEM.getKey(this.output.asItem()));
+    this.save(consumerIn, Loadables.ITEM.getKey(this.output.asItem()));
   }
 
   @Override
@@ -58,36 +68,6 @@ public class PartRecipeBuilder extends AbstractRecipeBuilder<PartRecipeBuilder> 
       throw new IllegalStateException("recipe " + id + " has no pattern associated with it");
     }
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "parts");
-    consumerIn.accept(new Result(id, advancementId));
-  }
-
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      if (!group.isEmpty()) {
-        json.addProperty("group", group);
-      }
-      json.addProperty("pattern", pattern.toString());
-      if (patternItem != null) {
-        json.add("pattern_item", patternItem.toJson());
-      }
-      json.addProperty("cost", cost);
-
-      JsonObject jsonOutput = new JsonObject();
-      jsonOutput.addProperty("item", BuiltInRegistries.ITEM.getKey(output.asItem()).toString());
-      if (outputAmount > 1) {
-        jsonOutput.addProperty("count", outputAmount);
-      }
-      json.add("result", jsonOutput);
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerTables.partRecipeSerializer.get();
-    }
+    consumerIn.accept(new LoadableFinishedRecipe<>(new PartRecipe(id, group, pattern, patternItem, cost, allowUncraftable, output, outputAmount), PartRecipe.LOADER, advancementId));
   }
 }

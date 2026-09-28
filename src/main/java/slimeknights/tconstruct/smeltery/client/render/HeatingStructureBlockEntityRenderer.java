@@ -14,15 +14,16 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraftforge.client.model.data.ModelData;
 import org.joml.Quaternionf;
-import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.TinkerRenderTypes;
+import slimeknights.tconstruct.library.TinkerItemDisplays;
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
 import slimeknights.tconstruct.smeltery.block.entity.controller.HeatingStructureBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.module.MeltingModuleInventory;
@@ -104,7 +105,7 @@ public class HeatingStructureBlockEntityRenderer implements BlockEntityRenderer<
           matrices.mulPose(itemRotation);
           matrices.scale(ITEM_SCALE, ITEM_SCALE, ITEM_SCALE);
           BakedModel model = itemRenderer.getModel(stack, world, null, 0);
-          itemRenderer.render(stack, ItemDisplayContext.NONE, false, matrices, buffer, LevelRenderer.getLightColor(world, itemPos), OverlayTexture.NO_OVERLAY, model);
+          itemRenderer.render(stack, TinkerItemDisplays.MELTER, false, matrices, buffer, LevelRenderer.getLightColor(world, itemPos), OverlayTexture.NO_OVERLAY, model);
           matrices.popPose();
 
           // done as quads rather than items as its not that expensive to draw blocks, items are the problem
@@ -113,11 +114,12 @@ public class HeatingStructureBlockEntityRenderer implements BlockEntityRenderer<
             if (model.isCustomRenderer()) {
               quadsRendered += 100;
             } else {
+              RandomSource random = smeltery.getLevel().getRandom();
               // not setting the seed on the random and ignoring the forge layered model stuff means this is just an estimate, but since this is for the sake of performance its not a huge deal for it to be exact
               for (Direction direction : Direction.values()) {
-                quadsRendered += model.getQuads(null, direction, TConstruct.RANDOM).size();
+                quadsRendered += model.getQuads(null, direction, random, ModelData.EMPTY, null).size();
               }
-              quadsRendered += model.getQuads(null, null, TConstruct.RANDOM).size();
+              quadsRendered += model.getQuads(null, null, random, ModelData.EMPTY, null).size();
             }
             if (quadsRendered > max) {
               break;

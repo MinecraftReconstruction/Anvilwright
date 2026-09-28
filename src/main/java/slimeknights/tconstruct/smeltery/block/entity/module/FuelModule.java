@@ -22,11 +22,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
@@ -34,32 +31,23 @@ import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
-import slimeknights.tconstruct.library.utils.TagUtil;
+import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * Module handling fuel consumption for the melter and smeltery
  */
 @RequiredArgsConstructor
-public class FuelModule implements ContainerData {
-  /** Block position that will never be valid in world, used for sync */
-  private static final BlockPos NULL_POS = new BlockPos(0, Short.MIN_VALUE, 0);
-  /** Temperature used for solid fuels, hot enough to melt iron */
-  public static final int SOLID_TEMPERATURE = 800;
-
+public abstract class FuelModule implements ContainerData {
   /** Listener to attach to stored capability */
   private final NonNullConsumer<SlottedStorage<FluidVariant>> fluidListener = new WeakConsumerWrapper<>(this, (self, cap) -> self.reset());
   private final NonNullConsumer<SlottedStorage<ItemVariant>> itemListener = new WeakConsumerWrapper<>(this, (self, cap) -> self.reset());
 
   /** Parent TE */
-  private final MantleBlockEntity parent;
-  /** Supplier for the list of valid tank positions */
-  private final Supplier<List<BlockPos>> tankSupplier;
+  protected final MantleBlockEntity parent;
 
   /** Last fuel recipe used */
   @Nullable
@@ -85,30 +73,39 @@ public class FuelModule implements ContainerData {
 
   /** Current amount of fluid in the TE */
   @Getter
-  private int fuel = 0;
+  protected int fuel = 0;
   /** Amount of fuel produced by the last source */
   @Getter
-  private int fuelQuality = 0;
+  protected int fuelQuality = 0;
   /** Temperature of the current fuel */
   @Getter
-  private int temperature = 0;
+  protected int temperature = 0;
+  /** Amount to progress recipes by per time step */
+  @Getter
+  protected int rate = 0;
 
 
   /*
    * Helpers
    */
 
-  private void reset() {
-    this.fluidHandler = null;
-    this.itemHandler = null;
-    this.tankDisplayHandlers = null;
-    this.lastPos = NULL_POS;
+  /** Called when the capability invalidates to reset any listeners */
+  protected void resetHandler(@Nullable LazyOptional<?> source) {
+    if (source == null || source == fluidHandler) {
+      // for efficiency on Forge, clear listener. Neo lacks this so we protect against redundant calls
+      // note that this will break if the source is the listener, below check does both null check and not source check
+      if (source != fluidHandler && Util.isForge()) {
+        fluidHandler.removeListener(fluidListener);
+      }
+      fluidHandler = null;
+    }
   }
 
   /** Gets a nonnull world instance from the parent */
-  private Level getLevel() {
+  protected Level getLevel() {
     return Objects.requireNonNull(parent.getLevel(), "Parent tile entity has null world");
   }
+
 
   /**
    * Finds a recipe for the given fluid
@@ -116,7 +113,7 @@ public class FuelModule implements ContainerData {
    * @return  Recipe
    */
   @Nullable
-  private MeltingFuel findRecipe(Fluid fluid) {
+  protected MeltingFuel findRecipe(Fluid fluid) {
     if (lastRecipe != null && lastRecipe.matches(fluid)) {
       return lastRecipe;
     }
@@ -231,6 +228,7 @@ public class FuelModule implements ContainerData {
           fuel += recipe.getDuration();
           fuelQuality = recipe.getDuration();
           temperature = recipe.getTemperature();
+          rate = recipe.getRate();
           parent.setChangedFast();
           return temperature;
         } else {
@@ -342,7 +340,7 @@ public class FuelModule implements ContainerData {
   /* Tag */
   private static final String TAG_FUEL = "fuel";
   private static final String TAG_TEMPERATURE = "temperature";
-  private static final String TAG_LAST_FUEL = "last_fuel_tank";
+  private static final String TAG_RATE = "rate";
 
   /**
    * Reads the fuel from NBT
@@ -354,9 +352,7 @@ public class FuelModule implements ContainerData {
     }
     if (nbt.contains(TAG_TEMPERATURE, Tag.TAG_ANY_NUMERIC)) {
       temperature = nbt.getInt(TAG_TEMPERATURE);
-    }
-    if (nbt.contains(TAG_LAST_FUEL, Tag.TAG_ANY_NUMERIC)) {
-      lastPos = TagUtil.readPos(nbt, TAG_LAST_FUEL);
+      rate = nbt.getInt(TAG_RATE);
     }
   }
 
@@ -368,10 +364,7 @@ public class FuelModule implements ContainerData {
   public CompoundTag writeToTag(CompoundTag nbt) {
     nbt.putInt(TAG_FUEL, fuel);
     nbt.putInt(TAG_TEMPERATURE, temperature);
-    // technically unneeded for melters, but does not hurt to add
-    if (lastPos != NULL_POS) {
-      nbt.put(TAG_LAST_FUEL, TagUtil.writePos(lastPos));
-    }
+    nbt.putInt(TAG_RATE, rate);
     return nbt;
   }
 
@@ -380,13 +373,11 @@ public class FuelModule implements ContainerData {
   private static final int FUEL = 0;
   private static final int FUEL_QUALITY = 1;
   private static final int TEMPERATURE = 2;
-  private static final int LAST_X = 3;
-  private static final int LAST_Y = 4;
-  private static final int LAST_Z = 5;
+  private static final int RATE = 3;
 
   @Override
   public int getCount() {
-    return 6;
+    return 4;
   }
 
   @Override
@@ -395,9 +386,7 @@ public class FuelModule implements ContainerData {
       case FUEL         -> fuel;
       case FUEL_QUALITY -> fuelQuality;
       case TEMPERATURE  -> temperature;
-      case LAST_X -> lastPos.getX();
-      case LAST_Y -> lastPos.getY();
-      case LAST_Z -> lastPos.getZ();
+      case RATE         -> rate;
       default -> 0;
     };
   }
@@ -408,27 +397,8 @@ public class FuelModule implements ContainerData {
       case FUEL         -> fuel = value;
       case FUEL_QUALITY -> fuelQuality = value;
       case TEMPERATURE  -> temperature = value;
-
-      // position sync takes three parts
-      case LAST_X, LAST_Y, LAST_Z -> {
-        // position sync
-        switch (index) {
-          case LAST_X -> lastPos = new BlockPos(value, lastPos.getY(), lastPos.getZ());
-          case LAST_Y -> lastPos = new BlockPos(lastPos.getX(), value, lastPos.getZ());
-          case LAST_Z -> lastPos = new BlockPos(lastPos.getX(), lastPos.getY(), value);
-        }
-        fluidHandler = null;
-        itemHandler = null;
-        tankDisplayHandlers = null;
-      }
+      case RATE         -> rate = value;
     }
-  }
-
-  /**
-   * Called on client structure update to clear the cached display listeners
-   */
-  public void clearCachedDisplayListeners() {
-    this.tankDisplayHandlers = null;
   }
 
   /**
@@ -438,21 +408,8 @@ public class FuelModule implements ContainerData {
    * @return  Fuel info
    */
   public FuelInfo getFuelInfo() {
-    List<BlockPos> positions = null;
-    // if there is no position, means we have not yet consumed fuel. Just fetch the first tank
-    // TODO: should we try to find a valid fuel tank? might be a bit confusing if they have multiple tanks in the structure before melting
-    // however, a valid tank is a lot more effort to find
-
-    // Y of -1 is how the UI syncs null
-    BlockPos mainTank = lastPos;
-    if (mainTank.getY() == NULL_POS.getY()) {
-      // if no first, return no fuel info
-      positions = tankSupplier.get();
-      if (positions.isEmpty()) {
-        return FuelInfo.EMPTY;
-      }
-      mainTank = positions.get(0);
-      assert mainTank != null;
+    if (fluidHandler == null) {
+      return FuelInfo.EMPTY;
     }
 
     // fetch primary fuel handler
@@ -535,8 +492,8 @@ public class FuelModule implements ContainerData {
   public static class FuelInfo {
     /** Empty fuel instance */
     public static final FuelInfo EMPTY = new FuelInfo(FluidStack.EMPTY, 0, 0, 0);
-    /** Item fuel instance */
-    public static final FuelInfo ITEM = new FuelInfo(FluidStack.EMPTY, 0, 0, SOLID_TEMPERATURE);
+    /** Item fuel instance, doesn't really matter what data we set as it will all be ignored */
+    public static final FuelInfo ITEM = new FuelInfo(FluidStack.EMPTY, 0, 0, 0);
 
     private final FluidStack fluid;
     private long totalAmount;

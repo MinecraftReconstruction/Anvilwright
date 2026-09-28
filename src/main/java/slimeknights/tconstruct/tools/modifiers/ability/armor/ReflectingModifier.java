@@ -22,15 +22,12 @@ import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.modifiers.Modifier;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.ConditionalStatModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
-import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.tools.logic.InteractionHandler;
+import slimeknights.tconstruct.library.modifiers.modules.build.VolatileIntModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.tools.logic.ModifierEvents;
 
+/** @deprecated use {@link VolatileIntModule} with {@link ModifierEvents#REFLECTING} */
+@Deprecated(forRemoval = true)
 public class ReflectingModifier extends Modifier {
   public ReflectingModifier() {
     EntityEvents.PROJECTILE_IMPACT.register(this::projectileImpact);

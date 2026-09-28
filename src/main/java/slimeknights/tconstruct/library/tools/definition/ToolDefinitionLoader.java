@@ -1,10 +1,6 @@
 package slimeknights.tconstruct.library.tools.definition;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
@@ -25,14 +21,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
-import slimeknights.tconstruct.library.tools.definition.harvest.IHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.module.IToolModule;
-import slimeknights.tconstruct.library.tools.definition.weapon.IWeaponAttack;
-import slimeknights.tconstruct.library.tools.nbt.MultiplierNBT;
-import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -46,21 +34,6 @@ import java.util.Map.Entry;
 @Log4j2
 public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
   public static final String FOLDER = "tinkering/tool_definitions";
-  public static final Gson GSON = (new GsonBuilder())
-    .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(StatsNBT.class, StatsNBT.SERIALIZER)
-    .registerTypeAdapter(MultiplierNBT.class, MultiplierNBT.SERIALIZER)
-    .registerTypeAdapter(PartRequirement.class, PartRequirement.SERIALIZER)
-    .registerTypeAdapter(DefinitionModifierSlots.class, DefinitionModifierSlots.SERIALIZER)
-    .registerTypeAdapter(ModifierEntry.class, ModifierEntry.SERIALIZER)
-    .registerTypeAdapter(ToolAction.class, ToolActionSerializer.INSTANCE)
-    .registerTypeHierarchyAdapter(IAreaOfEffectIterator.class, IAreaOfEffectIterator.LOADER)
-    .registerTypeHierarchyAdapter(IHarvestLogic.class, IHarvestLogic.LOADER)
-    .registerTypeHierarchyAdapter(IWeaponAttack.class, IWeaponAttack.LOADER)
-    .registerTypeAdapter(ModifierHookMap.class, IToolModule.Serializer.INSTANCE)
-    .setPrettyPrinting()
-    .disableHtmlEscaping()
-    .create();
   private static final ToolDefinitionLoader INSTANCE = new ToolDefinitionLoader();
 
   /** Map of loaded tool definition data */
@@ -69,8 +42,11 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
   /** Tool definitions registered to be loaded */
   private final Map<ResourceLocation,ToolDefinition> definitions = new HashMap<>();
 
+  /** Condition context */
+  private IContext conditionContext = IContext.EMPTY;
+
   private ToolDefinitionLoader() {
-    super(GSON, FOLDER);
+    super(JsonHelper.DEFAULT_GSON, FOLDER);
   }
 
   /** Gets the instance of the definition loader */
@@ -97,9 +73,14 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
       if (data != null) {
         definition.setData(data);
       } else {
-        definition.setDefaultData();
+        definition.clearData();
       }
     }
+  }
+
+  /** Creates context for modifier parsing */
+  public static TypedMapBuilder contextBuilder(ResourceLocation key) {
+    return TypedMapBuilder.builder().put(ContextKey.ID, key).put(ContextKey.DEBUG, "Tool Definition " + key);
   }
 
   @Override
@@ -113,17 +94,17 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
       JsonElement element = splashList.get(key);
       if (element == null) {
         log.error("Missing tool definition for tool {}", key);
-        definition.setDefaultData();
+        definition.clearData();
         continue;
       }
       try {
-        ToolDefinitionData data = GSON.fromJson(GsonHelper.convertToJsonObject(element, "tool_definition"), ToolDefinitionData.class);
-        definition.validate(data);
+        // TODO: do we want to allow load conditions for tool definitions? might make merging harder should we go that route instead
+        ToolDefinitionData data = ToolDefinitionData.LOADABLE.convert(element, key.toString(), contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
         builder.put(key, data);
         definition.setData(data);
       } catch (Exception e) {
         log.error("Failed to load tool definition for tool {}", key, e);
-        definition.setDefaultData();
+        definition.clearData();
       }
     }
     this.dataMap = builder.build();
@@ -142,7 +123,7 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
   }
 
   /** Registers a tool definition with the loader */
-  public void registerToolDefinition(ToolDefinition definition) {
+  public synchronized void registerToolDefinition(ToolDefinition definition) {
     ResourceLocation name = definition.getId();
     if (definitions.containsKey(name)) {
       throw new IllegalArgumentException("Duplicate tool definition " + name);

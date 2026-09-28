@@ -1,38 +1,40 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.json.IntRange;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
-import slimeknights.tconstruct.library.recipe.modifiers.ModifierMatch;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Standard recipe to add a modifier
  */
 public class ModifierRecipe extends AbstractModifierRecipe {
+  protected static final LoadableField<List<SizedIngredient>,ModifierRecipe> INPUTS_FIELD = SizedIngredient.LOADABLE.list(1).requiredField("inputs", r -> r.inputs);
+  public static final RecordLoadable<ModifierRecipe> LOADER = RecordLoadable.create(ContextKey.ID.requiredField(), INPUTS_FIELD, TOOLS_FIELD, MAX_TOOL_SIZE_FIELD, RESULT_FIELD, LEVEL_FIELD, SLOTS_FIELD, ALLOW_CRYSTAL_FIELD, CHECK_TRAIT_LEVEL_FIELD, ModifierRecipe::new);
+
   /**
    * List of input ingredients.
    * Order matters, as if a ingredient matches multiple ingredients it may produce unexpected behavior.
@@ -40,15 +42,9 @@ public class ModifierRecipe extends AbstractModifierRecipe {
    */
   protected final List<SizedIngredient> inputs;
 
-  public ModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements, String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots, boolean allowCrystal) {
-    super(id, toolRequirement, maxToolSize, requirements, requirementsError, result, maxLevel, slots, allowCrystal);
+  public ModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierId result, IntRange level, @Nullable SlotCount slots, boolean allowCrystal, boolean checkTraitLevel) {
+    super(id, toolRequirement, maxToolSize, result, level, slots, allowCrystal, checkTraitLevel);
     this.inputs = inputs;
-  }
-
-  /** @deprecated use {@link #ModifierRecipe(ResourceLocation, List, Ingredient, int, ModifierMatch, String, ModifierEntry, int, SlotCount, boolean)} */
-  @Deprecated
-  public ModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements, String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots) {
-    this(id, inputs, toolRequirement, maxToolSize, requirements, requirementsError, result, maxLevel, slots, true);
   }
 
     /**
@@ -56,7 +52,7 @@ public class ModifierRecipe extends AbstractModifierRecipe {
      * @param inv  Alloy tank
      * @return  Bitset
      */
-  protected static BitSet makeBitset(ITinkerableContainer inv) {
+  public static BitSet makeBitset(ITinkerableContainer inv) {
     int inputs = inv.getInputCount();
     BitSet used = new BitSet(inputs);
     // mark empty as used to save a bit of effort
@@ -100,7 +96,17 @@ public class ModifierRecipe extends AbstractModifierRecipe {
     if (inputs.isEmpty()) {
       return false;
     }
-    BitSet used = makeBitset(inv);
+    return checkMatch(inv, inputs, makeBitset(inv));
+  }
+
+  /**
+   * Tries to match the given list of ingredients to the inventory
+   * @param inv     Inventory to check
+   * @param inputs  List of inputs to check
+   * @param used    Partially filled bitset to mark ingredients used by other parts of the recipe. Use {@link #checkMatch(ITinkerableContainer, List)} if no other logic.
+   * @return True if a match
+   */
+  public static boolean checkMatch(ITinkerableContainer inv, List<SizedIngredient> inputs, BitSet used) {
     for (SizedIngredient ingredient : inputs) {
       int index = findMatch(ingredient, inv, used);
       if (index == -1) {
@@ -133,40 +139,41 @@ public class ModifierRecipe extends AbstractModifierRecipe {
    * @return Validated result
    */
   @Override
-  public ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack tinkerable = inv.getTinkerableStack();
-    ToolStack tool = ToolStack.from(tinkerable);
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    ToolStack tool = inv.getTinkerable();
 
     // common errors
-    ValidatedResult commonError = validatePrerequisites(tool);
-    if (commonError.hasError()) {
-      return commonError;
+    Component commonError = validatePrerequisites(tool);
+    if (commonError != null) {
+      return RecipeResult.failure(commonError);
     }
 
     // consume slots
     tool = tool.copy();
-    ModDataNBT persistentData = tool.getPersistentData();
+    ToolDataNBT persistentData = tool.getPersistentData();
     SlotCount slots = getSlots();
     if (slots != null) {
-      persistentData.addSlots(slots.getType(), -slots.getCount());
+      persistentData.addSlots(slots.type(), -slots.count());
     }
 
     // add modifier
-    tool.addModifier(result.getId(), result.getLevel());
+    tool.addModifier(result.getId(), 1);
 
     // ensure no modifier problems
-    ValidatedResult toolValidation = tool.validate();
-    if (toolValidation.hasError()) {
-      return toolValidation;
+    Component toolValidation = tool.tryValidate();
+    if (toolValidation != null) {
+      return RecipeResult.failure(toolValidation);
     }
-
-    return ValidatedResult.success(tool.createStack(Math.min(tinkerable.getCount(), shrinkToolSlotBy())));
+    return success(tool, inv);
   }
 
   /** Updates all inputs in the given container */
   public static void updateInputs(ITinkerableContainer.Mutable inv, List<SizedIngredient> inputs) {
-    // bit corresponding to items that are already found
-    BitSet used = makeBitset(inv);
+    updateInputs(inv, inputs, makeBitset(inv));
+  }
+
+  /** Updates all inputs in the given container, ignoring any slots already present in the bitset */
+  public static void updateInputs(ITinkerableContainer.Mutable inv, List<SizedIngredient> inputs, BitSet used) {
     // just shrink each input
     for (SizedIngredient ingredient : inputs) {
       // care about size, if too small just skip the recipe
@@ -180,8 +187,8 @@ public class ModifierRecipe extends AbstractModifierRecipe {
   }
 
   @Override
-  public void updateInputs(ItemStack result, IMutableTinkerStationContainer inv, boolean isServer) {
-    // if its a crystal, just shrink the crystal
+  public void updateInputs(LazyToolStack result, IMutableTinkerStationContainer inv, boolean isServer) {
+    // if it's a crystal, just shrink the crystal
     if (matchesCrystal(inv)) {
       super.updateInputs(result, inv, isServer);
     } else {
@@ -207,38 +214,6 @@ public class ModifierRecipe extends AbstractModifierRecipe {
     if (slot >= 0 && slot < inputs.size()) {
       return inputs.get(slot).getMatchingStacks();
     }
-    return Collections.emptyList();
-  }
-
-  public static class Serializer extends AbstractModifierRecipe.Serializer<ModifierRecipe> {
-    @Override
-    public ModifierRecipe fromJson(ResourceLocation id, JsonObject json, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements,
-                               String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots) {
-      List<SizedIngredient> ingredients = JsonHelper.parseList(json, "inputs", SizedIngredient::deserialize);
-      boolean allowCrystal = GsonHelper.getAsBoolean(json, "allow_crystal", true);
-      return new ModifierRecipe(id, ingredients, toolRequirement, maxToolSize, requirements, requirementsError, result, maxLevel, slots, allowCrystal);
-    }
-
-    @Override
-    public ModifierRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements,
-                               String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots) {
-      int size = buffer.readVarInt();
-      ImmutableList.Builder<SizedIngredient> builder = ImmutableList.builder();
-      for (int i = 0; i < size; i++) {
-        builder.add(SizedIngredient.read(buffer));
-      }
-      boolean allowCrystal = buffer.readBoolean();
-      return new ModifierRecipe(id, builder.build(), toolRequirement, maxToolSize, requirements, requirementsError, result, maxLevel, slots, allowCrystal);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, ModifierRecipe recipe) {
-      super.toNetworkSafe(buffer, recipe);
-      buffer.writeVarInt(recipe.inputs.size());
-      for (SizedIngredient ingredient : recipe.inputs) {
-        ingredient.write(buffer);
-      }
-      buffer.writeBoolean(recipe.allowCrystal);
-    }
+    return List.of();
   }
 }

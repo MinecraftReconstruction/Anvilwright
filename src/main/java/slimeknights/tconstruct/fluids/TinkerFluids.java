@@ -12,14 +12,20 @@ import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
+import net.minecraft.world.item.CreativeModeTab.Output;
 import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -30,6 +36,7 @@ import slimeknights.mantle.fluid.attributes.FluidAttributes;
 import slimeknights.mantle.registration.ItemProperties;
 import slimeknights.mantle.registration.ModelFluidAttributes;
 import slimeknights.mantle.registration.object.EnumObject;
+import slimeknights.mantle.registration.object.FlowingFluidObject;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.mantle.util.SimpleFlowableFluid;
@@ -39,20 +46,33 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.fluids.fluids.DirectionalSlimeFluid;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidAttributes;
 import slimeknights.tconstruct.fluids.fluids.SlimeFluid;
+import slimeknights.tconstruct.fluids.fluids.SlimeFluidType;
 import slimeknights.tconstruct.fluids.item.BottleItem;
 import slimeknights.tconstruct.fluids.item.ContainerFoodItem;
 import slimeknights.tconstruct.fluids.item.ContainerFoodItem.FluidContainerFoodItem;
+import slimeknights.tconstruct.fluids.item.MagmaBottleItem;
 import slimeknights.tconstruct.fluids.item.PotionBucketItem;
 import slimeknights.tconstruct.fluids.util.BottleBrewingRecipe;
 import slimeknights.tconstruct.fluids.util.EmptyBottleIntoEmpty;
 import slimeknights.tconstruct.fluids.util.EmptyBottleIntoWater;
 import slimeknights.tconstruct.fluids.util.FillBottle;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.recipe.FluidValues;
+import slimeknights.tconstruct.shared.TinkerEffects;
+import slimeknights.tconstruct.shared.TinkerFood;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
+import slimeknights.tconstruct.smeltery.item.CopperCanItem;
+import slimeknights.tconstruct.smeltery.item.TankItem;
+import slimeknights.tconstruct.tables.TinkerTables;
+import slimeknights.tconstruct.tools.data.material.MaterialIds;
+import slimeknights.tconstruct.tools.network.FluidDataSerializer;
 import slimeknights.tconstruct.world.TinkerWorld;
 
-import java.util.EnumMap;
-import java.util.Map;
+import static slimeknights.mantle.Mantle.commonResource;
+import static slimeknights.tconstruct.fluids.block.BurningLiquidBlock.createBurning;
+import static slimeknights.tconstruct.fluids.block.MobEffectLiquidBlock.createEffect;
 
 /**
  * Contains all fluids used throughout the mod
@@ -62,6 +82,15 @@ public final class TinkerFluids extends TinkerModule {
   public TinkerFluids() {
     Milk.enableMilkFluid();
   }
+
+  /** Creative tab for general items, or those that lack another tab */
+  public static final RegistryObject<CreativeModeTab> tabFluids = CREATIVE_TABS.register(
+    "fluids", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "fluids"))
+                                   .icon(() -> TankItem.fillTank(TinkerSmeltery.searedTank, TankType.FUEL_GAUGE, TinkerFluids.moltenCobalt.get()))
+                                   .displayItems(TinkerFluids::addFilledContainers)
+                                   .withTabsBefore(TinkerTables.tabTables.getId())
+                                   .withSearchBar()
+                                   .build());
 
   // basic
   public static final FluidObject<SimpleFlowableFluid> blood = FLUIDS.register("blood", coolBuilder().density(1200).viscosity(1200).temperature(336), properties -> properties.mapColor(MapColor.WATER).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 0);
@@ -133,10 +162,9 @@ public final class TinkerFluids extends TinkerModule {
   public static FluidObject<SimpleFlowableFluid> rabbitStew   = FLUIDS.register("rabbit_stew",   coolBuilder().temperature(400), properties -> properties.mapColor(MapColor.WATER).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 0);
 
   // potion
-  public static final ItemObject<PotionBucketItem> potionBucket = ITEMS.register("potion_bucket", () -> new PotionBucketItem(TinkerFluids.potion, ItemProperties.BUCKET_PROPS));
-  public static final RegistryObject<UnplaceableFluid> potion = FLUIDS.registerFluid("potion", () -> new UnplaceableFluid(potionBucket, PotionFluidAttributes.builder(TConstruct.getResource("block/fluid/potion/")).sound(SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY).density(1100).viscosity(1100).temperature(315)));
-  public static final ItemObject<Item> splashBottle = ITEMS.register("splash_bottle", () -> new BottleItem(Items.SPLASH_POTION, GENERAL_PROPS));
-  public static final ItemObject<Item> lingeringBottle = ITEMS.register("lingering_bottle", () -> new BottleItem(Items.LINGERING_POTION, GENERAL_PROPS));
+  public static final FluidObject<UnplaceableFluid> potion = FLUIDS.register("potion").type(() -> new PotionFluidType(cool().descriptionId("item.minecraft.potion.effect.empty").density(1100).viscosity(1100).temperature(315).sound(SoundActions.BUCKET_FILL, SoundEvents.BOTTLE_FILL).sound(SoundActions.BUCKET_EMPTY, SoundEvents.BOTTLE_EMPTY))).bucket(fluid -> new PotionBucketItem(fluid, RegistrationHelper.BUCKET_PROPS)).commonTag().unplacable();
+  public static final ItemObject<Item> splashBottle = ITEMS.register("splash_bottle", () -> new BottleItem(Items.SPLASH_POTION, ITEM_PROPS));
+  public static final ItemObject<Item> lingeringBottle = ITEMS.register("lingering_bottle", () -> new BottleItem(Items.LINGERING_POTION, ITEM_PROPS));
 
   // base molten fluids
   public static final FluidObject<SimpleFlowableFluid> searedStone   = FLUIDS.register("seared_stone",   hotBuilder().temperature( 900), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(),  6);
@@ -196,7 +224,7 @@ public final class TinkerFluids extends TinkerModule {
   public static final FluidObject<SimpleFlowableFluid> moltenPewter     = FLUIDS.register("molten_pewter",     hotBuilder().temperature( 700), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 10);
   public static final FluidObject<SimpleFlowableFluid> moltenSteel      = FLUIDS.register("molten_steel",      hotBuilder().temperature(1250), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 13);
 
-  // mod-specific compat alloys
+  // mod-specific compat
   // thermal
   public static final FluidObject<SimpleFlowableFluid> moltenEnderium = FLUIDS.register("molten_enderium", hotBuilder().temperature(1650), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 12);
   public static final FluidObject<SimpleFlowableFluid> moltenLumium   = FLUIDS.register("molten_lumium",   hotBuilder().temperature(1350), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 15);
@@ -205,15 +233,50 @@ public final class TinkerFluids extends TinkerModule {
   public static final FluidObject<SimpleFlowableFluid> moltenRefinedGlowstone = FLUIDS.register("molten_refined_glowstone", hotBuilder().temperature(1125), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(), 15);
   public static final FluidObject<SimpleFlowableFluid> moltenRefinedObsidian  = FLUIDS.register("molten_refined_obsidian",  hotBuilder().temperature(1775), properties -> properties.mapColor(MapColor.FIRE).replaceable().pushReaction(PushReaction.DESTROY).liquid(),  7);
 
+  // fluid data serializer
+  public static final FluidDataSerializer FLUID_DATA_SERIALIZER = new FluidDataSerializer();
+  public static final RegistryObject<EntityDataSerializer<?>> FLUID_DATA_SERIALIZER_REGISTRY = DATA_SERIALIZERS.register("fluid", () -> FLUID_DATA_SERIALIZER);
 
-  /** Creates a builder for a cool fluid with textures */
-  private static FluidAttributes.Builder coolBuilder() {
-    return ModelFluidAttributes.builder().sound(SoundEvents.BUCKET_FILL, SoundEvents.BUCKET_EMPTY);
+  /** Creates a builder for a cool fluid with sounds */
+  private static FluidType.Properties cool() {
+    return FluidType.Properties.create()
+                               .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
+                               .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY)
+                               .motionScale(0.0023333333333333335D)
+                               .canExtinguish(true);
+
   }
 
-  /** Creates a builder for a hot fluid */
-  private static FluidAttributes.Builder hotBuilder() {
-    return ModelFluidAttributes.builder().density(2000).viscosity(10000).temperature(1000).sound(SoundEvents.BUCKET_FILL_LAVA, SoundEvents.BUCKET_EMPTY_LAVA);
+  /** Creates a builder for a cool fluid with sounds and description */
+  private static FluidType.Properties cool(String name) {
+    return cool().descriptionId(TConstruct.makeDescriptionId("fluid", name))
+                 .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
+                 .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY);
+  }
+
+  /** Creates a builder for a cool fluid with sounds and description */
+  private static FluidType.Properties slime(String name) {
+    return cool(name).density(1600).viscosity(1600);
+  }
+
+  /** Creates a builder for a cool fluid with sounds and description */
+  @SuppressWarnings("SameParameterValue")
+  private static FluidType.Properties powder(String name) {
+    return FluidType.Properties.create().descriptionId(TConstruct.makeDescriptionId("fluid", name))
+                               .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_POWDER_SNOW)
+                               .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_POWDER_SNOW);
+  }
+
+  /** Creates a builder for a hot with sounds and description */
+  private static FluidType.Properties hot(String name) {
+    return FluidType.Properties.create().density(2000).viscosity(10000).temperature(1000)
+      .descriptionId(TConstruct.makeDescriptionId("fluid", name))
+      .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA)
+      .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
+      // from forge lava type
+      .motionScale(0.0023333333333333335D)
+      .canSwim(false).canDrown(false)
+      .pathType(BlockPathTypes.LAVA).adjacentPathType(null);
   }
 
   public static void gatherData(final FabricDataGenerator.Pack pack) {
@@ -240,7 +303,7 @@ public final class TinkerFluids extends TinkerModule {
         DispensibleContainerItem container = (DispensibleContainerItem)stack.getItem();
         BlockPos blockpos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
         Level level = source.getLevel();
-        if (container.emptyContents(null, level, blockpos, null)) {
+        if (container.emptyContents(null, level, blockpos, null, stack)) {
           container.checkExtraContent(null, level, stack, blockpos);
           return new ItemStack(Items.BUCKET);
         } else {
@@ -323,5 +386,153 @@ public final class TinkerFluids extends TinkerModule {
       BrewingRecipeRegistry.addRecipe(new BrewingRecipe(Ingredient.of(Items.GLASS_BOTTLE), Ingredient.of(TinkerWorld.congealedSlime.get(slime)), new ItemStack(TinkerFluids.slimeBottle.get(slime))));
     }
     BrewingRecipeRegistry.addRecipe(new BrewingRecipe(Ingredient.of(Items.GLASS_BOTTLE), Ingredient.of(Blocks.MAGMA_BLOCK), new ItemStack(TinkerFluids.magmaBottle)));
+  }
+
+  /** Adds all relevant items to the creative tab, called by smeltery */
+  @SuppressWarnings("deprecation")
+  public static void addTabItems(ItemDisplayParameters itemDisplayParameters, CreativeModeTab.Output output) {
+    // containers
+    output.accept(splashBottle);
+    output.accept(lingeringBottle);
+    // slime
+    output.accept(earthSlime);
+    output.accept(skySlime);
+    output.accept(ichor);
+    output.accept(enderSlime);
+    accept(output, slimeBottle);
+    output.accept(magma);
+    output.accept(magmaBottle);
+    output.accept(venom);
+    output.accept(venomBottle);
+
+    // food
+    output.accept(honey);
+    output.accept(beetrootSoup);
+    output.accept(mushroomStew);
+    output.accept(rabbitStew);
+    output.accept(meatSoup);
+    output.accept(meatSoupBowl);
+
+    // stone
+    output.accept(searedStone);
+    output.accept(scorchedStone);
+    output.accept(moltenClay);
+    if (ModList.get().isLoaded("ceramics")) {
+      output.accept(moltenPorcelain);
+    }
+    output.accept(moltenGlass);
+    output.accept(moltenObsidian);
+    output.accept(liquidSoul);
+    output.accept(moltenEnder);
+    output.accept(blazingBlood);
+
+    // ores
+    output.accept(moltenEmerald);
+    output.accept(moltenQuartz);
+    output.accept(moltenAmethyst);
+    output.accept(moltenDiamond);
+    output.accept(moltenDebris);
+    // metal ores
+    output.accept(moltenCopper);
+    output.accept(moltenIron);
+    output.accept(moltenGold);
+    output.accept(moltenCobalt);
+    output.accept(moltenSteel);
+
+    // overworld alloys
+    output.accept(moltenSlimesteel);
+    output.accept(moltenAmethystBronze);
+    output.accept(moltenRoseGold);
+    output.accept(moltenPigIron);
+    // nether alloys
+    output.accept(moltenCinderslime);
+    output.accept(moltenQueensSlime);
+    output.accept(moltenManyullyn);
+    output.accept(moltenHepatizon);
+    output.accept(moltenNetherite);
+    output.accept(moltenKnightmetal);
+    output.accept(moltenKnightslime);
+    // future: soulsteel
+
+    // compat ores
+    acceptMolten(output, moltenTin);
+    acceptCompat(output, moltenAluminum, MaterialIds.aluminum);
+    acceptCompat(output, moltenLead, MaterialIds.lead);
+    acceptCompat(output, moltenSilver, MaterialIds.silver);
+    acceptMolten(output, moltenNickel);
+    acceptMolten(output, moltenZinc);
+    acceptMolten(output, moltenPlatinum);
+    acceptMolten(output, moltenTungsten);
+    acceptCompat(output, moltenOsmium, MaterialIds.osmium);
+    acceptMolten(output, moltenUranium, MaterialIds.necronium);
+    acceptMolten(output, moltenChromium);
+    acceptMolten(output, moltenCadmium);
+    // compat alloys
+    acceptCompat(output, moltenBronze, MaterialIds.bronze);
+    acceptMolten(output, moltenBrass, MaterialIds.platedSlimewood);
+    acceptCompat(output, moltenElectrum, MaterialIds.electrum);
+    acceptCompat(output, moltenInvar, MaterialIds.invar);
+    acceptCompat(output, moltenConstantan, MaterialIds.constantan);
+    acceptCompat(output, moltenPewter, MaterialIds.pewter);
+    acceptMolten(output, moltenNicrosil, MaterialIds.nicrosil);
+    acceptMolten(output, moltenEnderium);
+    acceptMolten(output, moltenLumium);
+    acceptMolten(output, moltenSignalum);
+    acceptMolten(output, moltenRefinedGlowstone);
+    acceptMolten(output, moltenRefinedObsidian);
+    acceptMolten(output, moltenDuralumin);
+    acceptMolten(output, moltenBendalloy);
+    acceptCompat(output, moltenSteeleaf, MaterialIds.steeleaf);
+    acceptCompat(output, fieryLiquid, "fiery", MaterialIds.fiery);
+    // potion buckets
+    BuiltInRegistries.POTION.holders().filter(holder -> {
+      Potion potion = holder.get();
+      return potion != Potions.EMPTY && potion != Potions.WATER;
+    }).forEachOrdered(holder ->
+      output.accept(PotionFluidType.potionBucket(holder.key())));
+  }
+
+  /** Adds all filled containers to the fluids tab. */
+  private static void addFilledContainers(ItemDisplayParameters itemDisplayParameters, CreativeModeTab.Output output) {
+    // add copper cans, tanks, and lanterns for all the fluids
+    CopperCanItem.addFilledVariants(output::accept);
+    TankItem.addFilledVariants(output::accept);
+  }
+
+  /**
+   * Accepts the given item if the passed ingot is present
+   */
+  private static void acceptCompat(Output output, ItemLike item, String ingot) {
+    acceptIfTag(output, item, ItemTags.create(commonResource("ingots/" + ingot)));
+  }
+
+  /** Accepts the given item if the passed ingot or material is present */
+  private static void acceptCompat(CreativeModeTab.Output output, ItemLike item, String ingot, MaterialId material) {
+    if (!acceptIfMaterial(output, item, material)) {
+      acceptCompat(output, item, ingot);
+    }
+  }
+
+  /** Accepts the given item if the passed material or same named ingot is present */
+  private static void acceptCompat(CreativeModeTab.Output output, ItemLike item, MaterialId material) {
+    acceptCompat(output, item, material.getPath(), material);
+  }
+
+  /** Accepts the given item if the ingot named after the fluid is present */
+  private static void acceptMolten(CreativeModeTab.Output output, FluidObject<?> fluid) {
+    acceptCompat(output, fluid, withoutMolten(fluid));
+  }
+
+  /** Accepts the given item if the ingot named after the fluid or the material is present */
+  private static void acceptMolten(CreativeModeTab.Output output, FluidObject<?> fluid, MaterialId material) {
+    acceptCompat(output, fluid, withoutMolten(fluid), material);
+  }
+
+  /** Length of the molten prefix */
+  private static final int MOLTEN_LENGTH = "molten_".length();
+
+  /** Removes the "molten_" prefix from the fluids ID */
+  public static String withoutMolten(FluidObject<?> fluid) {
+    return fluid.getId().getPath().substring(MOLTEN_LENGTH);
   }
 }

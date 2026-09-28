@@ -28,14 +28,15 @@ public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockCon
     return ID;
   }
 
+  @SuppressWarnings("removal")
   @Override
-  protected Instance createInstance(JsonObject json, ContextAwarePredicate contextPredicate, DeserializationContext conditionsParser) {
+  protected Instance createInstance(JsonObject json, ContextAwarePredicate predicate, DeserializationContext pDeserializationContext) {
     ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(json, "type"));
-    BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(id);
+    BlockEntityType<?> type = ForgeRegistries.BLOCK_ENTITY_TYPES.getValue(id);
     if (type == null) {
       throw new JsonSyntaxException("Unknown tile entity '" + id + "'");
     }
-    return new Instance(contextPredicate, type);
+    return new Instance(predicate, type);
   }
 
   /** Triggers this criteria */
@@ -47,8 +48,8 @@ public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockCon
 
   public static class Instance extends AbstractCriterionTriggerInstance {
     private final BlockEntityType<?> type;
-    public Instance(ContextAwarePredicate playerCondition, BlockEntityType<?> type) {
-      super(ID, playerCondition);
+    public Instance(ContextAwarePredicate predicate, BlockEntityType<?> type) {
+      super(ID, predicate);
       this.type = type;
     }
 
@@ -61,6 +62,7 @@ public class BlockContainerOpenedTrigger extends SimpleCriterionTrigger<BlockCon
       return this.type == type;
     }
 
+    @SuppressWarnings("deprecation")  // no forge, your registries are deprecated, you just don't realize it yet
     @Override
     public JsonObject serializeToJson(SerializationContext conditions) {
       JsonObject json = super.serializeToJson(conditions);

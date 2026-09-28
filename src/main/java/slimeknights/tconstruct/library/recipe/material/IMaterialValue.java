@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.recipe.material;
 
 import net.minecraft.world.item.ItemStack;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.recipe.container.ISingleStackContainer;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 
@@ -8,6 +10,11 @@ import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
  * Represents a material with an amount and a cost
  */
 public interface IMaterialValue {
+  /** Field for a material value in JSON */
+  LoadableField<Integer,IMaterialValue> VALUE_FIELD = IntLoadable.FROM_ONE.defaultField("value", 1, true, IMaterialValue::getValue);
+  /** Field for a needed amount in JSON */
+  LoadableField<Integer,IMaterialValue> NEEDED_FIELD = IntLoadable.FROM_ONE.defaultField("needed", 1, true, IMaterialValue::getNeeded);
+
   /** Gets the material represented in this cost */
   MaterialVariant getMaterial();
 
@@ -19,11 +26,29 @@ public interface IMaterialValue {
   /** Gets the value of a single item of this material */
   int getValue();
 
+  /** Checks if a leftover is present without creating item stack copies. */
+  default boolean hasLeftover() {
+    return false;
+  }
+
   /**
    * Gets a copy of the leftover stack for this recipe
    * @return  Leftover stack
    */
   default ItemStack getLeftover() {
+    return ItemStack.EMPTY;
+  }
+
+  /** Gets the leftover on crafting an item of the given cost */
+  default ItemStack getLeftover(int itemCost) {
+    int remainder = getRemainder(itemCost);
+    if (remainder > 0) {
+      if (hasLeftover()) {
+        ItemStack leftover = getLeftover();
+        leftover.setCount(leftover.getCount() * remainder / getNeeded());
+        return leftover;
+      }
+    }
     return ItemStack.EMPTY;
   }
 
@@ -60,6 +85,14 @@ public interface IMaterialValue {
    * @return  Number of input to consume
    */
   default int getRemainder(int itemCost) {
-    return itemCost * this.getNeeded() % this.getValue();
+    int value = getValue();
+    if (value == 0) {
+      return 0;
+    }
+    int remainder = (value - itemCost * getNeeded()) % value;
+    if (remainder < 0) {
+      remainder += value;
+    }
+    return remainder;
   }
 }

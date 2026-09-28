@@ -9,9 +9,24 @@ import slimeknights.mantle.registration.object.FenceBuildingBlockObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
 import slimeknights.tconstruct.common.TinkerModule;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialDefinitionPredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialHasPartPredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialIdPredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialStatTypePredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialTierPredicate;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialVariantPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
+import slimeknights.tconstruct.shared.block.KnightMetalBlock;
 import slimeknights.tconstruct.shared.block.OrientableBlock;
 import slimeknights.tconstruct.shared.block.SlimesteelBlock;
+import slimeknights.tconstruct.tools.TinkerToolParts;
+import slimeknights.tconstruct.tools.data.material.MaterialIds;
+
+import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.TConstruct.getResource;
 
 /**
  * Contains bommon blocks and items used in crafting materials
@@ -38,7 +53,7 @@ public final class TinkerMaterials extends TinkerModule {
 
   // non-metal
   public static final ItemObject<Item> necroticBone = ITEMS.register("necrotic_bone", TOOLTIP_ITEM);
-  public static final ItemObject<Item> bloodbone = ITEMS.register("bloodbone", TOOLTIP_ITEM);
+  public static final ItemObject<Item> venombone = ITEMS.register("venombone", TOOLTIP_ITEM);
   public static final ItemObject<Item> blazingBone = ITEMS.register("blazing_bone", TOOLTIP_ITEM);
   public static final ItemObject<Item> necroniumBone = ITEMS.register("necronium_bone", TOOLTIP_ITEM);
   public static final FenceBuildingBlockObject nahuatl = BLOCKS.registerFenceBuilding("nahuatl", builder(MapColor.PODZOL, SoundType.WOOD).requiresCorrectToolForDrops().strength(25f, 300f), GENERAL_BLOCK_ITEM);

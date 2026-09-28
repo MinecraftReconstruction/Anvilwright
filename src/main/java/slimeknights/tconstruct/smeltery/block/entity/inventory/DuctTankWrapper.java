@@ -14,6 +14,44 @@ import java.util.Iterator;
 public class DuctTankWrapper implements SlottedStorage<FluidVariant> { // Fabric has FilteringStorage but in order to not create merge conflicts we use our own class
   private final SlottedStorage<FluidVariant> parent;
   private final DuctItemHandler itemHandler;
+  private int[] tankMapping;
+
+  public DuctTankWrapper(IFluidHandler parent, DuctItemHandler itemHandler) {
+    this.parent = parent;
+    this.itemHandler = itemHandler;
+    // clear cache when the fluid changes or the smeltery list changes
+    Consumer<DuctTankWrapper> consumer = self -> self.tankMapping = null;
+    itemHandler.addListener(this, consumer);
+    if (parent instanceof IMultitankListChange notifier) {
+      notifier.addTankListListener(this, consumer);
+    }
+  }
+
+  /** Gets the mapping from index to matching tank */
+  private int[] getTankMapping() {
+    if (tankMapping == null) {
+      FluidStack filter = itemHandler.getFluid();
+      int count = parent.getTanks();
+      if (filter.isEmpty()) {
+        FluidStack last = parent.getFluidInTank(count - 1);
+        if (last.isEmpty()) {
+          tankMapping = new int[] { count - 1 };
+        } else {
+          tankMapping = new int[0];
+        }
+      } else {
+        IntList list = new IntArrayList(count);
+        for (int i = 0; i < count; i++) {
+          FluidStack contained = parent.getFluidInTank(i);
+          if (contained.isEmpty() || filter.isFluidEqual(contained)) {
+            list.add(i);
+          }
+        }
+        tankMapping = list.toIntArray();
+      }
+    }
+    return tankMapping;
+  }
 
 
   /* Properties */

@@ -1,8 +1,8 @@
 {
-  "replace": false,
   "values": [
     "tconstruct:greenheart_trapdoor",
     "tconstruct:skyroot_trapdoor",
-    "tconstruct:bloodshroom_trapdoor"
+    "tconstruct:bloodshroom_trapdoor",
+    "tconstruct:enderbark_trapdoor"
   ]
 }

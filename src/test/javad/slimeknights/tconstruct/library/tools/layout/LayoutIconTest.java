@@ -9,12 +9,11 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.layout.LayoutIcon.ItemStackIcon;
 import slimeknights.tconstruct.library.tools.layout.LayoutIcon.PatternIcon;
 import slimeknights.tconstruct.test.BaseMcTest;
-
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -83,7 +82,7 @@ class LayoutIconTest extends BaseMcTest {
     LayoutIcon itemIcon = LayoutIcon.ofItem(original);
     JsonObject json = itemIcon.toJson();
     assertThat(json.entrySet()).hasSize(2);
-    assertThat(GsonHelper.getAsString(json, "item")).isEqualTo(Objects.requireNonNull(Items.DIAMOND_PICKAXE.getRegistryName()).toString());
+    assertThat(GsonHelper.getAsString(json, "item")).isEqualTo(Loadables.ITEM.getKey(Items.DIAMOND_PICKAXE).toString());
     assert original.getTag() != null;
     assertThat(GsonHelper.getAsString(json, "nbt")).isEqualTo(original.getTag().toString());
   }
@@ -91,7 +90,7 @@ class LayoutIconTest extends BaseMcTest {
   @Test
   void item_jsonDeserialize() {
     JsonObject json = new JsonObject();
-    json.addProperty("item", Objects.requireNonNull(Items.DIAMOND.getRegistryName()).toString());
+    json.addProperty("item", Loadables.ITEM.getKey(Items.DIAMOND).toString());
     json.addProperty("nbt", "{test:1}");
     LayoutIcon icon = LayoutIcon.SERIALIZER.deserialize(json, LayoutIcon.class, mock(JsonDeserializationContext.class));
     assertThat(icon).isInstanceOf(ItemStackIcon.class);

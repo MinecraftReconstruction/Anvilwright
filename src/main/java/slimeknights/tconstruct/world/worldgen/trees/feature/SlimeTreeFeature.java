@@ -249,14 +249,6 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
     return isReplaceableAt(reader, blockPos) || reader.isStateAtPosition(blockPos, state -> state.is(BlockTags.LOGS));
   }
 
-  private static boolean isVineAt(LevelSimulatedReader reader, BlockPos blockPos) {
-    return reader.isStateAtPosition(blockPos, (state) -> state.is(Blocks.VINE));
-  }
-
-  private static boolean isWaterAt(LevelSimulatedReader reader, BlockPos blockPos) {
-    return reader.isStateAtPosition(blockPos, state -> state.is(Blocks.WATER));
-  }
-
   public static boolean isAirOrLeavesAt(LevelSimulatedReader reader, BlockPos blockPos) {
     return reader.isStateAtPosition(blockPos, state -> state.isAir() || state.is(BlockTags.LEAVES));
   }
@@ -265,12 +257,8 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
     return reader.isStateAtPosition(blockPos, state -> state.is(TinkerTags.Blocks.SLIMY_SOIL));
   }
 
-  private static boolean isTallPlantAt(LevelSimulatedReader reader, BlockPos blockPos) {
-    return reader.isStateAtPosition(blockPos, state -> state.is(BlockTags.REPLACEABLE_BY_TREES));
-  }
-
   public static boolean isReplaceableAt(LevelSimulatedReader reader, BlockPos blockPos) {
-    return isAirOrLeavesAt(reader, blockPos) || isTallPlantAt(reader, blockPos) || isWaterAt(reader, blockPos);
+    return reader.isStateAtPosition(blockPos, state -> state.isAir() || state.canBeReplaced() || state.is(BlockTags.LEAVES));
   }
 
   public static void setBlockStateAt(LevelWriter writer, BlockPos blockPos, BlockState state) {
@@ -286,16 +274,16 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
 
     BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
-    for (BlockPos leavePos : Lists.newArrayList(leaves)) {
-      if (boundingBox.isInside(leavePos)) {
+    //for (BlockPos leavePos : Lists.newArrayList(leaves)) {
+      //if (boundingBox.isInside(leavePos)) {
         //TODO shapePart.setFull(leavePos.getX() - boundingBox.minX(), leavePos.getY() - boundingBox.minY(), leavePos.getZ() - boundingBox.minZ(), true, true);
-      }
-    }
+      //}
+    //}
 
     for (BlockPos logPos : Lists.newArrayList(logs)) {
-      if (boundingBox.isInside(logPos)) {
+      //if (boundingBox.isInside(logPos)) {
         //TODO shapePart.setFull(logPos.getX() - boundingBox.minX(), logPos.getY() - boundingBox.minY(), logPos.getZ() - boundingBox.minZ(), true, true);
-      }
+      //}
       for (Direction direction : Direction.values()) {
         mutable.setWithOffset(logPos, direction);
         if (!logs.contains(mutable)) {
@@ -303,9 +291,9 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
           if (blockstate.hasProperty(BlockStateProperties.DISTANCE)) {
             distanceList.get(0).add(mutable.immutable());
             setBlockStateAt(world, mutable, blockstate.setValue(BlockStateProperties.DISTANCE, 1));
-            if (boundingBox.isInside(mutable)) {
+            //if (boundingBox.isInside(mutable)) {
               //TODO shapePart.setFull(mutable.getX() - boundingBox.minX(), mutable.getY() - boundingBox.minY(), mutable.getZ() - boundingBox.minZ(), true, true);
-            }
+            //}
           }
         }
       }
@@ -316,9 +304,9 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
       Set<BlockPos> next = distanceList.get(distance);
 
       for (BlockPos pos : current) {
-        if (boundingBox.isInside(pos)) {
+        //if (boundingBox.isInside(pos)) {
           //TODO shapePart.setFull(pos.getX() - boundingBox.minX(), pos.getY() - boundingBox.minY(), pos.getZ() - boundingBox.minZ(), true, true);
-        }
+        //}
 
         for (Direction direction : Direction.values()) {
           mutable.setWithOffset(pos, direction);
@@ -329,9 +317,9 @@ public class SlimeTreeFeature extends Feature<SlimeTreeConfig> {
               if (stateDistance > distance + 1) {
                 BlockState furtherState = state.setValue(BlockStateProperties.DISTANCE, distance + 1);
                 setBlockStateAt(world, mutable, furtherState);
-                if (boundingBox.isInside(mutable)) {
+                //if (boundingBox.isInside(mutable)) {
                   //TODO shapePart.setFull(mutable.getX() - boundingBox.minX(), mutable.getY() - boundingBox.minY(), mutable.getZ() - boundingBox.minZ(), true, true);
-                }
+                //}
                 next.add(mutable.immutable());
               }
             }

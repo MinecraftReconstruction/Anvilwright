@@ -6,6 +6,7 @@ import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionData;
 
@@ -30,6 +31,11 @@ public interface IToolContext {
   @SuppressWarnings("deprecation")
   default boolean hasTag(TagKey<Item> tag) {
     return getItem().builtInRegistryHolder().is(tag);
+  }
+
+  /** Gets the given hook from the tool */
+  default <T> T getHook(ModuleHook<T> hook) {
+    return getDefinition().getData().getHook(hook);
   }
 
 
@@ -65,6 +71,24 @@ public interface IToolContext {
   }
 
   /**
+   * Gets the modifier entry for the given modifier ID
+   * @param modifier  Modifier
+   * @return  Modifier entry, or {@link ModifierEntry#EMPTY} if missing.
+   */
+  default ModifierEntry getModifier(ModifierId modifier) {
+    return getModifiers().getEntry(modifier);
+  }
+
+  /**
+   * Gets the modifier entry for the given modifier ID
+   * @param modifier  Modifier
+   * @return  Modifier entry, or {@link ModifierEntry#EMPTY} if missing.
+   */
+  default ModifierEntry getModifier(Modifier modifier) {
+    return getModifiers().getEntry(modifier.getId());
+  }
+
+  /**
    * Gets the level of a modifier on this tool. Will consider both raw modifiers and material traits
    * @param modifier  Modifier
    * @return  Level of modifier, 0 if the modifier is not on the tool
@@ -88,14 +112,6 @@ public interface IToolContext {
   /**
    * Gets persistent modifier data from the tool.
    * This data may be edited by modifiers and will persist when stats rebuild
-   * TODO 1.19: change return type to INamespacedNBTView as modifiers should not be slot sensitive
    */
   IModDataView getPersistentData();
-
-  /**
-   * Gets volatile modifier data from the tool.
-   * This data will be reset whenever modifiers reload and should not be edited.
-   * TODO 1.19: change return type to INamespacedNBTView as modifiers should not be slot sensitive
-   */
-  IModDataView getVolatileData();
 }

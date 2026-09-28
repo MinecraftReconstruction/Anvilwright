@@ -17,18 +17,18 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.IMultiRecipe;
-import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.casting.DisplayCastingRecipe;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.library.recipe.casting.ICastingRecipe;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,17 +36,26 @@ import java.util.Optional;
  * Casting recipe that takes an arbitrary fluid for a given amount and fills a container
  */
 @RequiredArgsConstructor
-public abstract class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<DisplayCastingRecipe> {
+public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDisplayableCastingRecipe> {
+  public static final RecordLoadable<ContainerFillingRecipe> LOADER = RecordLoadable.create(
+    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
+    IntLoadable.FROM_ONE.requiredField("fluid_amount", r -> r.fluidAmount),
+    Loadables.ITEM.requiredField("container", r -> r.container),
+    ContainerFillingRecipe::new);
+
   @Getter
-  protected final RecipeType<?> type;
+  private final TypeAwareRecipeSerializer<?> serializer;
   @Getter
-  protected final ResourceLocation id;
+  private final ResourceLocation id;
   @Getter
-  protected final String group;
-  @Getter
-  protected final int fluidAmount;
-  @Getter
-  protected final Item container;
+  private final String group;
+  private final int fluidAmount;
+  private final Item container;
+
+  @Override
+  public RecipeType<?> getType() {
+    return serializer.getType();
+  }
 
   private static Optional<Storage<FluidVariant>> getFluidHandlerItem(ItemStack stack) {
     return Optional.ofNullable(FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack)));
@@ -111,10 +120,10 @@ public abstract class ContainerFillingRecipe implements ICastingRecipe, IMultiRe
 
   /* Display */
   /** Cache of items to display for this container */
-  private List<DisplayCastingRecipe> displayRecipes = null;
+  private List<IDisplayableCastingRecipe> displayRecipes = null;
 
   @Override
-  public List<DisplayCastingRecipe> getRecipes() {
+  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
       List<ItemStack> casts = Collections.singletonList(new ItemStack(container));
       displayRecipes = BuiltInRegistries.FLUID.stream()
@@ -135,30 +144,5 @@ public abstract class ContainerFillingRecipe implements ICastingRecipe, IMultiRe
                                              .toList();
     }
     return displayRecipes;
-  }
-
-  /** Basin implementation */
-  public static class Basin extends ContainerFillingRecipe {
-    public Basin(ResourceLocation idIn, String groupIn, int fluidAmount, Item containerIn) {
-      super(TinkerRecipeTypes.CASTING_BASIN.get(), idIn, groupIn, fluidAmount, containerIn);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.basinFillingRecipeSerializer.get();
-    }
-  }
-
-  /** Table implementation */
-  public static class Table extends ContainerFillingRecipe {
-
-    public Table(ResourceLocation idIn, String groupIn, int fluidAmount, Item containerIn) {
-      super(TinkerRecipeTypes.CASTING_TABLE.get(), idIn, groupIn, fluidAmount, containerIn);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.tableFillingRecipeSerializer.get();
-    }
   }
 }

@@ -1,11 +1,4 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "never",
-  "modules": [
-    {
-      "type": "tconstruct:volatile_flag",
-      "flag": "tconstruct:overslime_friend"
-    }
-  ]
+  "show_in_tooltips": "advanced"
 }

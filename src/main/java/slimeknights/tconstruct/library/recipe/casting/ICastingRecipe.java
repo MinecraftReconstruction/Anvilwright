@@ -8,6 +8,8 @@ import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+
 /**
  * Base interface for all casting recipes
  */
@@ -21,23 +23,27 @@ public interface ICastingRecipe extends ICommonRecipe<ICastingContainer> {
   /**
    * Gets the amount of fluid required for this recipe
    * @param inv  Inventory instance
-   * @return  Fluid amount when using the fluid in the inventory
+   * @return Fluid amount when using the fluid in the inventory
    */
   long getFluidAmount(ICastingContainer inv);
 
   /**
-   * @return true if the cast item is consumed on crafting
+   * TODO 1.21: move this method to {@link IDisplayableCastingRecipe}.
+   * {@return true if the cast item is consumed on crafting}
    */
   boolean isConsumed();
 
-  /**
-   * @return true if the recipe output is placed into the casting input slot
-   */
+  /** {@return true if the cast item is consumed on crafting} */
+  default boolean isConsumed(ICastingContainer inv) {
+    return isConsumed();
+  }
+
+  /** {@return true if the recipe output is placed into the casting input slot} */
   boolean switchSlots();
 
   /**
    * @param inv ICastingInventory for casting recipe
-   * @return  cooling time for the output.
+   * {@return cooling time for the output}
    */
   int getCoolingTime(ICastingContainer inv);
 

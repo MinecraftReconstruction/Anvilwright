@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -21,33 +22,33 @@ import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.gadgets.block.FoodCakeBlock;
+import slimeknights.tconstruct.gadgets.block.FoodCakeBlock.EffectCombination;
+import slimeknights.tconstruct.gadgets.block.InvertedCakeBlock;
 import slimeknights.tconstruct.gadgets.block.PunjiBlock;
 import slimeknights.tconstruct.gadgets.data.GadgetRecipeProvider;
-import slimeknights.tconstruct.gadgets.entity.EflnBallEntity;
+import slimeknights.tconstruct.gadgets.entity.DispenseFancyArmorStand;
+import slimeknights.tconstruct.gadgets.entity.EFLNEntity;
+import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity;
+import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity.StandType;
 import slimeknights.tconstruct.gadgets.entity.FancyItemFrameEntity;
 import slimeknights.tconstruct.gadgets.entity.FrameType;
 import slimeknights.tconstruct.gadgets.entity.GlowballEntity;
 import slimeknights.tconstruct.gadgets.entity.shuriken.FlintShurikenEntity;
 import slimeknights.tconstruct.gadgets.entity.shuriken.QuartzShurikenEntity;
-import slimeknights.tconstruct.gadgets.item.EflnBallItem;
+import slimeknights.tconstruct.gadgets.item.EFLNItem;
+import slimeknights.tconstruct.gadgets.item.FancyArmorStandItem;
 import slimeknights.tconstruct.gadgets.item.FancyItemFrameItem;
 import slimeknights.tconstruct.gadgets.item.GlowBallItem;
 import slimeknights.tconstruct.gadgets.item.PiggyBackPackItem;
 import slimeknights.tconstruct.gadgets.item.PiggyBackPackItem.CarryPotionEffect;
+import slimeknights.tconstruct.gadgets.item.ShootProjectileDispenserBehavior;
 import slimeknights.tconstruct.gadgets.item.ShurikenItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.BaseSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.EarthSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.EnderSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.IchorSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.SkySlimeSlingItem;
-import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.TinkerFood;
-import slimeknights.tconstruct.shared.block.SlimeType;
-
-import java.util.function.Function;
+import slimeknights.tconstruct.world.block.FoliageType;
 
 /**
- * Contains any special tools unrelated to the base tools
+ * Contains any special tools unrelated to the base tools.
+ * TODO: consider merging this into commons, the distinction of what is a gadget is getting pretty narrow.
  */
 @SuppressWarnings("unused")
 public final class TinkerGadgets extends TinkerModule {
@@ -109,6 +110,10 @@ public final class TinkerGadgets extends TinkerModule {
       .entityFactory((spawnEntity, world) -> new FancyItemFrameEntity(TinkerGadgets.itemFrameEntity.get(), world))
       .forceTrackedVelocityUpdates(false)
   );
+  public static final RegistryObject<EntityType<FancyArmorStandEntity>> armorStandEntity = ENTITIES.register("armor_stand", () ->
+    EntityType.Builder.of(FancyArmorStandEntity::new, MobCategory.MISC).sized(0.5F, 1.975F).clientTrackingRange(10));
+
+  @Deprecated
   public static final RegistryObject<EntityType<GlowballEntity>> glowBallEntity = ENTITIES.register("glow_ball", () ->
     FabricEntityTypeBuilder.<GlowballEntity>create(MobCategory.MISC, GlowballEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
@@ -133,6 +138,7 @@ public final class TinkerGadgets extends TinkerModule {
       .entityFactory((spawnEntity, world) -> new QuartzShurikenEntity(TinkerGadgets.quartzShurikenEntity.get(), world))
       .forceTrackedVelocityUpdates(true)
   );
+  @Deprecated
   public static final RegistryObject<EntityType<FlintShurikenEntity>> flintShurikenEntity = ENTITIES.register("flint_shuriken", () ->
     FabricEntityTypeBuilder.<FlintShurikenEntity>create(MobCategory.MISC, FlintShurikenEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))

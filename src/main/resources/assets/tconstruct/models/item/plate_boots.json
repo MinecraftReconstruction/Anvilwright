@@ -2,9 +2,18 @@
   "loader": "tconstruct:tool",
   "parent": "forge:item/default",
   "textures": {
-    "tool":   "tconstruct:item/tool/armor/plate/boots",
-    "broken": "tconstruct:item/tool/armor/plate/boots_broken"
+    "plating": "tconstruct:item/tool/armor/plate/boots/plating",
+    "maille":  "tconstruct:item/tool/armor/plate/boots/maille"
   },
-  "modifier_roots": [ "tconstruct:item/tool/armor/plate/boot_modifiers/" ],
-  "first_modifiers": [ "tconstruct:embellishment", "tconstruct:golden" ]
+  "modifier_maps": ["tconstruct:plate/boots", "tconstruct:armor/boots"],
+  "parts": [
+    { "name": "plating", "index": 0 },
+    { "name": "maille",  "index": 1 }
+  ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tconstruct:item/armor/plate/boots_broken"
+    }
+  ]
 }

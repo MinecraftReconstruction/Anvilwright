@@ -1,3 +1,10 @@
 {
-  "type": "tconstruct:default"
+  "level_display": "tconstruct:default",
+  "modules": [
+    {
+      "type": "tconstruct:material_repair",
+      "durability": 140,
+      "material": "tconstruct:string"
+    }
+  ]
 }

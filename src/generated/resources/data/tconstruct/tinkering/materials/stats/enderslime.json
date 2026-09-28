@@ -1,7 +1,9 @@
 {
   "stats": {
-    "tconstruct:repair_kit": {
-      "durability": 30
+    "tconstruct:arrow_head": {},
+    "tconstruct:slime": {
+      "durability": 100,
+      "overslime_capacity": 225
     }
   }
 }

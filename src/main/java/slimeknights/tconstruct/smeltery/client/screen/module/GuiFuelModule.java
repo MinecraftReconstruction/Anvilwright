@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.client.screen.ScalableElementScreen;
@@ -15,6 +16,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule;
 import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule.FuelInfo;
+import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -24,10 +26,7 @@ import java.util.List;
 /**
  * GUI component handling the fuel module
  */
-@RequiredArgsConstructor
-public class GuiFuelModule {
-  private static final ScalableElementScreen FIRE = new ScalableElementScreen(176, 136, 14, 14, 256, 256);
-
+public class GuiFuelModule implements IScreenWithFluidTank, ClickableTankModule {
   // tooltips
   private static final String TOOLTIP_TEMPERATURE = TConstruct.makeTranslationKey("gui", "melting.fuel.temperature");
   private static final List<Component> TOOLTIP_NO_TANK = Collections.singletonList(Component.translatable(TConstruct.makeTranslationKey("gui", "melting.fuel.no_tank")));
@@ -39,22 +38,55 @@ public class GuiFuelModule {
   private final FuelModule fuelModule;
   /** location to draw the tank */
   private final int x, y, width, height;
+  /** Location of the fluid for JEI */
+  private final Rect2i fluidLoc;
   /** location to draw the fire */
   private final int fireX, fireY;
   /** If true, UI has a fuel slot */
   private final boolean hasFuelSlot;
+  /** Scalable fire instance */
+  private final ScalableElementScreen fire;
 
   private FuelInfo fuelInfo = FuelInfo.EMPTY;
 
-  /**
-   * Checks if the fuel tank is hovered
-   * @param checkX  X position to check
-   * @param checkY  Y position to check
-   * @return  True if hovered
-   */
-  private boolean isHovered(int checkX, int checkY) {
+  public GuiFuelModule(AbstractContainerScreen<?> screen, FuelModule fuelModule, int x, int y, int width, int height, int fireX, int fireY, boolean hasFuelSlot, ResourceLocation background) {
+    this.screen = screen;
+    this.fuelModule = fuelModule;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.fluidLoc = new Rect2i(x - 1, y - 1, width + 2, height + 2);
+    this.fireX = fireX;
+    this.fireY = fireY;
+    this.hasFuelSlot = hasFuelSlot;
+    this.fire = makeFire(background);
+  }
+
+  @Override
+  public AbstractContainerMenu getMenu() {
+    return screen.getMenu();
+  }
+
+  @Override
+  public boolean isHovered(int checkX, int checkY) {
     return GuiUtil.isHovered(checkX, checkY, x - 1, y - 1, width + 2, height + 2);
   }
+
+  /** Gets the current height of the fluid */
+  private int getFluidHeight() {
+    int capacity = fuelInfo.getCapacity();
+    if (capacity == 0) {
+      return height;
+    }
+    return height * fuelInfo.getTotalAmount() / capacity;
+  }
+
+  @Override
+  public boolean isFluidHovered(int checkY) {
+    return checkY > (y + height) - getFluidHeight();
+  }
+
 
   /**
    * Draws the fuel at the correct location
@@ -146,17 +178,17 @@ public class GuiFuelModule {
     }
   }
 
-  /**
-   * Gets the fluid stack under the mouse
-   * @param checkX  Mouse X position
-   * @param checkY  Mouse Y position
-   * @return  Fluid stack under mouse
-   */
+  @Override
   @Nullable
-  public FluidStack getIngredient(int checkX, int checkY) {
+  public FluidLocation getFluidUnderMouse(int checkX, int checkY) {
     if (!hasFuelSlot && isHovered(checkX, checkY) && !fuelInfo.isEmpty()) {
-      return fuelInfo.getFluid();
+      return new FluidLocation(fuelInfo.getFluid(), fluidLoc);
     }
     return null;
+  }
+
+  /** Creates the fire element from the standard location */
+  public static ScalableElementScreen makeFire(ResourceLocation background) {
+    return new ScalableElementScreen(background, 176, 136, 14, 14, 256, 256);
   }
 }

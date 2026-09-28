@@ -10,11 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /**
  * Builds a new recipe for a melter or smeltery fuel
@@ -25,6 +24,19 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
   private final FluidIngredient input;
   private final int duration;
   private final int temperature;
+  @Setter
+  @Accessors(fluent = true)
+  private int rate;
+
+  /**
+   * Creates a new builder instance with set temperature
+   * @param fluid     Fluid stack
+   * @param duration  Fluid duration
+   * @return  Builder instance
+   */
+  public static MeltingFuelBuilder fuel(FluidIngredient fluid, int duration, int temperature) {
+    return new MeltingFuelBuilder(fluid, duration, temperature, temperature / 100);
+  }
 
   /**
    * Creates a new builder instance with automatic temperature
@@ -47,27 +59,6 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
   @Override
   public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "melting_fuel");
-    consumer.accept(new Result(id, advancementId));
-  }
-
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      if (!group.isEmpty()) {
-        json.addProperty("group", group);
-      }
-      json.add("fluid", input.serialize());
-      json.addProperty("duration", duration);
-      json.addProperty("temperature", temperature);
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerSmeltery.fuelSerializer.get();
-    }
+    consumer.accept(new LoadableFinishedRecipe<>(new MeltingFuel(id, input, duration, temperature, rate), MeltingFuel.LOADER, advancementId));
   }
 }

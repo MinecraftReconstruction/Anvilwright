@@ -8,11 +8,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor.ABGR32;
 import net.minecraft.util.GsonHelper;
+import slimeknights.mantle.data.loadable.common.ColorLoadable;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.Util;
@@ -20,15 +26,26 @@ import slimeknights.tconstruct.library.utils.Util;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.function.ToIntFunction;
+
+import static net.minecraft.util.FastColor.ABGR32.alpha;
+import static net.minecraft.util.FastColor.ABGR32.blue;
+import static net.minecraft.util.FastColor.ABGR32.color;
+import static net.minecraft.util.FastColor.ABGR32.green;
+import static net.minecraft.util.FastColor.ABGR32.red;
 
 /** Color mcom.mojang.blaze3d.platform.NativeImager each value */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class GreyToColorMapping implements IColorMapping {
   public static final ResourceLocation NAME = TConstruct.getResource("grey_to_color");
   public static final Deserializer DESERIALIZER = new Deserializer();
+  /** Loadable for parsing the grey values */
+  public static final IntLoadable GREY_LOADABLE = IntLoadable.range(0, 255);
+  /** Loadable for parsing the grey values from a string */
+  public static final StringLoadable<Integer> GREY_STRING_LOADABLE = GREY_LOADABLE.asString(10);
 
-  private final List<ColorMapping> mappings;
+  final List<ColorMapping> mappings;
   private final Integer[] recolorCache = new Integer[256];
 
   /** Function to interpolate color values of two colors */
@@ -63,26 +80,53 @@ public class GreyToColorMapping implements IColorMapping {
   public int mapColor(int color) {
     // if fully transparent, just return fully transparent
     // we do not do 0 alpha RGB values to save effort
-    if (ABGR32.alpha(color) == 0) {
+    if (alpha(color) == 0) {
       return 0x00000000;
     }
     int grey = getGrey(color);
     return scaleColor(color, getColorForGrey(grey), grey);
   }
 
+  /** Serializes a color to JSON */
+  public static JsonElement serializeColor(int color) {
+    return ColorLoadable.ALPHA.serialize(Util.translateColorBGR(color));
+  }
+
+  /** Serializes the palette */
+  protected JsonElement serializePalette() {
+    JsonObject colors = new JsonObject();
+    for (ColorMapping mapping : mappings) {
+      // zero pad the grey string to length of exactly 3
+      colors.add(String.format("%03d", mapping.grey), serializeColor(mapping.color));
+    }
+    return colors;
+  }
+
   @Override
   public JsonObject serialize(JsonSerializationContext context) {
     JsonObject object = new JsonObject();
     object.addProperty("type", NAME.toString());
-    JsonArray colors = new JsonArray();
-    for (ColorMapping mapping : mappings) {
-      JsonObject pair = new JsonObject();
-      pair.addProperty("grey", mapping.grey);
-      pair.addProperty("color", String.format("%08X", Util.translateColorBGR(mapping.color)));
-      colors.add(pair);
-    }
-    object.add("palette", colors);
+    object.add("palette", serializePalette());
     return object;
+  }
+
+  /** Serializes the palette as an array instead of a compact object */
+  private static class PaletteArray extends GreyToColorMapping {
+    protected PaletteArray(List<ColorMapping> mappings) {
+      super(mappings);
+    }
+
+    @Override
+    protected JsonElement serializePalette() {
+      JsonArray colors = new JsonArray();
+      for (ColorMapping mapping : mappings) {
+        JsonObject pair = new JsonObject();
+        pair.add("grey", GREY_LOADABLE.serialize(mapping.grey));
+        pair.add("color", serializeColor(mapping.color));
+        colors.add(pair);
+      }
+      return colors;
+    }
   }
 
   /** Serializer for a recolor sprite transformer */
@@ -90,18 +134,41 @@ public class GreyToColorMapping implements IColorMapping {
     @Override
     public GreyToColorMapping deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
       JsonObject object = json.getAsJsonObject();
-      JsonArray palette = GsonHelper.getAsJsonArray(object, "palette");
-      GreyToColorMapping.Builder paletteBuilder = GreyToColorMapping.builder();
-      for (int i = 0; i < palette.size(); i++) {
-        JsonObject palettePair = GsonHelper.convertToJsonObject(palette.get(i), "palette["+i+']');
-        int grey = GsonHelper.getAsInt(palettePair, "grey");
-        int color = JsonHelper.parseColor(GsonHelper.getAsString(palettePair, "color"));
-        if (i == 0 && grey != 0) {
-          paletteBuilder.addABGR(0, 0xFF000000);
+      JsonElement element = JsonHelper.getElement(object, "palette");
+      // array format: [{"grey": ###, "color": "######"}]
+      if (element.isJsonArray()) {
+        JsonArray palette = element.getAsJsonArray();
+        GreyToColorMapping.Builder paletteBuilder = GreyToColorMapping.builder();
+        for (int i = 0; i < palette.size(); i++) {
+          JsonObject palettePair = GsonHelper.convertToJsonObject(palette.get(i), "palette[" + i + ']');
+          int grey = GREY_LOADABLE.getIfPresent(palettePair, "grey");
+          int color = ColorLoadable.ALPHA.getIfPresent(palettePair, "color");
+          // ensure we have 0
+          if (i == 0 && grey != 0) {
+            paletteBuilder.addABGR(0, 0xFF000000);
+          }
+          paletteBuilder.addARGB(grey, color);
         }
-        paletteBuilder.addARGB(grey, color);
+        return paletteBuilder.build();
+      // compact object format: {"###": "######"}. Requires keys to be sorted.
+      } else if (element.isJsonObject()) {
+        JsonObject palette = element.getAsJsonObject();
+        GreyToColorMapping.Builder paletteBuilder = GreyToColorMapping.builder();
+        boolean first = true;
+        for (Entry<String,JsonElement> entry : palette.entrySet()) {
+          int grey = GREY_STRING_LOADABLE.parseString(entry.getKey(), "palette");
+          int color = ColorLoadable.ALPHA.convert(entry.getValue(), "color");
+          // ensure we have 0
+          if (first && grey != 0) {
+            paletteBuilder.addABGR(0, 0xFF000000);
+          }
+          first = false;
+          paletteBuilder.addARGB(grey, color);
+        }
+        return paletteBuilder.build();
+      } else {
+        throw new JsonSyntaxException("Missing palette, expected to find a JsonArray or JsonObject");
       }
-      return paletteBuilder.build();
     }
   }
 
@@ -137,6 +204,9 @@ public class GreyToColorMapping implements IColorMapping {
   public static class Builder {
     private final ImmutableList.Builder<ColorMapping> builder = ImmutableList.builder();
     private int lastGrey = -1;
+    @Accessors(fluent = true)
+    @Setter
+    private boolean compact = true;
 
     /** Validates the given grey value */
     private void checkGrey(int grey) {
@@ -169,7 +239,7 @@ public class GreyToColorMapping implements IColorMapping {
       if (list.size() < 2) {
         throw new IllegalStateException("Too few colors in palette, must have at least 2");
       }
-      return new GreyToColorMapping(list);
+      return compact ? new GreyToColorMapping(list) : new GreyToColorMapping.PaletteArray(list);
     }
   }
 
@@ -202,31 +272,31 @@ public class GreyToColorMapping implements IColorMapping {
     int diff = grey - greyBefore;
     int divisor = greyAfter - greyBefore;
     // interpolate each pair of colors
-    int alpha = interpolate(ABGR32.alpha(colorBefore), ABGR32.alpha(colorAfter), diff, divisor);
-    int red   = interpolate(ABGR32.red(colorBefore), ABGR32.red(colorAfter),   diff, divisor);
-    int green = interpolate(ABGR32.green(colorBefore), ABGR32.green(colorAfter), diff, divisor);
-    int blue  = interpolate(ABGR32.blue(colorBefore), ABGR32.blue(colorAfter),  diff, divisor);
-    return ABGR32.color(alpha, blue, green, red);
+    int alpha = interpolate(alpha(colorBefore), alpha(colorAfter), diff, divisor);
+    int red   = interpolate(red(colorBefore),   red(colorAfter),   diff, divisor);
+    int green = interpolate(green(colorBefore), green(colorAfter), diff, divisor);
+    int blue  = interpolate(blue(colorBefore),  blue(colorAfter),  diff, divisor);
+    return color(alpha, blue, green, red);
   }
 
   /** Gets the largest grey value for the given color */
   public static int getGrey(int color) {
-    return Math.max(ABGR32.red(color), Math.max(ABGR32.green(color), ABGR32.blue(color)));
+    return Math.max(red(color), Math.max(green(color), blue(color)));
   }
 
   /** Scales the new color based on the original color values and the grey value */
   public static int scaleColor(int original, int newColor, int grey) {
     // if the original color was partially transparent, set the alpha
-    int alpha = ABGR32.alpha(original);
-    if (alpha < 255) newColor = (newColor & 0x00FFFFFF) | ((alpha * ABGR32.alpha(newColor) / 255) << 24);
+    int alpha = alpha(original);
+    if (alpha < 255) newColor = (newColor & 0x00FFFFFF) | ((alpha * alpha(newColor) / 255) << 24);
 
     // grey is based on largest, so scale down as needed
     // if any of RGB are lower than the max, scale it down
-    int red = ABGR32.red(original);
+    int red = red(original);
     if (red   < grey) newColor = (newColor & 0xFFFFFF00) | (((newColor & 0x000000FF) * red   / grey) & 0x000000FF);
-    int green = ABGR32.green(original);
+    int green = green(original);
     if (green < grey) newColor = (newColor & 0xFFFF00FF) | (((newColor & 0x0000FF00) * green / grey) & 0x0000FF00);
-    int blue = ABGR32.blue(original);
+    int blue = blue(original);
     if (blue  < grey) newColor = (newColor & 0xFF00FFFF) | (((newColor & 0x00FF0000) * blue  / grey) & 0x00FF0000);
 
     // final color

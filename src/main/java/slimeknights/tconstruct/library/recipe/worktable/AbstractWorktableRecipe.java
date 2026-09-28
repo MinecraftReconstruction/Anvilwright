@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -13,19 +15,21 @@ import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.ModifierRecipe;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Default implementation of modifier worktable recipes, taking a list of inputs
- * TODO 1.19: switch to sized ingredient
  */
 @RequiredArgsConstructor
 public abstract class AbstractWorktableRecipe implements IModifierWorktableRecipe {
+  public static final Ingredient DEFAULT_TOOLS = Ingredient.of(TinkerTags.Items.MODIFIABLE);
+  protected static final LoadableField<Ingredient,AbstractWorktableRecipe> TOOL_FIELD = IngredientLoadable.DISALLOW_EMPTY.defaultField("tools", DEFAULT_TOOLS, true, r -> r.toolRequirement);
+  protected static final LoadableField<List<SizedIngredient>,AbstractWorktableRecipe> INPUTS_FIELD = SizedIngredient.LOADABLE.list(1).requiredField("inputs", r -> r.inputs);
+
   @Getter
   private final ResourceLocation id;
   protected final Ingredient toolRequirement;
@@ -56,7 +60,7 @@ public abstract class AbstractWorktableRecipe implements IModifierWorktableRecip
   }
 
   @Override
-  public void updateInputs(IToolStackView result, ITinkerableContainer.Mutable inv, boolean isServer) {
+  public void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
     ModifierRecipe.updateInputs(inv, inputs);
   }
 
@@ -75,7 +79,7 @@ public abstract class AbstractWorktableRecipe implements IModifierWorktableRecip
   @Override
   public List<ItemStack> getDisplayItems(int slot) {
     if (slot < 0 || slot >= inputs.size()) {
-      return Collections.emptyList();
+      return List.of();
     }
     return inputs.get(slot).getMatchingStacks();
   }

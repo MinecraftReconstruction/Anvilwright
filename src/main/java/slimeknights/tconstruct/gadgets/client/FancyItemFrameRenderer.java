@@ -5,7 +5,6 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemFrameRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -18,6 +17,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderItemInFrameEvent;
+import net.minecraftforge.client.event.RenderNameTagEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.Event.Result;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.gadgets.entity.FancyItemFrameEntity;
 import slimeknights.tconstruct.gadgets.entity.FrameType;
@@ -46,13 +49,17 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
     return frame.getFrameType() == FrameType.MANYULLYN ? Math.max(7, baseLight) : baseLight;
   }
 
+  @SuppressWarnings({"UnstableApiUsage", "deprecation"})  // no thanks forge, I'm matching vanilla behavior so I'll call the methods there
+  // seriously forge, how am I supposed to implement something like vanilla if I cannot create events?
   @Override
   public void render(T frame, float entityYaw, float partialTicks, PoseStack matrices, MultiBufferSource bufferIn, int packedLight) {
     FrameType frameType = frame.getFrameType();
 
-    // base entity rendering logic, since calling super gives us the item frame renderer
-    if (this.shouldShowName(frame)) {
-      this.renderNameTag(frame, frame.getDisplayName(), matrices, bufferIn, packedLight);
+    // base entity rendering logic, since calling super gives us the item frame renderer that we are replacing
+    RenderNameTagEvent renderNameplate = new RenderNameTagEvent(frame, frame.getDisplayName(), this, matrices, bufferIn, packedLight, partialTicks);
+    MinecraftForge.EVENT_BUS.post(renderNameplate);
+    if (renderNameplate.getResult() == Result.ALLOW || (renderNameplate.getResult() != Result.DENY && this.shouldShowName(frame))) {
+      this.renderNameTag(frame, renderNameplate.getContent(), matrices, bufferIn, packedLight);
     }
 
     // orient the renderer
@@ -71,11 +78,9 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
     if (frameVisible) {
       matrices.pushPose();
       matrices.translate(-0.5D, -0.5D, -0.5D);
-      BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-      ModelManager modelManager = blockRenderer.getBlockModelShaper().getModelManager();
       blockRenderer.getModelRenderer().renderModel(
         matrices.last(), bufferIn.getBuffer(Sheets.cutoutBlockSheet()), null,
-        modelManager.bakedRegistry.getOrDefault(isMap ? LOCATIONS_MODEL_MAP.get(frameType) : LOCATIONS_MODEL.get(frameType), modelManager.getMissingModel()),
+        blockRenderer.getBlockModelShaper().getModelManager().getModel(isMap ? LOCATIONS_MODEL_MAP.get(frameType) : LOCATIONS_MODEL.get(frameType)),
         1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY);
       matrices.popPose();
     }
@@ -92,7 +97,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
       }
       int frameRotation = frame.getRotation();
       // for diamond, render the timer as a partial rotation
-      if (frameType == FrameType.DIAMOND) {
+      if (frameType.hasMoreRotations()) {
         int rotation = mapdata != null ? (frameRotation + 2) % 4 * 4 : frameRotation;
         matrices.mulPose(Axis.ZP.rotationDegrees(rotation * 360f / 16f));
       } else {

@@ -8,10 +8,13 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlassBlock;
+import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TintedGlassBlock;
@@ -24,27 +27,36 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.item.EdibleItem;
-import slimeknights.mantle.registration.object.BuildingBlockObject;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
+import slimeknights.tconstruct.common.data.model.ModelSpriteProvider;
+import slimeknights.tconstruct.common.data.model.TinkerBlockStateProvider;
+import slimeknights.tconstruct.common.data.model.TinkerItemModelProvider;
+import slimeknights.tconstruct.common.data.model.TinkerSpriteSourceProvider;
+import slimeknights.tconstruct.common.data.render.RenderFluidProvider;
+import slimeknights.tconstruct.common.data.render.RenderItemProvider;
 import slimeknights.tconstruct.common.json.BlockOrEntityCondition;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
 import slimeknights.tconstruct.common.json.TinkerConditons;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
-import slimeknights.tconstruct.library.json.TagDifferencePresentCondition;
-import slimeknights.tconstruct.library.json.TagIntersectionPresentCondition;
-import slimeknights.tconstruct.library.json.TagNotEmptyLootCondition;
-import slimeknights.tconstruct.library.json.TagPreferenceLootEntry;
-import slimeknights.tconstruct.library.json.predicate.block.BlockPredicate;
-import slimeknights.tconstruct.library.json.predicate.block.SetBlockPredicate;
-import slimeknights.tconstruct.library.json.predicate.block.TagBlockPredicate;
-import slimeknights.tconstruct.library.json.predicate.entity.LivingEntityPredicate;
-import slimeknights.tconstruct.library.json.predicate.entity.MobTypePredicate;
-import slimeknights.tconstruct.library.json.predicate.entity.TagEntityPredicate;
+import slimeknights.tconstruct.gadgets.TinkerGadgets;
+import slimeknights.tconstruct.library.json.condition.TagDifferencePresentCondition;
+import slimeknights.tconstruct.library.json.condition.TagIntersectionPresentCondition;
+import slimeknights.tconstruct.library.json.condition.TagNotEmptyCondition;
+import slimeknights.tconstruct.library.json.loot.HasLootContextSetCondition;
+import slimeknights.tconstruct.library.json.loot.TagPreferenceLootEntry;
+import slimeknights.tconstruct.library.json.predicate.BlockAtFeetEntityPredicate;
+import slimeknights.tconstruct.library.json.predicate.BlockVariableRangePredicate;
+import slimeknights.tconstruct.library.json.predicate.EntityVariableRangePredicate;
+import slimeknights.tconstruct.library.json.predicate.HarvestTierPredicate;
+import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
+import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
+import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
 import slimeknights.tconstruct.library.utils.SlimeBounceHandler;
-import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.block.BetterPaneBlock;
 import slimeknights.tconstruct.shared.block.ClearGlassPaneBlock;
 import slimeknights.tconstruct.shared.block.ClearStainedGlassBlock;
@@ -53,22 +65,35 @@ import slimeknights.tconstruct.shared.block.ClearStainedGlassPaneBlock;
 import slimeknights.tconstruct.shared.block.GlowBlock;
 import slimeknights.tconstruct.shared.block.PlatformBlock;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.shared.block.SoulGlassBlock;
+import slimeknights.tconstruct.shared.block.SoulGlassPaneBlock;
 import slimeknights.tconstruct.shared.block.WaxedPlatformBlock;
 import slimeknights.tconstruct.shared.block.WeatheringPlatformBlock;
 import slimeknights.tconstruct.shared.command.TConstructCommand;
 import slimeknights.tconstruct.shared.data.CommonRecipeProvider;
 import slimeknights.tconstruct.shared.data.TinkerDamageSourceProvider;
 import slimeknights.tconstruct.shared.inventory.BlockContainerOpenedTrigger;
+import slimeknights.tconstruct.shared.item.CheeseBlockItem;
+import slimeknights.tconstruct.shared.item.CheeseItem;
 import slimeknights.tconstruct.shared.item.TinkerBookItem;
 import slimeknights.tconstruct.shared.item.TinkerBookItem.BookType;
 import slimeknights.tconstruct.shared.particle.FluidParticleData;
+import slimeknights.tconstruct.tables.TinkerTables;
+import slimeknights.tconstruct.tools.TinkerModifiers;
+
+import static slimeknights.tconstruct.TConstruct.getResource;
 
 /**
  * Contains items and blocks and stuff that is shared by multiple modules, but might be required individually
  */
 @SuppressWarnings("unused")
 public final class TinkerCommons extends TinkerModule {
-  static final Logger log = Util.getLogger("tinker_commons");
+  /** Creative tab for general items, or those that lack another tab */
+  public static final RegistryObject<CreativeModeTab> tabGeneral = CREATIVE_TABS.register(
+    "general", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "general"))
+                                    .icon(() -> new ItemStack(TinkerCommons.materialsAndYou))
+                                    .displayItems(TinkerCommons::addTabItems)
+                                    .build());
 
   /*
    * Blocks
@@ -126,7 +151,14 @@ public final class TinkerCommons extends TinkerModule {
   /* Loot conditions */
   public static final RegistryObject<LootItemConditionType> lootConfig = LOOT_CONDITIONS.register(ConfigEnabledCondition.ID.getPath(), () -> new LootItemConditionType(ConfigEnabledCondition.SERIALIZER));
   public static final RegistryObject<LootItemConditionType> lootBlockOrEntity = LOOT_CONDITIONS.register("block_or_entity", () -> new LootItemConditionType(new BlockOrEntityCondition.ConditionSerializer()));
-  public static final RegistryObject<LootItemConditionType> lootTagNotEmptyCondition = LOOT_CONDITIONS.register("tag_not_empty", () -> new LootItemConditionType(new TagNotEmptyLootCondition.ConditionSerializer()));
+  public static final RegistryObject<LootItemConditionType> hasLootContextSet = LOOT_CONDITIONS.register("has_context_set", () -> new LootItemConditionType(new HasLootContextSetCondition.Serializer()));
+  /** @deprecated use {@link slimeknights.mantle.loot.MantleLoot#TAG_FILLED} */
+  @SuppressWarnings("removal")
+  @Deprecated(forRemoval = true)
+  public static final RegistryObject<LootItemConditionType> lootTagNotEmptyCondition = LOOT_CONDITIONS.register("tag_not_empty", () -> new LootItemConditionType(new TagNotEmptyCondition.ConditionSerializer()));
+  /** @deprecated use {@link slimeknights.mantle.loot.MantleLoot#TAG_PREFERENCE} */
+  @SuppressWarnings("removal")
+  @Deprecated(forRemoval = true)
   public static final RegistryObject<LootPoolEntryType> lootTagPreference = LOOT_ENTRIES.register("tag_preference", () -> new LootPoolEntryType(new TagPreferenceLootEntry.Serializer()));
 
   /* Slime Balls are edible, believe it or not */

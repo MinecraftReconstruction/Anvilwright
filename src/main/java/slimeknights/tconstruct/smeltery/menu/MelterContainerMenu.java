@@ -9,8 +9,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.inventory.SmartItemHandlerSlot;
 import slimeknights.mantle.util.sync.ValidZeroDataSlot;
@@ -68,5 +70,27 @@ public class MelterContainerMenu extends TriggeringBaseContainerMenu<MelterBlock
 
   public MelterContainerMenu(int id, Inventory inv, FriendlyByteBuf buf) {
     this(id, inv, getTileEntityFromBuf(buf, MelterBlockEntity.class));
+  }
+
+  @Override
+  public boolean clickMenuButton(Player player, int id) {
+    if (0 <= id && id <= 3 && !player.isSpectator()) {
+      ItemStack held = getCarried();
+      if (!held.isEmpty()) {
+        if (!player.level().isClientSide && tile != null) {
+          IFluidHandler tank = id < 2 ? tile.getTank() : tile.getFuelModule().getTank();
+          TransferResult result;
+          // even means drain fluid, odd means fill
+          if ((id & 1) == 0) {
+            result = FluidTransferHelper.fillStack(tank, held, tank.getFluidInTank(0));
+          } else {
+            result = FluidTransferHelper.interactWithStack(tank, held, TransferDirection.EMPTY_ITEM);
+          }
+          setCarried(FluidTransferHelper.handleUIResult(player, held, result));
+        }
+        return true;
+      }
+    }
+    return false;
   }
 }

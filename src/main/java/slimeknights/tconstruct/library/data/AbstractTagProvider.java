@@ -27,8 +27,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Generic class for generating tags at any location even for non-registries */
-@Log4j2
+/**
+ * Generic class for generating tags at any location even for non-registries.
+ * TODO: make updates based on {@link net.minecraft.data.tags.TagsProvider} changes, if any.
+ */
 public abstract class AbstractTagProvider<T> extends GenericDataProvider {
   /** Mod ID for the tags */
   private final String modId;

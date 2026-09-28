@@ -132,15 +132,17 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
    * @param player Player activating the block.
    */
   public void interact(Player player, InteractionHand hand) {
-    if (level == null || level.isClientSide) {
+    // skip client side, and skip if the recipe already started
+    if (level == null || level.isClientSide || (coolingTime >= 0 && timer > 0)) {
       return;
     }
-    // can't interact if liquid inside
-    if (!tank.isEmpty()) {
+    // first try interacting with the table as a tank. If that fails, run normal item swap logic
+    // normal item swap logic should only run if we lack a fluid though
+    ItemStack held = player.getItemInHand(hand);
+    if (FluidTransferHelper.interactWithContainer(level, worldPosition, tank, player, hand).didTransfer() || !tank.isEmpty()) {
       return;
     }
 
-    ItemStack held = player.getItemInHand(hand);
     ItemStack input = getItem(INPUT);
     ItemStack output = getItem(OUTPUT);
 
@@ -169,7 +171,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
         }
         moldingInventory.setPattern(ItemStack.EMPTY);
         return;
-      } else {
+      } else if (!held.isEmpty()) {
         // if no recipe was found using the held item, try to find a mold-less recipe to perform
         // this ensures that if a recipe happens "on pickup" you get consistent behavior, without this it would fall though to pick up normally
         moldingInventory.setPattern(ItemStack.EMPTY);
@@ -218,6 +220,14 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     // if the stack changed emptiness, update
     if (original.isEmpty() != stack.isEmpty()) {
       updateAnalogSignal();
+    }
+    // update the block property for having an item
+    if (level != null && !level.isClientSide) {
+      boolean hasItem = !getItem(INPUT).isEmpty() || !getItem(OUTPUT).isEmpty();
+      BlockState state = getBlockState();
+      if (state.getValue(AbstractCastingBlock.HAS_ITEM) != hasItem) {
+        level.setBlockAndUpdate(worldPosition, state.setValue(AbstractCastingBlock.HAS_ITEM, hasItem));
+      }
     }
   }
 
@@ -290,16 +300,19 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
         // actual recipe result
         ItemStack output = currentRecipe.assemble(castingInventory, level.registryAccess());
         if (currentRecipe.switchSlots() != lastRedstone) {
-          if (!currentRecipe.isConsumed()) {
+          if (!consumed) {
             setItem(OUTPUT, getItem(INPUT));
           }
           setItem(INPUT, output);
-          level.playSound(null, getBlockPos(), Sounds.CASTING_CLICKS.getSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
         } else {
-          if (currentRecipe.isConsumed()) {
+          if (consumed) {
             setItem(INPUT, ItemStack.EMPTY);
           }
           setItem(OUTPUT, output);
+        }
+        // if redstone swapped behavior, add a click sound
+        if (lastRedstone) {
+          level.playSound(null, getBlockPos(), Sounds.CASTING_CLICKS.getSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
         }
         level.playSound(null, pos, Sounds.CASTING_COOLS.getSound(), SoundSource.BLOCKS, 0.5f, 4f);
         reset();
@@ -484,7 +497,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
    */
   public ItemStack getRecipeOutput() {
     if (lastOutput == null) {
-      if (currentRecipe == null) {
+      if (currentRecipe == null || level == null) {
         return ItemStack.EMPTY;
       }
       castingInventory.setFluid(tank.getFluid());
@@ -582,6 +595,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
     }
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void load(CompoundTag tags) {
     super.load(tags);

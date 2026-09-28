@@ -3,8 +3,7 @@ package slimeknights.tconstruct.tools.modifiers.ability.interaction;
 import io.github.fabricators_of_create.porting_lib.core.event.BaseEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -26,31 +25,26 @@ import net.minecraft.world.phys.Vec3;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.ToolHarvestEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.impl.InteractionModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
-import slimeknights.tconstruct.library.tools.definition.module.ToolModuleHooks;
-import slimeknights.tconstruct.library.tools.definition.module.interaction.DualOptionInteraction;
-import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.behavior.ShowOffhandModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.tools.modules.interaction.HarvestModule;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
+/** @deprecated use {@link HarvestModule} */
+@Deprecated(forRemoval = true)
 @RequiredArgsConstructor
-public class HarvestAbilityModifier extends InteractionModifier.NoLevels implements BlockInteractionModifierHook {
+public class HarvestAbilityModifier extends NoLevelsModifier {
   @Getter
   private final int priority;
 
   @Override
   protected void registerHooks(Builder hookBuilder) {
-    super.registerHooks(hookBuilder);
-    hookBuilder.addHook(this, TinkerHooks.BLOCK_INTERACT);
+    hookBuilder.addModule(ShowOffhandModule.DISALLOW_BROKEN);
+    hookBuilder.addModule(HarvestModule.INSTANCE);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.tables.client.inventory.module;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.Getter;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -15,7 +14,6 @@ import slimeknights.mantle.client.screen.ScalableElementScreen;
 import slimeknights.mantle.client.screen.SliderWidget;
 import slimeknights.mantle.inventory.BaseContainerMenu;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.client.RenderUtils;
 import slimeknights.tconstruct.tables.client.inventory.widget.BorderWidget;
 
 public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends AbstractContainerMenu> extends ModuleScreen<P,C> {
@@ -25,7 +23,7 @@ public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends Abstr
   protected ElementScreen overlapTopRight = GenericScreen.overlapTopRight;
   protected ElementScreen overlapBottomLeft = GenericScreen.overlapBottomLeft;
   protected ElementScreen overlapBottomRight = GenericScreen.overlapBottomRight;
-  protected ElementScreen overlapTop = new ElementScreen(7, 0, 7, 7, 64, 64); // same as borderTop but only 7 wide
+  protected ElementScreen overlapTop = GenericScreen.borderTop.move(7, 0, 7, 7); // same as borderTop but only 7 wide
 
   protected ScalableElementScreen textBackground = GenericScreen.textBackground;
 
@@ -263,21 +261,20 @@ public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends Abstr
     int y = this.topPos;
     int midW = this.imageWidth - this.border.w * 2;
 
-    RenderUtils.setup(GENERIC_INVENTORY);
-    this.border.draw(graphics, GENERIC_INVENTORY);
+    this.border.draw(graphics);
 
     if (this.shouldDrawName()) {
-      this.textBackground.drawScaledX(graphics, GENERIC_INVENTORY, x, y, midW);
+      this.textBackground.drawScaledX(graphics, x, y, midW);
       y += this.textBackground.h;
     }
 
     //this.minecraft.getTextureManager().bind(GENERIC_INVENTORY); TODO: needed?
-    this.drawSlots(graphics, GENERIC_INVENTORY, x, y);
+    this.drawSlots(graphics, x, y);
 
     // slider
     if (this.slider.isEnabled()) {
       this.slider.update(mouseX, mouseY);
-      this.slider.draw(graphics, GENERIC_INVENTORY);
+      this.slider.draw(graphics);
 
       this.updateSlots();
     }
@@ -286,23 +283,23 @@ public class SideInventoryScreen<P extends MultiModuleScreen<?>, C extends Abstr
     this.topPos -= this.border.h;
   }
 
-  protected int drawSlots(GuiGraphics graphics, ResourceLocation texture, int xPos, int yPos) {
+  protected int drawSlots(GuiGraphics graphics, int xPos, int yPos) {
     int width = this.columns * this.slot.w;
     int height = this.imageHeight - this.border.h * 2;
     int fullRows = (this.lastSlotId - this.firstSlotId) / this.columns;
     int y;
 
     for (y = 0; y < fullRows * this.slot.h && y < height; y += this.slot.h) {
-      this.slot.drawScaledX(graphics, texture, xPos, yPos + y, width);
+      this.slot.drawScaledX(graphics, xPos, yPos + y, width);
     }
 
     // draw partial row and unused slots
     int slotsLeft = (this.lastSlotId - this.firstSlotId) % this.columns;
 
     if (slotsLeft > 0) {
-      this.slot.drawScaledX(graphics, texture, xPos, yPos + y, slotsLeft * this.slot.w);
+      this.slot.drawScaledX(graphics, xPos, yPos + y, slotsLeft * this.slot.w);
       // empty slots that don't exist
-      this.slotEmpty.drawScaledX(graphics, texture, xPos + slotsLeft * this.slot.w, yPos + y, width - slotsLeft * this.slot.w);
+      this.slotEmpty.drawScaledX(graphics, xPos + slotsLeft * this.slot.w, yPos + y, width - slotsLeft * this.slot.w);
     }
 
     return width;

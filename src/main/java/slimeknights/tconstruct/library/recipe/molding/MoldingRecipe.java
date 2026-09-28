@@ -1,30 +1,38 @@
 package slimeknights.tconstruct.library.recipe.molding;
 
-import com.google.gson.JsonObject;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICommonRecipe;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.util.JsonHelper;
-import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-
-import javax.annotation.Nullable;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 
 /** Recipe to combine two items on the top of a casting table, changing the first */
-@RequiredArgsConstructor
-public abstract class MoldingRecipe implements ICommonRecipe<IMoldingContainer> {
+public class MoldingRecipe implements ICommonRecipe<IMoldingContainer> {
+  public static final RecordLoadable<MoldingRecipe> LOADER = RecordLoadable.create(
+    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(),
+    ContextKey.ID.requiredField(),
+    IngredientLoadable.DISALLOW_EMPTY.requiredField("material", MoldingRecipe::getMaterial),
+    IngredientLoadable.ALLOW_EMPTY.defaultField("pattern", Ingredient.EMPTY, MoldingRecipe::getPattern),
+    BooleanLoadable.INSTANCE.defaultField("pattern_consumed", false, false, MoldingRecipe::isPatternConsumed),
+    ItemOutput.Loadable.REQUIRED_ITEM.requiredField("result", r -> r.recipeOutput),
+    MoldingRecipe::new);
+
+  @Getter
+  private final RecipeType<?> type;
+  @Getter
+  private final RecipeSerializer<?> serializer;
   @Getter
   private final ResourceLocation id;
   @Getter
@@ -35,7 +43,17 @@ public abstract class MoldingRecipe implements ICommonRecipe<IMoldingContainer> 
   private final boolean patternConsumed;
   private final ItemOutput recipeOutput;
 
-	@Override
+  public MoldingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, Ingredient material, Ingredient pattern, boolean patternConsumed, ItemOutput recipeOutput) {
+    this.type = serializer.getType();
+    this.serializer = serializer;
+    this.id = id;
+    this.material = material;
+    this.pattern = pattern;
+    this.patternConsumed = pattern != Ingredient.EMPTY && patternConsumed;
+    this.recipeOutput = recipeOutput;
+  }
+
+  @Override
   public boolean matches(IMoldingContainer inv, Level worldIn) {
     return material.test(inv.getMaterial()) && pattern.test(inv.getPattern());
   }
@@ -46,84 +64,7 @@ public abstract class MoldingRecipe implements ICommonRecipe<IMoldingContainer> 
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess registryAccess) {
+  public ItemStack getResultItem(RegistryAccess access) {
     return recipeOutput.get();
-  }
-
-  /** Subclass for table recipes */
-  public static class Table extends MoldingRecipe {
-    public Table(ResourceLocation id, Ingredient material, Ingredient mold, boolean moldConsumed, ItemOutput recipeOutput) {
-      super(id, material, mold, moldConsumed, recipeOutput);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.moldingTableSerializer.get();
-    }
-
-    @Override
-    public RecipeType<?> getType() {
-      return TinkerRecipeTypes.MOLDING_TABLE.get();
-    }
-  }
-
-  /** Subclass for basin recipes */
-  public static class Basin extends MoldingRecipe {
-    public Basin(ResourceLocation id, Ingredient material, Ingredient mold, boolean moldConsumed, ItemOutput recipeOutput) {
-      super(id, material, mold, moldConsumed, recipeOutput);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.moldingBasinSerializer.get();
-    }
-
-    @Override
-    public RecipeType<?> getType() {
-      return TinkerRecipeTypes.MOLDING_BASIN.get();
-    }
-  }
-
-  /** Serializer factory interface */
-  @FunctionalInterface
-  public interface IFactory<T extends MoldingRecipe> {
-    T create(ResourceLocation id, Ingredient material, Ingredient mold, boolean moldConsumed, ItemOutput recipeOutput);
-  }
-
-  /** Generic serializer to both types */
-  @RequiredArgsConstructor
-  public static class Serializer<T extends MoldingRecipe> extends LoggingRecipeSerializer<T> {
-    private final IFactory<T> factory;
-
-    @Override
-    public T fromJson(ResourceLocation id, JsonObject json) {
-      Ingredient material = Ingredient.fromJson(JsonHelper.getElement(json, "material"));
-      Ingredient pattern = Ingredient.EMPTY;
-      boolean patternConsumed = false;
-      if (json.has("pattern")) {
-        pattern = Ingredient.fromJson(json.get("pattern"));
-        patternConsumed = GsonHelper.getAsBoolean(json, "pattern_consumed", false);
-      }
-      ItemOutput output = ItemOutput.fromJson(json.get("result"));
-      return factory.create(id, material, pattern, patternConsumed, output);
-    }
-
-    @Nullable
-    @Override
-    protected T fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      Ingredient material = Ingredient.fromNetwork(buffer);
-      Ingredient mold = Ingredient.fromNetwork(buffer);
-      boolean moldConsumed = buffer.readBoolean();
-      ItemOutput output = ItemOutput.read(buffer);
-      return factory.create(id, material, mold, moldConsumed, output);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, MoldingRecipe recipe) {
-      recipe.material.toNetwork(buffer);
-      recipe.pattern.toNetwork(buffer);
-      buffer.writeBoolean(recipe.patternConsumed);
-      recipe.recipeOutput.write(buffer);
-    }
   }
 }

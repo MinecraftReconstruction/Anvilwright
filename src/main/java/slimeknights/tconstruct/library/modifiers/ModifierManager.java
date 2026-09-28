@@ -37,8 +37,12 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import slimeknights.mantle.data.GenericLoaderRegistry;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.RegistryHelper;
+import slimeknights.mantle.util.typed.TypedMap;
+import slimeknights.mantle.util.typed.TypedMapBuilder;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.JsonRedirect;
+import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
+import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 import slimeknights.tconstruct.library.utils.JsonUtils;
 
@@ -47,6 +51,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +78,9 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
   /** GSON instance for loading dynamic modifiers */
   public static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 
-  /** ID of the default modifier */
-  public static final ModifierId EMPTY = new ModifierId(TConstruct.MOD_ID, "empty");
+  /** @deprecated use {@link ModifierId#EMPTY} */
+  @Deprecated
+  public static final ModifierId EMPTY = ModifierId.EMPTY;
 
   /** Singleton instance of the modifier manager */
   public static final ModifierManager INSTANCE = new ModifierManager();
@@ -89,10 +95,8 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
   /** All modifiers registered directly with the manager */
   @VisibleForTesting
   final Map<ModifierId,Modifier> staticModifiers = new HashMap<>();
-  /** Map of all modifier types that are expected to load in datapacks */
-  private final Map<ModifierId,Class<?>> expectedDynamicModifiers = new HashMap<>();
-  /** Map of all modifier types that are expected to load in datapacks */
-  public static final GenericLoaderRegistry<Modifier> MODIFIER_LOADERS = new GenericLoaderRegistry<>();
+  /** Set all modifier types that are expected to load in datapacks */
+  private final Set<ModifierId> expectedDynamicModifiers = new HashSet<>();
 
   /** Modifiers loaded from JSON */
   private Map<ModifierId,Modifier> dynamicModifiers = Collections.emptyMap();
@@ -120,7 +124,6 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
   }
 
   /** For internal use only */
-  @Deprecated
   public void init() {
     this.fireRegistryEvent();
     this.addDataPackListeners();
@@ -139,6 +142,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
 //    conditionContext = event.getConditionContext();
   }
 
+  @SuppressWarnings({"removal", "deprecation"})
   @Override
   protected void apply(Map<ResourceLocation,JsonElement> splashList, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
     long time = System.nanoTime();
@@ -165,12 +169,18 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     this.dynamicModifiers.putAll(resolvedRedirects);
 
     // validate required modifiers
-    for (Entry<ModifierId,Class<?>> entry : expectedDynamicModifiers.entrySet()) {
-      Modifier modifier = dynamicModifiers.get(entry.getKey());
-      if (modifier == null) {
-        log.error("Missing expected modifier '" + entry.getKey() + "'");
-      } else if (!entry.getValue().isInstance(modifier)) {
-        log.error("Modifier '" + entry.getKey() + "' was loaded with the wrong class type. Expected " + entry.getValue().getName() + ", got " + modifier.getClass().getName());
+    for (ModifierId id : expectedDynamicModifiers) {
+      if (!dynamicModifiers.containsKey(id)) {
+        log.error("Missing expected modifier '{}'", id);
+      }
+    }
+    for (ModifierId id : staticModifiers.keySet()) {
+      if (dynamicModifiers.containsKey(id)) {
+        if (FMLLoader.isProduction()) {
+          log.warn("Dynamic modifier {} is replacing static modifier with the same ID. The ability to do this may be removed in a future version, so if this is intentional please open an issue report with reasoning..", id);
+        } else {
+          log.error("Dynamic modifier {} is replacing static modifier with the same ID. This is likely a bug with your mod, but on the chance its intentional this error does become just a warning at runtime.", id);
+        }
       }
     }
 
@@ -183,13 +193,14 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     // load modifier tags
     TagLoader<Modifier> tagLoader = new TagLoader<>(id -> {
       Modifier modifier = ModifierManager.getValue(new ModifierId(id));
-      if (modifier == defaultValue) {
+      // only allow the default modifier if it's explicitly set to empty
+      if (modifier == defaultValue && !id.equals(EMPTY)) {
         return Optional.empty();
       }
       return Optional.of(modifier);
     }, TAG_FOLDER);
-    this.tags = tagLoader.loadAndBuild(pResourceManager);
-    this.reverseTags = GenericTagUtil.reverseTags(REGISTRY_KEY, Modifier::getId, tags);
+    this.tags = GenericTagUtil.mapLoaderResults(REGISTRY_KEY, tagLoader.loadAndBuild(pResourceManager));
+    this.reverseTags = GenericTagUtil.reverseTags(Modifier::getId, tags);
     timeStep = System.nanoTime();
     log.info("Loaded {} modifier tags for {} modifiers in {} ms", tags.size(), this.reverseTags.size(), (timeStep - time) / 1000000f);
 
@@ -235,6 +246,17 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     new ModifiersLoadedEvent().sendEvent();
   }
 
+  /** Creates context for modifier parsing */
+  public static TypedMapBuilder contextBuilder(ResourceLocation modifier) {
+    return TypedMapBuilder.builder().put(ContextKey.ID, modifier).put(ContextKey.DEBUG, "Modifier " + modifier);
+  }
+
+  /** @deprecated use {@link #contextBuilder(ResourceLocation)} */
+  @Deprecated(forRemoval = true)
+  public static TypedMap createContext(ResourceLocation modifier) {
+    return contextBuilder(modifier).build();
+  }
+
   /** Loads a modifier from JSON */
   @Nullable
   private Modifier loadModifier(ResourceLocation key, JsonElement element, Map<ModifierId, ModifierId> redirects) {
@@ -260,7 +282,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
       }
 
       // fallback to actual modifier
-      Modifier modifier = MODIFIER_LOADERS.deserialize(json);
+      Modifier modifier = ComposableModifier.LOADER.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
       modifier.setId(new ModifierId(key));
       return modifier;
     } catch (JsonSyntaxException e) {
@@ -274,7 +296,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     this.dynamicModifiers = modifiers;
     this.dynamicModifiersLoaded = true;
     this.tags = tags;
-    this.reverseTags = GenericTagUtil.reverseTags(REGISTRY_KEY, Modifier::getId, tags);
+    this.reverseTags = GenericTagUtil.reverseTags(Modifier::getId, tags);
     this.enchantmentMap = enchantmentMap;
     this.enchantmentTagMap = enchantmentTagMappings;
     new ModifiersLoadedEvent().sendEvent();
@@ -290,7 +312,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
 
   /** Checks if the given static modifier exists */
   public boolean containsStatic(ModifierId id) {
-    return staticModifiers.containsKey(id) || expectedDynamicModifiers.containsKey(id);
+    return staticModifiers.containsKey(id) || expectedDynamicModifiers.contains(id);
   }
 
   /** Checks if the registry contains the given modifier */
@@ -314,6 +336,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
    * @param enchantment  Enchantment
    * @return Closest modifier to the enchantment, or null if no match
    */
+  @SuppressWarnings("deprecation")  // eventually it won't be if we move away from forge
   @Nullable
   public Modifier get(Enchantment enchantment) {
     // if we saw it before, return the last value
@@ -329,7 +352,13 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     return null;
   }
 
+  /** Checks if the given modifier has an enchantment equivelent */
+  public boolean hasEnchantment(Modifier modifier) {
+    return enchantmentMap.containsValue(modifier) || enchantmentTagMap.containsValue(modifier);
+  }
+
   /** Gets a stream of all enchantments that match the given modifiers */
+  @SuppressWarnings("deprecation")  // eventually it won't be if we move away from forge
   public Stream<Enchantment> getEquivalentEnchantments(Predicate<ModifierId> modifiers) {
     Predicate<Entry<?,Modifier>> predicate = entry -> modifiers.test(entry.getValue().getId());
     return Stream.concat(
@@ -416,12 +445,27 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     return TagKey.create(REGISTRY_KEY, id);
   }
 
+  /** Gets the set of tags on a modifier */
+  public static Stream<TagKey<Modifier>> getTagKeys(ModifierId modifier) {
+    return INSTANCE.reverseTags.getOrDefault(modifier, Set.of()).stream();
+  }
+
   /**
    * Checks if the given modifier is in the given tag
    * @return  True if the modifier is in the tag
    */
   public static boolean isInTag(ModifierId modifier, TagKey<Modifier> tag) {
-    return INSTANCE.reverseTags.getOrDefault(modifier, Collections.emptySet()).contains(tag);
+    return INSTANCE.reverseTags.getOrDefault(modifier, Set.of()).contains(tag);
+  }
+
+  /**
+   * Gets all values contained in the given tag
+   * @param tag  Tag instance
+   * @return  Contained values, or null if the tag is absent
+   */
+  @Nullable
+  public static List<Modifier> getTagOrNull(TagKey<Modifier> tag) {
+    return INSTANCE.tags.get(tag);
   }
 
   /**
@@ -452,7 +496,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
      */
     public void registerStatic(ModifierId name, Modifier modifier) {
       // should not include under both types
-      if (expectedDynamicModifiers.containsKey(name)) {
+      if (expectedDynamicModifiers.contains(name)) {
         throw new IllegalArgumentException(name + " is already expected as a dynamic modifier");
       }
 
@@ -466,20 +510,15 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
 
     /**
      * Registers that the given modifier is expected to be loaded in datapacks
-     * @param name         Modifier name
-     * @param classFilter  Class type the modifier is expected to have. Can be an interface
+     * @param name  Modifier name
      */
     public void registerExpected(ModifierId name, Class<?> classFilter) {
       // should not include under both types
       if (staticModifiers.containsKey(name)) {
         throw new IllegalArgumentException(name + " is already registered as a static modifier");
       }
-
       // register it
-      Class<?> existing = expectedDynamicModifiers.putIfAbsent(name, classFilter);
-      if (existing != null) {
-        throw new IllegalArgumentException("Attempting to register a duplicate expected modifier, this is not supported. Original value " + existing);
-      }
+      expectedDynamicModifiers.add(name);
     }
 
     @Override
@@ -512,8 +551,15 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
 
   /** Class for the empty modifier instance, mods should not need to extend this class */
   private static class EmptyModifier extends Modifier {
+    @SuppressWarnings("removal")
+    @Deprecated(forRemoval = true)
     @Override
     public boolean shouldDisplay(boolean advanced) {
+      return false;
+    }
+
+    @Override
+    public boolean shouldDisplay(ModifierTooltip context) {
       return false;
     }
   }

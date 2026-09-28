@@ -4,32 +4,36 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import slimeknights.mantle.lib.tiers.TierSortingRegistry;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.NetworkRegistry;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import slimeknights.tconstruct.library.utils.JsonUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 
 public class BaseMcTest {
 
-  @SuppressWarnings("ResultOfMethodCallIgnored")
+  @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
   @BeforeAll
   static void setUpRegistries() {
     SharedConstants.setVersion(TestWorldVersion.INSTANCE);
-    Bootstrap.bootStrap();
-    ModLoadingContext.get().setActiveContainer(new TestModContainer(mock(IModInfo.class)));
+    try (MockedStatic<NetworkHooks> mockNetwork = Mockito.mockStatic(NetworkHooks.class)) {
+      Bootstrap.bootStrap();
+    }
+    ModLoadingContext.get().setActiveContainer(new TestModContainer(TestModInfo.INSTANCE));
 
     // ensure during static initialization, we don't load channel stuff that we lack access to
     try (MockedStatic<NetworkRegistry> mockNetwork = Mockito.mockStatic(NetworkRegistry.class)) {
       mockNetwork.when(() -> NetworkRegistry.newSimpleChannel(any(), any(), any(), any())).thenReturn(null);
       TierSortingRegistry.getSortedTiers();
     }
+    // cannot read config during tests, and no need to log these values
+    JsonUtils.forceDisableDebugLog();
   }
 
   /** No need to set it up multiple times */

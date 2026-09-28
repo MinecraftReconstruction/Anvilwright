@@ -15,4 +15,14 @@ public class FluidEvents {
 //    }
     FuelRegistry.INSTANCE.add(TinkerFluids.blazingBlood.asItem(), 30000);
   }
+
+  @SubscribeEvent
+  static void attachCapabilities(AttachCapabilitiesEvent<ItemStack> event) {
+    ItemStack stack = event.getObject();
+    if (event.getObject().is(Items.POWDER_SNOW_BUCKET)) {
+      event.addCapability(
+        TConstruct.getResource("powdered_snow"),
+        new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.powderedSnow.get(), FluidType.BUCKET_VOLUME), stack, Items.BUCKET.getDefaultInstance()));
+    }
+  }
 }

@@ -2,7 +2,10 @@
   "values": [
     "tconstruct:embellishment",
     "tconstruct:dyed",
-    "tconstruct:creative_slot",
-    "tconstruct:stat_override"
+    "tconstruct:trim",
+    "tconstruct:banner",
+    "tconstruct:rebalanced",
+    "tconstruct:overslime",
+    "#tconstruct:remove_blacklist"
   ]
 }

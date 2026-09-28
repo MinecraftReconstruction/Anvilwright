@@ -1,55 +1,62 @@
 {
-  "type": "tconstruct:composable",
-  "level_display": "tconstruct:single_level",
-  "tooltip_display": "always",
+  "level_display": "tconstruct:no_levels",
   "modules": [
     {
       "type": "tconstruct:rarity",
       "rarity": "uncommon"
     },
     {
-      "type": "tconstruct:tool_stat",
+      "type": "tconstruct:stat_boost",
+      "flat": 500.0,
+      "operation": "add",
+      "stat": "tconstruct:durability"
+    },
+    {
+      "type": "tconstruct:stat_boost",
+      "flat": -250.0,
+      "operation": "add",
       "stat": "tconstruct:durability",
-      "operation": "add",
-      "value": 500.0
+      "tool": {
+        "type": "mantle:tag",
+        "tag": "tconstruct:modifiable/armor"
+      }
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:durability",
+      "type": "tconstruct:stat_boost",
+      "flat": 1.0,
       "operation": "add",
-      "value": -250.0,
-      "tags": [
-        "tconstruct:modifiable/armor"
-      ]
+      "stat": "tconstruct:armor"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:armor",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.5,
       "operation": "add",
-      "value": 1.0
+      "stat": "tconstruct:attack_damage"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:attack_damage",
+      "type": "tconstruct:stat_boost",
+      "flat": 2.0,
       "operation": "add",
-      "value": 0.5
+      "stat": "tconstruct:mining_speed"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:mining_speed",
-      "operation": "add",
-      "value": 2.0
-    },
-    {
-      "type": "tconstruct:tool_stat",
+      "type": "tconstruct:set_stat",
       "stat": "tconstruct:harvest_tier",
       "value": "minecraft:diamond"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:projectile_damage",
+      "type": "tconstruct:stat_boost",
+      "flat": 0.5,
       "operation": "add",
-      "value": 0.5
+      "stat": "tconstruct:projectile_damage"
+    },
+    {
+      "type": "tconstruct:volatile_flag",
+      "flag": "tconstruct:diamond_armor",
+      "tool": {
+        "type": "mantle:tag",
+        "tag": "tconstruct:modifiable/armor/worn"
+      }
     }
   ]
 }

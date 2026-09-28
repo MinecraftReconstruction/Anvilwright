@@ -7,34 +7,48 @@ import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ToolDefinitions {
   // rock
-  public static final ToolDefinition PICKAXE = ToolDefinition.builder(TinkerTools.pickaxe).meleeHarvest().build();
-  public static final ToolDefinition SLEDGE_HAMMER = ToolDefinition.builder(TinkerTools.sledgeHammer).meleeHarvest().build();
-  public static final ToolDefinition VEIN_HAMMER = ToolDefinition.builder(TinkerTools.veinHammer).meleeHarvest().build();
+  public static final ToolDefinition PICKAXE = ToolDefinition.create(TinkerTools.pickaxe);
+  public static final ToolDefinition SLEDGE_HAMMER = ToolDefinition.create(TinkerTools.sledgeHammer);
+  public static final ToolDefinition VEIN_HAMMER = ToolDefinition.create(TinkerTools.veinHammer);
 
   // dirt
-  public static final ToolDefinition MATTOCK = ToolDefinition.builder(TinkerTools.mattock).meleeHarvest().build();
-  public static final ToolDefinition PICKADZE = ToolDefinition.builder(TinkerTools.pickadze).meleeHarvest().build();
-  public static final ToolDefinition EXCAVATOR = ToolDefinition.builder(TinkerTools.excavator).meleeHarvest().build();
+  public static final ToolDefinition MATTOCK = ToolDefinition.create(TinkerTools.mattock);
+  public static final ToolDefinition PICKADZE = ToolDefinition.create(TinkerTools.pickadze);
+  public static final ToolDefinition EXCAVATOR = ToolDefinition.create(TinkerTools.excavator);
 
   // wood
-  public static final ToolDefinition HAND_AXE = ToolDefinition.builder(TinkerTools.handAxe).meleeHarvest().build();
-  public static final ToolDefinition BROAD_AXE = ToolDefinition.builder(TinkerTools.broadAxe).meleeHarvest().build();
+  public static final ToolDefinition HAND_AXE = ToolDefinition.create(TinkerTools.handAxe);
+  public static final ToolDefinition BROAD_AXE = ToolDefinition.create(TinkerTools.broadAxe);
 
   // scythes
-  public static final ToolDefinition KAMA = ToolDefinition.builder(TinkerTools.kama).meleeHarvest().build();
-  public static final ToolDefinition SCYTHE = ToolDefinition.builder(TinkerTools.scythe).meleeHarvest().build();
+  public static final ToolDefinition KAMA = ToolDefinition.create(TinkerTools.kama);
+  public static final ToolDefinition SCYTHE = ToolDefinition.create(TinkerTools.scythe);
   // swords
-  public static final ToolDefinition DAGGER = ToolDefinition.builder(TinkerTools.dagger).meleeHarvest().build();
-  public static final ToolDefinition SWORD = ToolDefinition.builder(TinkerTools.sword).meleeHarvest().build();
-  public static final ToolDefinition CLEAVER = ToolDefinition.builder(TinkerTools.cleaver).meleeHarvest().build();
+  public static final ToolDefinition DAGGER = ToolDefinition.create(TinkerTools.dagger);
+  public static final ToolDefinition SWORD = ToolDefinition.create(TinkerTools.sword);
+  public static final ToolDefinition CLEAVER = ToolDefinition.create(TinkerTools.cleaver);
 
-  // bows
-  public static final ToolDefinition CROSSBOW = ToolDefinition.builder(TinkerTools.crossbow).ranged().build();
-  public static final ToolDefinition LONGBOW = ToolDefinition.builder(TinkerTools.longbow).ranged().build();
+  // ranged
+  public static final ToolDefinition CROSSBOW = ToolDefinition.create(TinkerTools.crossbow);
+  public static final ToolDefinition LONGBOW = ToolDefinition.create(TinkerTools.longbow);
+  public static final ToolDefinition FISHING_ROD = ToolDefinition.create(TinkerTools.fishingRod);
+  public static final ToolDefinition JAVELIN = ToolDefinition.create(TinkerTools.javelin);
+  // ammo
+  public static final ToolDefinition ARROW = ToolDefinition.create(TinkerTools.arrow);
+  public static final ToolDefinition SHURIKEN = ToolDefinition.create(TinkerTools.shuriken);
+  public static final ToolDefinition THROWING_AXE = ToolDefinition.create(TinkerTools.throwingAxe);
 
   // special
-  public static final ToolDefinition FLINT_AND_BRICK = ToolDefinition.builder(TinkerTools.flintAndBrick).noParts().build();
-  public static final ToolDefinition SKY_STAFF = ToolDefinition.builder(TinkerTools.skyStaff).noParts().build();
-  public static final ToolDefinition EARTH_STAFF = ToolDefinition.builder(TinkerTools.earthStaff).noParts().build();
-  public static final ToolDefinition ICHOR_STAFF = ToolDefinition.builder(TinkerTools.ichorStaff).noParts().build();
+  public static final ToolDefinition FLINT_AND_BRICK = ToolDefinition.create(TinkerTools.flintAndBrick);
+  public static final ToolDefinition SKY_STAFF = ToolDefinition.create(TinkerTools.skyStaff);
+  public static final ToolDefinition EARTH_STAFF = ToolDefinition.create(TinkerTools.earthStaff);
+  public static final ToolDefinition ICHOR_STAFF = ToolDefinition.create(TinkerTools.ichorStaff);
+  public static final ToolDefinition ENDER_STAFF = ToolDefinition.create(TinkerTools.enderStaff);
+
+  // ancient
+  public static final ToolDefinition MELTING_PAN = ToolDefinition.create(TinkerTools.meltingPan);
+  public static final ToolDefinition WAR_PICK = ToolDefinition.create(TinkerTools.warPick);
+  public static final ToolDefinition BATTLESIGN = ToolDefinition.create(TinkerTools.battlesign);
+  public static final ToolDefinition SWASHER = ToolDefinition.create(TinkerTools.swasher);
+  public static final ToolDefinition MINOTAUR_AXE = ToolDefinition.create(TinkerTools.minotaurAxe);
 }

@@ -9,30 +9,33 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.IMultiRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.util.RegistryHelper;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.json.IntRange;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,18 +43,16 @@ import java.util.stream.Collectors;
 public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisplayModifierRecipe> {
   @Getter
   private final ResourceLocation id;
-  private final Ingredient toolRequirement;
 
-  public ArmorDyeingRecipe(ResourceLocation id, Ingredient toolRequirement) {
+  public ArmorDyeingRecipe(ResourceLocation id) {
     this.id = id;
-    this.toolRequirement = toolRequirement;
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.dyed);
   }
 
   @Override
   public boolean matches(ITinkerStationContainer inv, Level world) {
     // ensure this modifier can be applied
-    if (!this.toolRequirement.test(inv.getTinkerableStack())) {
+    if (!inv.getTinkerableStack().is(TinkerTags.Items.DYEABLE)) {
       return false;
     }
     // slots must be only dyes, and have at least 1 dye
@@ -74,7 +75,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
     ToolStack tool = ToolStack.copyFrom(tinkerable);
 
     ModDataNBT persistentData = tool.getPersistentData();
-    ResourceLocation key = TinkerModifiers.dyed.getId();
+    ModifierId key = TinkerModifiers.dyed.getId();
     int nr = 0, nb = 0, ng = 0;
     int brightness = 0;
     int count = 0;
@@ -87,8 +88,8 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       int b = color       & 255;
       brightness = Math.max(r, Math.max(g, b));
       nr = r;
-      nb = b;
       ng = g;
+      nb = b;
       count++;
     }
 
@@ -113,27 +114,24 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
 
     // should never happen, but lets not crash
     if (count == 0) {
-      return ItemStack.EMPTY;
+      return RecipeResult.pass();
     }
 
     // build the final color
     nr /= count;
     ng /= count;
     nb /= count;
-    float scaledBrightness = (float)brightness / (float)count;
-    brightness = Math.max(nr, Math.max(ng, nb));
-    nr = (int)((float)nr * scaledBrightness / brightness);
-    ng = (int)((float)ng * scaledBrightness / brightness);
-    nb = (int)((float)nb * scaledBrightness / brightness);
-    int finalColor = (nr << 16) | (ng << 8) | nb;
-    persistentData.putInt(key, finalColor);
+    float scaledBrightness = (float)brightness / count / Math.max(nr, Math.max(ng, nb));
+    nr = (int)(nr * scaledBrightness);
+    ng = (int)(ng * scaledBrightness);
+    nb = (int)(nb * scaledBrightness);
+    persistentData.putInt(key, (nr << 16) | (ng << 8) | nb);
 
     // add the modifier if missing
-    ModifierId modifier = TinkerModifiers.dyed.getId();
-    if (tool.getModifierLevel(modifier) == 0) {
-      tool.addModifier(modifier, 1);
+    if (tool.getModifierLevel(key) == 0) {
+      tool.addModifier(key, 1);
     }
-    return tool.createStack(Math.min(tinkerable.getCount(), shrinkToolSlotBy()));
+    return ITinkerStationRecipe.success(tool, inv);
   }
 
   @Override
@@ -148,16 +146,22 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
   private List<IDisplayModifierRecipe> displayRecipes;
 
   @Override
-  public List<IDisplayModifierRecipe> getRecipes() {
+  public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
-      List<ItemStack> toolInputs = Arrays.stream(this.toolRequirement.getItems()).map(stack -> {
-        if (stack.getItem() instanceof IModifiableDisplay) {
-          return ((IModifiableDisplay)stack.getItem()).getRenderTool();
-        }
-        return stack;
-      }).toList();
-      ModifierEntry result = new ModifierEntry(TinkerModifiers.dyed.get(), 1);
-      displayRecipes = Arrays.stream(DyeColor.values()).map(dye -> new DisplayRecipe(result, toolInputs, dye)).collect(Collectors.toList());
+      List<ItemStack> toolInputs = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DYEABLE)
+        .map(item -> {
+          ItemStack stack = IModifiableDisplay.getDisplayStack(item);
+          if (stack.getMaxStackSize() > 1) {
+            stack = stack.copyWithCount(Math.min(stack.getMaxStackSize(), DEFAULT_TOOL_STACK_SIZE));
+          }
+          return stack;
+        }).toList();
+      if (!toolInputs.isEmpty()) {
+        ResourceLocation id = getId();
+        displayRecipes = Arrays.stream(DyeColor.values()).map(dye -> new DisplayRecipe(id, toolInputs, dye)).collect(Collectors.toList());
+      } else {
+        displayRecipes = List.of();
+      }
     }
     return displayRecipes;
   }
@@ -225,35 +229,43 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
   }
 
   private static class DisplayRecipe implements IDisplayModifierRecipe {
-    /** Cache of tint colors to save calculating it twice */
-    private static final int[] TINT_COLORS = new int[16];
+    private static final IntRange LEVELS = new IntRange(1, 1);
+    private final ModifierEntry RESULT = new ModifierEntry(TinkerModifiers.dyed, 1);
 
-    /** Gets the tint color for the given dye */
-    private static int getTintColor(DyeColor color) {
-      int id = color.getId();
-      // taking advantage of the fact no color is pure black
-      if (TINT_COLORS[id] == 0) {
-        float[] colors = color.getTextureDiffuseColors();
-        TINT_COLORS[id] = ((int)(colors[0] * 255) << 16) | ((int)(colors[1] * 255) << 8) | (int)(colors[2] * 255);
-      }
-      return TINT_COLORS[id];
-    }
-
-    private final List<ItemStack> dyes;
     @Getter
-    private final ModifierEntry displayResult;
+    private final ResourceLocation recipeId;
+    private final List<ItemStack> dyes;
     @Getter
     private final List<ItemStack> toolWithoutModifier;
     @Getter
     private final List<ItemStack> toolWithModifier;
-    public DisplayRecipe(ModifierEntry result, List<ItemStack> tools, DyeColor color) {
-      this.displayResult = result;
+    @Getter
+    private final Component variant;
+    private final int tintColor;
+    private final int r;
+    private final int g;
+    private final int b;
+    private final int brightness;
+    public DisplayRecipe(ResourceLocation recipeId, List<ItemStack> tools, DyeColor color) {
+      this.recipeId = recipeId;
       this.toolWithoutModifier = tools;
       this.dyes = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, color.getTag()).map(ItemStack::new).toList();
 
-      ResourceLocation id = result.getModifier().getId();
-      int tintColor = getTintColor(color);
-      toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, null, result, data -> data.putInt(id, tintColor))).toList();
+      ResourceLocation modID = RESULT.getId();
+      this.tintColor = Util.getColor(color);
+      List<ModifierEntry> results = List.of(RESULT);
+      toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, DEFAULT_TOOL_STACK_SIZE, results, data -> data.putInt(modID, tintColor))).toList();
+
+      // cache some color properties for later
+      this.r = tintColor >> 16 & 255;
+      this.g = tintColor >>  8 & 255;
+      this.b = tintColor       & 255;
+      this.brightness = Math.max(r, Math.max(g, b));
+    }
+
+    @Override
+    public ModifierEntry getDisplayResult() {
+      return RESULT;
     }
 
     @Override
@@ -266,12 +278,52 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       if (slot == 0) {
         return dyes;
       }
-      return Collections.emptyList();
+      return List.of();
     }
 
     @Override
-    public int getMaxLevel() {
-      return 1;
+    public IntRange getLevel() {
+      return LEVELS;
+    }
+
+    @Override
+    public boolean isTool(ItemStack check) {
+      return check.is(TinkerTags.Items.DYEABLE);
+    }
+
+    @Nullable
+    @Override
+    public Component canApply(IToolStackView tool) {
+      return null;
+    }
+
+    @Override
+    public void applyModifier(ToolStack tool) {
+      // store into tool NBT
+      ModifierId modifier = TinkerModifiers.dyed.getId();
+      ModDataNBT persistentData = tool.getPersistentData();
+      if (persistentData.contains(modifier, Tag.TAG_INT)) {
+        int color = persistentData.getInt(modifier);
+        int r = color >> 16 & 255;
+        int g = color >>  8 & 255;
+        int b = color       & 255;
+        int nr = (r + this.r) / 2;
+        int ng = (g + this.g) / 2;
+        int nb = (b + this.b) / 2;
+
+        // build the final color
+        float brightness = (Math.max(r, Math.max(g, b)) + this.brightness) / 2f / Math.max(nr, Math.max(ng, nb));
+        nr = (int)(nr * brightness);
+        ng = (int)(ng * brightness);
+        nb = (int)(nb * brightness);
+        persistentData.putInt(modifier, (nr << 16) | (ng << 8) | nb);
+      } else {
+        persistentData.putInt(modifier, tintColor);
+      }
+      // add the modifier if missing
+      if (tool.getModifierLevel(modifier) == 0) {
+        tool.addModifier(modifier, 1);
+      }
     }
   }
 }

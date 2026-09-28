@@ -1,56 +1,38 @@
 {
+  "color": "FF1F5752",
   "fallbacks": [
     "wood",
     "stick",
     "primitive"
   ],
-  "color": "118066",
-  "luminosity": 0,
   "generator": {
+    "supported_stats": [
+      "tconstruct:head",
+      "tconstruct:handle",
+      "tconstruct:binding",
+      "tconstruct:repair_kit",
+      "tconstruct:limb",
+      "tconstruct:grip",
+      "tconstruct:shield_core",
+      "tconstruct:wood",
+      "tconstruct:arrow_shaft"
+    ],
     "transformer": {
       "type": "tconstruct:recolor_sprite",
       "color_mapping": {
         "type": "tconstruct:grey_to_color",
-        "palette": [
-          {
-            "grey": 0,
-            "color": "FF000000"
-          },
-          {
-            "grey": 63,
-            "color": "FF38254C"
-          },
-          {
-            "grey": 102,
-            "color": "FF452D5C"
-          },
-          {
-            "grey": 140,
-            "color": "FF16615B"
-          },
-          {
-            "grey": 178,
-            "color": "FF136C68"
-          },
-          {
-            "grey": 216,
-            "color": "FF118066"
-          },
-          {
-            "grey": 255,
-            "color": "FF14956F"
-          }
-        ]
+        "palette": {
+          "000": "FF000000",
+          "063": "FF0A211F",
+          "102": "FF0D2B28",
+          "140": "FF113835",
+          "178": "FF1E4340",
+          "216": "FF1F5752",
+          "234": "FF287067",
+          "255": "FF398382"
+        }
       }
     },
-    "supportedStats": [
-      "tconstruct:head",
-      "tconstruct:handle",
-      "tconstruct:extra",
-      "tconstruct:repair_kit",
-      "tconstruct:limb",
-      "tconstruct:grip"
-    ],
-    "ignoreMaterialStats": false
+    "variant": true
   }
 }

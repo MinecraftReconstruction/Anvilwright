@@ -1,15 +1,13 @@
 package slimeknights.tconstruct.library.tools.helper;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -21,38 +19,40 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStack.TooltipPart;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.TooltipFlag.Default;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ToolActions;
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
-import slimeknights.tconstruct.library.materials.IMaterialRegistry;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
-import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.tools.definition.PartRequirement;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
+import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.display.ToolNameHook;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolMaterialHook;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolPartsHook;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.item.ITinkerStationDisplay;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.Util;
-import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiPredicate;
 
 /** Helper functions for adding tooltips to tools */
@@ -61,8 +61,6 @@ public class TooltipUtil {
   public static final String KEY_FORMAT = TConstruct.makeTranslationKey("item", "tool.format");
   /** Format for a name ID pair */
   public static final String KEY_ID_FORMAT = TConstruct.makeTranslationKey("item", "tool.id_format");
-  /** Translation key for the tool name format string */
-  private static final Component MATERIAL_SEPARATOR = TConstruct.makeTranslation("item", "tool.material_separator");
 
   /** Tool tag to set that makes a tool a display tool */
   public static final String KEY_DISPLAY = "tic_display";
@@ -104,69 +102,6 @@ public class TooltipUtil {
     return nbt != null && nbt.getBoolean(KEY_DISPLAY);
   }
 
-  /** Gets the name for a given material variant */
-  @Nullable
-  private static Component nameFor(String itemKey, Component itemName, MaterialVariantId variantId) {
-    String materialKey = MaterialTooltipCache.getKey(variantId);
-    String key = itemKey + "." + materialKey;
-    if (Util.canTranslate(key)) {
-      return Component.translatable(key);
-    }
-    // name format override
-    String formatKey = materialKey + ".format";
-    if (Util.canTranslate(formatKey)) {
-      return Component.translatable(formatKey, itemName);
-    }
-    // base name with generic format
-    if (Util.canTranslate(materialKey)) {
-      return Component.translatable(KEY_FORMAT, Component.translatable(materialKey), itemName);
-    }
-    return null;
-  }
-
-  /**
-   * Gets the display name for a single material
-   * @param stack     Stack instance
-   * @param itemName  Name of the stack on its own
-   * @param material  Material to use
-   * @return  Name for a material tool
-   */
-  private static Component getMaterialItemName(ItemStack stack, Component itemName, MaterialVariantId material) {
-    String itemKey = stack.getDescriptionId();
-    if (material.hasVariant()) {
-      Component component = nameFor(itemKey, itemName, material);
-      if (component != null) {
-        return component;
-      }
-    }
-    Component component = nameFor(itemKey, itemName, material.getId());
-    if (component != null) {
-      return component;
-    }
-    return itemName;
-  }
-
-  /**
-   * Combines the given display name with the material names to form the new given name
-   *
-   * @param itemName the standard display name
-   * @param materials the list of material names
-   * @return the combined item name
-   */
-  private static Component getCombinedItemName(Component itemName, Collection<Component> materials) {
-    if (materials.isEmpty()) {
-      return itemName;
-    }
-    // separate materials by dash
-    MutableComponent name = Component.literal("");
-    Iterator<Component> iter = materials.iterator();
-    name.append(iter.next());
-    while (iter.hasNext()) {
-      name.append(MATERIAL_SEPARATOR).append(iter.next());
-    }
-    return Component.translatable(KEY_FORMAT, name, itemName);
-  }
-
   /** Sets the tool name in a way that will not be italic */
   public static void setDisplayName(ItemStack tool, String name) {
     if (name.isEmpty()) {
@@ -176,8 +111,8 @@ public class TooltipUtil {
       }
     } else {
       tool.getOrCreateTag().putString(KEY_NAME, name);
+      tool.resetHoverName();
     }
-    tool.resetHoverName();
   }
 
   /** Gets the display name from the given tool */
@@ -194,9 +129,11 @@ public class TooltipUtil {
    * @param stack           Stack instance
    * @param toolDefinition  Tool definition
    * @return  Display name including the head material
+   * @deprecated call using {@link ToolNameHook#getName(ToolDefinition, ItemStack)}.
    */
+  @Deprecated(forRemoval = true)
   public static Component getDisplayName(ItemStack stack, ToolDefinition toolDefinition) {
-    return getDisplayName(stack, null, toolDefinition);
+    return ToolNameHook.getName(toolDefinition, stack);
   }
 
   /**
@@ -204,65 +141,17 @@ public class TooltipUtil {
    * @param stack  Stack instance
    * @param tool   Tool instance
    * @return  Display name including the head material
+   * @deprecated call using {@link ToolNameHook#getName(ToolDefinition, ItemStack)}.
    */
+  @Deprecated(forRemoval = true)
   public static Component getDisplayName(ItemStack stack, @Nullable IToolStackView tool, ToolDefinition toolDefinition) {
-    String name = getDisplayName(stack);
-    if (!name.isEmpty()) {
-      return Component.literal(name);
-    }
-    List<PartRequirement> components = toolDefinition.getData().getParts();
-    Component baseName = Component.translatable(stack.getDescriptionId());
-    if (components.isEmpty()) {
-      return baseName;
-    }
-
-    // if there is a mismatch in material size, just stop here
-    if (tool == null) tool = ToolStack.from(stack);
-    MaterialNBT materials = tool.getMaterials();
-    if (materials.size() != components.size()) {
-      return baseName;
-    }
-
-    // if the tool is not named we use the repair materials for a prefix like thing
-    // set ensures we don't use the same name twice, specifically a set of components ensures if two variants have the same name we don't use both
-    Set<Component> nameMaterials = Sets.newLinkedHashSet();
-    MaterialVariantId firstMaterial = null;
-    IMaterialRegistry registry = MaterialRegistry.getInstance();
-    for (int i = 0; i < components.size(); i++) {
-      if (i < materials.size() && registry.canRepair(components.get(i).getStatType())) {
-        MaterialVariantId material = materials.get(i).getVariant();
-        if (!IMaterial.UNKNOWN_ID.equals(material)) {
-          if (firstMaterial == null) {
-            firstMaterial = material;
-          }
-          nameMaterials.add(MaterialTooltipCache.getDisplayName(material));
-        }
-      }
-    }
-    // if a single material, use the single material logic
-    if (nameMaterials.size() == 1) {
-      return getMaterialItemName(stack, baseName, firstMaterial);
-    }
-    // multiple means we mix them together
-    return getCombinedItemName(baseName, nameMaterials);
-  }
-
-  /** @deprecated use {@link #addInformation(IModifiableDisplay, ItemStack, Level, List, TooltipKey, TooltipFlag)} */
-  @Deprecated
-  public static void addInformation(IModifiableDisplay item, ItemStack stack, @Nullable Level world, List<Component> tooltip, slimeknights.tconstruct.library.utils.TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
-    addInformation(item, stack, world, tooltip, tooltipKey.asMantle(), tooltipFlag);
+    return ToolNameHook.getName(toolDefinition, stack, tool);
   }
 
   /** Replaces the world argument with the local player */
   public static void addInformation(IModifiableDisplay item, ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
     Player player = world == null ? null : SafeClientAccess.getPlayer();
     TooltipUtil.addInformation(item, stack, player, tooltip, tooltipKey, tooltipFlag);
-  }
-
-  /** @deprecated use {@link #addInformation(IModifiableDisplay, ItemStack, Player, List, TooltipKey, TooltipFlag)} */
-  @Deprecated
-  public static void addInformation(IModifiableDisplay item, ItemStack stack, @Nullable Player player, List<Component> tooltip, slimeknights.tconstruct.library.utils.TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
-    addInformation(item, stack, player, tooltip, tooltipKey.asMantle(), tooltipFlag);
   }
 
   /**
@@ -273,7 +162,7 @@ public class TooltipUtil {
     ToolDefinition definition = item.getToolDefinition();
     if (isDisplay(stack)) {
       ToolStack tool = ToolStack.from(stack);
-      addModifierNames(stack, tool, tooltip, tooltipFlag);
+      addModifierNames(stack, tool, player, tooltip, tooltipFlag);
       // No definition?
     } else if (!definition.isDataLoaded()) {
       tooltip.add(NO_DATA);
@@ -281,7 +170,7 @@ public class TooltipUtil {
       // if not initialized, show no data tooltip on non-standard items
     } else if (!ToolStack.isInitialized(stack)) {
       tooltip.add(UNINITIALIZED);
-      if (definition.isMultipart()) {
+      if (definition.hasMaterials()) {
         CompoundTag nbt = stack.getTag();
         if (nbt == null || !nbt.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST)) {
           tooltip.add(RANDOM_MATERIALS);
@@ -293,37 +182,33 @@ public class TooltipUtil {
           item.getStatInformation(ToolStack.from(stack), player, tooltip, tooltipKey, tooltipFlag);
           break;
         case CONTROL:
-          if (definition.isMultipart()) {
+          if (definition.hasMaterials()) {
             getComponents(item, stack, tooltip, tooltipFlag);
             break;
           }
           // intentional fallthrough
         default:
           ToolStack tool = ToolStack.from(stack);
-          getDefaultInfo(stack, tool, tooltip, tooltipFlag);
+          getDefaultInfo(stack, tool, player, tooltip, tooltipFlag);
           break;
       }
     }
-  }
-
-  /** @deprecated use {@link #addModifierNames(ItemStack, IToolStackView, List, TooltipFlag)} */
-  @Deprecated
-  public static void addModifierNames(ItemStack stack, IToolStackView tool, List<Component> tooltips) {
-    addModifierNames(stack, tool, tooltips, Default.NORMAL);
   }
 
   /**
    * Adds modifier names to the tooltip
    * @param stack      Stack instance. If empty, skips adding enchantment names
    * @param tool       Tool instance
+   * @param player     Player holding the tool
    * @param tooltips   Tooltip list
-   * @param flag      Tooltip flag
+   * @param flag       Tooltip flag
    */
   @SuppressWarnings("deprecation")
-  public static void addModifierNames(ItemStack stack, IToolStackView tool, List<Component> tooltips, TooltipFlag flag) {
+  public static void addModifierNames(ItemStack stack, IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipFlag flag) {
+    RegistryAccess access = player == null ? null : player.level().registryAccess();
     for (ModifierEntry entry : tool.getModifierList()) {
-      if (entry.getModifier().shouldDisplay(false)) {
-        Component name = entry.getModifier().getDisplayName(tool, entry.getLevel());
+      if (entry.getModifier().shouldDisplay(ModifierTooltip.TOOL)) {
+        Component name = entry.getModifier().getDisplayName(tool, entry, access);
         if (flag.isAdvanced() && Config.CLIENT.modifiersIDsInAdvancedTooltips.get()) {
           tooltips.add(Component.translatable(KEY_ID_FORMAT, name, Component.literal(entry.getModifier().getId().toString())).withStyle(ChatFormatting.DARK_GRAY));
         } else {
@@ -337,54 +222,33 @@ public class TooltipUtil {
         ListTag enchantments = tag.getList("Enchantments", Tag.TAG_COMPOUND);
         for (int i = 0; i < enchantments.size(); ++i) {
           CompoundTag enchantmentTag = enchantments.getCompound(i);
-          // TODO: remove in 1.19, as the new enchantment hooks mean any enchants that end up on the tool are desired
+          // TODO: is this the best place for this, or should we let vanilla run?
           BuiltInRegistries.ENCHANTMENT.getOptional(ResourceLocation.tryParse(enchantmentTag.getString("id")))
-                              .ifPresent(enchantment -> {
-                                if (enchantment.isCurse()) {
-                                  tooltips.add(enchantment.getFullname(enchantmentTag.getInt("lvl")));
-                                }
-                              });
+                                       .ifPresent(enchantment -> tooltips.add(enchantment.getFullname(enchantmentTag.getInt("lvl"))));
         }
       }
     }
   }
 
-  /** @deprecated use {@link #getDefaultInfo(ItemStack, IToolStackView, List, TooltipFlag)} */
-  @Deprecated
-  public static void getDefaultInfo(ItemStack stack, List<Component> tooltips) {
-    getDefaultInfo(stack, ToolStack.from(stack), tooltips);
-  }
-
-  /** @deprecated use {@link #getDefaultInfo(ItemStack, IToolStackView, List, TooltipFlag)} */
-  @Deprecated
-  public static void getDefaultInfo(ItemStack stack, IToolStackView tool, List<Component> tooltips) {
-    getDefaultInfo(stack, tool, tooltips, Default.NORMAL);
-  }
-
   /**
    * Adds information when holding neither control nor shift
    * @param tool      Tool stack instance
+   * @param player    Player holding the tool
    * @param tooltips  Tooltip list
    * @param flag      Tooltip flag
    */
-  public static void getDefaultInfo(ItemStack stack, IToolStackView tool, List<Component> tooltips, TooltipFlag flag) {
+  public static void getDefaultInfo(ItemStack stack, IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipFlag flag) {
     // shows as broken when broken, hold shift for proper durability
     if (tool.getItem().canBeDepleted() && !tool.isUnbreakable() && tool.hasTag(TinkerTags.Items.DURABILITY)) {
       tooltips.add(TooltipBuilder.formatDurability(tool.getCurrentDurability(), tool.getStats().getInt(ToolStats.DURABILITY), true));
     }
     // modifier tooltip
-    addModifierNames(stack, tool, tooltips, flag);
+    addModifierNames(stack, tool, player, tooltips, flag);
     tooltips.add(Component.empty());
     tooltips.add(TOOLTIP_HOLD_SHIFT);
-    if (tool.getDefinition().isMultipart()) {
+    if (tool.getDefinition().hasMaterials()) {
       tooltips.add(TOOLTIP_HOLD_CTRL);
     }
-  }
-
-  /** @deprecated use {@link #getDefaultStats(IToolStackView, Player, List, TooltipKey, TooltipFlag)} */
-  @Deprecated
-  public static List<Component> getDefaultStats(IToolStackView tool, @Nullable Player player, List<Component> tooltip, slimeknights.tconstruct.library.utils.TooltipKey key, TooltipFlag flag) {
-    return getDefaultStats(tool, player, tooltip, key.asMantle(), flag);
   }
 
   /**
@@ -400,13 +264,21 @@ public class TooltipUtil {
     if (tool.hasTag(TinkerTags.Items.DURABILITY)) {
       builder.addDurability();
     }
+    boolean allowMelee = !EntityInteractionModifierHook.meleeDisabled(tool);
+    boolean meleePrimary = allowMelee && tool.hasTag(TinkerTags.Items.MELEE_PRIMARY);
+    if (meleePrimary) {
+      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE);
+      builder.add(ToolStats.ATTACK_SPEED);
+    }
     if (tool.hasTag(TinkerTags.Items.RANGED)) {
       builder.add(ToolStats.DRAW_SPEED);
       builder.add(ToolStats.VELOCITY);
-      builder.add(ToolStats.PROJECTILE_DAMAGE);
+      if (tool.hasTag(TinkerTags.Items.LAUNCHERS)) {
+        builder.add(ToolStats.PROJECTILE_DAMAGE);
+      }
       builder.add(ToolStats.ACCURACY);
     }
-    if (tool.hasTag(TinkerTags.Items.MELEE)) {
+    if (allowMelee && !meleePrimary && tool.hasTag(TinkerTags.Items.MELEE_WEAPON)) {
       builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE);
       builder.add(ToolStats.ATTACK_SPEED);
     }
@@ -418,31 +290,24 @@ public class TooltipUtil {
     }
     // slimestaffs and shields are holdable armor, so show armor stats
     if (tool.hasTag(TinkerTags.Items.ARMOR)) {
-      builder.add(ToolStats.ARMOR);
+      builder.addOptional(ToolStats.ARMOR);
       builder.addOptional(ToolStats.ARMOR_TOUGHNESS);
       builder.addOptional(ToolStats.KNOCKBACK_RESISTANCE, 10f);
     }
-    // TODO: should this be a tag? or a volatile flag?
-    if (tool.getModifierLevel(TinkerModifiers.blocking.getId()) > 0 || tool.getModifierLevel(TinkerModifiers.parrying.getId()) > 0) {
+    if (ModifierUtil.canPerformAction(tool, ToolActions.SHIELD_BLOCK)) {
       builder.add(ToolStats.BLOCK_AMOUNT);
       builder.add(ToolStats.BLOCK_ANGLE);
     }
 
     builder.addAllFreeSlots();
     for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(TinkerHooks.TOOLTIP).addTooltip(tool, entry, player, tooltip, key, flag);
+      entry.getHook(ModifierHooks.TOOLTIP).addTooltip(tool, entry, player, tooltip, key, flag);
     }
     return builder.getTooltips();
   }
 
-  /** @deprecated use {@link #getArmorStats(IToolStackView, Player, List, TooltipKey, TooltipFlag)} */
-  @Deprecated
-  public static List<Component> getArmorStats(IToolStackView tool, @Nullable Player player, List<Component> tooltip, slimeknights.tconstruct.library.utils.TooltipKey key, TooltipFlag flag) {
-    return getArmorStats(tool, player, tooltip, key.asMantle(), flag);
-  }
-
   /**
-   * Gets the  default information for the given tool stack
+   * Gets the armor information for the given tool stack
    *
    * @param tool      the tool stack
    * @param tooltip   Tooltip list
@@ -466,16 +331,31 @@ public class TooltipUtil {
     builder.addAllFreeSlots();
 
     for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(TinkerHooks.TOOLTIP).addTooltip(tool, entry, player, tooltip, key, flag);
+      entry.getHook(ModifierHooks.TOOLTIP).addTooltip(tool, entry, player, tooltip, key, flag);
     }
     return builder.getTooltips();
   }
 
-  /** @deprecated use {@link #getComponents(IModifiable, ItemStack, List, TooltipFlag)} */
-  @Deprecated
-  public static void getComponents(IModifiable item, ItemStack stack, List<Component> tooltips) {
-    getComponents(item, stack, tooltips, Default.NORMAL);
+  /**
+   * Gets the ammo information for the given tool stack
+   *
+   * @param tool      the tool stack
+   * @param tooltip   Tooltip list
+   * @param flag      Tooltip flag
+   * @return List from the parameter after filling
+   */
+  public static List<Component> getAmmoStats(IToolStackView tool, @Nullable Player player, List<Component> tooltip, TooltipKey key, TooltipFlag flag) {
+    TooltipBuilder builder = new TooltipBuilder(tool, tooltip);
+    builder.add(ToolStats.PROJECTILE_DAMAGE);
+    builder.add(ToolStats.VELOCITY);
+    builder.add(ToolStats.ACCURACY);
+    builder.addAllFreeSlots();
+    for (ModifierEntry entry : tool.getModifierList()) {
+      entry.getHook(ModifierHooks.TOOLTIP).addTooltip(tool, entry, player, tooltip, key, flag);
+    }
+    return builder.getTooltips();
   }
+
 
   /**
    * Gets the tooltip of the components list of a tool
@@ -486,13 +366,15 @@ public class TooltipUtil {
    */
   public static void getComponents(IModifiable item, ItemStack stack, List<Component> tooltips, TooltipFlag flag) {
     // no components, nothing to do
-    List<PartRequirement> components = item.getToolDefinition().getData().getParts();
+    ToolDefinition definition = item.getToolDefinition();
+    ToolMaterialHook hook = definition.getHook(ToolHooks.TOOL_MATERIALS);
+    List<MaterialStatsId> components = hook.getStatTypes(definition);
     if (components.isEmpty()) {
       return;
     }
     // no materials is bad
     MaterialNBT materials = ToolStack.from(stack).getMaterials();
-    if (materials.size() == 0) {
+    if (materials.isEmpty()) {
       tooltips.add(NO_DATA);
       return;
     }
@@ -500,16 +382,28 @@ public class TooltipUtil {
     if (materials.size() < components.size()) {
       return;
     }
-    // finally, display them all
+    // start by displaying all tool parts
     int max = components.size() - 1;
+    List<IToolPart> parts = ToolPartsHook.parts(item.getToolDefinition());
+    int partCount = parts.size();
     for (int i = 0; i <= max; i++) {
-      PartRequirement requirement = components.get(i);
       MaterialVariantId material = materials.get(i).getVariant();
-      tooltips.add(requirement.nameForMaterial(material).copy().withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withColor(MaterialTooltipCache.getColor(material))));
+      // display tool parts as the tool part name, nicer to work with
+      Component componentName;
+      if (i < partCount) {
+        componentName = parts.get(i).withMaterialForDisplay(material).getHoverName();
+      } else {
+        componentName = Component.translatable(KEY_FORMAT, MaterialTooltipCache.getDisplayName(material), Component.translatable(Util.makeTranslationKey("stat", components.get(i))));
+      }
+      // underline it and color it with the material name
+      tooltips.add(componentName.copy().withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withColor(MaterialTooltipCache.getColor(material))));
+      // material IDs on advanced
       if (flag.isAdvanced()) {
         tooltips.add((Component.literal(material.toString())).withStyle(ChatFormatting.DARK_GRAY));
       }
-      MaterialRegistry.getInstance().getMaterialStats(material.getId(), requirement.getStatType()).ifPresent(stat -> tooltips.addAll(stat.getLocalizedInfo()));
+      // material stats
+      float scale = hook.scaleStats(definition, i);
+      MaterialRegistry.getInstance().getMaterialStats(material.getId(), components.get(i)).ifPresent(stat -> tooltips.addAll(stat.getLocalizedInfo(scale)));
       if (i != max) {
         tooltips.add(Component.empty());
       }
@@ -542,52 +436,64 @@ public class TooltipUtil {
           if (!showAttribute.test(attribute, operation)) {
             continue;
           }
-          // find value
-          double amount = modifier.getAmount();
-          boolean showEquals = false;
-          if (player != null) {
-            if (modifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
-              amount += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-              showEquals = true;
-            } else if (modifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
-              amount += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
-              showEquals = true;
-            }
-          }
-          // some numbers display a bit different
-          double displayValue = amount;
-          if (modifier.getOperation() == Operation.ADDITION) {
-            // vanilla multiplies knockback resist by 10 for some odd reason
-            if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE)) {
-              displayValue *= 10;
-            }
-          } else {
-            // display multiply as percentage
-            displayValue *= 100;
-          }
-          // final tooltip addition
-          Component name = Component.translatable(attribute.getDescriptionId());
-          if (showEquals) {
-            tooltip.add(Component.literal(" ")
-                          .append(Component.translatable("attribute.modifier.equals." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
-                          .withStyle(ChatFormatting.DARK_GREEN));
-          } else if (amount > 0.0D) {
-            tooltip.add((Component.translatable("attribute.modifier.plus." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
-                          .withStyle(ChatFormatting.BLUE));
-          } else if (amount < 0.0D) {
-            displayValue *= -1;
-            tooltip.add((Component.translatable("attribute.modifier.take." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
-                          .withStyle(ChatFormatting.RED));
-          }
+          addAttribute(attribute, operation, modifier.getAmount(), modifier.getId(), player, tooltip);
         }
       }
+    }
+  }
+
+  /**
+   * Adds a single attribute to the tooltip
+   * @param attribute  Attribute type
+   * @param operation  Attribute operationm
+   * @param amount     Attribute amount
+   * @param uuid       Attribute UUID
+   * @param player     Player instance
+   * @param tooltip    Tooltip list
+   */
+  public static void addAttribute(Attribute attribute, Operation operation, double amount, @Nullable UUID uuid, @Nullable Player player, List<Component> tooltip) {
+    // find value
+    boolean showEquals = false;
+    if (player != null) {
+      if (uuid == Item.BASE_ATTACK_DAMAGE_UUID) {
+        amount += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+        showEquals = true;
+      } else if (uuid == Item.BASE_ATTACK_SPEED_UUID) {
+        amount += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+        showEquals = true;
+      }
+    }
+    // some numbers display a bit different
+    double displayValue = amount;
+    if (operation == Operation.ADDITION) {
+      // vanilla multiplies knockback resist by 10 for some odd reason
+      if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE)) {
+        displayValue *= 10;
+      }
+    } else {
+      // display multiply as percentage
+      displayValue *= 100;
+    }
+    // final tooltip addition
+    Component name = Component.translatable(attribute.getDescriptionId());
+    if (showEquals) {
+      tooltip.add(Component.literal(" ")
+                           .append(Component.translatable("attribute.modifier.equals." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+                           .withStyle(ChatFormatting.DARK_GREEN));
+    } else if (amount > 0.0D) {
+      tooltip.add((Component.translatable("attribute.modifier.plus." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+                    .withStyle(ChatFormatting.BLUE));
+    } else if (amount < 0.0D) {
+      displayValue *= -1;
+      tooltip.add((Component.translatable("attribute.modifier.take." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+                    .withStyle(ChatFormatting.RED));
     }
   }
 
   /** Gets the tooltip flags for the current ctrl+shift combination, used to hide enchantments and modifiers from the tooltip as needed */
   public static int getModifierHideFlags(ToolDefinition definition) {
     TooltipKey key = SafeClientAccess.getTooltipKey();
-    if (key == TooltipKey.SHIFT || (key == TooltipKey.CONTROL && definition.isMultipart())) {
+    if (key == TooltipKey.SHIFT || (key == TooltipKey.CONTROL && definition.hasMaterials())) {
       return MODIFIER_HIDE_FLAGS;
     }
     return DEFAULT_HIDE_FLAGS;

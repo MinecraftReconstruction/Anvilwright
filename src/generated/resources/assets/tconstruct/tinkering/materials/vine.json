@@ -1,50 +1,35 @@
 {
+  "color": "FF48B518",
   "fallbacks": [
-    "vine"
+    "vine",
+    "primitive",
+    "cloth"
   ],
-  "color": "48B518",
-  "luminosity": 0,
   "generator": {
+    "supported_stats": [
+      "tconstruct:binding",
+      "tconstruct:bowstring",
+      "tconstruct:cuirass",
+      "tconstruct:armor_cuirass",
+      "tconstruct:repair_kit",
+      "tconstruct:fletching",
+      "tconstruct:laces",
+      "tconstruct:slimesuit_overlay"
+    ],
     "transformer": {
       "type": "tconstruct:recolor_sprite",
       "color_mapping": {
         "type": "tconstruct:grey_to_color",
-        "palette": [
-          {
-            "grey": 0,
-            "color": "FF000000"
-          },
-          {
-            "grey": 63,
-            "color": "FF143306"
-          },
-          {
-            "grey": 102,
-            "color": "FF183D08"
-          },
-          {
-            "grey": 140,
-            "color": "FF1F4E0A"
-          },
-          {
-            "grey": 178,
-            "color": "FF265F0D"
-          },
-          {
-            "grey": 216,
-            "color": "FF2E730F"
-          },
-          {
-            "grey": 255,
-            "color": "FF3A9313"
-          }
-        ]
+        "palette": {
+          "000": "FF000000",
+          "063": "FF143306",
+          "102": "FF183D08",
+          "140": "FF1F4E0A",
+          "178": "FF265F0D",
+          "216": "FF2E730F",
+          "255": "FF3A9313"
+        }
       }
-    },
-    "supportedStats": [
-      "tconstruct:extra",
-      "tconstruct:bowstring"
-    ],
-    "ignoreMaterialStats": false
+    }
   }
 }

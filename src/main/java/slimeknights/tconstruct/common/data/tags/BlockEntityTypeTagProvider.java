@@ -7,7 +7,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,6 +23,8 @@ public class BlockEntityTypeTagProvider extends FabricTagProvider<BlockEntityTyp
 						 TinkerTables.partChestTile.get(), TinkerTables.tinkersChestTile.get(), TinkerTables.castChestTile.get(),
 						 TinkerSmeltery.basin.get(), TinkerSmeltery.table.get(), TinkerSmeltery.smeltery.get());
 
+    // these block entities don't fully sync the fluid to client, so show simplified information
+    tag(MantleTags.BlockEntities.HIDES_GAUGE_AMOUNT).add(TinkerSmeltery.faucet.get(), TinkerSmeltery.channel.get());
   }
 
   @Override

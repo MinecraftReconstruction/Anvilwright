@@ -1,5 +1,4 @@
 {
-  "replace": false,
   "values": [
     "minecraft:lever",
     "minecraft:ladder",
@@ -14,6 +13,10 @@
     "#minecraft:buttons",
     "#c:fences",
     "#minecraft:walls",
-    "#minecraft:wall_signs"
+    "#minecraft:wall_signs",
+    {
+      "id": "#architects_palette:nubs",
+      "required": false
+    }
   ]
 }

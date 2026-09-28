@@ -9,22 +9,28 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNullElse;
 
 /**
  * All the materials contained within the tool. Determines a portion of the modifiers, along with the stats.
  */
 @EqualsAndHashCode
 @ToString
-public class MaterialNBT {
+public class MaterialNBT implements Iterable<MaterialVariant> {
   /** Instance containing no materials, for errors with parsing NBT */
   public final static MaterialNBT EMPTY = new MaterialNBT(ImmutableList.of());
 
@@ -41,6 +47,11 @@ public class MaterialNBT {
   @VisibleForTesting
   public static MaterialNBT of(IMaterial... materials) {
     return new MaterialNBT(Arrays.stream(materials).map(MaterialVariant::of).toList());
+  }
+
+  /** Creates a new material NBT */
+  public static MaterialNBT of(MaterialVariant... materials) {
+    return new MaterialNBT(List.of(materials));
   }
 
   /** Creates a builder for this NBT */
@@ -65,6 +76,11 @@ public class MaterialNBT {
     return list.size();
   }
 
+  /** Checks if the internal list is empty */
+  public boolean isEmpty() {
+    return list.isEmpty();
+  }
+
   /**
    * Creates a copy of this material list with the material at the given index substituted
    * @param index        Index to replace. Can be greater than the material list size
@@ -72,7 +88,7 @@ public class MaterialNBT {
    * @return  Copy of NBt with the new material
    * @throws IndexOutOfBoundsException  If the index is invalid
    */
-  public MaterialNBT replaceMaterial(int index, MaterialVariantId replacement) {
+  public MaterialNBT replaceMaterial(int index, MaterialVariant replacement) {
     if (index < 0) {
       throw new IndexOutOfBoundsException("Material index is out of bounds");
     }
@@ -81,7 +97,7 @@ public class MaterialNBT {
     ArrayList<MaterialVariant> list = new ArrayList<>(Math.max(size, index + 1));
     for (int i = 0; i < size; i++) {
       if (i == index) {
-        list.add(MaterialVariant.of(replacement));
+        list.add(replacement);
       } else {
         list.add(this.list.get(i));
       }
@@ -93,10 +109,21 @@ public class MaterialNBT {
       for (int i = size; i < index; i++) {
         list.add(MaterialVariant.of(IMaterial.UNKNOWN, ""));
       }
-      list.add(MaterialVariant.of(replacement));
+      list.add(replacement);
     }
 
     return new MaterialNBT(list);
+  }
+
+  /**
+   * Creates a copy of this material list with the material at the given index substituted
+   * @param index        Index to replace. Can be greater than the material list size
+   * @param replacement  New material for that index
+   * @return  Copy of NBt with the new material
+   * @throws IndexOutOfBoundsException  If the index is invalid
+   */
+  public MaterialNBT replaceMaterial(int index, MaterialVariantId replacement) {
+    return replaceMaterial(index, MaterialVariant.of(replacement));
   }
 
   /**
@@ -109,16 +136,15 @@ public class MaterialNBT {
       return EMPTY;
     }
     ListTag listNBT = (ListTag) nbt;
-    if (listNBT.getElementType() != Tag.TAG_STRING) {
+    if (listNBT.getElementType() != Tag.TAG_STRING || listNBT.isEmpty()) {
       return EMPTY;
     }
 
     List<MaterialVariant> materials = listNBT.stream()
-                                             .map(tag -> MaterialVariantId.tryParse(tag.getAsString()))
-                                             .filter(Objects::nonNull)
-                                             .map(MaterialVariant::of)
-                                             .collect(Collectors.toList());
-
+      // if any material ID fails to parse (invalid string), replace with unknown
+      .map(tag -> requireNonNullElse(MaterialVariantId.tryParse(tag.getAsString()), MaterialId.UNKNOWN))
+      .map(MaterialVariant::of)
+      .toList();
     return new MaterialNBT(materials);
   }
 
@@ -131,6 +157,26 @@ public class MaterialNBT {
                .map(lazy -> StringTag.valueOf(lazy.getVariant().toString()))
                .collect(Collectors.toCollection(ListTag::new));
   }
+
+
+  /* Iterator */
+
+  @Nonnull
+  @Override
+  public Iterator<MaterialVariant> iterator() {
+    return list.iterator();
+  }
+
+  @Override
+  public void forEach(Consumer<? super MaterialVariant> action) {
+    list.forEach(action);
+  }
+
+  @Override
+  public Spliterator<MaterialVariant> spliterator() {
+    return list.spliterator();
+  }
+
 
   /** Builder for material NBT */
   public static class Builder {
@@ -152,9 +198,32 @@ public class MaterialNBT {
       return add(MaterialVariant.of(material));
     }
 
+    /** Adds all materials from the given list */
+    public Builder add(List<MaterialVariantId> materials) {
+      for (MaterialVariantId material : materials) {
+        add(material);
+      }
+      return this;
+    }
+
+    /** Adds all materials from the given list */
+    public Builder addAll(List<MaterialVariant> existing) {
+      builder.addAll(existing);
+      return this;
+    }
+
+    /** Adds all materials from the given NBT */
+    public Builder addAll(MaterialNBT existing) {
+      return addAll(existing.list);
+    }
+
     /** Builds the final list */
     public MaterialNBT build() {
-      return new MaterialNBT(builder.build());
+      List<MaterialVariant> materials = builder.build();
+      if (materials.isEmpty()) {
+        return MaterialNBT.EMPTY;
+      }
+      return new MaterialNBT(materials);
     }
   }
 }

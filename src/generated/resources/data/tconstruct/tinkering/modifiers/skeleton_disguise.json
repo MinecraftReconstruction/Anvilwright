@@ -1,7 +1,5 @@
 {
-  "type": "tconstruct:composable",
-  "level_display": "tconstruct:default",
-  "tooltip_display": "always",
+  "level_display": "tconstruct:single_level",
   "modules": [
     {
       "type": "tconstruct:mob_disguise",

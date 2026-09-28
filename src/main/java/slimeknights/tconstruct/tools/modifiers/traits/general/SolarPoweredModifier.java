@@ -3,19 +3,31 @@ package slimeknights.tconstruct.tools.modifiers.traits.general;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.ToolDamageModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 
-public class SolarPoweredModifier extends NoLevelsModifier {
+/** @deprecated use {@link slimeknights.tconstruct.library.modifiers.modules.behavior.ReduceToolDamageModule} with {@link slimeknights.tconstruct.library.json.variable.entity.EntityLightVariable} */
+@Deprecated(forRemoval = true)
+public class SolarPoweredModifier extends NoLevelsModifier implements ToolDamageModifierHook {
+  @Override
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addHook(this, ModifierHooks.TOOL_DAMAGE);
+  }
+
   @Override
   public int getPriority() {
     return 185; // after tanned, before stoneshield
   }
 
   @Override
-  public int onDamageTool(IToolStackView tool, int level, int amount, @Nullable LivingEntity holder) {
+  public int onDamageTool(IToolStackView tool, ModifierEntry modifier, int amount, @Nullable LivingEntity holder) {
     if (holder != null) {
       Level world = holder.getCommandSenderWorld();
       // note this may go negative, that is not a problem

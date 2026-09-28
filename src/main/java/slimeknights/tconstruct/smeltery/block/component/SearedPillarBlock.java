@@ -12,8 +12,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 public class SearedPillarBlock extends SearedBlock {
   public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
-  public SearedPillarBlock(Properties properties) {
-    super(properties);
+  public SearedPillarBlock(Properties properties, boolean requireBlockEntity) {
+    super(properties, requireBlockEntity);
     this.registerDefaultState(this.defaultBlockState().setValue(AXIS, Direction.Axis.Y));
   }
 

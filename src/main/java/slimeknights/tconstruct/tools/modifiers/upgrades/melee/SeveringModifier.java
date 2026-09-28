@@ -8,12 +8,11 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
-import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipe;
-import slimeknights.tconstruct.library.recipe.modifiers.severing.SeveringRecipeCache;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.tools.modules.combat.SeveringModule;
 
-import java.util.List;
-
+/** @deprecated use {@link SeveringModule} */
+@Deprecated(forRemoval = true)
 public class SeveringModifier extends Modifier {
   @Override
   public ObjectArrayList<ItemStack> processLoot(IToolStackView tool, int level, ObjectArrayList<ItemStack> generatedLoot, LootContext context) {

@@ -7,24 +7,28 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.List;
-import java.util.stream.StreamSupport;
+import java.util.function.Function;
 
 /** Melting recipe that scale output based on input damage */
 public class DamageableMeltingRecipe extends MeltingRecipe {
-  private static final int[] EMPTY_SIZE = {};
+  /** Loader instance */
+  public static final RecordLoadable<DamageableMeltingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP, INPUT, OUTPUT, TEMPERATURE, TIME, BYPRODUCTS,
+    new MergingField<>(IntLoadable.FROM_ONE.defaultField("unit_size", 1, r -> r.unitSize), "result", MissingMode.IGNORE),
+    new MergingListField<>(IntLoadable.FROM_ONE.defaultField("unit_size", 1, Function.identity()), "byproducts", r -> r.byproductSizes),
+    DamageableMeltingRecipe::new);
 
   /** Sizes of each unit in the recipe. Index 0 is the main output, 1 and onwards is secondary outputs */
   private final int unitSize;
   /** Sizes of byproducts */
-  private final int[] byproductSizes;
-  public DamageableMeltingRecipe(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, int unitSize, int... byproductSizes) {
+  private final List<Integer> byproductSizes;
+  public DamageableMeltingRecipe(ResourceLocation id, String group, Ingredient input, FluidOutput output, int temperature, int time, List<FluidOutput> byproducts, int unitSize, List<Integer> byproductSizes) {
     super(id, group, input, output, temperature, time, byproducts);
     this.unitSize = unitSize;
     this.byproductSizes = byproductSizes;
@@ -77,34 +81,5 @@ public class DamageableMeltingRecipe extends MeltingRecipe {
   @Override
   public RecipeSerializer<?> getSerializer() {
     return TinkerSmeltery.damagableMeltingSerializer.get();
-  }
-
-  public static class Serializer extends MeltingRecipe.AbstractSerializer<DamageableMeltingRecipe> {
-
-    @Override
-    protected DamageableMeltingRecipe createFromJson(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, JsonObject json) {
-      int unitSize = GsonHelper.getAsInt(GsonHelper.getAsJsonObject(json, "result"), "unit_size", 1);
-      int[] byproductSizes = EMPTY_SIZE;
-      if (json.has("byproducts")) {
-        byproductSizes = StreamSupport.stream(GsonHelper.getAsJsonArray(json, "byproducts").spliterator(), false)
-                                 .mapToInt(element -> GsonHelper.getAsInt(element.getAsJsonObject(), "unit_size", 1))
-                                 .toArray();
-      }
-      return new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSize, byproductSizes);
-    }
-
-    @Override
-    protected DamageableMeltingRecipe createFromNetwork(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, FriendlyByteBuf buffer) {
-      int unitSize = buffer.readVarInt();
-      int[] byproductSizes = buffer.readVarIntArray();
-      return new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSize, byproductSizes);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, DamageableMeltingRecipe recipe) {
-      super.toNetworkSafe(buffer, recipe);
-      buffer.writeVarInt(recipe.unitSize);
-      buffer.writeVarIntArray(recipe.byproductSizes);
-    }
   }
 }

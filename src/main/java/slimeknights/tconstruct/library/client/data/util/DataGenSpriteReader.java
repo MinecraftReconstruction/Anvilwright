@@ -8,7 +8,9 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 /**
  * Logic to read sprites from existing images and return native images which can later be modified
@@ -25,15 +27,27 @@ public class DataGenSpriteReader extends AbstractSpriteReader {
   }
 
   @Override
+  public boolean metadataExists(ResourceLocation path) {
+    return existingFileHelper.exists(path, PackType.CLIENT_RESOURCES, ".png.mcmeta", folder);
+  }
+
+  @Override
   public NativeImage read(ResourceLocation path) throws IOException {
     try {
       Resource resource = existingFileHelper.getResource(path, PackType.CLIENT_RESOURCES, ".png", folder);
       NativeImage image = NativeImage.read(resource.open());
       openedImages.add(image);
       return image;
-    } catch (IOException e) {
+    } catch (IOException|NoSuchElementException e) {
       log.error("Failed to read image at {}", path);
       throw e;
+    }
+  }
+
+  @Override
+  public JsonObject readMetadata(ResourceLocation path) throws IOException {
+    try (BufferedReader reader = existingFileHelper.getResource(path, PackType.CLIENT_RESOURCES, ".png.mcmeta", folder).openAsReader()) {
+      return GsonHelper.parse(reader);
     }
   }
 }

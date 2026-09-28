@@ -6,14 +6,12 @@ import lombok.RequiredArgsConstructor;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
-import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
-import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -23,12 +21,13 @@ import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.recipe.FluidValues;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
+import slimeknights.tconstruct.library.recipe.melting.IDisplayableMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
-import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule;
 
 import java.util.List;
 
@@ -43,22 +42,26 @@ public class MeltingCategory extends AbstractMeltingCategory {
   private static final Component TOOLTIP_MELTER = TConstruct.makeTranslation("jei", "melting.melter").withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE);
 
   /** Tooltip callback for items */
-  private static final IRecipeSlotTooltipCallback ITEM_FUEL_TOOLTIP = (slot, list) -> {
-    list.add(1, SOLID_TEMPERATURE);
-    list.add(2, SOLID_MULTIPLIER);
+  private static final IRecipeSlotRichTooltipCallback ITEM_FUEL_TOOLTIP = (slot, tooltip) -> {
+    if (slot.getDisplayedItemStack().isEmpty()) {
+      return;
+    }
+    MeltingFuel solid = MeltingFuelLookup.getSolid();
+    var list = tooltip.getLines();
+    int insertAfterItemName = list.isEmpty() ? 0 : 1;
+    list.addAll(insertAfterItemName, List.of(
+      Either.left(Component.translatable(KEY_TEMPERATURE, solid.getTemperature()).withStyle(ChatFormatting.GRAY)),
+      Either.left(Component.translatable(KEY_MULTIPLIER, solid.getRate() / 10f).withStyle(ChatFormatting.GRAY))));
   };
 
   /** Tooltip callback for ores */
-  private static final IRecipeSlotTooltipCallback METAL_ORE_TOOLTIP = new MeltingFluidCallback(OreRateType.METAL);
-  private static final IRecipeSlotTooltipCallback GEM_ORE_TOOLTIP = new MeltingFluidCallback(OreRateType.GEM);
+  private static final FluidTooltipCallback METAL_ORE_TOOLTIP = new MeltingFluidCallback(OreRateType.METAL);
+  private static final FluidTooltipCallback GEM_ORE_TOOLTIP = new MeltingFluidCallback(OreRateType.GEM);
 
-  @Getter
-  private final IDrawable icon;
   private final IDrawableStatic solidFuel;
 
   public MeltingCategory(IGuiHelper helper) {
-    super(helper);
-    this.icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(TinkerSmeltery.searedMelter));
+    super(helper, TConstructJEIConstants.MELTING, TITLE, helper.createDrawableItemLike(TinkerSmeltery.searedMelter));
     this.solidFuel = helper.drawableBuilder(BACKGROUND_LOC, 164, 0, 18, 20).build();
   }
 
@@ -86,11 +89,12 @@ public class MeltingCategory extends AbstractMeltingCategory {
   @Override
   public void setRecipe(IRecipeLayoutBuilder builder, MeltingRecipe recipe, IFocusGroup focuses) {
     // input
-    builder.addSlot(RecipeIngredientRole.INPUT, 24, 18).addIngredients(recipe.getInput());
+    List<ItemStack> inputs = recipe.getInputs();
+    IRecipeSlotBuilder inputSlot = builder.addInputSlot(24, 18).addItemStacks(inputs);
 
     // output
     OreRateType oreType = recipe.getOreType();
-    IRecipeSlotTooltipCallback tooltip;
+    FluidTooltipCallback tooltip;
     if (oreType == OreRateType.METAL) {
       tooltip = METAL_ORE_TOOLTIP;
     } else if (oreType == OreRateType.GEM) {
@@ -98,8 +102,9 @@ public class MeltingCategory extends AbstractMeltingCategory {
     } else {
       tooltip = MeltingFluidCallback.INSTANCE;
     }
-    builder.addSlot(RecipeIngredientRole.OUTPUT, 96, 4)
-      .addTooltipCallback(tooltip)
+    List<FluidStack> outputs = recipe.getOutputs();
+    IRecipeSlotBuilder outputSlot = builder.addOutputSlot(96, 4)
+      .addRichTooltipCallback(tooltip)
       .setFluidRenderer(FluidValues.METAL_BLOCK, false, 32, 32)
       .setOverlay(tankOverlay, 0, 0)
       .addIngredient(FabricTypes.FLUID_STACK, JEITypes.toJEI(recipe.getOutput()));
@@ -107,10 +112,11 @@ public class MeltingCategory extends AbstractMeltingCategory {
     // show fuels that are valid for this recipe
     int fuelHeight = 32;
     // solid fuel
-    if (recipe.getTemperature() <= FuelModule.SOLID_TEMPERATURE) {
+    if (recipe.getTemperature() <= MeltingFuelLookup.getSolid().getTemperature()) {
       fuelHeight = 15;
       builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 2, 22)
-             .addTooltipCallback(ITEM_FUEL_TOOLTIP)
+             .addRichTooltipCallback(ITEM_FUEL_TOOLTIP)
+             .setBackground(solidFuel, -1, -3)
              .addItemStacks(MeltingFuelHandler.SOLID_FUELS.get());
     }
 

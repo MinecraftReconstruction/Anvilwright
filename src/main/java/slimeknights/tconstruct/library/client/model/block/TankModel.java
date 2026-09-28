@@ -42,7 +42,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.data.IModelData;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
-import slimeknights.mantle.client.model.util.ExtraTextureConfiguration;
+import slimeknights.mantle.client.model.util.ExtraTextureContext;
 import slimeknights.mantle.client.model.util.SimpleBlockModel;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
@@ -60,13 +60,12 @@ import java.util.function.Supplier;
 /**
  * This model contains a single scalable fluid that can either be statically rendered or rendered in the TESR. It also supports rendering fluids in the item model
  */
-@Log4j2
 @AllArgsConstructor
 public class TankModel implements IUnbakedGeometry<TankModel> {
   protected static final ResourceLocation BAKE_LOCATION = TConstruct.getResource("dynamic_model_baking");
 
   /** Shared loader instance */
-  public static final Loader LOADER = new Loader();
+  public static final IGeometryLoader<TankModel> LOADER = TankModel::deserialize;
 
   protected final SimpleBlockModel model;
   @Nullable
@@ -141,22 +140,26 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       wrapped.getTransforms().getTransform(cameraTransformType).apply(leftHanded, mat);
       return wrapped;
     }
+    return new Baked(owner, transform, baked, bakedGui, this);
   }
 
   /**
    * Baked variant to load in the custom overrides
-   * @param <T>  Parent model type, used to make this easier to extend
    */
   @SuppressWarnings("removal")
   public static class Baked<T extends TankModel> extends BakedGuiUniqueModel {
     private final BlockModel owner;
     private final ModelState originalTransforms;
     @SuppressWarnings("WeakerAccess")
-    protected final T original;
-    private final Cache<FluidStack,BakedModel> cache = CacheBuilder
+    protected final TankModel original;
+    private final FluidPartOverride overrides = new FluidPartOverride();
+    private final Cache<CacheKey,BakedModel> cache = CacheBuilder
       .newBuilder()
       .maximumSize(64)
       .build();
+
+    /** Cache key since fluids don't do equality over amount */
+    private record CacheKey(FluidStack fluid, int increments) {}
 
     @SuppressWarnings("WeakerAccess")
     protected Baked(BlockModel owner, ModelState transforms, BakedModel baked, BakedModel gui, T original) {
@@ -168,7 +171,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
 
     @Override
     public ItemOverrides getOverrides() {
-      return FluidPartOverride.INSTANCE;
+      return overrides;
     }
 
     /**
@@ -187,19 +190,20 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(owner.hasAmbientOcclusion(), owner.getGuiLight().lightLikeBlock(), true, owner.getTransforms(), ItemOverrides.EMPTY).particle(particle);
       // first, add all regular elements
       for (BlockElement element : baseModel.getElements()) {
-        SimpleBlockModel.bakePart(builder, owner, element, originalTransforms, spriteGetter, BAKE_LOCATION);
+        SimpleBlockModel.bakePart(builder, owner, element, spriteGetter, originalTransforms, quadTransformer, BAKE_LOCATION);
       }
       // next, add in the fluid
-      ColoredBlockModel.bakePart(builder, owner, fluid, color, luminosity, originalTransforms, spriteGetter, BAKE_LOCATION);
-      return builder.build();
+      IQuadTransformer fluidTransformer = color == -1 ? quadTransformer : quadTransformer.andThen(ColoredBlockModel.applyColorQuadTransformer(color));
+      ColoredBlockModel.bakePart(builder, owner, fluid, luminosity, spriteGetter, originalTransforms.getRotation(), fluidTransformer, originalTransforms.isUvLocked(), BAKE_LOCATION);
+      return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
     }
 
     /**
      * Gets the model with the fluid part added
-     * @param stack  Fluid stack to add
+     * @param key  Cache key containing fluid and increments
      * @return  Model with the fluid part
      */
-    private BakedModel getModel(FluidStack stack) {
+    private BakedModel getModel(CacheKey key) {
       // fetch fluid data
       var sprites = FluidVariantRendering.getSprites(stack.getType());
       int color = FluidVariantRendering.getColor(stack.getType());
@@ -216,7 +220,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
 
       // if we have GUI, bake a GUI variant
       if (original.gui != null) {
-        baked = new BakedGuiUniqueModel(baked, bakeWithFluid(textured, original.gui, fluid, color, 0));
+        baked = new UniqueGuiModel.Baked(baked, bakeWithFluid(textured, original.gui, fluid, color, 0));
       }
 
       // return what we ended up with
@@ -228,12 +232,12 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
      * @param fluid  Scaled contained fluid
      * @return  Cached model
      */
-    private BakedModel getCachedModel(FluidStack fluid) {
+    private BakedModel getCachedModel(CacheKey fluid) {
       try {
         return cache.get(fluid, () -> getModel(fluid));
       }
       catch(ExecutionException e) {
-        log.error(e);
+        TConstruct.LOG.error(e);
         return this;
       }
     }
@@ -270,14 +274,25 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       return false;
     }
 
-    /**
-     * Gets the fluid location
-     * @return  Fluid location data
-     */
-    public IncrementalFluidCuboid getFluid() {
-      return original.fluid;
+    /** Override to add the fluid part to the item model */
+    private class FluidPartOverride extends ItemOverrides {
+      @Override
+      public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
+        // ensure we have a fluid
+        if (stack.isEmpty() || !stack.hasTag()) {
+          return model;
+        }
+        // determine fluid
+        FluidTank tank = TankItem.getTank(stack, 1);
+        if (tank.isEmpty()) {
+          return model;
+        }
+        // always baked model as this override is only used in our model
+        return getCachedModel(tank.getFluid(), tank.getCapacity());
+      }
     }
   }
+
 
   /** Loader for this model */
   public static class Loader implements IGeometryLoader<TankModel> {
@@ -293,5 +308,8 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       boolean forceModelFluid = GsonHelper.getAsBoolean(modelContents, "render_fluid_in_model", false);
       return new TankModel(model, gui, fluid, forceModelFluid);
     }
+    IncrementalFluidCuboid fluid = IncrementalFluidCuboid.fromJson(GsonHelper.getAsJsonObject(json, "fluid"));
+    boolean forceModelFluid = GsonHelper.getAsBoolean(json, "render_fluid_in_model", false);
+    return new TankModel(model, gui, fluid, forceModelFluid);
   }
 }

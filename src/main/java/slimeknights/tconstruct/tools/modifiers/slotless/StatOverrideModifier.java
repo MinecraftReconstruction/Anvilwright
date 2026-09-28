@@ -8,9 +8,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.modifiers.Modifier;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.stat.INumericToolStat;
@@ -29,7 +35,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** Modifier to directly modify a tool's stats */
-public class StatOverrideModifier extends NoLevelsModifier {
+public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsModifierHook, ModifierRemovalHook {
   /** Key of all stats added to the tool */
   private static final ResourceLocation KEY_BONUS = TConstruct.getResource("override_bonus");
   /** Key of all stats multiplied by the tool */
@@ -40,14 +46,22 @@ public class StatOverrideModifier extends NoLevelsModifier {
   private static final Component LANG_MULTIPLY = TConstruct.makeTranslation("modifier", "stat_override.multipliers").withStyle(ChatFormatting.UNDERLINE);
 
   @Override
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addHook(this, ModifierHooks.TOOL_STATS, ModifierHooks.REMOVE);
+  }
+
+  @Override
   public boolean shouldDisplay(boolean advanced) {
     return advanced;
   }
 
+  @Nullable
   @Override
-  public void onRemoved(IToolStackView tool) {
+  public Component onRemoved(IToolStackView tool, Modifier modifier) {
     tool.getPersistentData().remove(KEY_BONUS);
     tool.getPersistentData().remove(KEY_MULTIPLY);
+    return null;
   }
 
   /** Processes the stats from Tag into the consumer */
@@ -55,7 +69,7 @@ public class StatOverrideModifier extends NoLevelsModifier {
     if (persistentData.contains(key, Tag.TAG_COMPOUND)) {
       CompoundTag nbt = persistentData.getCompound(key);
       for (String name : nbt.getAllKeys()) {
-        ToolStatId id = ToolStatId.tryCreate(name);
+        ToolStatId id = ToolStatId.tryParse(name);
         if (id != null) {
           IToolStat<?> stat = ToolStats.getToolStat(id);
           if (stat != null) {
@@ -75,7 +89,7 @@ public class StatOverrideModifier extends NoLevelsModifier {
   }
 
   @Override
-  public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
+  public void addToolStats(IToolContext context, ModifierEntry modifier, ModifierStatsBuilder builder) {
     IModDataView persistentData = context.getPersistentData();
     processStats(persistentData, KEY_BONUS, (stat, tag) -> update(builder, stat, tag));
     processStats(persistentData, KEY_MULTIPLY, (stat, tag) -> {
@@ -100,7 +114,7 @@ public class StatOverrideModifier extends NoLevelsModifier {
       boolean first = true;
       for (String key : stats.getAllKeys()) {
         // ignore invalid stat names
-        ToolStatId id = ToolStatId.tryCreate(key);
+        ToolStatId id = ToolStatId.tryParse(key);
         if (id != null) {
           IToolStat<?> stat = ToolStats.getToolStat(id);
           if (stat != null) {
@@ -125,8 +139,8 @@ public class StatOverrideModifier extends NoLevelsModifier {
   }
 
   @Override
-  public List<Component> getDescriptionList(IToolStackView tool, int level) {
-    List<Component> defaultList = getDescriptionList(level);
+  public List<Component> getDescriptionList(IToolStackView tool, ModifierEntry entry) {
+    List<Component> defaultList = getDescriptionList(entry.getLevel());
 
     // create the list when we first try to add text
     MutableObject<List<Component>> resultList = new MutableObject<>();
@@ -180,7 +194,7 @@ public class StatOverrideModifier extends NoLevelsModifier {
 
   /** Gets the given stat from Tag */
   private static float getStat(IToolStackView tool, ResourceLocation groupKey, INumericToolStat<?> stat, float defaultValue) {
-    ModDataNBT data = tool.getPersistentData();
+    IModDataView data = tool.getPersistentData();
     if (data.contains(groupKey, Tag.TAG_COMPOUND)) {
       CompoundTag nbt = data.getCompound(groupKey);
       String name = stat.getName().toString();
@@ -230,7 +244,7 @@ public class StatOverrideModifier extends NoLevelsModifier {
     ModDataNBT data = tool.getPersistentData();
     boolean storeValue;
     if (stat instanceof INumericToolStat) {
-      storeValue = ((Number)value).intValue() != 0;
+      storeValue = ((Number)value).floatValue() != 0;
     } else {
       storeValue = value != stat.getDefaultValue();
     }
@@ -295,7 +309,6 @@ public class StatOverrideModifier extends NoLevelsModifier {
 
   /** Removes the given stat from the bonuses */
   public <T> boolean remove(IToolStackView tool, IToolStat<T> stat) {
-    // create tag if needed
     CompoundTag nbt = getTag(tool, KEY_BONUS, false);
     if (nbt == null) {
       return false;

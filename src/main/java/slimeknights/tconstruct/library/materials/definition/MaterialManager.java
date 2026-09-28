@@ -22,8 +22,8 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.exception.TinkerJSONException;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.materials.json.MaterialJson;
-import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
+import slimeknights.tconstruct.library.utils.JsonUtils;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -56,8 +57,8 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
   public static final String FOLDER = "tinkering/materials/definition";
   /** Location of material tags */
   public static final String TAG_FOLDER = "tinkering/tags/materials";
-  /** Registry key to make tag keys */
-  private static final ResourceKey<? extends Registry<IMaterial>> REGISTRY_KEY = ResourceKey.createRegistryKey(TConstruct.getResource("materials"));
+  /** Registry key to make tag keys, will not work on actual registry lookup */
+  public static final ResourceKey<? extends Registry<IMaterial>> REGISTRY_KEY = ResourceKey.createRegistryKey(TConstruct.getResource("materials"));
 
   /** GSON for loading materials */
   public static final Gson GSON = (new GsonBuilder())
@@ -137,12 +138,27 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
     return TagKey.create(REGISTRY_KEY, id);
   }
 
+  /** Gets the set of tags for a material */
+  public Stream<TagKey<IMaterial>> getTagKeys(MaterialId id) {
+    return reverseTags.getOrDefault(id, Set.of()).stream();
+  }
+
   /**
    * Checks if the given modifier is in the given tag
    * @return  True if the modifier is in the tag
    */
   public boolean isIn(MaterialId id, TagKey<IMaterial> tag) {
     return reverseTags.getOrDefault(id, Collections.emptySet()).contains(tag);
+  }
+
+  /**
+   * Gets all values contained in the given tag
+   * @param tag  Tag instance
+   * @return  Contained values, or null if the tag is absent
+   */
+  @Nullable
+  public List<IMaterial> getTagOrNull(TagKey<IMaterial> tag) {
+    return tags.get(tag);
   }
 
   /**
@@ -172,7 +188,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
     this.materials = materials;
     this.redirects = redirects;
     this.tags = tags;
-    this.reverseTags = GenericTagUtil.reverseTags(REGISTRY_KEY, IMaterial::getIdentifier, tags);
+    this.reverseTags = GenericTagUtil.reverseTags(IMaterial::getIdentifier, tags);
     onMaterialUpdate();
   }
 
@@ -199,17 +215,19 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
     }
     this.redirects = redirects;
     onMaterialUpdate();
-    
-    log.debug("Loaded materials: {}", Util.toIndentedStringList(materials.keySet()));
-    log.debug("Loaded redirects: {}", Util.toIndentedStringList(redirects.keySet()));
+
+    if (log.isDebugEnabled() && JsonUtils.debugLogResourceValues()) {
+      log.debug("Loaded materials: {}", Util.toIndentedStringList(materials.keySet().stream().sorted().toList()));
+      log.debug("Loaded redirects: {}", Util.toIndentedStringList(redirects.entrySet().stream().sorted(Entry.comparingByKey()).toList()));
+    }
     long timeStep = System.nanoTime();
     log.info("Loaded {} materials in {} ms", materials.size(), (timeStep - time) / 1000000f);
 
 
     // load modifier tags
     TagLoader<IMaterial> tagLoader = new TagLoader<>(id -> getMaterial(new MaterialId(id)), TAG_FOLDER);
-    this.tags = tagLoader.loadAndBuild(resourceManagerIn);
-    this.reverseTags = GenericTagUtil.reverseTags(REGISTRY_KEY, IMaterial::getIdentifier, tags);
+    this.tags = GenericTagUtil.mapLoaderResults(REGISTRY_KEY, tagLoader.loadAndBuild(resourceManagerIn));
+    this.reverseTags = GenericTagUtil.reverseTags(IMaterial::getIdentifier, tags);
     log.info("Loaded {} material tags for {} materials in {} ms", tags.size(), reverseTags.size(), (System.nanoTime() - timeStep) / 1000000f);
   }
 
@@ -234,7 +252,6 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
           Predicate<JsonObject> redirectCondition = redirect.getConditionPredicate();
           if (redirectCondition == null || redirectCondition.test(jsonObject)) {
             MaterialId redirectTarget = new MaterialId(redirect.getId());
-            log.debug("Redirecting material {} to {}", materialId, redirectTarget);
             redirects.put(new MaterialId(materialId), redirectTarget);
             return null;
           }
@@ -254,9 +271,14 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
 
       boolean isCraftable = Boolean.TRUE.equals(materialJson.getCraftable());
       boolean hidden = Boolean.TRUE.equals(materialJson.getHidden());
+      int tier = requireNonNullElse(materialJson.getTier(), 0);
+      Rarity rarity = materialJson.getRarity();
+      if (rarity == null) {
+        rarity = IMaterial.computeRarity(tier);
+      }
 
       // parse trait
-      return new Material(materialId, requireNonNullElse(materialJson.getTier(), 0), requireNonNullElse(materialJson.getSortOrder(), 100), isCraftable, hidden);
+      return new Material(materialId, tier, requireNonNullElse(materialJson.getSortOrder(), 100), rarity, isCraftable, hidden);
     } catch (Exception e) {
       log.error("Could not deserialize material {}. JSON: {}", materialId, jsonObject, e);
       return null;

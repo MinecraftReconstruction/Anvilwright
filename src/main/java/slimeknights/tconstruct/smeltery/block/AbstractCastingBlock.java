@@ -12,21 +12,35 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.shared.block.TableBlock;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
+import javax.annotation.Nullable;
+
 public abstract class AbstractCastingBlock extends TableBlock {
+  /** Property for when the casting block has an item inside */
+  public static final BooleanProperty HAS_ITEM = BooleanProperty.create("has_item");
+
   @Getter
   private final boolean requireCast;
   protected AbstractCastingBlock(Properties builder, boolean requireCast) {
     super(builder);
     this.requireCast = requireCast;
+    registerDefaultState(defaultBlockState().setValue(HAS_ITEM, false));
+  }
+
+  @Override
+  protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+    super.createBlockStateDefinition(builder);
+    builder.add(HAS_ITEM);
   }
 
   @Override
   @Deprecated
+  @Nullable
   public MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
     return null;
   }
@@ -48,18 +62,19 @@ public abstract class AbstractCastingBlock extends TableBlock {
   @SuppressWarnings("deprecation")
   @Deprecated
   @Override
-  public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-    if (worldIn.isClientSide()) {
-      return;
+  public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    if (!world.isClientSide && world.getBlockEntity(pos) instanceof CastingBlockEntity casting) {
+      casting.handleRedstone(world.hasNeighborSignal(pos));
     }
-    BlockEntityHelper.get(CastingBlockEntity.class, worldIn, pos).ifPresent(casting -> casting.handleRedstone(worldIn.hasNeighborSignal(pos)));
   }
 
   @SuppressWarnings("deprecation")
   @Deprecated
   @Override
-  public void tick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource rand) {
-    BlockEntityHelper.get(CastingBlockEntity.class, worldIn, pos).ifPresent(CastingBlockEntity::swap);
+  public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource rand) {
+    if (world.getBlockEntity(pos) instanceof CastingBlockEntity casting) {
+      casting.swap();
+    }
   }
 
   @Override
@@ -73,7 +88,10 @@ public abstract class AbstractCastingBlock extends TableBlock {
   }
 
   @Override
-  public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
-    return Math.toIntExact(BlockEntityHelper.get(CastingBlockEntity.class, worldIn, pos).map(te -> te.getAnalogSignal()).orElse(0L));
+  public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos pos) {
+    if (world.getBlockEntity(pos) instanceof CastingBlockEntity casting) {
+      return casting.getAnalogSignal();
+    }
+    return 0;
   }
 }

@@ -5,23 +5,17 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.data.GenericDataProvider;
-import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
-import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionData;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionDataBuilder;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinitionLoader;
-import slimeknights.tconstruct.library.tools.part.IToolPart;
-import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
-import slimeknights.tconstruct.library.tools.stat.IToolStat;
-import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.tools.item.ArmorSlotType;
+import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
+import slimeknights.tconstruct.tools.modules.ArmorModuleBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,9 +29,6 @@ import java.util.stream.Collectors;
 
 /** Base datagenerator to generate tool definition data */
 public abstract class AbstractToolDefinitionDataProvider extends GenericDataProvider {
-  /** copy of the vanilla array for the builder */
-  private static final int[] MAX_DAMAGE_ARRAY = {13, 15, 16, 11};
-
   private final Map<ResourceLocation,ToolDefinitionDataBuilder> allTools = new HashMap<>();
   /** Mod ID to filter definitions we care about */
   private final String modId;
@@ -58,6 +49,7 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
   }
 
   /** Defines the given ID as a tool definition */
+  @SuppressWarnings("deprecation")  // best way to get an item key
   protected ToolDefinitionDataBuilder define(ItemLike item) {
     return define(BuiltInRegistries.ITEM.getKey(item.asItem()));
   }
@@ -87,6 +79,7 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
     }
     List<CompletableFuture<?>> futures = new ArrayList<>();
     // ensure all included ones are required, and the built ones are valid
+    List<CompletableFuture<?>> tasks = new ArrayList<>();
     for (Entry<ResourceLocation,ToolDefinitionDataBuilder> entry : allTools.entrySet()) {
       ResourceLocation id = entry.getKey();
       ToolDefinition definition = relevantDefinitions.get(id);
@@ -105,15 +98,15 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
   protected class ArmorDataBuilder {
     private final ResourceLocation name;
     private final ToolDefinitionDataBuilder[] builders;
-    private final List<ArmorSlotType> slotTypes;
+    private final List<ArmorItem.Type> slotTypes;
     private ArmorDataBuilder(ModifiableArmorMaterial armorMaterial) {
-      this.name = new ResourceLocation(armorMaterial.getName());
+      this.name = armorMaterial.getId();
       this.builders = new ToolDefinitionDataBuilder[4];
-      ImmutableList.Builder<ArmorSlotType> slotTypes = ImmutableList.builder();
-      for (ArmorSlotType slotType : ArmorSlotType.values()) {
+      ImmutableList.Builder<ArmorItem.Type> slotTypes = ImmutableList.builder();
+      for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
         ToolDefinition definition = armorMaterial.getArmorDefinition(slotType);
         if (definition != null) {
-          this.builders[slotType.getIndex()] = define(definition);
+          this.builders[slotType.ordinal()] = define(definition);
           slotTypes.add(slotType);
         }
       }
@@ -121,8 +114,8 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
     }
 
     /** Gets the builder for the given slot */
-    protected ToolDefinitionDataBuilder getBuilder(ArmorSlotType slotType) {
-      ToolDefinitionDataBuilder builder = builders[slotType.getIndex()];
+    protected ToolDefinitionDataBuilder getBuilder(ArmorItem.Type slotType) {
+      ToolDefinitionDataBuilder builder = builders[slotType.ordinal()];
       if (builder == null) {
         throw new IllegalArgumentException("Unsupported slot type " + slotType + " for material " + name);
       }
@@ -130,166 +123,87 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
     }
 
 
-    /* Parts */
+    /* Modules */
 
-    /** Adds a part to the builder */
-    public ArmorDataBuilder part(ArmorSlotType slotType, IToolPart part, int weight) {
-      getBuilder(slotType).part(part, weight);
-      return this;
-    }
-
-    /** Adds a part to the builder */
-    public ArmorDataBuilder part(ArmorSlotType slotType, MaterialStatsId statsId, int weight) {
-      getBuilder(slotType).part(statsId, weight);
-      return this;
-    }
-
-
-    /* Stats */
-
-    /** Adds a bonus to the builder */
-    public <T> ArmorDataBuilder stat(ArmorSlotType slotType, IToolStat<T> stat, T value) {
-      getBuilder(slotType).stat(stat, value);
-      return this;
-    }
-
-    /** Adds a bonus to the builder */
-    public ArmorDataBuilder stat(ArmorSlotType slotType, IToolStat<Float> stat, float value) {
-      return stat(slotType, stat, (Float) value);
-    }
-
-    /** Sets the same bonus on all pieces */
-    public <T> ArmorDataBuilder statAll(IToolStat<T> stat, T value) {
-      for (ArmorSlotType slotType : slotTypes) {
-        stat(slotType, stat, value);
-      }
-      return this;
-    }
-
-    /** Sets the same bonus on all pieces */
-    public ArmorDataBuilder statAll(IToolStat<Float> stat, float value) {
-      return statAll(stat, (Float) value);
-    }
-
-    /** Sets a different bonus on all pieces */
+    /** Adds a module to the definition with the given hooks */
     @SafeVarargs
-    public final <T> ArmorDataBuilder statEach(IToolStat<T> stat, T... values) {
-      if (values.length != slotTypes.size()) {
-        throw new IllegalStateException("Wrong number of stats set");
-      }
-      for (int i = 0; i < values.length; i++) {
-        stat(slotTypes.get(i), stat, values[i]);
-      }
+    public final <T extends ToolModule> ArmorDataBuilder module(ArmorItem.Type slotType, T module, ModuleHook<? super T>... hooks) {
+      getBuilder(slotType).module(module, hooks);
       return this;
     }
 
-    /** Sets a different bonus on all pieces, float overload as it comes up commonly */
-    public final ArmorDataBuilder statEach(IToolStat<Float> stat, float... values) {
-      if (values.length != slotTypes.size()) {
-        throw new IllegalStateException("Wrong number of stats set");
-      }
-      for (int i = 0; i < values.length; i++) {
-        stat(slotTypes.get(i), stat, values[i]);
-      }
+    /** Adds a module to the definition */
+    public ArmorDataBuilder module(ArmorItem.Type slotType, ToolModule module) {
+      getBuilder(slotType).module(module);
       return this;
     }
 
-    /**
-     * Sets the durability for all parts like vanilla armor materials
-     * @param maxDamageFactor  Durability modifier applied to the base value for each slot
-     * @return  Builder
-     */
-    public ArmorDataBuilder durabilityFactor(float maxDamageFactor) {
-      for (ArmorSlotType slotType : slotTypes) {
-        stat(slotType, ToolStats.DURABILITY, MAX_DAMAGE_ARRAY[slotType.getIndex()] * maxDamageFactor);
-      }
+    /** Adds a module to the definition */
+    public ArmorDataBuilder module(ArmorItem.Type slotType, ToolModule... modules) {
+      getBuilder(slotType).module(modules);
       return this;
     }
 
-    /** Applies a global multiplier to a single slot */
-    public ArmorDataBuilder multiplier(ArmorSlotType slotType, FloatToolStat stat, float value) {
-      getBuilder(slotType).multiplier(stat, value);
-      return this;
-    }
-
-    /** Applies a global multiplier to all slots */
-    public ArmorDataBuilder multiplier(FloatToolStat stat, float value) {
-      for (ArmorSlotType slotType : slotTypes) {
-        multiplier(slotType, stat, value);
-      }
-      return this;
-    }
-
-    /** Sets the starting slots for the given type, unspecified defaults to 0 */
-    public ArmorDataBuilder startingSlots(ArmorSlotType armorSlot, SlotType slotType, int value) {
-      getBuilder(armorSlot).startingSlots(slotType, value);
-      return this;
-    }
-
-    /** Sets the starting slots for all types */
-    public ArmorDataBuilder startingSlots(SlotType slotType, int value) {
-      for (ArmorSlotType armorSlot : slotTypes) {
-        startingSlots(armorSlot, slotType, value);
-      }
-      return this;
-    }
-
-    /** Sets the starting slots for multiple slots */
-    public ArmorDataBuilder startingSlots(SlotType slotType, int... values) {
-      if (values.length != slotTypes.size()) {
-        throw new IllegalStateException("Wrong number of stats set");
-      }
-      for (int i = 0; i < values.length; i++) {
-        startingSlots(slotTypes.get(i), slotType, values[i]);
+    /** Adds a module to the definition for the given slots */
+    public ArmorDataBuilder module(ToolModule module, ArmorItem.Type... slotTypes) {
+      for (ArmorItem.Type slot : slotTypes) {
+        getBuilder(slot).module(module);
       }
       return this;
     }
 
 
-    /* Traits */
-
-    /** Adds a base trait to all variants of the tool */
-    public ArmorDataBuilder trait(ModifierId modifier, int level) {
-      for (ArmorSlotType armorSlot : slotTypes) {
-        trait(armorSlot, modifier, level);
+    /** Adds a module to the definition with the given hooks */
+    @SafeVarargs
+    public final <T extends ToolModule> ArmorDataBuilder module(T module, ModuleHook<? super T>... hooks) {
+      for (ArmorItem.Type armorSlot : slotTypes) {
+        module(armorSlot, module, hooks);
       }
       return this;
     }
 
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(LazyModifier modifier, int level) {
-      return trait(modifier.getId(), level);
-    }
-
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(ModifierId modifier) {
-      return trait(modifier, 1);
-    }
-
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(LazyModifier modifier) {
-      return trait(modifier, 1);
-    }
-
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(ArmorSlotType slotType, ModifierId modifier, int level) {
-      getBuilder(slotType).trait(modifier, level);
+    /** Adds a module to the definition */
+    public ArmorDataBuilder module(ToolModule module) {
+      for (ArmorItem.Type armorSlot : slotTypes) {
+        module(armorSlot, module);
+      }
       return this;
     }
 
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(ArmorSlotType slotType, LazyModifier modifier, int level) {
-      return trait(slotType, modifier.getId(), level);
+    /** Adds a module to the definition */
+    public ArmorDataBuilder module(ToolModule... modules) {
+      for (ArmorItem.Type armorSlot : slotTypes) {
+        module(armorSlot, modules);
+      }
+      return this;
     }
 
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(ArmorSlotType slotType, ModifierId modifier) {
-      return trait(slotType, modifier, 1);
+    /** Adds modules to the definition using the passed builder */
+    @SafeVarargs
+    public final <T extends ToolModule> ArmorDataBuilder module(ArmorModuleBuilder<T> builder, ModuleHook<? super T>... hooks) {
+      for (ArmorItem.Type armorSlot : slotTypes) {
+        module(armorSlot, builder.build(armorSlot), hooks);
+      }
+      return this;
     }
 
-    /** Adds a base trait to the tool */
-    public ArmorDataBuilder trait(ArmorSlotType slotType, LazyModifier modifier) {
-      return trait(slotType, modifier, 1);
+    /** Adds modules to the definition using the passed builder */
+    public ArmorDataBuilder module(ArmorModuleBuilder<? extends ToolModule> builder) {
+      for (ArmorItem.Type armorSlot : slotTypes) {
+        module(armorSlot, builder.build(armorSlot));
+      }
+      return this;
+    }
+
+    /** Adds modules to the definition using the passed builder */
+    @SafeVarargs
+    public final <T extends ToolModule> ArmorDataBuilder modules(Function<List<ArmorItem.Type>,ArmorModuleBuilder<T>> constructor, ModuleHook<? super T>... hooks) {
+      return module(constructor.apply(slotTypes), hooks);
+    }
+
+    /** Adds modules to the definition using the passed builder */
+    public ArmorDataBuilder modules(Function<List<ArmorItem.Type>,ArmorModuleBuilder<? extends ToolModule>> constructor) {
+      return module(constructor.apply(slotTypes));
     }
   }
 }

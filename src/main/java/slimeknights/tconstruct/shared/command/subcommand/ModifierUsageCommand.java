@@ -21,7 +21,10 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolTraitHook;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.shared.command.argument.SlotTypeArgument;
 import slimeknights.tconstruct.shared.command.argument.SlotTypeArgument.OptionalSlotType;
 
@@ -79,9 +82,13 @@ public class ModifierUsageCommand {
     // finally, tool traits we limit to anything in the modifiable tag
     Set<Modifier> toolTraits = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.MODIFIABLE)
                                              .filter(item -> item instanceof IModifiable)
-                                             .flatMap(item -> ((IModifiable) item).getToolDefinition().getData().getTraits().stream())
+                                             .flatMap(item -> {
+                                               ToolDefinition definition = ((IModifiable) item).getToolDefinition();
+                                               return ToolTraitHook.getTraits(definition, MaterialNBT.EMPTY).getModifiers().stream();
+                                             })
                                              .map(ModifierEntry::getModifier)
                                              .collect(Collectors.toSet());
+    // TODO: modifier traits
 
     // next, get our list of modifiers
     Stream<Modifier> modifierStream;

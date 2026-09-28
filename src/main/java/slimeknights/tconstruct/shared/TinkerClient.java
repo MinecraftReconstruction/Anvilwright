@@ -17,11 +17,15 @@ import slimeknights.tconstruct.fluids.FluidClientEvents;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.GadgetClientEvents;
 import slimeknights.tconstruct.library.client.book.TinkerBook;
+import slimeknights.tconstruct.library.client.data.spritetransformer.FramesSpriteTransformer;
 import slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping;
 import slimeknights.tconstruct.library.client.data.spritetransformer.GreyToSpriteTransformer;
 import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;
 import slimeknights.tconstruct.library.client.data.spritetransformer.ISpriteTransformer;
+import slimeknights.tconstruct.library.client.data.spritetransformer.OffsettingSpriteTransformer;
 import slimeknights.tconstruct.library.client.data.spritetransformer.RecolorSpriteTransformer;
+import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
+import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.ModifierIconManager;
 import slimeknights.tconstruct.smeltery.SmelteryClientEvents;
 import slimeknights.tconstruct.tables.TableClientEvents;
@@ -35,6 +39,8 @@ import slimeknights.tconstruct.world.WorldClientEvents;
 
 import java.util.function.Consumer;
 
+import static slimeknights.tconstruct.TConstruct.getResource;
+
 /**
  * This class should only be referenced on the client side
  */
@@ -47,8 +53,8 @@ public class TinkerClient implements ClientModInitializer {
   public void onInitializeClient() {
     TinkerBook.initBook();
     // needs to register listeners early enough for minecraft to load
-    PatternGuiTextureLoader.init();
     ModifierIconManager.init();
+    MaterialRenderInfoLoader.init();
 
     // add the recipe cache invalidator to the client
     Consumer<RecipeManager> recipesUpdated = event -> RecipeCacheInvalidator.reload(true);
@@ -57,6 +63,8 @@ public class TinkerClient implements ClientModInitializer {
     // register datagen serializers
     ISpriteTransformer.SERIALIZER.registerDeserializer(RecolorSpriteTransformer.NAME, RecolorSpriteTransformer.DESERIALIZER);
     GreyToSpriteTransformer.init();
+    ISpriteTransformer.SERIALIZER.registerDeserializer(OffsettingSpriteTransformer.NAME, OffsettingSpriteTransformer.DESERIALIZER);
+    ISpriteTransformer.SERIALIZER.registerDeserializer(FramesSpriteTransformer.NAME, FramesSpriteTransformer.DESERIALIZER);
     IColorMapping.SERIALIZER.registerDeserializer(GreyToColorMapping.NAME, GreyToColorMapping.DESERIALIZER);
     FluidClientEvents.clientSetup();
     GadgetClientEvents.init();

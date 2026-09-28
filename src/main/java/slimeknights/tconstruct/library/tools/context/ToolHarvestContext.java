@@ -25,6 +25,8 @@ public class ToolHarvestContext {
   /** Player harvesting the block, null if not a player */
   @Nullable
   private final ServerPlayer player;
+  @Nullable
+  private final Projectile projectile;
   /** State being harvested */
   private final BlockState state;
   /** Position being harvested */
@@ -45,24 +47,19 @@ public class ToolHarvestContext {
   /** Originally targeted block state. Will be the same as {@link #state} for the original block */
   private final BlockState targetedState;
 
+  public ToolHarvestContext(ServerLevel world, ServerPlayer player, @Nullable Projectile projectile, BlockState state, BlockPos pos, Direction sideHit, boolean canHarvest, boolean isEffective) {
+    this(world, player, player, projectile, state, pos, sideHit, canHarvest, isEffective, false, pos, state);
+  }
+
   public ToolHarvestContext(ServerLevel world, ServerPlayer player, BlockState state, BlockPos pos, Direction sideHit, boolean canHarvest, boolean isEffective) {
-    this.world = world;
-    this.living = player;
-    this.player = player;
-    this.state = state;
-    this.pos = pos;
-    this.canHarvest = canHarvest;
-    this.isEffective = isEffective;
-    this.sideHit = sideHit;
-    this.isAOE = false;
-    this.targetedPos = pos;
-    this.targetedState = state;
+    this(world, player, null, state, pos, sideHit, canHarvest, isEffective);
   }
 
   public ToolHarvestContext(ServerLevel world, LivingEntity living, BlockState state, BlockPos pos, Direction sideHit, boolean canHarvest, boolean isEffective) {
     this.world = world;
     this.living = living;
     this.player = living instanceof ServerPlayer ? (ServerPlayer) living : null;
+    this.projectile = null;
     this.state = state;
     this.pos = pos;
     this.canHarvest = canHarvest;

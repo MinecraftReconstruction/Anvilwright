@@ -9,15 +9,15 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /**
  * Builder to make parts and composites castable
@@ -37,6 +37,9 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
   /** Material base for composite */
   @Setter @Nullable
   private MaterialVariantId inputId;
+  /** If true, this recipe will not show in book pages. */
+  @Setter
+  private boolean hideInBook = false;
 
   /**
    * Sets the fluid for this recipe, and cooling time if unset.
@@ -75,27 +78,6 @@ public class MaterialFluidRecipeBuilder extends AbstractRecipeBuilder<MaterialFl
       throw new IllegalStateException("Temperature is too low, must be at least 0");
     }
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "materials");
-    consumer.accept(new Result(id, advancementId));
-  }
-
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      if (inputId != null) {
-        json.addProperty("input", inputId.toString());
-      }
-      json.add("fluid", fluid.serialize());
-      json.addProperty("temperature", temperature);
-      json.addProperty("output", outputId.toString());
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerSmeltery.materialFluidRecipe.get();
-    }
+    consumer.accept(new LoadableFinishedRecipe<>(new MaterialFluidRecipe(id, fluid, temperature, inputId, outputId, hideInBook), MaterialFluidRecipe.LOADER, advancementId));
   }
 }

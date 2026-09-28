@@ -19,14 +19,12 @@ import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 public abstract class RetexturedTableBlockEntity extends TableBlockEntity implements IRetexturedBlockEntity, CustomRenderBoundingBoxBlockEntity {
   private static final String TAG_TEXTURE = "texture";
 
-  private final Lazy<IModelData> data = Lazy.of(this::getRetexturedModelData);
   @Nonnull @Getter
-  private Block texture = Blocks.AIR;
+  protected Block texture = Blocks.AIR;
   public RetexturedTableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, Component name, int size) {
     super(type, pos, state, name, size);
   }
@@ -90,14 +88,6 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
     if (tags.contains(TAG_TEXTURE, Tag.TAG_STRING)) {
       texture = RetexturedHelper.getBlock(tags.getString(TAG_TEXTURE));
       textureUpdated();
-      // legacy fallback for anyone who ported from 1.16 (though I doubt that would work). Remove sometime later in 1.18
-    } else if (tags.contains("ForgeData", Tag.TAG_COMPOUND)) {
-      CompoundTag forgeData = tags.getCompound("ForgeData");
-      if (forgeData.contains(TAG_TEXTURE, Tag.TAG_STRING)) {
-        texture = RetexturedHelper.getBlock(forgeData.getString(TAG_TEXTURE));
-        textureUpdated();
-        forgeData.remove(TAG_TEXTURE);
-      }
     }
   }
     

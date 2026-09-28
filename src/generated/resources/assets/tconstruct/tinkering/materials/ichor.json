@@ -1,46 +1,30 @@
 {
-  "color": "FFB97C",
-  "luminosity": 0,
+  "color": "FFFFB97C",
   "generator": {
+    "supported_stats": [
+      "tconstruct:slime",
+      "tconstruct:slimesuit",
+      "tconstruct:repair_kit",
+      "tconstruct:arrow_head",
+      "tconstruct:fletching"
+    ],
     "transformer": {
       "type": "tconstruct:recolor_sprite",
       "color_mapping": {
         "type": "tconstruct:grey_to_color",
-        "palette": [
-          {
-            "grey": 0,
-            "color": "FF000000"
-          },
-          {
-            "grey": 63,
-            "color": "FFB04000"
-          },
-          {
-            "grey": 102,
-            "color": "FFD35200"
-          },
-          {
-            "grey": 140,
-            "color": "FFEC5E00"
-          },
-          {
-            "grey": 178,
-            "color": "FFFF8324"
-          },
-          {
-            "grey": 216,
-            "color": "FFFFB97C"
-          },
-          {
-            "grey": 255,
-            "color": "FFFFFFFF"
-          }
-        ]
+        "palette": {
+          "000": "FF000000",
+          "063": "FFB04000",
+          "102": "FFD35200",
+          "127": "FFEC5E00",
+          "140": "FFFF6E05",
+          "178": "FFFF8324",
+          "193": "FFFF9F50",
+          "216": "FFFFB97C",
+          "255": "FFFFE1BF"
+        }
       }
-    },
-    "supportedStats": [
-      "tconstruct:slimesuit"
-    ],
-    "ignoreMaterialStats": false
-  }
+    }
+  },
+  "luminosity": 10
 }

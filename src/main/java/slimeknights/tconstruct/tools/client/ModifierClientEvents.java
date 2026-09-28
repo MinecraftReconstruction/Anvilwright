@@ -10,9 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
@@ -21,18 +21,19 @@ import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.events.ToolEquipmentChangeEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.data.FloatMultiplier;
+import slimeknights.tconstruct.library.modifiers.modules.technical.ArmorLevelModule;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataKeys;
+import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
-import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableBowItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.modifiers.ability.armor.ShieldStrapModifier;
-import slimeknights.tconstruct.tools.modifiers.upgrades.armor.ItemFrameModifier;
+import slimeknights.tconstruct.tools.modules.armor.MinimapModule;
+import slimeknights.tconstruct.tools.modules.armor.SleevesModule;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -66,26 +67,16 @@ public class ModifierClientEvents {
   static void renderHand(RenderHandCallback.RenderHandEvent event) {
     InteractionHand hand = event.getHand();
     Player player = Minecraft.getInstance().player;
-    if (hand != InteractionHand.OFF_HAND || player == null) {
+    if (player == null) {
       return;
     }
-    ItemStack mainhand = player.getMainHandItem();
-    ItemStack offhand = event.getItemStack();
-    if (mainhand.is(TinkerTags.Items.TWO_HANDED)) {
-      ToolStack tool = ToolStack.from(mainhand);
-      // special support for replacing modifier
-      IModDataView volatileData = tool.getVolatileData();
-      boolean noInteraction = volatileData.getBoolean(IModifiable.NO_INTERACTION);
-      if (!noInteraction && !volatileData.getBoolean(IModifiable.DEFER_OFFHAND)) {
-        if (!(offhand.getItem() instanceof BlockItem) || tool.getModifierLevel(TinkerModifiers.exchanging.getId()) == 0) {
-          event.setCanceled(true);
-          return;
-        }
-      }
-      // don't render empty offhand if main stack does not have upgraded offhanded
-      if (!noInteraction && offhand.isEmpty()) {
-        return;
-      }
+    // when firing your melee weapon with ballista, don't render it in the other hand; makes it look like you duplicated your weapon
+    InteractionHand hand = event.getHand();
+    ItemStack held = player.getItemInHand(hand);
+    ItemStack opposite = player.getItemInHand(Util.getOpposite(hand));
+    if (!held.isEmpty() && !opposite.isEmpty() && opposite.is(TinkerTags.Items.BALLISTAS) && ModifierUtil.getPersistentInt(opposite, ModifiableBowItem.KEY_BALLISTA, 0) == ModifiableBowItem.FLAG_BALLISTA_HELD) {
+      event.setCanceled(true);
+      return;
     }
 
     // if the data is set, render the empty offhand
@@ -97,9 +88,6 @@ public class ModifierClientEvents {
         matrices.popPose();
         event.setCanceled(true);
       }
-      // if the offhand is two handed and is not upgraded to be used
-    } else if (offhand.is(TinkerTags.Items.TWO_HANDED) && !ModifierUtil.checkVolatileFlag(offhand, IModifiable.DEFER_OFFHAND)) {
-      event.setCanceled(true);
     }
   }
 
@@ -141,28 +129,55 @@ public class ModifierClientEvents {
 
   /** Cache of the current item to render */
   private static final int SLOT_BACKGROUND_SIZE = 22;
+  /** Size of the border around the map */
+  private static final int MAP_PADDING = 7;
+  /** Total map size */
+  private static final int MAP_SIZE = 2 * MAP_PADDING + 128;
 
   @Nonnull
   private static ItemStack nextOffhand = ItemStack.EMPTY;
+  @Nonnull
+  private static ItemStack currentSleeve = ItemStack.EMPTY;
 
   /** Items to render for the item frame modifier */
   private static final List<ItemStack> itemFrames = new ArrayList<>();
 
+  @SubscribeEvent
+  static void playerLoggedOut(LoggingOut event) {
+    nextOffhand = ItemStack.EMPTY;
+    itemFrames.clear();
+  }
+
   /** Update the slot in the first shield slot */
   static void equipmentChange(ToolEquipmentChangeEvent event) {
+    if (event.getEntity() != Minecraft.getInstance().player) {
+      return;
+    }
     EquipmentChangeContext context = event.getContext();
     if (Config.CLIENT.renderShieldSlotItem.get()) {
       if (event.getEntity() == Minecraft.getInstance().player && context.getChangedSlot() == EquipmentSlot.LEGS) {
         IToolStackView tool = context.getToolInSlot(EquipmentSlot.LEGS);
         if (tool != null) {
-          ShieldStrapModifier modifier = TinkerModifiers.shieldStrap.get();
-          ModifierEntry entry = tool.getModifiers().getEntry(modifier.getId());
-          if (entry != null) {
-            nextOffhand = modifier.getStack(tool, entry, 0);
+          ModifierEntry entry = tool.getModifiers().getEntry(TinkerModifiers.shieldStrap.getId());
+          if (entry != ModifierEntry.EMPTY) {
+            nextOffhand = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, 0);
             return;
           }
         }
         nextOffhand = ItemStack.EMPTY;
+      }
+    }
+    if (Config.CLIENT.renderSleevesItem.get()) {
+      if (context.getChangedSlot() == EquipmentSlot.CHEST) {
+        IToolStackView tool = context.getToolInSlot(EquipmentSlot.CHEST);
+        if (tool != null) {
+          ModifierEntry entry = tool.getModifiers().getEntry(TinkerModifiers.sleeves.getId());
+          if (entry != ModifierEntry.EMPTY) {
+            currentSleeve = entry.getHook(ToolInventoryCapability.HOOK).getStack(tool, entry, tool.getPersistentData().getInt(SleevesModule.SELECTED_SLOT));
+            return;
+          }
+        }
+        currentSleeve = ItemStack.EMPTY;
       }
     }
 
@@ -171,14 +186,30 @@ public class ModifierClientEvents {
         itemFrames.clear();
         IToolStackView tool = context.getToolInSlot(EquipmentSlot.HEAD);
         if (tool != null) {
-          ItemFrameModifier modifier = TinkerModifiers.itemFrame.get();
-          int level = tool.getModifierLevel(modifier);
-          if (level > 0) {
-            modifier.getAllStacks(tool, level, itemFrames);
+          ModifierEntry entry = tool.getModifier(TinkerModifiers.itemFrame.getId());
+          if (entry.intEffectiveLevel() > 0) {
+            entry.getHook(ToolInventoryCapability.HOOK).getAllStacks(tool, entry, itemFrames);
           }
         }
       }
     }
+  }
+
+  /** Gets the offset to apply for potion effects on the player */
+  private static int getEffectOffset(Player player) {
+    boolean hasBeneficial = false;
+    for (MobEffectInstance instance : player.getActiveEffects()) {
+      if (instance.showIcon() && IClientMobEffectExtensions.of(instance).isVisibleInGui(instance)) {
+        if (instance.getEffect().isBeneficial()) {
+          hasBeneficial = true;
+        } else {
+          // negative effects means offset two rows
+          return 52;
+        }
+      }
+    }
+    // if we found a positive effect, only need one row. Otherwise none
+    return hasBeneficial ? 26 : 0;
   }
 
   /** Render the item in the first shield slot */

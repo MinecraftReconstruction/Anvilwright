@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.client.data.material;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,20 +12,26 @@ import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;
 import slimeknights.tconstruct.library.client.data.spritetransformer.ISpriteTransformer;
 import slimeknights.tconstruct.library.client.data.spritetransformer.RecolorSpriteTransformer;
-import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoJson.MaterialGeneratorJson;
+import slimeknights.tconstruct.library.client.materials.MaterialGeneratorInfo;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatType;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
-import slimeknights.tconstruct.tools.stats.ExtraMaterialStats;
+import slimeknights.tconstruct.tools.data.sprite.TinkerPartSpriteProvider;
 import slimeknights.tconstruct.tools.stats.GripMaterialStats;
 import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
 import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
 import slimeknights.tconstruct.tools.stats.LimbMaterialStats;
-import slimeknights.tconstruct.tools.stats.RepairKitStats;
+import slimeknights.tconstruct.tools.stats.PlatingMaterialStats;
+import slimeknights.tconstruct.tools.stats.RepairStats;
+import slimeknights.tconstruct.tools.stats.SlimeStats;
+import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -79,7 +87,7 @@ public abstract class AbstractMaterialSpriteProvider {
   }
 
   /** Data for material rendering */
-  public static class MaterialSpriteInfo extends MaterialGeneratorJson {
+  public static class MaterialSpriteInfo extends MaterialGeneratorInfo {
     /** Material texture name for the material */
     @Getter
     private transient final ResourceLocation texture;
@@ -87,14 +95,14 @@ public abstract class AbstractMaterialSpriteProvider {
     @Getter
     private transient final String[] fallbacks;
 
-    public MaterialSpriteInfo(ResourceLocation texture, String[] fallbacks, MaterialGeneratorJson generatorJson) {
+    public MaterialSpriteInfo(ResourceLocation texture, String[] fallbacks, MaterialGeneratorInfo generatorJson) {
       super(generatorJson);
       this.texture = texture;
       this.fallbacks = fallbacks;
     }
 
-    public MaterialSpriteInfo(ResourceLocation texture, String[] fallbacks, ISpriteTransformer transformer, Set<MaterialStatsId> supportedStats) {
-      super(transformer, supportedStats, false);
+    public MaterialSpriteInfo(ResourceLocation texture, String[] fallbacks, ISpriteTransformer transformer, Set<MaterialStatsId> supportedStats, boolean variant) {
+      super(transformer, supportedStats, false, variant);
       this.texture = texture;
       this.fallbacks = fallbacks;
     }
@@ -106,14 +114,16 @@ public abstract class AbstractMaterialSpriteProvider {
       }
       // if material registry is loaded and we are not ignoring it, allow checking that
       if (!ignoreMaterialStats && MaterialRegistry.isFullyLoaded()) {
-        return MaterialRegistry.getInstance().getMaterialStats(new MaterialId(texture), statType).isPresent();
+        return  MaterialRegistry.getInstance().getMaterialStats(new MaterialId(texture), statType).isPresent();
       }
-      return super.supportStatType(statType);
+      return false;
     }
   }
 
   /** Builder for material sprite info */
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+  @CanIgnoreReturnValue
+  @Accessors(fluent = true)
   protected static class MaterialSpriteInfoBuilder {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private final ResourceLocation texture;
@@ -121,8 +131,11 @@ public abstract class AbstractMaterialSpriteProvider {
     private final ImmutableSet.Builder<MaterialStatsId> statTypes = ImmutableSet.builder();
 
     /** Transformer to modify textures */
-    @Setter @Accessors(fluent = true)
+    @Setter
+    @Nullable
     private ISpriteTransformer transformer;
+    @Setter
+    private boolean variant = false;
 
     /** Sets the fallbacks */
     public MaterialSpriteInfoBuilder fallbacks(String... fallbacks) {
@@ -133,6 +146,11 @@ public abstract class AbstractMaterialSpriteProvider {
     /** Sets the transformer to a color mapping transform */
     public MaterialSpriteInfoBuilder colorMapper(IColorMapping mapping) {
       return transformer(new RecolorSpriteTransformer(mapping));
+    }
+
+    /** Marks this as a variant texture, which is skipped by some sprites such as ancient tools (which can never obtain them) */
+    public MaterialSpriteInfoBuilder variant() {
+      return variant(true);
     }
 
     /** Adds a stat type as supported */
@@ -147,12 +165,41 @@ public abstract class AbstractMaterialSpriteProvider {
       return this;
     }
 
+    /** Adds a stat type as supported */
+    public MaterialSpriteInfoBuilder statType(IMaterialStats... stats) {
+      for (IMaterialStats stat : stats) {
+        statTypes.add(stat.getIdentifier());
+      }
+      return this;
+    }
+
+    /** Adds a stat type as supported */
+    public MaterialSpriteInfoBuilder statType(MaterialStatType<?>... stats) {
+      for (MaterialStatType<?> stat : stats) {
+        statTypes.add(stat.getId());
+      }
+      return this;
+    }
+
+    /** Adds a stat type as supported */
+    public MaterialSpriteInfoBuilder statType(List<? extends MaterialStatType<?>> stats) {
+      for (MaterialStatType<?> stat : stats) {
+        statTypes.add(stat.getId());
+      }
+      return this;
+    }
+
+    /** Adds repair kits */
+    public MaterialSpriteInfoBuilder repairKit() {
+      return statType(StatlessMaterialStats.REPAIR_KIT.getIdentifier());
+    }
+
     /** Adds stat types for melee and harvest tools - head, handle and extra */
     public MaterialSpriteInfoBuilder meleeHarvest() {
       statType(HeadMaterialStats.ID);
       statType(HandleMaterialStats.ID);
-      statType(ExtraMaterialStats.ID);
-      statType(RepairKitStats.ID);
+      statType(StatlessMaterialStats.BINDING.getIdentifier());
+      repairKit();
       return this;
     }
 
@@ -160,11 +207,89 @@ public abstract class AbstractMaterialSpriteProvider {
     public MaterialSpriteInfoBuilder ranged() {
       statType(LimbMaterialStats.ID);
       statType(GripMaterialStats.ID);
-      statType(RepairKitStats.ID);
+      repairKit();
+      return this;
+    }
+
+    /** Adds stat types for maille */
+    public MaterialSpriteInfoBuilder maille() {
+      statType(StatlessMaterialStats.MAILLE.getIdentifier());
+      statType(TinkerPartSpriteProvider.ARMOR_MAILLE);
+      return this;
+    }
+
+    /** Adds stat types for maille */
+    public MaterialSpriteInfoBuilder cuirass() {
+      statType(StatlessMaterialStats.CUIRASS.getIdentifier());
+      statType(TinkerPartSpriteProvider.ARMOR_CUIRASS);
+      repairKit(); // used by traveler's gear
+      return this;
+    }
+
+    /** Adds all plating stat types */
+    public MaterialSpriteInfoBuilder plating() {
+      statType(TinkerPartSpriteProvider.ARMOR_PLATING);
+      for (MaterialStatType<?> type : PlatingMaterialStats.TYPES) {
+        statType(type.getId());
+      }
+      repairKit();
+      return this;
+    }
+
+    /** Adds stat types for armor, all plating plus maille */
+    public MaterialSpriteInfoBuilder armor() {
+      plating();
+      maille();
+      return this;
+    }
+
+    /** Adds slime textures for the given material. */
+    public MaterialSpriteInfoBuilder slime() {
+      return statType(SlimeStats.ID, TinkerPartSpriteProvider.SLIMESUIT).repairKit();
+    }
+
+    /** Adds a slimesuit ribcage part for the given material. */
+    public MaterialSpriteInfoBuilder ribcage() {
+      return statType(RepairStats.RIBCAGE).statType(TinkerPartSpriteProvider.SLIMESUIT_OVERLAY).repairKit();
+    }
+
+    /** Adds a slimesuit shell part for the given material. */
+    public MaterialSpriteInfoBuilder shell() {
+      return statType(RepairStats.SHELL).repairKit();
+    }
+
+    /** Adds a slimesuit laces part for the given material. */
+    public MaterialSpriteInfoBuilder laces() {
+      return statType(RepairStats.LACES).statType(TinkerPartSpriteProvider.SLIMESUIT_OVERLAY).repairKit();
+    }
+
+    /** Makes this work as the wood part for a shield */
+    public MaterialSpriteInfoBuilder shieldCore() {
+      statType(StatlessMaterialStats.SHIELD_CORE);
+      repairKit(); // used by traveler's shields
+      return this;
+    }
+
+    /** Makes this work as the head for an arrow or shuriken */
+    public MaterialSpriteInfoBuilder arrowHead() {
+      statType(StatlessMaterialStats.ARROW_HEAD);
+      return this;
+    }
+
+    /** Makes this work as the shaft for an arrow */
+    public MaterialSpriteInfoBuilder arrowShaft() {
+      statType(StatlessMaterialStats.ARROW_SHAFT);
+      return this;
+    }
+
+    /** Makes this work as the shaft for an arrow */
+    public MaterialSpriteInfoBuilder fletching() {
+      statType(StatlessMaterialStats.FLETCHING);
       return this;
     }
 
     /** Builds a material sprite info */
+    @CheckReturnValue
     private MaterialSpriteInfo build() {
       if (transformer == null) {
         throw new IllegalStateException("Material must have a transformer for a sprite provider");
@@ -173,7 +298,7 @@ public abstract class AbstractMaterialSpriteProvider {
       if (supportedStats.isEmpty()) {
         throw new IllegalStateException("Material must support at least one stat type");
       }
-      return new MaterialSpriteInfo(texture, fallbacks, transformer, supportedStats);
+      return new MaterialSpriteInfo(texture, fallbacks, transformer, supportedStats, variant);
     }
   }
 }

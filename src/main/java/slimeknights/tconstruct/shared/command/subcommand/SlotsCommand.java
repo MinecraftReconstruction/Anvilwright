@@ -14,9 +14,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.command.MantleCommand;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.shared.command.HeldModifiableItemIterator;
 import slimeknights.tconstruct.shared.command.argument.SlotTypeArgument;
@@ -67,7 +66,7 @@ public class SlotsCommand {
     List<LivingEntity> successes = HeldModifiableItemIterator.apply(context, (living, stack) -> {
       // add slots
       ToolStack tool = ToolStack.copyFrom(stack);
-      ModDataNBT slots = tool.getPersistentData();
+      ToolDataNBT slots = tool.getPersistentData();
       if (op == Operation.ADD) {
         slots.addSlots(slotType, count);
       } else {
@@ -77,13 +76,13 @@ public class SlotsCommand {
       tool.rebuildStats();
 
       // ensure no modifier problems after adding, mainly happens if we subtract slots
-      ValidatedResult toolValidation = tool.validate();
-      if (toolValidation.hasError()) {
-        throw VALIDATION_ERROR.create(toolValidation.getMessage());
+      Component toolValidation = tool.tryValidate();
+      if (toolValidation != null) {
+        throw VALIDATION_ERROR.create(toolValidation);
       }
 
       // if successful, update held item
-      living.setItemInHand(InteractionHand.MAIN_HAND, tool.createStack(stack.getCount()));
+      living.setItemInHand(InteractionHand.MAIN_HAND, tool.copyStack(stack));
       return true;
     });
 

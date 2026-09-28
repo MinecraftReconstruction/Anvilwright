@@ -35,25 +35,27 @@ import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo.TintedSprite;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
-import slimeknights.tconstruct.library.client.model.DynamicTextureLoader;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
+/**
+ * Model for an item with material texture variants, such as tool parts. Used only for single material items, {@link ToolModel} is used for multi-material items.
+ */
 @AllArgsConstructor
 @Log4j2
 public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
 
   /** Shared loader instance */
-  public static final Loader LOADER = new Loader();
+  public static final IGeometryLoader<MaterialModel> LOADER = MaterialModel::deserialize;
 
   /** If null, uses dynamic material */
   @Nullable
@@ -70,8 +72,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   }
 
   /**
-   * Gets the list of material textures for the given owner texture
-   * @param allTextures  Collection of textures
+   * Checks that all unique material textures for the given part exist, logs any that are missing via the sprite getter function.
    * @param owner        Model owner
    * @param textureName  Texture name to add
    * @param material     List of materials
@@ -80,15 +81,13 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
     Material texture = owner.getMaterial(textureName);
     allTextures.add(texture);
 
-    // if the texture is missing, stop here
+    // if the texture is missing, stop here with a warning for the root
     if (!MissingTextureAtlasSprite.getLocation().equals(texture.texture())) {
-      // texture should exist in item/tool, or the validator cannot handle them
-      Predicate<Material> textureAdder = DynamicTextureLoader.getTextureAdder(allTextures, Config.CLIENT.logMissingMaterialTextures.get());
       // if no specific material is set, load all materials as dependencies. If just one material, use just that one
       if (material == null) {
-        MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos().forEach(info -> info.getTextureDependencies(textureAdder, texture));
+        MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos().forEach(info -> info.getSprite(texture, spriteGetter));
       } else {
-        MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material).ifPresent(info -> info.getTextureDependencies(textureAdder, texture));
+        MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material).ifPresent(info -> info.getSprite(texture, spriteGetter));
       }
     }
   }
@@ -125,41 +124,20 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   /**
    * Gets the quads for a material for the given texture
    * @param texture       Base texture
-   * @param spriteGetter  Sprite getter
-   * @param transform     Model transform
-   * @param index         Sprite tint index
-   * @param material      Material to use
-   * @param pixels        Pixels for the z-fighting fix. See {@link MantleItemLayerModel} for more information
-   * @return  Model quads
+   * @param material      Material variant
+   * @return  Tinted sprite or fallback
    */
   public static TextureAtlasSprite getPartQuads(Consumer<Mesh> quadConsumer, Material texture, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transform, int index, @Nullable MaterialVariantId material, @Nullable ItemLayerPixels pixels) {
     int color = -1;
     int light = 0;
     TextureAtlasSprite finalSprite = null;
     // if the base material is non-null, try to find the sprite for that material
-    if (material != null) {
-      // first, find a render info
-      Optional<MaterialRenderInfo> optional = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material);
-      if (optional.isPresent()) {
-        // determine the texture to use and whether or not to tint it
-        MaterialRenderInfo info = optional.get();
-        TintedSprite sprite = info.getSprite(texture, spriteGetter);
-        finalSprite = sprite.sprite();
-        color = sprite.color();
-        light = info.getLuminosity();
-      }
+    // first, find a render info
+    Optional<MaterialRenderInfo> optional = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material);
+    if (optional.isPresent()) {
+      return optional.get().getSprite(texture, spriteGetter);
     }
-
-    // if we have no material, or the material failed to fetch, use the default sprite and tint index
-    if (finalSprite == null) {
-      finalSprite = spriteGetter.apply(texture);
-    }
-
-    // get quads
-    quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels));
-
-    // return sprite
-    return finalSprite;
+    return new TintedSprite(spriteGetter.apply(texture), -1, 0);
   }
 
   /**
@@ -184,6 +162,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   @Override
   public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides vanillaOverrides, ResourceLocation modelLocation, boolean isGui3d) {
     // create transforms from offset
+    // TODO: figure out forge transforms, can I use them here?
     Transformation transforms;
     if (Vec2.ZERO.equals(offset)) {
       transforms = Transformation.identity();
@@ -200,7 +179,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
     }
 
     // after that its base logic
-    return bakeInternal(owner, spriteGetter, transforms, material, index, overrides);
+    return bakeInternal(owner, spriteGetter, transforms, Objects.requireNonNullElse(material, MaterialId.UNKNOWN), index, overrides);
   }
 
   /**
@@ -267,6 +246,25 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
 
   /* Helpers */
 
+  /** Loads a material model from JSON */
+  public static MaterialModel deserialize(JsonObject json, JsonDeserializationContext context) {
+    // need tint index for tool models, doubles as part index
+    int index = GsonHelper.getAsInt(json, "index", 0);
+
+    // static material can be defined, if unset uses dynamic material
+    MaterialVariantId material = null;
+    if (json.has("material")) {
+      material = MaterialVariantId.fromJson(json, "material");
+    }
+
+    Vec2 offset = Vec2.ZERO;
+    if (json.has("offset")) {
+      offset = getVec2(json, "offset");
+    }
+
+    return new MaterialModel(material, index, offset);
+  }
+
   /**
    * Converts a JSON float array to the specified object
    * @param json    JSON object
@@ -274,7 +272,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
    * @return  Vector3f of data
    * @throws JsonParseException  If there is no array or the length is wrong
    */
-  public static Vec2 arrayToObject(JsonObject json, String name) {
+  public static Vec2 getVec2(JsonObject json, String name) {
     JsonArray array = GsonHelper.getAsJsonArray(json, name);
     if (array.size() != 2) {
       throw new JsonParseException("Expected " + 2 + " " + name + " values, found: " + array.size());

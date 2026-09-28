@@ -76,6 +76,7 @@ public class FancyItemFrameEntity extends ItemFrame implements EntityPickInterac
     super.tick();
     // diamond spins on both sides
     int frameId = getFrameId();
+    Level level = level();
     if (frameId == FrameType.DIAMOND.getId()) {
       rotationTimer++;
       // diamond winds down every 30 seconds, but does not go past 0, makes a full timer 3:30
@@ -139,7 +140,7 @@ public class FancyItemFrameEntity extends ItemFrame implements EntityPickInterac
         this.playSound(Sounds.ITEM_FRAME_CLICK.getSound(), 1.0f, 1.0f);
       }
       // diamond allows rotation between 0 and 16
-      setRotationRaw(Math.min(rotationIn, 16), updateComparator);
+      setRotationRaw(rotationIn, updateComparator);
     } else {
       // non diamond rotates around after 7
       setRotationRaw(rotationIn % 8, updateComparator);
@@ -198,8 +199,9 @@ public class FancyItemFrameEntity extends ItemFrame implements EntityPickInterac
       return 0;
     }
     int rotation = getRotation();
-    if (getFrameId() == FrameType.DIAMOND.getId()) {
-      return Math.min(15, rotation + 1);
+    // seems more useful to have 16 unique rotation values than 15 unique values plus 1 for empty
+    if (FrameType.hasMoreRotations(getFrameId())) {
+      return rotation;
     }
     return rotation % 8 + 1;
   }

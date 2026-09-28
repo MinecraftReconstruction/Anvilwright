@@ -56,7 +56,8 @@ public class SideButtonsWidget<T extends Button> implements Renderable, GuiEvent
       T button = this.buttons.get(i);
       int x = (i % columns) * (button.getWidth() + SPACING);
       int y = (i / columns) * (button.getHeight() + SPACING);
-      button.setPosition(leftPos + x, topPos + y);
+      button.setX(leftPos + x);
+      button.setY(topPos + y);
     }
   }
 
@@ -117,5 +118,14 @@ public class SideButtonsWidget<T extends Button> implements Renderable, GuiEvent
    */
   public static int size(int buttonCount, int buttonSize) {
     return buttonSize * buttonCount + SPACING * (buttonCount - 1);
+  }
+
+  // TODO: do I need to use these?
+  @Override
+  public void setFocused(boolean pFocused) {}
+
+  @Override
+  public boolean isFocused() {
+    return false;
   }
 }

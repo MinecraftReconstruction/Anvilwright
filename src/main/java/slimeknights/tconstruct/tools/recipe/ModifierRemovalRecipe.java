@@ -12,50 +12,51 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierSalvage;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.ModifierRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
-import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.worktable.AbstractWorktableRecipe;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.library.utils.JsonUtils;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
-  private static final Component TITLE = TConstruct.makeTranslation("recipe", "remove_modifier.title");
+  public static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "remove_modifier");
   private static final Component DESCRIPTION = TConstruct.makeTranslation("recipe", "remove_modifier.description");
   private static final Component NO_MODIFIERS = TConstruct.makeTranslation("recipe", "remove_modifier.no_modifiers");
+  public static final SizedIngredient DEFAULT_TOOLS = SizedIngredient.of(AbstractWorktableRecipe.DEFAULT_TOOLS);
 
+  protected static final LoadableField<String,ModifierRemovalRecipe> NAME_FIELD = StringLoadable.DEFAULT.defaultField("name", "modifiers", true, r -> r.name);
+  protected static final LoadableField<SizedIngredient,ModifierRemovalRecipe> TOOLS_FIELD = SizedIngredient.LOADABLE.defaultField("tools", DEFAULT_TOOLS, true, r -> r.sizedTool);
+  protected static final LoadableField<List<ItemStack>,ModifierRemovalRecipe> LEFTOVERS_FIELD = ItemStackLoadable.REQUIRED_STACK_NBT.list(0).defaultField("leftovers", List.of(), r -> r.leftovers);
+  protected static final LoadableField<IJsonPredicate<ModifierId>,ModifierRemovalRecipe> MODIFIER_PREDICATE_FIELD = ModifierPredicate.LOADER.defaultField("modifier_predicate", false, r -> r.modifierPredicate);
+
+  /** Recipe loadable */
+  public static final RecordLoadable<ModifierRemovalRecipe> LOADER = RecordLoadable.create(ContextKey.ID.requiredField(), NAME_FIELD, TOOLS_FIELD, INPUTS_FIELD, LEFTOVERS_FIELD, MODIFIER_PREDICATE_FIELD, ModifierRemovalRecipe::new);
+
+  private final String name;
+  @Getter
+  private final Component title;
   private final SizedIngredient sizedTool;
   private final List<ItemStack> leftovers;
   private final IJsonPredicate<ModifierId> modifierPredicate;
@@ -63,29 +64,19 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   protected final Predicate<ModifierEntry> entryPredicate;
   private List<ModifierEntry> displayModifiers;
 
-  public ModifierRemovalRecipe(ResourceLocation id, SizedIngredient toolRequirement, List<SizedIngredient> inputs, List<ItemStack> leftovers, IJsonPredicate<ModifierId> modifierPredicate) {
-    super(id, Ingredient.EMPTY, inputs);
+  public ModifierRemovalRecipe(ResourceLocation id, String name, SizedIngredient toolRequirement, List<SizedIngredient> inputs, List<ItemStack> leftovers, IJsonPredicate<ModifierId> modifierPredicate) {
+    super(id, toolRequirement.getIngredient(), inputs);
+    this.name = name;
+    this.title = Component.translatable(getBaseKey() + "." + name);
     this.sizedTool = toolRequirement;
     this.leftovers = leftovers;
     this.modifierPredicate = modifierPredicate;
     this.entryPredicate = mod -> modifierPredicate.matches(mod.getId());
   }
 
-  /** @deprecated use {#link #ModifierRemovalRecipe(ResourceLocation, SizedIngredient, List, List, IJsonPredicate} */
-  @Deprecated
-  public ModifierRemovalRecipe(ResourceLocation id, List<SizedIngredient> inputs, List<ItemStack> leftovers, IJsonPredicate<ModifierId> modifierPredicate) {
-    this(id, SizedIngredient.fromTag(TinkerTags.Items.MODIFIABLE), inputs, leftovers, modifierPredicate);
-  }
-
-  /** @deprecated use {@link #ModifierRemovalRecipe(ResourceLocation, SizedIngredient, List, List, IJsonPredicate)} */
-  @Deprecated
-  public ModifierRemovalRecipe(ResourceLocation id, List<SizedIngredient> inputs, List<ItemStack> leftovers) {
-    this(id, inputs, leftovers, ModifierPredicate.ALWAYS);
-  }
-
-  @Override
-  public Component getTitle() {
-    return TITLE;
+  /** Gets the base key for the title translation */
+  protected String getBaseKey() {
+    return BASE_KEY;
   }
 
   @Override
@@ -98,7 +89,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
 
   /** Filters the given modifier list */
   protected List<ModifierEntry> filter(@Nullable IToolStackView tool, List<ModifierEntry> modifiers) {
-    if (modifierPredicate != ModifierPredicate.ALWAYS) {
+    if (modifierPredicate != ModifierPredicate.ANY) {
       return modifiers.stream().filter(entryPredicate).toList();
     }
     return modifiers;
@@ -124,13 +115,14 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   }
 
   @Override
-  public RecipeResult<ToolStack> getResult(ITinkerableContainer inv, ModifierEntry entry) {
-    ToolStack tool = inv.getTinkerable();
+  public RecipeResult<LazyToolStack> getResult(ITinkerableContainer inv, ModifierEntry entry) {
+    ToolStack original = inv.getTinkerable();
 
     // salvage
-    tool = tool.copy();
+    ToolStack tool = original.copy();
     ModifierId modifierId = entry.getId();
-    ModifierSalvage salvage = ModifierRecipeLookup.getSalvage(inv.getTinkerableStack(), tool, modifierId, entry.getLevel());
+    ItemStack originalStack = inv.getTinkerableStack();
+    ModifierSalvage salvage = ModifierRecipeLookup.getSalvage(originalStack, tool, modifierId, entry.getLevel());
 
     // restore the slots
     if (salvage != null) {
@@ -141,7 +133,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
     int newLevel = tool.getModifierLevel(modifierId) - 1;
     Modifier modifier = entry.getModifier();
     if (newLevel <= 0) {
-      modifier.getHook(TinkerHooks.RAW_DATA).removeRawData(tool, modifier, tool.getRestrictedNBT());
+      modifier.getHook(ModifierHooks.RAW_DATA).removeRawData(tool, modifier, tool.getRestrictedNBT());
     }
 
     // remove the actual modifier
@@ -152,32 +144,17 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
     if (error != null) {
       return RecipeResult.failure(error);
     }
-    // if this was the last level, validate the tool is still valid without it
-    if (newLevel <= 0) {
-      error = modifier.getHook(TinkerHooks.REMOVE).onRemoved(tool, modifier);
-      if (error != null) {
-        return RecipeResult.failure(error);
-      }
+    error = ModifierRemovalHook.onRemoved(original, tool);
+    if (error != null) {
+      return RecipeResult.failure(error);
     }
-
-    // check the modifier requirements
-    ValidatedResult validated = ModifierRecipeLookup.checkRequirements(inv.getTinkerableStack(), tool);
-    if (validated.hasError()) {
-      return RecipeResult.failure(validated.getMessage());
-    }
-
     // successfully removed
-    return RecipeResult.success(tool);
+    return LazyToolStack.successCopy(tool, originalStack);
   }
 
   @Override
-  public int toolResultSize() {
-    return 64;
-  }
-
-  @Override
-  public void updateInputs(IToolStackView result, ITinkerableContainer.Mutable inv, boolean isServer) {
-    super.updateInputs(result, inv, isServer);
+  public void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
+    super.updateInputs(result, inv, selected, isServer);
     if (isServer) {
       for (ItemStack stack : leftovers) {
         inv.giveItem(stack.copy());

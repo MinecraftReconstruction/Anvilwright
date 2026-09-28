@@ -1,21 +1,13 @@
 {
-  "loader": "tconstruct:table",
+  "loader": "tconstruct:material_block",
   "parent": "block/block",
   "textures": {
-    "particle": "tconstruct:block/chest/cast/side",
-    "top": "tconstruct:block/chest/cast/side",
+    "particle": "tconstruct:block/storage/fallback",
+    "top": "tconstruct:block/storage/fallback",
     "base": "tconstruct:block/table/anvil_base",
     "upper": "tconstruct:block/table/anvil_base_upper"
   },
   "retextured": [ "particle", "top" ],
-  "items": [
-    { "center": [  8,   16.25, 9 ], "size": 7.5, "x": 270 },
-    { "center": [  2.5, 17.5, 10.5 ], "size": 3 },
-    { "center": [  2.5, 17.5,  5.5 ], "size": 3 },
-    { "center": [  8,   17.5,  4.5 ], "size": 3 },
-    { "center": [ 13.5, 17.5,  5.5 ], "size": 3 },
-    { "center": [ 13.5, 17.5, 10.5 ], "size": 3 }
-  ],
   "display": {
     "fixed": {
       "rotation": [ 0, 90, 0 ],

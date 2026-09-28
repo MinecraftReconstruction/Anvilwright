@@ -8,23 +8,27 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.crafting.ShapedRetexturedRecipeBuilder;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import slimeknights.mantle.recipe.data.ItemNameIngredient;
+import slimeknights.mantle.recipe.data.ItemNameOutput;
+import slimeknights.mantle.recipe.helper.SimpleFinishedRecipe;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.data.BaseRecipeProvider;
 import slimeknights.tconstruct.library.data.recipe.SpecialRecipeBuilder;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tables.TinkerTables;
-import slimeknights.tconstruct.tables.recipe.PartBuilderToolRecycle;
-import slimeknights.tconstruct.tables.recipe.TinkerStationDamagingRecipe;
+import slimeknights.tconstruct.tables.recipe.TinkerStationDamagingRecipeBuilder;
+import slimeknights.tconstruct.tables.recipe.TinkerStationPartSwappingBuilder;
+import slimeknights.tconstruct.tools.TinkerToolParts;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TableRecipeProvider extends BaseRecipeProvider {
 
@@ -58,7 +62,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
                           .requires(TinkerTables.pattern)
                           .requires(TinkerTables.pattern)
                           .unlockedBy("has_item", has(TinkerTables.pattern))
-                          .save(consumer, modResource(folder + "book_substitute"));
+                          .save(consumer, location(folder + "book_substitute"));
 
     // crafting station -> crafting table upgrade
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTables.craftingStation)
@@ -88,7 +92,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
         .pattern("pp")
         .pattern("ww")
         .unlockedBy("has_item", has(TinkerTables.pattern)))
-      .setSource(TinkerTags.Items.PLANKLIKE)
+      .setSource('w')
       .setMatchAll()
       .build(consumer, prefix(TinkerTables.partBuilder.getRegistryName(), folder));
 
@@ -101,7 +105,7 @@ public class TableRecipeProvider extends BaseRecipeProvider {
         .pattern("w w")
         .pattern("w w")
         .unlockedBy("has_item", has(TinkerTables.pattern)))
-      .setSource(TinkerTags.Items.PLANKLIKE)
+      .setSource('w')
       .setMatchAll()
       .build(consumer, prefix(TinkerTables.tinkerStation.getRegistryName(), folder));
 
@@ -213,12 +217,11 @@ public class TableRecipeProvider extends BaseRecipeProvider {
     ));
 
     // tool repair recipe
-    SpecialRecipeBuilder.special(TinkerTables.tinkerStationRepairSerializer.get())
-                       .save(consumer, modPrefix(folder + "tinker_station_repair"));
-    SpecialRecipeBuilder.special(TinkerTables.tinkerStationPartSwappingSerializer.get())
-                       .save(consumer, modPrefix(folder + "tinker_station_part_swapping"));
-    SpecialRecipeBuilder.special(TinkerTables.craftingTableRepairSerializer.get())
-                       .save(consumer, modPrefix(folder + "crafting_table_repair"));
+    consumer.accept(new SimpleFinishedRecipe(location(folder + "tinker_station_repair"), TinkerTables.tinkerStationRepairSerializer.get()));
+    consumer.accept(new SimpleFinishedRecipe(location(folder + "crafting_table_repair"), TinkerTables.craftingTableRepairSerializer.get()));
+  }
+
+  private void damageRecipes(Consumer<FinishedRecipe> consumer) {
     // tool damaging
     String damageFolder = folder + "tinker_station_damaging/";
     TinkerStationDamagingRecipe.Builder.damage(DefaultCustomIngredients.nbt(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.MUNDANE), true), 1)

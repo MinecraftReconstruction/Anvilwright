@@ -1,5 +1,4 @@
 {
-  "replace": false,
   "values": [
     "tconstruct:iron_platform",
     "#tconstruct:copper_platforms",
@@ -14,6 +13,8 @@
     "tconstruct:seared_drain",
     "tconstruct:seared_chute",
     "tconstruct:smeltery_controller",
+    "tconstruct:seared_fluid_cannon",
+    "tconstruct:copper_gauge",
     "tconstruct:cast_chest"
   ]
 }

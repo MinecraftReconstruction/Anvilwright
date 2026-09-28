@@ -1,13 +1,8 @@
 package slimeknights.tconstruct.library.tools.nbt;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -16,14 +11,15 @@ import lombok.ToString;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.GsonHelper;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.tools.stat.INumericToolStat;
 import slimeknights.tconstruct.library.tools.stat.IToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStatId;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,8 +33,6 @@ import java.util.Set;
 @EqualsAndHashCode
 @ToString
 public class StatsNBT {
-  /** Serializer to parse this from JSON */
-  public static Serializer SERIALIZER = new Serializer();
   /** Set of all tool stat IDs that failed to parse, to reduce log spam as they get parsed many times in UIs when dumb mods don't call proper methods */
   static final Set<String> ERRORED_IDS = new HashSet<>();
   /** Empty stats */
@@ -94,7 +88,7 @@ public class StatsNBT {
   /** Reads a tool stat ID from a NBT string */
   @Nullable
   static IToolStat<?> readStatIdFromNBT(String name) {
-    ToolStatId statName = ToolStatId.tryCreate(name);
+    ToolStatId statName = ToolStatId.tryParse(name);
     if (statName != null) {
       IToolStat<?> stat = ToolStats.getToolStat(statName);
       if (stat != null) {
@@ -177,7 +171,7 @@ public class StatsNBT {
     ImmutableMap.Builder<IToolStat<?>, Object> builder = ImmutableMap.builder();
     int max = buffer.readVarInt();
     for (int i = 0; i < max; i++) {
-      IToolStat<?> stat = ToolStats.fromNetwork(buffer);
+      IToolStat<?> stat = ToolStats.LOADER.decode(buffer);
       builder.put(stat, stat.fromNetwork(buffer));
     }
     return new StatsNBT(builder.build());
@@ -194,6 +188,11 @@ public class StatsNBT {
       return this;
     }
 
+    /** Sets the given stat in the builder */
+    public Builder set(INumericToolStat<Float> stat, float value) {
+      return set(stat, (Float)value);
+    }
+
     /** Builds the stats from the given values */
     public StatsNBT build() {
       Map<IToolStat<?>,Object> map = builder.build();
@@ -204,14 +203,12 @@ public class StatsNBT {
     }
   }
 
-  /** Serializes and deserializes from JSON */
-  protected static class Serializer implements JsonDeserializer<StatsNBT>, JsonSerializer<StatsNBT> {
+  public static final RecordLoadable<StatsNBT> LOADABLE = new RecordLoadable<>() {
     @Override
-    public StatsNBT deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-      JsonObject object = GsonHelper.convertToJsonObject(json, "stats");
+    public StatsNBT deserialize(JsonObject json, TypedMap context) {
       ImmutableMap.Builder<IToolStat<?>,Object> builder = ImmutableMap.builder();
-      for (Entry<String,JsonElement> entry : object.entrySet()) {
-        IToolStat<?> stat = ToolStats.fromJson(entry.getKey());
+      for (Entry<String,JsonElement> entry : json.entrySet()) {
+        IToolStat<?> stat = ToolStats.LOADER.parseString(entry.getKey(), "[map key]");
         builder.put(stat, stat.deserialize(entry.getValue()));
       }
       return new StatsNBT(builder.build());
@@ -224,13 +221,21 @@ public class StatsNBT {
     }
 
     @Override
-    public JsonElement serialize(StatsNBT stats, Type typeOfSrc, JsonSerializationContext context) {
-      JsonObject json = new JsonObject();
+    public void serialize(StatsNBT stats, JsonObject json) {
       for (Entry<IToolStat<?>,Object> entry : stats.stats.entrySet()) {
         IToolStat<?> stat = entry.getKey();
         json.add(stat.getName().toString(), serialize(stat, entry.getValue()));
       }
-      return json;
     }
-  }
+
+    @Override
+    public StatsNBT decode(FriendlyByteBuf buffer, TypedMap context) {
+      return StatsNBT.fromNetwork(buffer);
+    }
+
+    @Override
+    public void encode(FriendlyByteBuf buffer, StatsNBT stats) {
+      stats.toNetwork(buffer);
+    }
+  };
 }

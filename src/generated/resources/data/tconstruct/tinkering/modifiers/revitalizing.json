@@ -1,22 +1,38 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:incremental"
+      "type": "tconstruct:attribute",
+      "attribute": "minecraft:generic.max_health",
+      "each_level": 2.0,
+      "operation": "addition",
+      "slots": [
+        "mainhand",
+        "offhand",
+        "feet",
+        "legs",
+        "chest",
+        "head"
+      ],
+      "tooltip_style": "boost"
     },
     {
-      "type": "tconstruct:attribute",
-      "unique": "tconstruct.modifier.revitalizing",
-      "attribute": "minecraft:generic.max_health",
-      "operation": "addition",
-      "amount": 2.0,
+      "type": "tconstruct:update_health",
       "slots": [
         "feet",
         "legs",
         "chest",
         "head"
+      ]
+    },
+    {
+      "type": "tconstruct:update_health",
+      "bonus": {
+        "each_level": 2.0
+      },
+      "slots": [
+        "mainhand",
+        "offhand"
       ]
     }
   ]

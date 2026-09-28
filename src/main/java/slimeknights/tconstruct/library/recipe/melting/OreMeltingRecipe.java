@@ -5,73 +5,65 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.common.config.Config;
+import slimeknights.tconstruct.library.json.TinkerLoadables;
+import slimeknights.tconstruct.library.json.field.MergingListField;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Extension of melting recipe to boost results of ores
  */
 public class OreMeltingRecipe extends MeltingRecipe {
+  public static final RecordLoadable<OreMeltingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP, INPUT, OUTPUT, TEMPERATURE, TIME, BYPRODUCTS,
+    TinkerLoadables.ORE_RATE_TYPE.requiredField("rate", OreMeltingRecipe::getOreType),
+    new MergingListField<>(TinkerLoadables.ORE_RATE_TYPE.defaultField("rate", OreRateType.DEFAULT, Function.identity()), "byproducts", r -> r.byproductTypes),
+    OreMeltingRecipe::new);
+
   @Getter
   private final OreRateType oreType;
-  public OreMeltingRecipe(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, OreRateType oreType) {
+  private final List<OreRateType> byproductTypes;
+  protected OreMeltingRecipe(ResourceLocation id, String group, Ingredient input, FluidOutput output, int temperature, int time, List<FluidOutput> byproducts, OreRateType oreType, List<OreRateType> byproductTypes) {
     super(id, group, input, output, temperature, time, byproducts);
     this.oreType = oreType;
+    this.byproductTypes = byproductTypes;
   }
 
   @Override
   public FluidStack getOutput(IMeltingContainer inv) {
-    FluidStack output = getOutput();
-    return inv.getOreRate().applyOreBoost(oreType, output);
+    return inv.getOreRate().applyOreBoost(oreType, output.get(), true);
+  }
+
+  @Override
+  public void handleByproducts(IMeltingContainer inv, IFluidHandler handler) {
+    // fill byproducts until we run out of space or byproducts
+    for (int i = 0; i < byproducts.size(); i++) {
+      handler.fill(Config.COMMON.foundryByproductRate.applyOreBoost(byproductTypes.get(i).orElse(oreType), byproducts.get(i).get(), true), FluidAction.EXECUTE);
+    }
+  }
+
+  @Override
+  public List<List<FluidStack>> getOutputWithByproducts() {
+    if (outputWithByproducts == null) {
+      outputWithByproducts = Stream.concat(
+        Stream.of(output).map(output -> Config.COMMON.foundryOreRate.applyOreBoost(oreType, output.get(), false)),
+        Streams.zip(byproducts.stream(), byproductTypes.stream(), (byproduct, rate) -> Config.COMMON.foundryByproductRate.applyOreBoost(rate.orElse(oreType), byproduct.get(), false))
+      ).map(List::of).toList();
+    }
+    return outputWithByproducts;
   }
 
   @Override
   public RecipeSerializer<?> getSerializer() {
     return TinkerSmeltery.oreMeltingSerializer.get();
-  }
-
-  public static class Serializer extends MeltingRecipe.AbstractSerializer<OreMeltingRecipe> {
-    @Override
-    protected OreMeltingRecipe createFromJson(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, JsonObject json) {
-      OreRateType rate = OreRateType.parse(json, "rate");
-      // multiply byproducts by the config amount, config is loaded, and this prevents running it twice (once on read from network)
-      List<FluidStack> scaledByproducts;
-      if (json.has("byproducts")) {
-        List<OreRateType> list = JsonHelper.parseList(json, "byproducts", (e, n) -> {
-          JsonObject byproduct = e.getAsJsonObject();
-          if (byproduct.has("rate")) {
-            return OreRateType.parse(e.getAsJsonObject(), "rate");
-          }
-          return rate;
-        });
-        if (list.size() != byproducts.size()) {
-          throw new JsonSyntaxException("Wrong number of byproduct rates passed, must have one per byproduct");
-        }
-        scaledByproducts = Streams.zip(list.stream(), byproducts.stream(), Config.COMMON.foundryByproductRate::applyOreBoost).toList();
-      } else {
-        scaledByproducts = byproducts.stream().map(fluid -> Config.COMMON.foundryByproductRate.applyOreBoost(rate, fluid)).toList();
-      }
-      return new OreMeltingRecipe(id, group, input, output, temperature, time, scaledByproducts, rate);
-    }
-
-    @Override
-    protected OreMeltingRecipe createFromNetwork(ResourceLocation id, String group, Ingredient input, FluidStack output, int temperature, int time, List<FluidStack> byproducts, FriendlyByteBuf buffer) {
-      OreRateType rate = buffer.readEnum(OreRateType.class);
-      return new OreMeltingRecipe(id, group, input, output, temperature, time, byproducts, rate);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, OreMeltingRecipe recipe) {
-      super.toNetworkSafe(buffer, recipe);
-      buffer.writeEnum(recipe.oreType);
-    }
   }
 }

@@ -9,23 +9,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import slimeknights.mantle.client.book.data.JsonCondition;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
-import slimeknights.tconstruct.library.materials.definition.Material;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialManager;
 import slimeknights.tconstruct.library.materials.json.MaterialJson;
+import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Extendable material provider, useful for addons
@@ -54,7 +55,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   public static final int ORDER_REPAIR = 25;
 
   /** List of all added materials */
-  private final Map<MaterialId, DataMaterial> allMaterials = new HashMap<>();
+  private final Map<MaterialId, MaterialBuilder> allMaterials = new HashMap<>();
 
   /** Boolean just in case material stats run first */
   private boolean addMaterialsRun = false;
@@ -90,12 +91,11 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
    */
   public Set<MaterialId> getAllMaterials() {
     ensureAddMaterialsRun();
-    // ignore any materials with no IMaterial defintion, means its purely a redirect and will never exist in game
+    // ignore any pure redirects
     return allMaterials.values().stream()
-                       .map(DataMaterial::material)
-                       .filter(Objects::nonNull)
-                       .map(IMaterial::getIdentifier)
-                       .collect(Collectors.toSet());
+      .filter(e -> !e.isPureRedirect())
+      .map(b -> b.id)
+      .collect(Collectors.toSet());
   }
 
 
@@ -128,9 +128,10 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
     addMaterial(new Material(location, tier, order, craftable, hidden), condition, redirect);
   }
 
-  /** Creates a normal material */
+  /** @deprecated use {@link #material(MaterialId)} */
+  @Deprecated
   protected void addMaterial(MaterialId location, int tier, int order, boolean craftable) {
-    addMaterial(location, tier, order, craftable, false, null);
+    material(location).tier(tier).sort(order).craftable(craftable);
   }
 
   /** Creates a new compat material */
@@ -144,9 +145,30 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
     addCompatMaterial(location, tier, order, ingotName + "_ingots", false);
   }
 
-  /** Creates a new compat material */
+  /** @deprecated use {@link MaterialBuilder#compatMetal()} */
+  @Deprecated
   protected void addCompatMetalMaterial(MaterialId location, int tier, int order) {
     addCompatMetalMaterial(location, tier, order, location.getPath());
+  }
+
+  /** @deprecated use {@link MaterialBuilder#compatAlloy(ICondition...)} */
+  @Deprecated
+  protected void addCompatAlloy(MaterialId location, int tier, int order, ICondition... alloyConditions) {
+    ICondition condition = new OrCondition(
+      // if forced
+      ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS,
+      // or we have the matching alloy ingot
+      tagExistsCondition("ingots/" + location.getPath()),
+      // or we allow ingotless alloys and have all alloy components
+      new AndCondition(Util.prepend(alloyConditions, ConfigEnabledCondition.ALLOW_INGOTLESS_ALLOYS))
+    );
+    addMaterial(location, tier, order, false, false, condition);
+  }
+
+  /** @deprecated use {@link MaterialBuilder#compatAlloy(String...)} */
+  @Deprecated
+  protected void addCompatAlloy(MaterialId location, int tier, int order, String component) {
+    addCompatAlloy(location, tier, order, tagExistsCondition("ingots/" + component));
   }
 
 
@@ -157,24 +179,32 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
     return new JsonRedirect(id, condition, null);
   }
 
-  /** Makes an unconditional redirect to the given ID */
+  /** @deprecated use {@link MaterialBuilder#redirect(ResourceLocation, ICondition...)} */
+  @Deprecated
   protected JsonRedirect redirect(MaterialId id) {
     return conditionalRedirect(id, null);
   }
 
 
-  /* Helpers */
+  /* Builder */
 
-  /**
-   * Converts a material to JSON
-   * @param data   Data to save
-   * @return  Material JSON
-   */
-  private MaterialJson convert(DataMaterial data) {
-    IMaterial material = data.material;
-    JsonRedirect[] redirect = data.redirect;
-    if (redirect != null && redirect.length == 0) {
-      redirect = null;
+  @Accessors(fluent = true)
+  @Setter
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+  protected static class MaterialBuilder {
+    private final List<ICondition> conditions = new ArrayList<>();
+    private final List<JsonRedirect> redirects = new ArrayList<>();
+    private final MaterialId id;
+    private boolean craftable = false;
+    private boolean hidden = false;
+    private int tier = 1;
+    private int sort = 100;
+    private Rarity rarity = null;
+
+    /** Makes the material craftable in the part builder */
+    public MaterialBuilder craftable() {
+      craftable = true;
+      return this;
     }
     if (material == null) {
       return new MaterialJson(new JsonCondition(data.condition), null, null, null, null, redirect);

@@ -5,11 +5,9 @@ package slimeknights.tconstruct.library.utils;
  */
 public final class NBTTags {
   /**
-   * The tag that saves the material information on toolparts
+   * Tag containing the tank on many items
+   * TODO: find better home in 1.19, likely migrate usages to a utility
    */
-  public static final String PART_MATERIAL = "Material";
-
-  /** Tag containing the tank on many items */
   public static final String TANK = "tank";
 
   private NBTTags() {}

@@ -6,31 +6,32 @@ import com.google.gson.JsonSyntaxException;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
-import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Base class for alloying recipes
  */
 @RequiredArgsConstructor
 public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
+  public static final RecordLoadable<AlloyRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    AlloyIngredient.LOADABLE.list(2).requiredField("inputs", r -> r.inputs),
+    FluidOutput.Loadable.REQUIRED.requiredField("result", r -> r.output),
+    IntLoadable.FROM_ONE.requiredField("temperature", r -> r.temperature),
+    AlloyRecipe::new);
+
   @Getter
   private final ResourceLocation id;
   /**
@@ -38,27 +39,17 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
    * Order matters, as if a fluid matches multiple ingredients it may produce unexpected behavior.
    * Making the most strict first will produce the best behavior
    */
-  private final List<FluidIngredient> inputs;
-  /** Recipe output */
   @Getter
-  private final FluidStack output;
+  private final List<AlloyIngredient> inputs;
+  /** Recipe output */
+  private final FluidOutput output;
   /** Required temperature to craft this */
   @Getter
   private final int temperature;
 
-
-  /** Cache of recipe input list */
-  private List<List<FluidStack>> displayInputs;
-
-  /**
-   * Gets the list of inputs for display in JEI
-   * @return  List of input list for each "slot"
-   */
-  public List<List<FluidStack>> getDisplayInputs() {
-    if (displayInputs == null) {
-      displayInputs = inputs.stream().map(FluidIngredient::getFluids).collect(Collectors.toList());
-    }
-    return displayInputs;
+  /** Gets the result of this recipe */
+  public FluidStack getOutput() {
+    return output.get();
   }
 
   /**
@@ -103,9 +94,9 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
   @Override
   public boolean matches(IAlloyTank inv, Level worldIn) {
     BitSet used = makeBitset(inv);
-    for (FluidIngredient ingredient : inputs) {
+    for (AlloyIngredient ingredient : inputs) {
       // do not care about size for matches, just want a recipe with the right fluids
-      int index = findMatch(ingredient, inv, used, false);
+      int index = findMatch(ingredient.fluid, inv, used, false);
       if (index == -1) {
         return false;
       }
@@ -129,20 +120,21 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     BitSet used = makeBitset(inv);
     int drainAmount = 0;
     FluidStack fluid;
-    for (FluidIngredient ingredient : inputs) {
+    for (AlloyIngredient ingredient : inputs) {
       // care about size, if too small just skip the recipe
-      int index = findMatch(ingredient, inv, used, true);
-      if (index != -1) {
-        fluid = inv.getFluidInTank(index);
-        drainAmount += ingredient.getAmount(fluid.getFluid());
-      } else {
+      int index = findMatch(ingredient.fluid, inv, used, true);
+      if (index == -1) {
         // no fluid matched this ingredient, match failed
         return false;
+      } else if (!ingredient.catalyst()) {
+        // increase amount to drain only for non-catalysts
+        fluid = inv.getFluidInTank(index);
+        drainAmount += ingredient.fluid.getAmount(fluid.getFluid());
       }
     }
 
     // ensure there is space for the recipe
-    return inv.canFit(output, drainAmount);
+    return inv.canFit(output.get(), drainAmount);
   }
 
   /**
@@ -161,7 +153,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     BitSet used = makeBitset(inv);
 
     FluidStack fluid;
-    for (FluidIngredient ingredient : inputs) {
+    for (AlloyIngredient ingredient : inputs) {
       // care about size, if too small just skip the recipe
       int index = findMatch(ingredient, inv, used, true);
       if (index != -1 && drainFluids[index] == null) {
@@ -172,12 +164,19 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
       } else {
         // no fluid matched this ingredient, match failed
         return;
+      } else if (!ingredient.catalyst) {
+        // practically the drained fluid at the index should always be null as we don't reuse indexes
+        assert drainFluids[index] == null;
+        fluid = inv.getFluidInTank(index);
+        int amount = ingredient.fluid.getAmount(fluid.getFluid());
+        drainAmount += amount;
+        drainFluids[index] = new FluidStack(fluid, amount);
       }
     }
 
     // ensure there is space for the recipe
     FluidStack drained;
-    if (inv.canFit(output, drainAmount)) {
+    if (inv.canFit(output.get(), drainAmount)) {
       // drain each marked fluid
       for (int i = 0; i < drainFluids.length; i++) {
         FluidStack toDrain = drainFluids[i];

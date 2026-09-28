@@ -1,12 +1,24 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:single_level",
-  "tooltip_display": "tinker_station",
   "modules": [
     {
       "type": "tconstruct:modifier_slot",
-      "name": "upgrades",
-      "count": 1
+      "each_level": 1,
+      "name": "upgrades"
+    },
+    {
+      "type": "tconstruct:requirements",
+      "requirement": {
+        "type": "tconstruct:has_modifier",
+        "check": "upgrades",
+        "level": 0,
+        "modifier": {
+          "type": "tconstruct:single",
+          "modifier": "tconstruct:forecast"
+        }
+      },
+      "translation_key": "modifier.tconstruct.resurrected.requirements"
     }
-  ]
+  ],
+  "show_in_tooltips": "bonus_slot"
 }

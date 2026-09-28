@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
-import com.google.gson.JsonObject;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -9,30 +9,41 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
  * Builder for a potion bottle filling recipe. Takes a fluid and optional cast to create an item that copies the fluid NBT
  */
 @SuppressWarnings({"WeakerAccess", "unused", "UnusedReturnValue"})
-@RequiredArgsConstructor(staticName = "castingRecipe")
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCastingRecipeBuilder> {
   private final Item result;
-  private final PotionCastingRecipe.Serializer recipeSerializer;
+  @Nullable
+  private final ModifierId modifier;
+  private final TypeAwareRecipeSerializer<? extends PotionCastingRecipe> recipeSerializer;
   private Ingredient bottle = Ingredient.EMPTY;
   private FluidIngredient fluid = FluidIngredient.EMPTY;
   @Setter @Accessors(chain = true)
-  private int coolingTime = 0;
+  private int coolingTime = 5;
+
+  /* Bottle filling */
+
+  /** Creates a new casting recipe for a bottle */
+  public static PotionCastingRecipeBuilder castingRecipe(ItemLike result, TypeAwareRecipeSerializer<PotionCastingRecipe> serializer) {
+    return new PotionCastingRecipeBuilder(result.asItem(), null, serializer);
+  }
 
   /**
    * Creates a new casting basin recipe
@@ -40,7 +51,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
    * @return  Builder instance
    */
   public static PotionCastingRecipeBuilder basinRecipe(ItemLike result) {
-    return castingRecipe(result.asItem(), TinkerSmeltery.basinPotionRecipeSerializer.get());
+    return castingRecipe(result, TinkerSmeltery.basinPotionRecipeSerializer.get());
   }
 
   /**
@@ -49,7 +60,51 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
    * @return  Builder instance
    */
   public static PotionCastingRecipeBuilder tableRecipe(ItemLike result) {
-    return castingRecipe(result.asItem(), TinkerSmeltery.tablePotionRecipeSerializer.get());
+    return castingRecipe(result, TinkerSmeltery.tablePotionRecipeSerializer.get());
+  }
+
+
+  /* Modifier casting */
+
+  /** Creates a new casting recipe for a bottle */
+  public static PotionCastingRecipeBuilder tippingRecipe(ModifierId modifier, TypeAwareRecipeSerializer<? extends PotionCastingRecipe> serializer) {
+    return new PotionCastingRecipeBuilder(Items.AIR, modifier, serializer);
+  }
+
+  /**
+   * Creates a new tool potion casting basin recipe
+   * @param modifier  Modifier required to cast
+   * @return  Builder instance
+   */
+  public static PotionCastingRecipeBuilder basinTipping(ModifierId modifier) {
+    return tippingRecipe(modifier, TinkerSmeltery.basinTippingRecipeSerializer.get());
+  }
+
+  /**
+   * Creates a new tool potion casting table recipe
+   * @param modifier  Recipe result
+   * @return  Builder instance
+   */
+  public static PotionCastingRecipeBuilder tableTipping(ModifierId modifier) {
+    return tippingRecipe(modifier, TinkerSmeltery.tableTippingRecipeSerializer.get());
+  }
+
+  /**
+   * Creates a new tool potion casting basin recipe
+   * @param modifier  Modifier required to cast
+   * @return  Builder instance
+   */
+  public static PotionCastingRecipeBuilder basinClearing(ModifierId modifier) {
+    return tippingRecipe(modifier, TinkerSmeltery.basinTipClearingRecipeSerializer.get());
+  }
+
+  /**
+   * Creates a new tool potion casting table recipe
+   * @param modifier  Recipe result
+   * @return  Builder instance
+   */
+  public static PotionCastingRecipeBuilder tableClearing(ModifierId modifier) {
+    return tippingRecipe(modifier, TinkerSmeltery.tableTipClearingRecipeSerializer.get());
   }
 
 
@@ -112,7 +167,7 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
    */
   @Override
   public void save(Consumer<FinishedRecipe> consumerIn) {
-    this.save(consumerIn, BuiltInRegistries.ITEM.getKey(this.result));
+    this.save(consumerIn, Loadables.ITEM.getKey(this.result));
   }
 
   @Override
@@ -124,30 +179,10 @@ public class PotionCastingRecipeBuilder extends AbstractRecipeBuilder<PotionCast
       throw new IllegalStateException("Cooling time is too low, must be at least 0");
     }
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "casting");
-    consumer.accept(new PotionCastingRecipeBuilder.Result(id, advancementId));
-  }
-
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return recipeSerializer;
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      if (!group.isEmpty()) {
-        json.addProperty("group", group);
-      }
-      if (bottle != Ingredient.EMPTY) {
-        json.add("bottle", bottle.toJson());
-      }
-      json.add("fluid", fluid.serialize());
-      json.addProperty("result", BuiltInRegistries.ITEM.getKey(result).toString());
-      json.addProperty("cooling_time", coolingTime);
+    if (modifier != null) {
+      consumer.accept(new LoadableFinishedRecipe<>(new TippingCastingRecipe(recipeSerializer, id, group, bottle, fluid, coolingTime, modifier), TippingCastingRecipe.LOADER, advancementId));
+    } else {
+      consumer.accept(new LoadableFinishedRecipe<>(new PotionCastingRecipe(recipeSerializer, id, group, bottle, fluid, result, coolingTime), PotionCastingRecipe.LOADER, advancementId));
     }
   }
 }

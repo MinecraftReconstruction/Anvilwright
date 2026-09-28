@@ -49,7 +49,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener im
   public static final Gson GSON = (new GsonBuilder())
     .registerTypeHierarchyAdapter(Ingredient.class, new IngredientSerializer())
     .registerTypeHierarchyAdapter(LayoutIcon.class, LayoutIcon.SERIALIZER)
-    .registerTypeAdapter(Pattern.class, Pattern.SERIALIZER)
+    .registerTypeAdapter(Pattern.class, Pattern.PARSER)
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();
@@ -63,6 +63,9 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener im
   /** List of all slots in order */
   @Getter
   private List<StationSlotLayout> sortedSlots = Collections.emptyList();
+
+  /** Context for parsing conditions */
+  private IContext conditionContext = IContext.EMPTY;
 
   private StationSlotLayoutLoader() {
     super(GSON, FOLDER);
@@ -92,7 +95,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener im
       try {
         // skip empty objects, allows disabling a slot at a lower datapack
         JsonObject object = GsonHelper.convertToJsonObject(value, "station_layout");
-        if (!object.entrySet().isEmpty()) {
+        if (!object.entrySet().isEmpty() && CraftingHelper.processConditions(object, "conditions", conditionContext)) {
           // just need a valid slot information
           StationSlotLayout layout = GSON.fromJson(object, StationSlotLayout.class);
           int size = layout.getInputSlots().size() + (layout.getToolSlot().isHidden() ? 0 : 1);

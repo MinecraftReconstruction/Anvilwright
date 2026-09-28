@@ -1,29 +1,25 @@
 package slimeknights.tconstruct.tools.modifiers.slotless;
 
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.tools.modules.cosmetic.DyeModule;
 
+import javax.annotation.Nullable;
+
+/** @deprecated use {@link DyeModule} */
+@Deprecated(forRemoval = true)
 public class DyedModifier extends NoLevelsModifier {
-  private static final String FORMAT_KEY = TConstruct.makeTranslationKey("modifier", "dyed.formatted");
-
   @Override
-  public Component getDisplayName(IToolStackView tool, int level) {
-    ModDataNBT persistentData = tool.getPersistentData();
-    ResourceLocation key = getId();
-    if (persistentData.contains(key, Tag.TAG_INT)) {
-      int color = persistentData.getInt(key);
-      return applyStyle(Component.translatable(FORMAT_KEY, String.format("%06X", color)));
-    }
-    return super.getDisplayName();
+  protected void registerHooks(Builder hookBuilder) {
+    hookBuilder.addModule(DyeModule.INSTANCE);
   }
 
   @Override
-  public void onRemoved(IToolStackView tool) {
-    tool.getPersistentData().remove(getId());
+  public Component getDisplayName(IToolStackView tool, ModifierEntry entry, @Nullable RegistryAccess access) {
+    return DyeModule.INSTANCE.getDisplayName(tool, entry, super.getDisplayName(), access);
   }
 }

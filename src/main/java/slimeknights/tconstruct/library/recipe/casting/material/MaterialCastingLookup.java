@@ -7,21 +7,30 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator.DuelSidedListener;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
+import slimeknights.tconstruct.library.recipe.casting.ICastingRecipe;
+import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
+import slimeknights.tconstruct.library.utils.SimpleCache;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Class serving as a lookup to get part costs for any material item
+ * Class serving as a lookup to get part costs for any material item.
+ * TODO 1.21: consider merging with {@link MaterialRecipeCache}.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MaterialCastingLookup {
@@ -32,12 +41,81 @@ public class MaterialCastingLookup {
   private static final List<MaterialFluidRecipe> CASTING_FLUIDS = new ArrayList<>();
   /** Fluids that composite into materials */
   private static final List<MaterialFluidRecipe> COMPOSITE_FLUIDS = new ArrayList<>();
+  /** Fluids that cast into materials */
+  private static List<MaterialFluidRecipe> SORTED_CASTING = null;
+  /** Fluids that composite into materials */
+  private static List<MaterialFluidRecipe> SORTED_COMPOSITE = null;
+
+  /** Predicate for sorted recipe lists, ensuring they are visible */
+  private static final Predicate<MaterialFluidRecipe> RECIPE_FILTER = MaterialFluidRecipe::isVisible;
+  /** Comparator for casting recipes, used in {@link #getSortedCastingFluids()} */
+  private static final Comparator<MaterialFluidRecipe> OUTPUT_COMPARATOR = Comparator.comparing(MaterialFluidRecipe::getOutput);
+  /** Comparator for casting recipes, used in {@link #getSortedCastingFluids()} */
+  private static final Comparator<MaterialFluidRecipe> INPUT_COMPARATOR = Comparator.comparing(r -> {
+    MaterialVariant input = r.getInput();
+    assert input != null;
+    return input;
+  });
+  /** Comparator for composite recipes, used in {@link #getSortedCompositeFluids()} */
+  private static final Comparator<MaterialFluidRecipe> COMPOSITE_COMPARATOR = OUTPUT_COMPARATOR.thenComparing(INPUT_COMPARATOR);
+
+  /** Cache for casting recipe for a given fluid */
+  private static final SimpleCache<Fluid,MaterialFluidRecipe> CASTING_CACHE = new SimpleCache<>(fluid -> {
+    for (MaterialFluidRecipe recipe : CASTING_FLUIDS) {
+      if (recipe.matches(fluid)) {
+        return recipe;
+      }
+    }
+    return MaterialFluidRecipe.EMPTY;
+  });
+
+  private record CompositeCacheKey(Fluid fluid, MaterialVariantId input) {}
+
+  /** Cache for a composite recipe for a given material */
+  private static final SimpleCache<CompositeCacheKey,MaterialFluidRecipe> COMPOSITE_CACHE = new SimpleCache<>(key -> {
+    for (MaterialFluidRecipe recipe : COMPOSITE_FLUIDS) {
+      if (recipe.matches(key.fluid, key.input)) {
+        return recipe;
+      }
+    }
+    return MaterialFluidRecipe.EMPTY;
+  });
+
+  /** Cache for all casting recipes for a given material output */
+  private static final SimpleCache<MaterialVariantId,List<MaterialFluidRecipe>> MATERIAL_CASTABLE = new SimpleCache<>(material ->
+    CASTING_FLUIDS.stream()
+      .filter(recipe -> material.matchesVariant(recipe.getOutput()))
+      .collect(Collectors.toList()));
+  /** Cache for all composite recipes for a given material output */
+  private static final SimpleCache<MaterialVariantId,List<MaterialFluidRecipe>> MATERIAL_COMPOSITE = new SimpleCache<>(material ->
+    COMPOSITE_FLUIDS.stream()
+      .filter(recipe -> material.matchesVariant(recipe.getOutput()))
+      .sorted(INPUT_COMPARATOR)
+      .collect(Collectors.toList()));
+
+  /** Cache of temperatures for each fluid. Used for validation and for dynamic recipe display. */
+  private static final SimpleCache<Fluid,Integer> TEMPERATURE_CACHE = new SimpleCache<>(fluid -> {
+    for (MaterialFluidRecipe recipe : CASTING_FLUIDS) {
+      if (recipe.matches(fluid)) return recipe.getTemperature();
+    }
+    for (MaterialFluidRecipe recipe : COMPOSITE_FLUIDS) {
+      if (recipe.matches(fluid)) return recipe.getTemperature();
+    }
+    return 0;
+  });
 
   /** Listener for clearing the recipe cache on recipe reload */
   private static final DuelSidedListener LISTENER = RecipeCacheInvalidator.addDuelSidedListener(() -> {
     ITEM_COST_LOOKUP.clear();
     CASTING_FLUIDS.clear();
+    CASTING_CACHE.clear();
+    MATERIAL_CASTABLE.clear();
+    MATERIAL_COMPOSITE.clear();
     COMPOSITE_FLUIDS.clear();
+    COMPOSITE_CACHE.clear();
+    SORTED_CASTING = null;
+    SORTED_COMPOSITE = null;
+    TEMPERATURE_CACHE.clear();
   });
 
   /** Shared logic to register parts */
@@ -47,7 +125,7 @@ public class MaterialCastingLookup {
     if (ITEM_COST_LOOKUP.containsKey(item)) {
       int original = ITEM_COST_LOOKUP.getInt(item);
       if (cost != original) {
-        TConstruct.LOG.error("Inconsistent cost for item {}", BuiltInRegistries.ITEM.getKey(item.asItem()));
+        TConstruct.LOG.error("Inconsistent cost for item {}", Loadables.ITEM.getKey(item.asItem()));
         ITEM_COST_LOOKUP.put(item, Math.min(cost, original));
       }
     } else {
@@ -63,9 +141,12 @@ public class MaterialCastingLookup {
     LISTENER.checkClear();
     if (recipe.getInput() == null) {
       CASTING_FLUIDS.add(recipe);
+      SORTED_CASTING = null;
     } else {
       COMPOSITE_FLUIDS.add(recipe);
+      SORTED_COMPOSITE = null;
     }
+    MaterialRecipeCache.addKnownVariant(recipe.getOutput().getVariant());
   }
 
   /**
@@ -96,31 +177,50 @@ public class MaterialCastingLookup {
 
   /**
    * Gets the material the given fluid casts into
-   * @param inventory  Inventory
-   * @return  Recipe
+   * @param fluid  Fluid
+   * @return  Recipe, or {@link MaterialFluidRecipe#EMPTY} if not found.
    */
-  public static Optional<MaterialFluidRecipe> getCastingFluid(ICastingContainer inventory) {
-    // TODO: reconsider cache
-    for (MaterialFluidRecipe recipe : CASTING_FLUIDS) {
-      if (recipe.matches(inventory)) {
-        return Optional.of(recipe);
-      }
+  public static MaterialFluidRecipe getCastingFluid(Fluid fluid) {
+    return CASTING_CACHE.apply(fluid);
+  }
+
+  /**
+   * Gets the material the given fluid casts into
+   * @param fluid  Fluid
+   * @param filter Material filter, will skip recipes that don't match
+   * @return  Recipe, or {@link MaterialFluidRecipe#EMPTY} if not found.
+   */
+  public static MaterialFluidRecipe getCastingFluid(Fluid fluid, IJsonPredicate<MaterialVariantId> filter) {
+    MaterialFluidRecipe recipe = getCastingFluid(fluid);
+    if (recipe != MaterialFluidRecipe.EMPTY && filter.matches(recipe.getOutput().getVariant())) {
+      return recipe;
     }
-    return Optional.empty();
+    return MaterialFluidRecipe.EMPTY;
   }
 
   /**
    * Gets the composite fluid recipe for the given inventory
-   * @param inventory  Inventory
-   * @return  Composite fluid recipe
+   * @param fluid     Fluid
+   * @param material  Material input
+   * @return  Composite fluid recipe, or {@link MaterialFluidRecipe#EMPTY} if not found.
    */
-  public static Optional<MaterialFluidRecipe> getCompositeFluid(ICastingContainer inventory) {
-    for (MaterialFluidRecipe recipe : COMPOSITE_FLUIDS) {
-      if (recipe.matches(inventory)) {
-        return Optional.of(recipe);
-      }
+  public static MaterialFluidRecipe getCompositeFluid(Fluid fluid, MaterialVariantId material) {
+    return COMPOSITE_CACHE.apply(new CompositeCacheKey(fluid, material));
+  }
+
+  /**
+   * Gets the composite fluid recipe for the given inventory
+   * @param fluid     Fluid
+   * @param material  Material input
+   * @param filter    Material filter, will skip recipes that don't match
+   * @return  Composite fluid recipe, or {@link MaterialFluidRecipe#EMPTY} if not found.
+   */
+  public static MaterialFluidRecipe getCompositeFluid(Fluid fluid, MaterialVariantId material, IJsonPredicate<MaterialVariantId> filter) {
+    MaterialFluidRecipe recipe = getCompositeFluid(fluid, material);
+    if (recipe != MaterialFluidRecipe.EMPTY && filter.matches(recipe.getOutput().getVariant())) {
+      return recipe;
     }
-    return Optional.empty();
+    return MaterialFluidRecipe.EMPTY;
   }
 
   /**
@@ -129,9 +229,7 @@ public class MaterialCastingLookup {
    * @return  Recipe
    */
   public static List<MaterialFluidRecipe> getCastingFluids(MaterialVariantId material) {
-    return CASTING_FLUIDS.stream()
-                         .filter(recipe -> material.matchesVariant(recipe.getOutput()))
-                         .collect(Collectors.toList());
+    return MATERIAL_CASTABLE.apply(material);
   }
 
   /**
@@ -140,9 +238,7 @@ public class MaterialCastingLookup {
    * @return  Recipe
    */
   public static List<MaterialFluidRecipe> getCompositeFluids(MaterialVariantId material) {
-    return COMPOSITE_FLUIDS.stream()
-                           .filter(recipe -> material.matchesVariant(recipe.getOutput()))
-                           .collect(Collectors.toList());
+    return MATERIAL_COMPOSITE.apply(material);
   }
 
   /**
@@ -153,11 +249,41 @@ public class MaterialCastingLookup {
     return CASTING_FLUIDS;
   }
 
+  /** Gets all visible casting fluids sorted in material order */
+  public static List<MaterialFluidRecipe> getSortedCastingFluids() {
+    if (SORTED_CASTING == null) {
+      SORTED_CASTING = CASTING_FLUIDS.stream().filter(RECIPE_FILTER).sorted(OUTPUT_COMPARATOR).toList();
+    }
+    return SORTED_CASTING;
+  }
+
   /**
    * Gets all composite fluid recipes
    * @return  Collection of all recipes
    */
   public static Collection<MaterialFluidRecipe> getAllCompositeFluids() {
     return COMPOSITE_FLUIDS;
+  }
+
+  /** Gets all visible composite fluids sorted in material order */
+  public static List<MaterialFluidRecipe> getSortedCompositeFluids() {
+    if (SORTED_COMPOSITE == null) {
+      SORTED_COMPOSITE = COMPOSITE_FLUIDS.stream().filter(RECIPE_FILTER).sorted(COMPOSITE_COMPARATOR).toList();
+    }
+    return SORTED_COMPOSITE;
+  }
+
+  /** Gets the temperature for the given fluid, or 0 if undefined. */
+  public static int getTemperature(Fluid fluid) {
+    return TEMPERATURE_CACHE.apply(fluid);
+  }
+
+  /** Gets the temperature for the given fluid */
+  public static int getCoolingTime(FluidStack fluid, int fallback) {
+    int temperature = TEMPERATURE_CACHE.apply(fluid.getFluid());
+    if (temperature > 0) {
+      return ICastingRecipe.calcCoolingTime(temperature, fluid.getAmount());
+    }
+    return fallback;
   }
 }

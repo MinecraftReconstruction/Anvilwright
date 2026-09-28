@@ -1,62 +1,90 @@
 {
-  "parts": [
+  "modules": [
     {
-      "item": "tconstruct:small_blade"
+      "type": "tconstruct:part_stats",
+      "parts": [
+        "tconstruct:small_blade",
+        "tconstruct:tool_handle"
+      ],
+      "primary_part": 0
     },
     {
-      "item": "tconstruct:tool_handle"
-    }
-  ],
-  "stats": {
-    "base": {
-      "tconstruct:attack_damage": 3.0,
-      "tconstruct:attack_speed": 2.0,
-      "tconstruct:block_amount": 10.0,
-      "tconstruct:use_item_speed": 1.0
-    },
-    "multipliers": {
-      "tconstruct:attack_damage": 0.65,
-      "tconstruct:mining_speed": 0.75,
-      "tconstruct:durability": 0.75
-    }
-  },
-  "slots": {
-    "upgrades": 3,
-    "abilities": 1
-  },
-  "traits": [
-    {
-      "name": "tconstruct:padded",
-      "level": 1
-    },
-    {
-      "name": "tconstruct:offhand_attack",
-      "level": 1
-    },
-    {
-      "name": "tconstruct:silky_shears",
-      "level": 1
-    }
-  ],
-  "actions": [
-    "sword_dig",
-    "hoe_dig"
-  ],
-  "harvest": {
-    "logic": {
-      "type": "tconstruct:modified_tag",
-      "effective": "tconstruct:mineable/dagger",
-      "modifiers": [
+      "type": "tconstruct:default_materials",
+      "materials": [
         {
-          "modifier": 7.5,
-          "predicate": {
-            "type": "tconstruct:set",
-            "blocks": [
-              "minecraft:cobweb"
-            ]
-          }
+          "type": "tconstruct:random",
+          "tier": 1
+        },
+        {
+          "type": "tconstruct:random",
+          "tier": 1
         }
       ]
+    },
+    {
+      "type": "tconstruct:base_stats",
+      "stats": {
+        "tconstruct:attack_damage": 3.0,
+        "tconstruct:attack_speed": 2.0,
+        "tconstruct:block_amount": 10.0,
+        "tconstruct:use_item_speed": 1.0
+      }
+    },
+    {
+      "type": "tconstruct:multiply_stats",
+      "multipliers": {
+        "tconstruct:attack_damage": 0.65,
+        "tconstruct:durability": 0.75,
+        "tconstruct:mining_speed": 0.75
+      }
+    },
+    {
+      "type": "tconstruct:modifier_slots",
+      "slots": {
+        "abilities": 1,
+        "upgrades": 3
+      }
+    },
+    {
+      "type": "tconstruct:traits",
+      "traits": [
+        {
+          "level": 1,
+          "name": "tconstruct:padded"
+        },
+        {
+          "level": 1,
+          "name": "tconstruct:offhand_attack"
+        },
+        {
+          "level": 1,
+          "name": "tconstruct:silky_shears"
+        }
+      ]
+    },
+    {
+      "type": "tconstruct:tool_actions",
+      "tool_actions": [
+        "sword_dig",
+        "hoe_dig"
+      ]
+    },
+    {
+      "type": "tconstruct:is_effective",
+      "predicate_type": "mantle:tag",
+      "tag": "tconstruct:mineable/dagger"
+    },
+    {
+      "type": "tconstruct:mining_speed_modifier",
+      "blocks": [
+        "minecraft:cobweb"
+      ],
+      "modifier": 7.5,
+      "predicate_type": "mantle:set"
+    },
+    {
+      "type": "tconstruct:fixed_material_name",
+      "index": 0
     }
-  }
+  ]
 }

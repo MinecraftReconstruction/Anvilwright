@@ -4,18 +4,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -26,9 +27,9 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   /** Collection of all modifiers */
   private final Map<ModifierId,Modifier> allModifiers;
   /** Map of all modifier tags */
-  private final Map<ResourceLocation,Collection<Modifier>> tags;
+  private final Map<TagKey<Modifier>,List<Modifier>> tags;
   /** Collection of non-redirect modifiers */
-  private Collection<Modifier> modifiers;
+  private Collection<ComposableModifier> modifiers;
   /** Map of modifier redirect ID pairs */
   private Map<ModifierId,ModifierId> redirects;
   /** Map of enchantment to modifier pair */
@@ -39,15 +40,21 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   /** Ensures both the modifiers and redirects lists are calculated, allows one packet to be used multiple times without redundant work */
   private void ensureCalculated() {
     if (this.modifiers == null || this.redirects == null) {
-      ImmutableList.Builder<Modifier> modifiers = ImmutableList.builder();
+      ImmutableList.Builder<ComposableModifier> modifiers = ImmutableList.builder();
       ImmutableMap.Builder<ModifierId,ModifierId> redirects = ImmutableMap.builder();
       for (Entry<ModifierId,Modifier> entry : allModifiers.entrySet()) {
         ModifierId id = entry.getKey();
-        Modifier mod = entry.getValue();
-        if (id.equals(mod.getId())) {
-          modifiers.add(mod);
+        Modifier value = entry.getValue();
+        ModifierId actual = value.getId();
+        if (id.equals(actual)) {
+          // we can't sync anything that is not composable
+          if (value instanceof ComposableModifier composable) {
+            modifiers.add(composable);
+          } else {
+            TConstruct.LOG.warn("Unable to sync modifier {} as its not ComposableModifier; got class {}", id, value.getClass().getName());
+          }
         } else {
-          redirects.put(id, mod.getId());
+          redirects.put(id, actual);
         }
       }
       this.modifiers = modifiers.build();
@@ -73,9 +80,14 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     Map<ModifierId,Modifier> modifiers = new HashMap<>();
     for (int i = 0; i < size; i++) {
       ModifierId id = new ModifierId(buffer.readUtf(Short.MAX_VALUE));
-      Modifier modifier = ModifierManager.MODIFIER_LOADERS.fromNetwork(buffer);
-      modifier.setId(id);
-      modifiers.put(id, modifier);
+      try {
+        Modifier modifier = ComposableModifier.LOADER.decode(buffer, ModifierManager.contextBuilder(id).build());
+        modifier.setId(id);
+        modifiers.put(id, modifier);
+      } catch (RuntimeException e) {
+        TConstruct.LOG.error("Failed to decode modifier with ID {}", id, e);
+        throw e;
+      }
     }
     // read in redirects
     size = buffer.readVarInt();
@@ -84,7 +96,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
       modifiers.put(from, getModifier(modifiers, new ModifierId(buffer.readUtf(Short.MAX_VALUE))));
     }
     this.allModifiers = modifiers;
-    this.tags = GenericTagUtil.decodeTags(buffer, id -> getModifier(modifiers, new ModifierId(id)));
+    this.tags = GenericTagUtil.decodeTags(buffer, ModifierManager.REGISTRY_KEY, id -> getModifier(modifiers, new ModifierId(id)));
 
     // read in enchantment to modifier mapping
     ImmutableMap.Builder<Enchantment,Modifier> enchantmentBuilder = ImmutableMap.builder();
@@ -110,9 +122,16 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     ensureCalculated();
     // write modifiers
     buffer.writeVarInt(modifiers.size());
-    for (Modifier modifier : modifiers) {
-      buffer.writeResourceLocation(modifier.getId());
-      ModifierManager.MODIFIER_LOADERS.toNetwork(modifier, buffer);
+    for (ComposableModifier modifier : modifiers) {
+      ResourceLocation id = modifier.getId();
+      buffer.writeResourceLocation(id);
+      try {
+        ComposableModifier.LOADER.encode(buffer, modifier);
+      } catch (RuntimeException e) {
+        // improve error logging
+        TConstruct.LOG.error("Failed to encode modifier with ID {}", id, e);
+        throw e;
+      }
     }
     // write redirects
     buffer.writeVarInt(redirects.size());

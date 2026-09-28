@@ -10,6 +10,8 @@ import slimeknights.mantle.client.book.data.PageData;
 import slimeknights.mantle.client.book.data.element.TextData;
 import slimeknights.mantle.client.screen.book.element.SizedBookElement;
 
+/** @deprecated use {@link slimeknights.mantle.client.screen.book.element.PageIconLinkElement} */
+@Deprecated(forRemoval = true)
 public class PageIconLinkElement extends SizedBookElement {
 
   public PageData pageData;
@@ -35,12 +37,12 @@ public class PageIconLinkElement extends SizedBookElement {
   @Override
   public void draw(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, Font fontRenderer) {
     boolean hover = this.isHovered(mouseX, mouseY);
-    RenderSystem.setShaderColor(1F, 1F, 1F, hover ? 1F : 0.5F);
 
-    if (this.isHovered(mouseX, mouseY)) {
+    if (hover) {
       graphics.fill(this.x, this.y, this.x + this.width, this.y + this.height, this.parent.book.appearance.hoverColor | (0x77 << 24));
     }
 
+    RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     this.displayElement.draw(graphics, mouseX, mouseY, partialTicks, fontRenderer);
   }
 

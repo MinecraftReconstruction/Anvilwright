@@ -8,22 +8,41 @@ import net.minecraft.world.level.block.Blocks;
 import slimeknights.mantle.lib.util.ToolActions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.tconstruct.fixture.MaterialItemFixture;
+import slimeknights.tconstruct.fixture.RegistrationFixture;
+import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierFixture;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.definition.aoe.CircleAOEIterator;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
-import slimeknights.tconstruct.library.tools.definition.harvest.IHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.weapon.IWeaponAttack;
-import slimeknights.tconstruct.library.tools.definition.weapon.SweepWeaponAttack;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.AreaOfEffectIterator;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.CircleAOEIterator;
+import slimeknights.tconstruct.library.tools.definition.module.build.MultiplyStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.SetStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolActionToolHook;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolActionsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolSlotsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolTraitsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.VolatileDataToolHook;
+import slimeknights.tconstruct.library.tools.definition.module.material.PartStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolPartsHook;
+import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveModule;
+import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveToolHook;
+import slimeknights.tconstruct.library.tools.definition.module.weapon.MeleeHitToolHook;
+import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.MultiplierNBT;
 import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
+import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.test.BaseMcTest;
-import slimeknights.tconstruct.test.BlockHarvestLogic;
+import slimeknights.tconstruct.test.TestHelper;
+import slimeknights.tconstruct.test.TestHelper.ToolDefinitionStats;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,20 +50,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
-  private static final ResourceLocation EMPTY_ID = new ResourceLocation("test", "empty");
-  private static final ResourceLocation FILLED_ID = new ResourceLocation("test", "filled");
+  private static final ResourceLocation EMPTY_ID = TestHelper.id("empty");
+  private static final ResourceLocation FILLED_ID = TestHelper.id("filled");
 
   @BeforeAll
   static void initialize() {
     MaterialItemFixture.init();
     ModifierFixture.init();
-    try {
-      IHarvestLogic.LOADER.register(new ResourceLocation("test", "block"), BlockHarvestLogic.LOADER);
-      IAreaOfEffectIterator.LOADER.register(new ResourceLocation("test", "circle"), CircleAOEIterator.LOADER);
-      IWeaponAttack.LOADER.register(new ResourceLocation("test", "sweep"), SweepWeaponAttack.LOADER);
-    } catch (IllegalArgumentException e) {
-      // no-op
-    }
+    RegistrationFixture.register(ToolModule.LOADER, "base_stats", SetStatsModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "multiply_stats", MultiplyStatsModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "slots", ToolSlotsModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "parts", PartStatsModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "is_effective", IsEffectiveModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "circle", CircleAOEIterator.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "sweep", SweepWeaponAttack.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "traits", ToolTraitsModule.LOADER);
+    RegistrationFixture.register(ToolModule.LOADER, "actions", ToolActionsModule.LOADER);
   }
 
   @Test
@@ -53,24 +74,25 @@ class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
     ToolDefinitionData filled = ToolDefinitionDataBuilder
       .builder()
       // parts
-      .part(MaterialItemFixture.MATERIAL_ITEM_HEAD, 10)
-      .part(MaterialItemFixture.MATERIAL_ITEM_HANDLE)
+      .module(PartStatsModule.parts()
+                             .part(MaterialItemFixture.MATERIAL_ITEM_HEAD, 10)
+                             .part(MaterialItemFixture.MATERIAL_ITEM_HANDLE).build())
       // stats
-      .stat(ToolStats.DURABILITY, 1000)
-      .stat(ToolStats.ATTACK_DAMAGE, 152.5f)
-      .multiplier(ToolStats.MINING_SPEED, 10)
-      .multiplier(ToolStats.ATTACK_SPEED, 0.5f)
-      .multiplier(ToolStats.ATTACK_DAMAGE, 1)
-      .startingSlots(SlotType.UPGRADE, 5)
-      .startingSlots(SlotType.ABILITY, 8)
+      .module(new SetStatsModule(StatsNBT.builder()
+        .set(ToolStats.DURABILITY, 1000)
+        .set(ToolStats.ATTACK_DAMAGE, 152.5f).build()))
+      .module(new MultiplyStatsModule(MultiplierNBT.builder()
+        .set(ToolStats.MINING_SPEED, 10)
+        .set(ToolStats.ATTACK_SPEED, 0.5f)
+        .set(ToolStats.ATTACK_DAMAGE, 1).build()))
+      .module(ToolSlotsModule.builder().slots(SlotType.UPGRADE, 5).slots(SlotType.ABILITY, 8).build())
       // traits
-      .trait(ModifierFixture.TEST_1, 10)
-      .action(ToolActions.AXE_DIG)
-      .action(ToolActions.SHOVEL_FLATTEN)
+      .module(ToolTraitsModule.builder().trait(ModifierFixture.TEST_1, 10).build())
+      .module(ToolActionsModule.of(ToolActions.AXE_DIG, ToolActions.SHOVEL_FLATTEN))
       // behavior
-      .harvestLogic(new BlockHarvestLogic(Blocks.GRANITE))
-      .aoe(new CircleAOEIterator(7, true))
-      .attack(new SweepWeaponAttack(4))
+      .module(new IsEffectiveModule(BlockPredicate.set(Blocks.GRANITE), true))
+      .module(new CircleAOEIterator(7, true))
+      .module(new SweepWeaponAttack(4))
       .build();
 
     // send a packet over the buffer
@@ -87,81 +109,94 @@ class UpdateToolDefinitionDataPacketTest extends BaseMcTest {
     ToolDefinitionData parsed = parsedMap.get(EMPTY_ID);
     assertThat(parsed).isNotNull();
     // no parts
-    assertThat(parsed.getParts()).isEmpty();
+    assertThat(parsed.getHook(ToolHooks.TOOL_MATERIALS).getStatTypes(ToolDefinition.EMPTY)).isEmpty();
     // no stats
-    assertThat(parsed.getStats().getBase().getContainedStats()).isEmpty();
-    assertThat(parsed.getStats().getMultipliers().getContainedStats()).isEmpty();
+    ToolDefinitionStats stats = TestHelper.buildStats(parsed);
+    assertThat(stats.base().getContainedStats()).isEmpty();
+    assertThat(stats.multipliers().getContainedStats()).isEmpty();
     // no slots
-    assertThat(parsed.getSlots().containedTypes()).isEmpty();
+    assertThat(parsed.getHook(ToolHooks.VOLATILE_DATA)).isNotInstanceOf(ToolSlotsModule.class);
     // no traits
-    assertThat(parsed.getTraits()).isEmpty();
-    // no actions
-    assertThat(parsed.actions).isNullOrEmpty();
+    assertThat(TestHelper.getTraits(parsed)).isEmpty();
 
     // next, validate the filled one
     parsed = parsedMap.get(FILLED_ID);
     assertThat(parsed).isNotNull();
 
     // parts
-    List<PartRequirement> parts = parsed.getParts();
+    ToolPartsHook toolPartsHook = parsed.getHook(ToolHooks.TOOL_PARTS);
+    assertThat(toolPartsHook).isInstanceOf(PartStatsModule.class);
+    PartStatsModule module = (PartStatsModule)toolPartsHook;
+    List<IToolPart> parts = module.getParts(ToolDefinition.EMPTY);
+    float[] scales = module.getScales();
     assertThat(parts).hasSize(2);
-    assertThat(parts.get(0).getPart()).isEqualTo(MaterialItemFixture.MATERIAL_ITEM_HEAD);
-    assertThat(parts.get(0).getWeight()).isEqualTo(10);
-    assertThat(parts.get(1).getPart()).isEqualTo(MaterialItemFixture.MATERIAL_ITEM_HANDLE);
-    assertThat(parts.get(1).getWeight()).isEqualTo(1);
+    assertThat(parts.get(0)).isEqualTo(MaterialItemFixture.MATERIAL_ITEM_HEAD);
+    assertThat(scales[0]).isEqualTo(10);
+    assertThat(parts.get(1)).isEqualTo(MaterialItemFixture.MATERIAL_ITEM_HANDLE);
+    assertThat(scales[1]).isEqualTo(1);
 
     // stats
-    StatsNBT stats = parsed.getStats().getBase();
-    assertThat(stats.getContainedStats()).hasSize(2);
-    assertThat(stats.getContainedStats()).contains(ToolStats.DURABILITY);
-    assertThat(stats.getContainedStats()).contains(ToolStats.ATTACK_DAMAGE);
-    assertThat(stats.get(ToolStats.DURABILITY)).isEqualTo(1000);
-    assertThat(stats.get(ToolStats.ATTACK_DAMAGE)).isEqualTo(152.5f);
-    assertThat(stats.get(ToolStats.ATTACK_SPEED)).isEqualTo(ToolStats.ATTACK_SPEED.getDefaultValue());
+    stats = TestHelper.buildStats(parsed);
+    assertThat(stats.base().getContainedStats()).hasSize(2);
+    assertThat(stats.base().getContainedStats()).contains(ToolStats.DURABILITY);
+    assertThat(stats.base().getContainedStats()).contains(ToolStats.ATTACK_DAMAGE);
+    assertThat(stats.base().get(ToolStats.DURABILITY)).isEqualTo(1000);
+    assertThat(stats.base().get(ToolStats.ATTACK_DAMAGE)).isEqualTo(152.5f);
+    assertThat(stats.base().get(ToolStats.ATTACK_SPEED)).isEqualTo(ToolStats.ATTACK_SPEED.getDefaultValue());
 
-    MultiplierNBT multipliers = parsed.getStats().getMultipliers();
-    assertThat(multipliers.getContainedStats()).hasSize(2); // attack damage is 1, so its skipped
-    assertThat(multipliers.getContainedStats()).contains(ToolStats.ATTACK_SPEED);
-    assertThat(multipliers.getContainedStats()).contains(ToolStats.MINING_SPEED);
-    assertThat(multipliers.get(ToolStats.MINING_SPEED)).isEqualTo(10);
-    assertThat(multipliers.get(ToolStats.ATTACK_SPEED)).isEqualTo(0.5f);
-    assertThat(multipliers.get(ToolStats.ATTACK_DAMAGE)).isEqualTo(1);
-    assertThat(multipliers.get(ToolStats.DURABILITY)).isEqualTo(1);
+    assertThat(stats.multipliers().getContainedStats()).hasSize(2); // attack damage is 1, so its skipped
+    assertThat(stats.multipliers().getContainedStats()).contains(ToolStats.ATTACK_SPEED);
+    assertThat(stats.multipliers().getContainedStats()).contains(ToolStats.MINING_SPEED);
+    assertThat(stats.multipliers().get(ToolStats.MINING_SPEED)).isEqualTo(10);
+    assertThat(stats.multipliers().get(ToolStats.ATTACK_SPEED)).isEqualTo(0.5f);
+    assertThat(stats.multipliers().get(ToolStats.ATTACK_DAMAGE)).isEqualTo(1);
+    assertThat(stats.multipliers().get(ToolStats.DURABILITY)).isEqualTo(1);
 
     // slots
-    DefinitionModifierSlots slots = parsed.getSlots();
-    assertThat(slots.containedTypes()).hasSize(2);
-    assertThat(slots.containedTypes()).contains(SlotType.UPGRADE);
-    assertThat(slots.containedTypes()).contains(SlotType.ABILITY);
-    assertThat(slots.getSlots(SlotType.UPGRADE)).isEqualTo(5);
-    assertThat(slots.getSlots(SlotType.ABILITY)).isEqualTo(8);
+    VolatileDataToolHook volatileHook = parsed.getHook(ToolHooks.VOLATILE_DATA);
+    // parts has volatile data, so need to extract it out
+    assertThat(volatileHook).isInstanceOf(VolatileDataToolHook.AllMerger.class);
+    Collection<VolatileDataToolHook> collection = ((VolatileDataToolHook.AllMerger) volatileHook).modules();
+    assertThat(collection).hasSize(2);
+    Iterator<VolatileDataToolHook> iterator = collection.iterator();
+    assertThat(iterator.next()).isInstanceOf(PartStatsModule.class);
+    volatileHook = iterator.next();
+    assertThat(volatileHook).isInstanceOf(ToolSlotsModule.class);
+    Map<SlotType,Integer> slots = ((ToolSlotsModule) volatileHook).slots();
+    assertThat(slots).hasSize(2);
+    assertThat(slots).containsEntry(SlotType.UPGRADE, 5);
+    assertThat(slots).containsEntry(SlotType.ABILITY, 8);
 
     // traits
-    List<ModifierEntry> traits = parsed.getTraits();
+    List<ModifierEntry> traits = TestHelper.getTraits(parsed);
     assertThat(traits).hasSize(1);
     assertThat(traits.get(0).getModifier()).isEqualTo(ModifierFixture.TEST_MODIFIER_1);
     assertThat(traits.get(0).getLevel()).isEqualTo(10);
 
     // actions
-    assertThat(parsed.actions).isNotNull();
-    assertThat(parsed.actions).hasSize(2);
-    assertThat(parsed.canPerformAction(ToolActions.AXE_DIG)).isTrue();
-    assertThat(parsed.canPerformAction(ToolActions.SHOVEL_FLATTEN)).isTrue();
+    ToolActionToolHook actionModule = parsed.getHook(ToolHooks.TOOL_ACTION);
+    assertThat(actionModule).isInstanceOf(ToolActionsModule.class);
+    assertThat(((ToolActionsModule) actionModule).actions()).hasSize(2);
+    IToolStackView tool = mock(IToolStackView.class);
+    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ToolActions.AXE_DIG)).isTrue();
+    assertThat(parsed.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, ToolActions.SHOVEL_FLATTEN)).isTrue();
 
     // harvest
-    IHarvestLogic harvestLogic = parsed.getHarvestLogic();
-    assertThat(harvestLogic).isInstanceOf(BlockHarvestLogic.class);
-    assertThat(harvestLogic.isEffective(mock(IToolStackView.class), Blocks.GRANITE.defaultBlockState())).isTrue();
+    IsEffectiveToolHook harvestLogic = parsed.getHook(ToolHooks.IS_EFFECTIVE);
+    assertThat(harvestLogic).isInstanceOf(IsEffectiveModule.class);
+    assertThat(harvestLogic.isToolEffective(mock(IToolStackView.class), Blocks.GRANITE.defaultBlockState())).isTrue();
 
     // aoe
-    IAreaOfEffectIterator aoe = parsed.getAOE();
+    AreaOfEffectIterator aoe = parsed.getHook(ToolHooks.AOE_ITERATOR);
     assertThat(aoe).isInstanceOf(CircleAOEIterator.class);
-    assertThat(((CircleAOEIterator)aoe).getDiameter()).isEqualTo(7);
+    assertThat(((CircleAOEIterator)aoe).diameter()).isEqualTo(7);
     assertThat(((CircleAOEIterator)aoe).is3D()).isTrue();
 
     // weapon
-    IWeaponAttack attack = parsed.getAttack();
+    MeleeHitToolHook attack = parsed.getHook(ToolHooks.MELEE_HIT);
     assertThat(attack).isInstanceOf(SweepWeaponAttack.class);
-    assertThat(((SweepWeaponAttack)attack).getRange()).isEqualTo(4);
+    LevelingValue range = ((SweepWeaponAttack)attack).ranges();
+    assertThat(range.flat()).isEqualTo(4);
+    assertThat(range.eachLevel()).isEqualTo(1);
   }
 }

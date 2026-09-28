@@ -1,20 +1,22 @@
 package slimeknights.tconstruct.library.materials.definition;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
+import slimeknights.tconstruct.library.utils.IdParser;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import javax.annotation.Nullable;
 
 /**
- * This is just a copy of ResourceLocation for type safety.
+ * This is just a copy of ResourceLocation for type safety in material JSON.
  */
-public final class MaterialId extends ResourceLocation implements MaterialVariantId {
+public final class MaterialId extends ResourceId implements MaterialVariantId {
+  public static final IdParser<MaterialId> PARSER = new IdParser<>(MaterialId::new, "Material");
+  /** ID of fallback material */
+  public static final MaterialId UNKNOWN = new MaterialId(TConstruct.MOD_ID, "unknown");
+
   public MaterialId(String resourceName) {
     super(resourceName);
   }
@@ -23,8 +25,12 @@ public final class MaterialId extends ResourceLocation implements MaterialVarian
     super(namespaceIn, pathIn);
   }
 
-  public MaterialId(ResourceLocation resourceLocation) {
-    super(resourceLocation.getNamespace(), resourceLocation.getPath());
+  public MaterialId(ResourceLocation location) {
+    super(location);
+  }
+
+  private MaterialId(String namespace, String path, @Nullable Dummy pDummy) {
+    super(namespace, path, pDummy);
   }
 
   /** Checks if this ID matches the given material */
@@ -53,8 +59,18 @@ public final class MaterialId extends ResourceLocation implements MaterialVarian
   }
 
   @Override
+  public boolean isDefaultVariant() {
+    return false;
+  }
+
+  @Override
   public ResourceLocation getLocation(char separator) {
     return this;
+  }
+
+  @Override
+  public String getSuffix() {
+    return getNamespace() + '_' + getPath();
   }
 
   @Override
@@ -62,50 +78,18 @@ public final class MaterialId extends ResourceLocation implements MaterialVarian
     return this.equals(other.getId());
   }
 
+
   /* Helpers */
 
-  /**
-   * Creates a new material ID from the given string
-   * @param string  String
-   * @return  Material ID, or null if invalid
-   */
+  /** {@return Material ID, or null if invalid} */
   @Nullable
   public static MaterialId tryParse(String string) {
-    try {
-      return new MaterialId(string);
-    } catch (ResourceLocationException resourcelocationexception) {
-      return null;
-    }
+    return tryParse(string, (namespace, path) -> new MaterialId(namespace, path, null));
   }
 
-  /** Shared logic for {@link #fromJson(JsonObject, String)} and {@link #convertJson(JsonElement, String)} */
-  private static MaterialId parse(String text, String key) {
-    MaterialId location = tryParse(text);
-    if (location == null) {
-      throw new JsonSyntaxException("Expected " + key + " to be a material ID, was '" + text + "'");
-    }
-    return location;
-  }
-
-  /**
-   * Gets a resource location from JSON, throwing a nice exception if invalid
-   * @param json  JSON object
-   * @param key   Key to fetch
-   * @return  Resource location parsed
-   */
-  public static MaterialId fromJson(JsonObject json, String key) {
-    String text = GsonHelper.getAsString(json, key);
-    return parse(text, key);
-  }
-
-  /**
-   * Gets a resource location from JSON, throwing a nice exception if invalid
-   * @param json  JSON object
-   * @param key   Key to fetch
-   * @return  Resource location parsed
-   */
-  public static MaterialId convertJson(JsonElement json, String key) {
-    String text = GsonHelper.convertToString(json, key);
-    return parse(text, key);
+  /** {@return Material ID, or null if invalid} */
+  @Nullable
+  public static MaterialId tryBuild(String namespace, String path) {
+    return tryBuild(namespace, path, (n, p) -> new MaterialId(namespace, path, null));
   }
 }

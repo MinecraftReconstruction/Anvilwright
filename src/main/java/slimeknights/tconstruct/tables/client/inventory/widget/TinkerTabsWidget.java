@@ -36,10 +36,10 @@ import java.util.List;
 
 public class TinkerTabsWidget implements Renderable, GuiEventListener, NarratableEntry {
   private static final ResourceLocation TAB_IMAGE = TConstruct.getResource("textures/gui/icons.png");
-  protected static final ElementScreen TAB_ELEMENT = new ElementScreen(0, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_L_ELEMENT = new ElementScreen(26, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_C_ELEMENT = new ElementScreen(52, 18, 26, 30, 256, 256);
-  protected static final ElementScreen ACTIVE_TAB_R_ELEMENT = new ElementScreen(78, 18, 26, 30, 256, 256);
+  protected static final ElementScreen TAB_ELEMENT = new ElementScreen(TAB_IMAGE, 0, 18, 26, 30, 256, 256);
+  protected static final ElementScreen ACTIVE_TAB_L_ELEMENT = new ElementScreen(TAB_IMAGE, 26, 18, 26, 30, 256, 256);
+  protected static final ElementScreen ACTIVE_TAB_C_ELEMENT = new ElementScreen(TAB_IMAGE, 52, 18, 26, 30, 256, 256);
+  protected static final ElementScreen ACTIVE_TAB_R_ELEMENT = new ElementScreen(TAB_IMAGE, 78, 18, 26, 30, 256, 256);
 
   private final int leftPos;
   private final int topPos;
@@ -56,7 +56,6 @@ public class TinkerTabsWidget implements Renderable, GuiEventListener, Narratabl
     var tabs = collectTabs(Screens.getClient(this.parent), this.parent.getMenu());
 
     this.tabs = new TabsWidget(parent, TAB_ELEMENT, TAB_ELEMENT, TAB_ELEMENT, ACTIVE_TAB_L_ELEMENT, ACTIVE_TAB_C_ELEMENT, ACTIVE_TAB_R_ELEMENT);
-    this.tabs.tabsResource = TAB_IMAGE;
 
     int count = tabs.size();
     this.imageWidth = count * ACTIVE_TAB_C_ELEMENT.w + (count - 1) * this.tabs.spacing;

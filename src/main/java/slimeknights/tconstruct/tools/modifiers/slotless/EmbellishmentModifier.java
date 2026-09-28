@@ -1,26 +1,25 @@
 package slimeknights.tconstruct.tools.modifiers.slotless;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
-import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.tools.modules.cosmetic.EmbellishmentModule;
 
+import javax.annotation.Nullable;
+
+/** @deprecated use {@link EmbellishmentModule} */
+@Deprecated(forRemoval = true)
 public class EmbellishmentModifier extends NoLevelsModifier {
-  private static final String FORMAT_KEY = TConstruct.makeTranslationKey("modifier", "embellishment.formatted");
-
   @Override
-  public Component getDisplayName(IToolStackView tool, int level) {
-    MaterialVariantId materialVariant = MaterialVariantId.tryParse(tool.getPersistentData().getString(getId()));
-    if (materialVariant != null) {
-      return Component.translatable(FORMAT_KEY, MaterialTooltipCache.getDisplayName(materialVariant)).withStyle(style -> style.withColor(MaterialTooltipCache.getColor(materialVariant)));
-    }
-    return super.getDisplayName();
+  protected void registerHooks(Builder hookBuilder) {
+    hookBuilder.addModule(EmbellishmentModule.INSTANCE);
   }
 
   @Override
-  public void onRemoved(IToolStackView tool) {
-    tool.getPersistentData().remove(getId());
+  public Component getDisplayName(IToolStackView tool, ModifierEntry entry, @Nullable RegistryAccess access) {
+    return EmbellishmentModule.INSTANCE.getDisplayName(tool, entry, super.getDisplayName(), access);
   }
 }

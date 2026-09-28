@@ -16,11 +16,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.SyncPersistentDataPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
-import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
+import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class PersistentDataCapability implements EntityComponentInitializer {
     Optional<NamespacedNBT> data = CAPABILITY.maybeGet(entity);
     if (data.isEmpty()) {
       TConstruct.LOG.warn("Missing Tinkers NBT on entity {}, this should not happen", entity.getType());
-      return new NamespacedNBT();
+      return new ModDataNBT();
     }
     return data.get();
   }
@@ -77,6 +78,7 @@ public class PersistentDataCapability implements EntityComponentInitializer {
         CAPABILITY.maybeGet(newPlayer).ifPresent(newData -> newData.copyFrom(nbt));
       }
     });
+    original.invalidateCaps();
   }
 
   /** sync caps when the player respawns/returns from the end */

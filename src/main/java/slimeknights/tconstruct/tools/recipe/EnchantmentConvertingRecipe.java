@@ -1,17 +1,8 @@
 package slimeknights.tconstruct.tools.recipe;
 
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,10 +11,13 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.registries.ForgeRegistries;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
+import slimeknights.mantle.data.loadable.primitive.StringLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -34,10 +28,8 @@ import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.ModifierRecipe;
-import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.worktable.AbstractWorktableRecipe;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.item.ModifierCrystalItem;
 
@@ -47,17 +39,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /** Recipe for converting enchanted books into modifier crystals */
 public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
-  private static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "enchantment_converting");
   private static final Component DESCRIPTION_LOST = TConstruct.makeTranslation("recipe", "enchantment_converting.description.lost");
   private static final Component DESCRIPTION_KEEP = TConstruct.makeTranslation("recipe", "enchantment_converting.description.keep");
   private static final Component NO_ENCHANTMENT = TConstruct.makeTranslation("recipe", "enchantment_converting.no_enchantments");
-  private static final RecipeResult<ToolStack> TOO_FEW = RecipeResult.failure(TConstruct.makeTranslationKey("recipe", "enchantment_converting.too_few"));
+  private static final RecipeResult<LazyToolStack> TOO_FEW = RecipeResult.failure(TConstruct.makeTranslationKey("recipe", "enchantment_converting.too_few"));
+  /** Loader instance */
+  public static final RecordLoadable<EnchantmentConvertingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    StringLoadable.DEFAULT.requiredField("name", r -> r.name),
+    INPUTS_FIELD,
+    BooleanLoadable.INSTANCE.requiredField("match_book", r -> r.matchBook),
+    BooleanLoadable.INSTANCE.requiredField("return_unenchanted", r -> r.returnInput),
+    ModifierPredicate.LOADER.defaultField("modifier_predicate", false, r -> r.modifierPredicate),
+    EnchantmentConvertingRecipe::new);
 
   /** Name of recipe, used for title */
   private final String name;
@@ -77,7 +76,7 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
   public EnchantmentConvertingRecipe(ResourceLocation id, String name, List<SizedIngredient> inputs, boolean matchBook, boolean returnInput, IJsonPredicate<ModifierId> modifierPredicate) {
     super(id, inputs);
     this.name = name;
-    this.title = Component.translatable(BASE_KEY + "." + name + ".title");
+    this.title = Component.translatable(ExtractModifierRecipe.BASE_KEY + "." + name);
     this.matchBook = matchBook;
     this.returnInput = returnInput;
     this.modifierPredicate = modifierPredicate;
@@ -121,6 +120,13 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
     return ModifierRecipe.checkMatch(inv, inputs);
   }
 
+  /** Gets a list of all modifiers that match this recipe, set to level 1 for display */
+  private List<ModifierEntry> getMatchingModifiers() {
+    return ModifierRecipeLookup.getAllRecipeModifiers()
+      .filter(modifier -> modifierPredicate.matches(modifier.getId()) && ModifierManager.INSTANCE.hasEnchantment(modifier))
+      .map(mod -> new ModifierEntry(mod, 1)).toList();
+  }
+
   @Override
   public List<ModifierEntry> getModifierOptions(@Nullable ITinkerableContainer inv) {
     if (inv != null) {
@@ -128,19 +134,28 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
       return getEnchantments(inv.getTinkerableStack()).entrySet().stream().map(entry -> {
         Modifier modifier = ModifierManager.INSTANCE.get(entry.getKey());
         if (modifier != null && modifierPredicate.matches(modifier.getId())) {
-          return new ModifierEntry(modifier, entry.getValue());
+          return new ModifierEntry(modifier, returnInput ? 1 : entry.getValue());
         }
         return null;
-      }).filter(Objects::nonNull).toList();
+      }).filter(Objects::nonNull).distinct().toList();
     }
     if (displayModifiers == null) {
-      displayModifiers = ModifierRecipeLookup.getAllRecipeModifiers().filter(modifier -> modifierPredicate.matches(modifier.getId())).map(mod -> new ModifierEntry(mod, 1)).toList();
+      if (matchBook) {
+        Set<ModifierId> modifiers = getMatchingModifiers().stream().map(ModifierEntry::getId).collect(Collectors.toSet());
+        Modifier defaultModifier = ModifierManager.INSTANCE.getDefaultValue();
+        displayModifiers = ModifierManager.INSTANCE.getEquivalentEnchantments(modifiers::contains)
+          .flatMap(enchantment -> IntStream.rangeClosed(1, enchantment.getMaxLevel())
+            .mapToObj(level -> new ModifierEntry(Objects.requireNonNullElse(ModifierManager.INSTANCE.get(enchantment), defaultModifier), level)))
+          .toList();
+      } else {
+        displayModifiers = getMatchingModifiers();
+      }
     }
     return displayModifiers;
   }
 
   @Override
-  public RecipeResult<ToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier) {
+  public RecipeResult<LazyToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier) {
     // first, ensure we have enough items for counts above 1
     int level = modifier.getLevel();
     if (level > 1) {
@@ -159,36 +174,55 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
         return TOO_FEW;
       }
     }
-    // TODO 1.19: this is a pretty big hack, converting it into a tool stack when its an item stack. Consider whether we should use item stack output for 1.19
-    return RecipeResult.success(ToolStack.from(ModifierCrystalItem.withModifier(modifier.getId())));
+    return LazyToolStack.success(ModifierCrystalItem.withModifier(modifier.getId(), level));
   }
 
   @Override
-  public int toolResultSize(ITinkerableContainer inv, ModifierEntry selected) {
-    return selected.getLevel();
+  public int shrinkToolSlotBy(LazyToolStack result) {
+    return 1;
   }
 
   @Override
-  public void updateInputs(IToolStackView result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
+  public void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
     // consume inputs once per selected item
     for (int i = 0; i < selected.getLevel(); i++) {
       ModifierRecipe.updateInputs(inv, inputs);
     }
     // give back unenchanted item if requested
     if (returnInput && isServer) {
+      ModifierId modifier = ModifierCrystalItem.getModifier(result.getStack());
+      assert modifier != null;
       ItemStack current = inv.getTinkerableStack();
+      // returnInput drops just 1 level of the enchantment
+      // worth noting, its possible multiple match, if thats the case we just extract the first we find
+      Map<Enchantment,Integer> enchantments = getEnchantments(current);
+      for (Entry<Enchantment,Integer> entry : enchantments.entrySet()) {
+        Enchantment enchantment = entry.getKey();
+        Modifier enchantmentModifier = ModifierManager.INSTANCE.get(enchantment);
+        if (enchantmentModifier != null && enchantmentModifier.getId().equals(modifier)) {
+          int newLevel = entry.getValue() - 1;
+          if (newLevel <= 0) {
+            enchantments.remove(enchantment);
+          } else {
+            enchantments.put(enchantment, newLevel);
+          }
+          break;
+        }
+      }
+
       ItemStack unenchanted;
-      if (matchBook) {
+      if (matchBook && enchantments.isEmpty()) {
         unenchanted = new ItemStack(Items.BOOK);
         if (current.hasCustomHoverName()) {
           unenchanted.setHoverName(current.getHoverName());
         }
       } else {
         unenchanted = current.copy();
-        EnchantmentHelper.setEnchantments(getEnchantments(unenchanted).entrySet().stream()
-                                                                      .filter(entry -> entry.getKey().isCurse())
-                                                                      .collect(Collectors.toMap(Entry::getKey, Entry::getValue)),
-                                          unenchanted);
+        if (matchBook) {
+          // for some dumb reason setEnchantments for a book just adds them instead of setting them
+          unenchanted.removeTagKey("StoredEnchantments");
+        }
+        EnchantmentHelper.setEnchantments(enchantments, unenchanted);
       }
       inv.giveItem(unenchanted);
     }
@@ -203,6 +237,16 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
   /* Display */
 
   @Override
+  public boolean isToolInput() {
+    return true;
+  }
+
+  @Override
+  public boolean linkToolsModifiers() {
+    return matchBook;
+  }
+
+  @Override
   public boolean isModifierOutput() {
     return true;
   }
@@ -215,102 +259,16 @@ public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {
     }
     // for books, cache per recipe as we show the enchants
     if (tools == null) {
-      Set<ModifierId> modifiers = getModifierOptions(null).stream().map(ModifierEntry::getId).collect(Collectors.toSet());
+      // don't use the cached value from getModifierOptions as that is going to contain some redundant listings
+      Set<ModifierId> modifiers = getMatchingModifiers().stream().map(ModifierEntry::getId).collect(Collectors.toSet());
       tools = ModifierManager.INSTANCE.getEquivalentEnchantments(modifiers::contains)
-                                      .flatMap(enchantment -> IntStream.rangeClosed(1, enchantment.getMaxLevel())
-                                                                       .mapToObj(level -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, level))))
-                                      .toList();
+        .flatMap(enchantment -> IntStream.rangeClosed(1, enchantment.getMaxLevel())
+          .mapToObj(level -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, level))))
+        .toList();
     }
     return tools;
   }
 
-  public static class Serializer extends LoggingRecipeSerializer<EnchantmentConvertingRecipe> {
-    @Override
-    public EnchantmentConvertingRecipe fromJson(ResourceLocation id, JsonObject json) {
-      String name = GsonHelper.getAsString(json, "name");
-      List<SizedIngredient> ingredients = JsonHelper.parseList(json, "inputs", SizedIngredient::deserialize);
-      boolean matchBook = GsonHelper.getAsBoolean(json, "match_book");
-      boolean returnInput = GsonHelper.getAsBoolean(json, "return_unenchanted");
-      IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.LOADER.getAndDeserialize(json, "modifier_predicate");
-      return new EnchantmentConvertingRecipe(id, name, ingredients, matchBook, returnInput, modifierPredicate);
-    }
-
-    @Nullable
-    @Override
-    public EnchantmentConvertingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      String name = buffer.readUtf(Short.MAX_VALUE);
-      int size = buffer.readVarInt();
-      ImmutableList.Builder<SizedIngredient> ingredients = ImmutableList.builder();
-      for (int i = 0; i < size; i++) {
-        ingredients.add(SizedIngredient.read(buffer));
-      }
-      boolean matchBook = buffer.readBoolean();
-      boolean returnInput = buffer.readBoolean();
-      IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.LOADER.fromNetwork(buffer);
-      return new EnchantmentConvertingRecipe(id, name, ingredients.build(), matchBook, returnInput, modifierPredicate);
-    }
-
-    @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, EnchantmentConvertingRecipe recipe) {
-      buffer.writeUtf(recipe.name);
-      buffer.writeVarInt(recipe.inputs.size());
-      for (SizedIngredient ingredient : recipe.inputs) {
-        ingredient.write(buffer);
-      }
-      buffer.writeBoolean(recipe.matchBook);
-      buffer.writeBoolean(recipe.returnInput);
-      ModifierPredicate.LOADER.toNetwork(recipe.modifierPredicate, buffer);
-    }
-  }
-
-  @RequiredArgsConstructor(staticName = "converting")
-  public static class Builder extends AbstractSizedIngredientRecipeBuilder<Builder> {
-    private final String name;
-    private final boolean matchBook;
-    private boolean returnInput = false;
-    @Setter @Accessors(fluent = true)
-    private IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.ALWAYS;
-
-    /** If true, returns the unenchanted form of the item as an extra result */
-    public Builder returnInput() {
-      returnInput = true;
-      return this;
-    }
-
-    @Override
-    public void save(Consumer<FinishedRecipe> consumer) {
-      save(consumer, TConstruct.getResource(name));
-    }
-
-    @Override
-    public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-      if (inputs.isEmpty()) {
-        throw new IllegalStateException("Must have at least one input");
-      }
-      ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
-      consumer.accept(new Finished(id, advancementId));
-    }
-
-    private class Finished extends SizedFinishedRecipe {
-      public Finished(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-        super(ID, advancementID);
-      }
-
-      @Override
-      public void serializeRecipeData(JsonObject json) {
-        json.addProperty("name", name);
-        super.serializeRecipeData(json);
-        json.addProperty("match_book", matchBook);
-        json.addProperty("return_unenchanted", returnInput);
-        json.add("modifier_predicate", ModifierPredicate.LOADER.serialize(modifierPredicate));
-      }
-
-      @Override
-      public RecipeSerializer<?> getType() {
-        return TinkerModifiers.enchantmentConvertingSerializer.get();
-      }
-    }
-  }
 
   /* Helpers */
 

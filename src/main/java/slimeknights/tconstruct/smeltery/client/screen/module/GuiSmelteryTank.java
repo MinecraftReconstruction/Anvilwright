@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
@@ -12,6 +13,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.smeltery.block.entity.tank.SmelteryTank;
+import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank;
 import slimeknights.tconstruct.smeltery.network.SmelteryFluidClickedPacket;
 
 import javax.annotation.Nullable;
@@ -22,7 +24,7 @@ import java.util.function.BiConsumer;
 /**
  * Helper class to draw the smeltery tank in UIs
  */
-public class GuiSmelteryTank {
+public class GuiSmelteryTank implements IScreenWithFluidTank {
   // fluid tooltips
   public static final Component TOOLTIP_CAPACITY = TConstruct.makeTranslation("gui", "melting.capacity");
   public static final Component TOOLTIP_AVAILABLE = TConstruct.makeTranslation("gui", "melting.available");
@@ -64,7 +66,7 @@ public class GuiSmelteryTank {
    * @param checkY  Y position to check
    * @return  True if within the tank
    */
-  private boolean withinTank(int checkX, int checkY) {
+  public boolean withinTank(int checkX, int checkY) {
     return x <= checkX && checkX < (x + width) && y <= checkY && checkY < (y + height);
   }
 
@@ -84,6 +86,8 @@ public class GuiSmelteryTank {
         GuiUtil.renderTiledFluid(graphics.pose(), parent, liquid, x, bottom - fluidH, width, fluidH, 100);
         bottom -= fluidH;
       }
+    } else if (liquidHeights != null && liquidHeights.length > 0) {
+      liquidHeights = new int[0];
     }
   }
 
@@ -142,6 +146,7 @@ public class GuiSmelteryTank {
         } else {
           GuiUtil.renderHighlight(graphics, x, (y + height) - heightSum, width, heights[hovered]);
         }
+        GuiUtil.renderHighlight(graphics, x, y, width, top - y);
       }
     }
   }
@@ -187,28 +192,41 @@ public class GuiSmelteryTank {
 
   /**
    * Checks if the tank was clicked at the given location
+   * @return Index clicked. -1 if in the tank and nothing was clicked. -2 if not in the tank
    */
-  public void handleClick(int mouseX, int mouseY) {
-    if (tank.getContained() > 0 && withinTank(mouseX, mouseY)) {
-      int index = getFluidFromMouse(calcLiquidHeights(false), mouseY);
-      if (index != -1) {
-        TinkerNetwork.getInstance().sendToServer(new SmelteryFluidClickedPacket(index));
-      }
+  public int getFluidClicked(int mouseX, int mouseY) {
+    if (withinTank(mouseX, mouseY)) {
+      return getFluidFromMouse(calcLiquidHeights(false), mouseY);
     }
+    return -2;
   }
 
   /**
-   * Gets the ingredient under the mouse
-   * @param checkX  Mouse X position
-   * @param checkY  Mouse Y position
-   * @return  Ingredient
+   * Checks if the tank was clicked at the given location
+   * @return Index clicked. -1 if in the tank and nothing was clicked. -2 if not in the tank
+   * @deprecated use {@link #getFluidClicked(int, int)} with {@link net.minecraft.world.inventory.AbstractContainerMenu#clickMenuButton(Player, int)} and {@link net.minecraft.client.multiplayer.MultiPlayerGameMode#handleInventoryButtonClick(int, int)}
    */
+  @Deprecated
+  public int handleClick(int mouseX, int mouseY) {
+    int index = getFluidClicked(mouseX, mouseY);
+    if (index >= 0) {
+      TinkerNetwork.getInstance().sendToServer(new SmelteryFluidClickedPacket(index));
+    }
+    return index;
+  }
+
   @Nullable
-  public FluidStack getIngredient(int checkX, int checkY) {
+  @Override
+  public FluidLocation getFluidUnderMouse(int checkX, int checkY) {
     if (tank.getContained() > 0 && withinTank(checkX, checkY)) {
-      int index = getFluidFromMouse(calcLiquidHeights(false), checkY);
-      if (index != -1) {
-        return tank.getFluidInTank(index);
+      // can't just use the helper as we need the location of the fluid
+      int[] heights = calcLiquidHeights(false);
+      int y = this.y + height - 1;
+      for (int i = 0; i < heights.length; i++) {
+        y -= heights[i];
+        if (y < checkY) {
+          return new FluidLocation(tank.getFluidInTank(i), new Rect2i(x, y, width, heights[i]));
+        }
       }
     }
     return null;

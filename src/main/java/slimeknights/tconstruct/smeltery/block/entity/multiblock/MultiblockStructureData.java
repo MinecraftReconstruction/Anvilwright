@@ -4,13 +4,15 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.multiblock.IServantLogic;
-import slimeknights.tconstruct.library.utils.TagUtil;
+import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -173,6 +175,23 @@ public class MultiblockStructureData {
     }
   }
 
+  /** Updates the master at the given position */
+  private static void updateMaster(Level world, BlockPos pos, IMasterLogic master, boolean add) {
+    // update the structure property first, this may add or remove the block entity
+    BlockState state = world.getBlockState(pos);
+    if (state.hasProperty(SearedBlock.IN_STRUCTURE) && state.getValue(SearedBlock.IN_STRUCTURE) != add) {
+      world.setBlock(pos, state.setValue(SearedBlock.IN_STRUCTURE, add), Block.UPDATE_CLIENTS);
+    }
+    // if the BE is there, set its property
+    if (world.getBlockEntity(pos) instanceof IServantLogic te) {
+      if (add) {
+        te.setPotentialMaster(master);
+      } else {
+        te.removeMaster(master);
+      }
+    }
+  }
+
   /**
    * Assigns the master to all servants in this structure
    * @param master        Master to assign
@@ -193,7 +212,7 @@ public class MultiblockStructureData {
     // assign master to each servant
     forEachContained(pos -> {
       if (shouldUpdate.test(pos) && world.hasChunkAt(pos)) {
-        BlockEntityHelper.get(IServantLogic.class, world, pos).ifPresent(te -> te.setPotentialMaster(master));
+        updateMaster(world, pos, master, true);
       }
     });
 
@@ -201,7 +220,7 @@ public class MultiblockStructureData {
     if (oldStructure != null) {
       oldStructure.forEachContained(pos -> {
         if (!contains(pos) && world.hasChunkAt(pos)) {
-          BlockEntityHelper.get(IServantLogic.class, world, pos).ifPresent(te -> te.removeMaster(master));
+          updateMaster(world, pos, master, false);
         }
       });
     }
@@ -216,30 +235,32 @@ public class MultiblockStructureData {
     assert world != null;
     forEachContained(pos -> {
       if (world.hasChunkAt(pos)) {
-        BlockEntityHelper.get(IServantLogic.class, world, pos).ifPresent(te -> te.removeMaster(master));
+        updateMaster(world, pos, master, false);
       }
     });
   }
 
   /**
    * Writes this structure to NBT for the client, client does not need a full list of positions, just render bounds
+   * @param controllerPos  Position of the controller for relative saving, use {@link BlockPos#ZERO} for absolute.
    * @return  structure as NBT
    */
-  public CompoundTag writeClientTag() {
+  public CompoundTag writeClientTag(BlockPos controllerPos) {
     CompoundTag nbt = new CompoundTag();
-    nbt.put(TAG_MIN, TagUtil.writePos(minPos));
-    nbt.put(TAG_MAX, TagUtil.writePos(maxPos));
+    nbt.put(TAG_MIN, NbtUtils.writeBlockPos(minPos.subtract(controllerPos)));
+    nbt.put(TAG_MAX, NbtUtils.writeBlockPos(maxPos.subtract(controllerPos)));
     return nbt;
   }
 
   /**
    * Writes the full NBT data for writing to disk
+   * @param controllerPos  Position of the controller for relative saving, use {@link BlockPos#ZERO} for absolute.
    * @return  structure as NBT
    */
-  public CompoundTag writeToTag() {
-    CompoundTag nbt = writeClientTag();
+  public CompoundTag writeToTag(BlockPos controllerPos) {
+    CompoundTag nbt = writeClientTag(controllerPos);
     if (!extra.isEmpty()) {
-      nbt.put(TAG_EXTRA_POS, writePosList(extra));
+      nbt.put(TAG_EXTRA_POS, writePosList(extra, controllerPos));
     }
     return nbt;
   }
@@ -247,12 +268,13 @@ public class MultiblockStructureData {
   /**
    * Writes a lit of positions to NBT
    * @param collection  Position collection
+   * @param basePos     Base position for relative saving, use {@link BlockPos#ZERO} for absolute positions.
    * @return  NBT list
    */
-  protected static ListTag writePosList(Collection<BlockPos> collection) {
+  protected static ListTag writePosList(Collection<BlockPos> collection, BlockPos basePos) {
     ListTag list = new ListTag();
     for (BlockPos pos : collection) {
-      list.add(TagUtil.writePos(pos));
+      list.add(NbtUtils.writeBlockPos(pos.subtract(basePos)));
     }
     return list;
   }

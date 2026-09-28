@@ -7,7 +7,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 
+// TOOD: can this be removed?
 public class RayTracer {
   /**
    * Creates a BlockRayTraceEvent with a block mode of COLLIDER and whatever fluid mode you pass to it.

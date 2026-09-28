@@ -1,15 +1,35 @@
 {
   "stats": {
-    "tconstruct:limb": {
-      "durability": 225,
-      "drawSpeed": 0.15,
-      "velocity": -0.15,
-      "accuracy": -0.05
-    },
     "tconstruct:grip": {
-      "durability": 0.85,
       "accuracy": 0.15,
-      "meleeAttack": 2.0
+      "durability": -0.15,
+      "melee_damage": 2.0
+    },
+    "tconstruct:limb": {
+      "accuracy": -0.05,
+      "draw_speed": 0.15,
+      "durability": 225,
+      "velocity": -0.15
+    },
+    "tconstruct:maille": {},
+    "tconstruct:plating_boots": {
+      "armor": 2.0,
+      "durability": 169
+    },
+    "tconstruct:plating_chestplate": {
+      "armor": 6.0,
+      "durability": 208
+    },
+    "tconstruct:plating_helmet": {
+      "armor": 2.0,
+      "durability": 143
+    },
+    "tconstruct:plating_leggings": {
+      "armor": 4.0,
+      "durability": 195
+    },
+    "tconstruct:plating_shield": {
+      "durability": 234
     }
   }
 }

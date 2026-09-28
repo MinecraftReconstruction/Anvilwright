@@ -1,15 +1,12 @@
 package slimeknights.tconstruct.library.tools.stat;
 
 import lombok.NoArgsConstructor;
-import net.minecraft.world.item.Item;
 import slimeknights.tconstruct.library.tools.nbt.MultiplierNBT;
 import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -17,9 +14,6 @@ import java.util.function.Consumer;
  */
 @NoArgsConstructor(staticName = "builder")
 public class ModifierStatsBuilder {
-  /** If true, a change was made */
-  private boolean dirty = false;
-
   /** Map of all stats in the builder */
   private final Map<IToolStat<?>,Object> map = new HashMap<>();
   /** Map of multipliers set */
@@ -33,16 +27,6 @@ public class ModifierStatsBuilder {
   @SuppressWarnings("unchecked")
   public <B> void updateStat(IToolStat<?> stat, Consumer<B> consumer) {
     consumer.accept((B)map.computeIfAbsent(stat, IToolStat::makeBuilder));
-    dirty = true;
-  }
-
-  /** Sets the given stat into the builder from the base NBT, method to help with generics */
-  private <T> void setStat(StatsNBT.Builder builder, IToolStat<T> stat, StatsNBT base) {
-    if (map.containsKey(stat)) {
-      builder.set(stat, stat.build(map.get(stat), base.get(stat)));
-    } else {
-      builder.set(stat, base.get(stat));
-    }
   }
 
   /** Multiplies the given multiplier value by the parameter */
@@ -50,70 +34,65 @@ public class ModifierStatsBuilder {
     multipliers.put(stat, (float)(multipliers.getOrDefault(stat, 1f) * value));
   }
 
+
+  /* Querying */
+
+  /**
+   * Gets the value of the given stat so far.
+   * Note: unlike other methods on the builder, this one depends on priority, make sure you consider modifier order if you are going to use this method.
+   */
+  public <T> T getStat(IToolStat<T> stat) {
+    Object builder = map.get(stat);
+    if (builder == null) {
+      return stat.getDefaultValue();
+    }
+    return stat.build(this, map.get(stat));
+  }
+
   /** Builds the given stat, method exists to make generic easier */
   private <T> void buildStat(StatsNBT.Builder builder, IToolStat<T> stat) {
-    builder.set(stat, stat.build(map.get(stat), stat.getDefaultValue()));
+    T value = stat.build(this, map.get(stat));
+    if (!value.equals(stat.getDefaultValue())) {
+      builder.set(stat, value);
+    }
   }
 
   /**
-   * Builds the stats with a filter
-   * @param base    Base stats
-   * @param filter  Item the stats must match to be included
+   * Gets the current value of the given multiplier.
+   * Note: unlike other methods on the builder, this one depends on priority, make sure you consider modifier order if you are going to use this method.
+   */
+  public float getMultiplier(INumericToolStat<?> stat) {
+    return multipliers.getOrDefault(stat, 1f);
+  }
+
+  /**
+   * Builds the final stats
    * @return  Built stats
    */
-  public StatsNBT build(StatsNBT base, @Nullable Item filter) {
-    if (!dirty) {
-      return base;
-    }
-
-    StatsNBT.Builder builder = StatsNBT.builder();
-
-    // first, iterate all stats in the base set
-    Set<IToolStat<?>> existing = base.getContainedStats();
-    for (IToolStat<?> stat : existing) {
-      setStat(builder, stat, base);
+  public StatsNBT build() {
+    if (map.isEmpty()) {
+      return StatsNBT.EMPTY;
     }
 
     // next, iterate any stats we have that are not in base
+    StatsNBT.Builder builder = StatsNBT.builder();
     for (IToolStat<?> stat : map.keySet()) {
-      if (!existing.contains(stat) && (filter == null || stat.supports(filter))) {
-        buildStat(builder, stat);
-      }
+      buildStat(builder, stat);
     }
 
     return builder.build();
-  }
-
-  /**
-   * Builds the stats unfiltered
-   * @param base  Base stats
-   * @return  Built stats
-   */
-  public StatsNBT build(StatsNBT base) {
-    return build(base, null);
   }
 
   /**
    * Builds the stat multiplier object for global stat multipliers
-   * @param filter  Item the stats must match to be included
-   * @return  Multipliers stats
-   */
-  public MultiplierNBT buildMultipliers(@Nullable Item filter) {
-    MultiplierNBT.Builder builder = MultiplierNBT.builder();
-    for (Entry<INumericToolStat<?>,Float> entry : multipliers.entrySet()) {
-      INumericToolStat<?> stat = entry.getKey();
-      if (filter == null || stat.supports(filter)) {
-        builder.set(stat, entry.getValue());
-      }
-    }
-    return builder.build();
-  }
-
-  /**
-   * Builds the stat multiplier object for global stat multipliers unfiltered
    * @return  Multipliers stats
    */
   public MultiplierNBT buildMultipliers() {
-    return buildMultipliers(null);
+    MultiplierNBT.Builder builder = MultiplierNBT.builder();
+    for (Entry<INumericToolStat<?>,Float> entry : multipliers.entrySet()) {
+      INumericToolStat<?> stat = entry.getKey();
+      builder.set(stat, entry.getValue());
+    }
+    return builder.build();
   }
 }

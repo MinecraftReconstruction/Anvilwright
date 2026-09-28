@@ -41,6 +41,7 @@ public class TankItemFluidHandler implements SingleSlotStorage<FluidVariant> {
     return TankBlockEntity.getCapacity(container.getItemVariant().getItem());
   }
 
+  @Nonnull
   @Override
   public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
     FluidTank tank = getTank();

@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,14 +25,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.mantle.item.TooltipItem;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.gadgets.capability.PiggybackCapability;
 import slimeknights.tconstruct.gadgets.capability.PiggybackHandler;
-import slimeknights.tconstruct.library.client.Icons;
-import slimeknights.tconstruct.library.client.RenderUtils;
 
 import javax.annotation.Nonnull;
 
@@ -55,7 +55,7 @@ public class PiggyBackPackItem extends TooltipItem {
     }
 
     // try carrying the entity
-    if (this.pickupEntity(playerIn, target)) {
+    if (pickupEntity(playerIn, target)) {
       // unequip old armor
       if (chestArmor.getItem() != this) {
         playerIn.getInventory().add(chestArmor);
@@ -76,12 +76,27 @@ public class PiggyBackPackItem extends TooltipItem {
     return InteractionResult.CONSUME;
   }
 
-  private boolean pickupEntity(Player player, Entity target) {
+  /**
+   * Checks if the passed entity is a vehicle of the other
+   * @param entity           Entity to query
+   * @param possibleVehicle  Possible vehicle of the entity
+   * @return  True if it's a vehicle, or a vehicle of a vehicle
+   */
+  private static boolean isVehicle(Entity entity, Entity possibleVehicle) {
+    for (Entity vehicle = entity.getVehicle(); vehicle != null; vehicle = vehicle.getVehicle()) {
+      if (vehicle == possibleVehicle) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean pickupEntity(Player player, Entity target) {
     if (player.getCommandSenderWorld().isClientSide || target.getType().is(TinkerTags.EntityTypes.PIGGYBACKPACK_BLACKLIST)) {
       return false;
     }
     // silly players, clicking on entities they're already carrying or riding
-    if (target.getVehicle() == player || player.getVehicle() == target) {
+    if (isVehicle(player, target) || isVehicle(target, player)) {
       return false;
     }
 
@@ -138,7 +153,7 @@ public class PiggyBackPackItem extends TooltipItem {
   public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
     if (entityIn instanceof LivingEntity livingEntity && livingEntity.getItemBySlot(EquipmentSlot.CHEST) == stack && entityIn.isVehicle()) {
       int amplifier = this.getEntitiesCarriedCount(livingEntity) - 1;
-      livingEntity.addEffect(new MobEffectInstance(TinkerGadgets.carryEffect.get(), 2, amplifier, true, false));
+      livingEntity.addEffect(new MobEffectInstance(TinkerGadgets.carryEffect.get(), 2, amplifier, true, false, true));
     }
   }
 
@@ -175,7 +190,6 @@ public class PiggyBackPackItem extends TooltipItem {
       }
     }
 
-    // TODO: proper sprite sheet for effect icons?
     @Override
     public MobEffectRenderer getRenderer() {
       return new MobEffectRenderer() {

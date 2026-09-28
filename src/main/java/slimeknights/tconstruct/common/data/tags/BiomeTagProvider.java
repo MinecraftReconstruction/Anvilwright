@@ -42,6 +42,9 @@ public class BiomeTagProvider extends FabricTagProvider<Biome> {
     this.tag(TinkerTags.Biomes.SKYSLIME_ISLANDS).forceAddTag(IS_DEEP_OCEAN).forceAddTag(IS_OCEAN).forceAddTag(IS_BEACH).forceAddTag(IS_RIVER).forceAddTag(IS_MOUNTAIN).forceAddTag(IS_BADLANDS).forceAddTag(IS_HILL).forceAddTag(IS_TAIGA).forceAddTag(IS_FOREST);
     this.tag(TinkerTags.Biomes.BLOOD_ISLANDS).forceAddTag(IS_NETHER);
     this.tag(TinkerTags.Biomes.ENDERSLIME_ISLANDS).add(END_HIGHLANDS, END_MIDLANDS, SMALL_END_ISLANDS, END_BARRENS);
+
+    // filling common tag as Forge doesn't provide it. TODO 1.21: can switch to Neo tag
+    this.tag(TinkerTags.Biomes.NO_DEFAULT_MONSTERS).add(Biomes.MUSHROOM_FIELDS, Biomes.DEEP_DARK);
   }
 
   public FabricTagBuilder tag(TagKey<Biome> tag) {

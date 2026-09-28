@@ -3,48 +3,53 @@ package slimeknights.tconstruct.library.recipe.fuel;
 import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * Recipe for a fuel for the melter or smeltery
  */
+@Getter
 public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
-  @Getter
-  private final ResourceLocation id;
-  @Getter
-  private final String group;
-  private final FluidIngredient input;
-  @Getter
-  private final int duration;
-  @Getter
-  private final int temperature;
+  public static final RecordLoadable<MeltingFuel> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    FluidIngredient.LOADABLE.defaultField("fluid", FluidIngredient.EMPTY, r -> r.input),
+    IntLoadable.FROM_ONE.defaultField("duration", 0, MeltingFuel::getDuration),
+    IntLoadable.FROM_ONE.requiredField("temperature", MeltingFuel::getTemperature),
+    IntLoadable.FROM_ONE.requiredField("rate", MeltingFuel::getRate),
+    MeltingFuel::new).validate((fuel, error) -> {
+      // duration is optional (and ignored) for solid
+      if (fuel.input != FluidIngredient.EMPTY && fuel.duration == 0) {
+        throw error.create("Missing JSON field duration");
+      }
+      return fuel;
+    });
 
-  public MeltingFuel(ResourceLocation id, String group, FluidIngredient input, int duration, int temperature) {
+  private final ResourceLocation id;
+  private final FluidIngredient input;
+  private final int duration;
+  private final int temperature;
+  private final int rate;
+
+  public MeltingFuel(ResourceLocation id, FluidIngredient input, int duration, int temperature, int rate) {
     this.id = id;
-    this.group = group;
     this.input = input;
     this.duration = duration;
     this.temperature = temperature;
+    this.rate = rate;
     // register this recipe with the lookup
-    for (FluidStack fluid : input.getFluids()) {
-      MeltingFuelLookup.addFuel(fluid.getFluid(), this);
-    }
+    MeltingFuelLookup.addFuel(this);
   }
 
   /* Recipe methods */
@@ -104,37 +109,5 @@ public class MeltingFuel implements ICustomOutputRecipe<IFluidContainer> {
   @Override
   public ItemStack getToastSymbol() {
     return new ItemStack(TinkerSmeltery.searedTank.get(TankType.FUEL_TANK));
-  }
-
-  /**
-   * Serializer for {@link MeltingFuel}
-   */
-  public static class Serializer extends LoggingRecipeSerializer<MeltingFuel> {
-    @Override
-    public MeltingFuel fromJson(ResourceLocation id, JsonObject json) {
-      String group = GsonHelper.getAsString(json, "group", "");
-      FluidIngredient input = FluidIngredient.deserialize(json, "fluid");
-      int duration = GsonHelper.getAsInt(json, "duration");
-      int temperature = GsonHelper.getAsInt(json, "temperature");
-      return new MeltingFuel(id, group, input, duration, temperature);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, MeltingFuel recipe) {
-      buffer.writeUtf(recipe.group);
-      recipe.input.write(buffer);
-      buffer.writeInt(recipe.duration);
-      buffer.writeInt(recipe.temperature);
-    }
-
-    @Nullable
-    @Override
-    protected MeltingFuel fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      String group = buffer.readUtf(Short.MAX_VALUE);
-      FluidIngredient input = FluidIngredient.read(buffer);
-      int duration = buffer.readInt();
-      int temperature = buffer.readInt();
-      return new MeltingFuel(id, group, input, duration, temperature);
-    }
   }
 }

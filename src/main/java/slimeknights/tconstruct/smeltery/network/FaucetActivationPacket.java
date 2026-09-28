@@ -7,39 +7,42 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.FaucetBlockEntity;
 
-/** Sent to clients to activate the faucet animation clientside **/
-public class FaucetActivationPacket extends FluidUpdatePacket {
-
+/**
+ * Sent to clients to activate the faucet animation clientside.
+ * TODO 1.21: make record.
+ */
+@RequiredArgsConstructor
+@ToString(callSuper = true)
+public class FaucetActivationPacket implements BlockEntityPacket<FaucetBlockEntity> {
+  protected final BlockPos pos;
+  protected final FluidStack fluid;
   private final boolean isPouring;
-  public FaucetActivationPacket(BlockPos pos, FluidStack fluid, boolean isPouring) {
-    super(pos, fluid);
-    this.isPouring = isPouring;
-  }
 
   public FaucetActivationPacket(FriendlyByteBuf buffer) {
-    super(buffer);
+    this.pos = buffer.readBlockPos();
+    this.fluid = buffer.readFluidStack();
     this.isPouring = buffer.readBoolean();
   }
 
   @Override
-  public void encode(FriendlyByteBuf packetBuffer) {
-    super.encode(packetBuffer);
-    packetBuffer.writeBoolean(isPouring);
+  public void encode(FriendlyByteBuf buffer) {
+    buffer.writeBlockPos(pos);
+    buffer.writeFluidStack(fluid);
+    buffer.writeBoolean(isPouring);
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public BlockPos pos() {
+    return pos;
   }
 
-  /** Safely runs client side only code in a method only called on client */
-  private static class HandleClient {
-    private static void handle(FaucetActivationPacket packet) {
-      assert Minecraft.getInstance().level != null;
-      BlockEntity te = Minecraft.getInstance().level.getBlockEntity(packet.pos);
-      if (te instanceof FaucetBlockEntity) {
-        ((FaucetBlockEntity) te).onActivationPacket(packet.fluid, packet.isPouring);
-      }
-    }
+  @Override
+  public Class<FaucetBlockEntity> type() {
+    return FaucetBlockEntity.class;
+  }
+
+  @Override
+  public void handleBlockEntity(Context context, FaucetBlockEntity be) {
+    be.onActivationPacket(fluid, isPouring);
   }
 }

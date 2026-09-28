@@ -1,6 +1,8 @@
 {
-  "replace": false,
   "values": [
-    "tconstruct:dagger"
+    "tconstruct:dagger",
+    "tconstruct:arrow",
+    "tconstruct:shuriken",
+    "tconstruct:throwing_axe"
   ]
 }

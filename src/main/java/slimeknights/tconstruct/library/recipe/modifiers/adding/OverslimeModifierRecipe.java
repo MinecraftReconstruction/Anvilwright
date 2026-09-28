@@ -1,58 +1,79 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
-import com.google.gson.JsonObject;
 import lombok.Getter;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.util.JsonHelper;
-import slimeknights.mantle.util.RegistryHelper;
+import org.jetbrains.annotations.ApiStatus.Internal;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.OverslimeModule;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.modifiers.slotless.OverslimeModifier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+
+import static slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe.withModifiers;
 
 /**
  * Recipe to add overslime to a tool
  */
 public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayModifierRecipe {
-  private static final ValidatedResult AT_CAPACITY = ValidatedResult.failure(TConstruct.makeTranslationKey("recipe", "overslime.at_capacity"));
+  private static final RecipeResult<LazyToolStack> AT_CAPACITY = RecipeResult.failure(TConstruct.makeTranslationKey("recipe", "overslime.at_capacity"));
+  private static final String KEY_AMOUNT = TConstruct.makeTranslationKey("recipe", "modifier.amount");
+  public static final RecordLoadable<OverslimeModifierRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    IngredientLoadable.DISALLOW_EMPTY.defaultField("tools", Ingredient.of(TinkerTags.Items.DURABILITY), true, r -> r.tools),
+    IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", r -> r.ingredient),
+    IntLoadable.FROM_ONE.requiredField("restore_amount", r -> r.restoreAmount),
+    OverslimeModifierRecipe::new);
 
   @Getter
   private final ResourceLocation id;
+  private final Ingredient tools;
   private final Ingredient ingredient;
   private final int restoreAmount;
+  @Getter
+  private final Component variant;
 
-  public OverslimeModifierRecipe(ResourceLocation id, Ingredient ingredient, int restoreAmount) {
+  @Internal
+  protected OverslimeModifierRecipe(ResourceLocation id, Ingredient tools, Ingredient ingredient, int restoreAmount) {
     this.id = id;
+    this.tools = tools;
     this.ingredient = ingredient;
     this.restoreAmount = restoreAmount;
+    this.variant = Component.translatable(KEY_AMOUNT, restoreAmount);
     ModifierRecipeLookup.addRecipeModifier(null, TinkerModifiers.overslime);
+  }
+
+  /** @deprecated use {@link #OverslimeModifierRecipe(ResourceLocation, Ingredient, Ingredient, int)} */
+  @Deprecated(forRemoval = true)
+  public OverslimeModifierRecipe(ResourceLocation id, Ingredient ingredient, int restoreAmount) {
+    this(id, Ingredient.of(TinkerTags.Items.DURABILITY), ingredient, restoreAmount);
   }
 
   @Override
   public boolean matches(ITinkerStationContainer inv, Level world) {
-    if (!inv.getTinkerableStack().is(TinkerTags.Items.DURABILITY)) {
+    if (!tools.test(inv.getTinkerableStack())) {
       return false;
     }
     // must find at least one slime, but multiple is fine, as is empty slots
@@ -60,25 +81,21 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
   }
 
   @Override
-  public ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack tinkerable = inv.getTinkerableStack();
-    ToolStack tool = ToolStack.from(tinkerable);
-    OverslimeModifier overslime = TinkerModifiers.overslime.get();
-    ModifierId overslimeId = TinkerModifiers.overslime.getId();
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    ToolStack tool = inv.getTinkerable();
+    ModifierId overslime = TinkerModifiers.overslime.getId();
     // if the tool lacks true overslime, add overslime
-    if (tool.getUpgrades().getLevel(overslimeId) == 0) {
+    if (tool.getUpgrades().getLevel(overslime) == 0) {
       // however, if we have overslime though a trait and reached our cap, also do nothing
-      if (tool.getModifierLevel(overslimeId) > 0) {
-        if (overslime.getOverslime(tool) >= overslime.getCapacity(tool)) {
-          return AT_CAPACITY;
-        }
+      if (tool.getModifierLevel(overslime) > 0 && OverslimeModule.INSTANCE.getAmount(tool) >= OverslimeModule.getCapacity(tool)) {
+        return AT_CAPACITY;
       }
       // truely add overslime, this will cost a slime crystal if full durability
       tool = tool.copy();
-      tool.addModifier(TinkerModifiers.overslime.getId(), 1);
+      tool.addModifier(overslime, 1);
     } else {
       // ensure we are not at the cap already
-      if (overslime.getOverslime(tool) >= overslime.getCapacity(tool)) {
+      if (OverslimeModule.INSTANCE.getAmount(tool) >= OverslimeModule.getCapacity(tool)) {
         return AT_CAPACITY;
       }
       // copy the tool as we will change it later
@@ -87,35 +104,17 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
 
     // see how much value is available, update overslime to the max possible
     int available = IncrementalModifierRecipe.getAvailableAmount(inv, ingredient, restoreAmount);
-    overslime.addOverslime(tool, available);
-    return ValidatedResult.success(tool.createStack(Math.min(tinkerable.getCount(), shrinkToolSlotBy())));
+    OverslimeModule.INSTANCE.addAmount(tool, available);
+    return ITinkerStationRecipe.success(tool, inv);
   }
 
-  /**
-   * Updates the input stacks upon crafting this recipe
-   * @param result  Result from {@link #assemble(ITinkerStationContainer, RegistryAccess)}. Generally should not be modified
-   * @param inv     Inventory instance to modify inputs
-   */
   @Override
-  public void updateInputs(ItemStack result, IMutableTinkerStationContainer inv, boolean isServer) {
-    ToolStack tool = ToolStack.from(inv.getTinkerableStack());
-    // if the original tool did not have overslime, its treated as having no slime
-    int current = 0;
-    OverslimeModifier overslime = TinkerModifiers.overslime.get();
-    if (tool.getModifierLevel(overslime) != 0) {
-      current = overslime.getOverslime(tool);
-    }
-
+  public void updateInputs(LazyToolStack result, IMutableTinkerStationContainer inv, boolean isServer) {
+    ToolStack tool = inv.getTinkerable();
     // how much did we actually consume?
-    int maxNeeded = overslime.getOverslime(ToolStack.from(result)) - current;
-    IncrementalModifierRecipe.updateInputs(inv, ingredient, maxNeeded, restoreAmount, ItemStack.EMPTY);
-  }
-
-  /** @deprecated use {@link #assemble(ITinkerStationContainer, RegistryAccess)} */
-  @Deprecated
-  @Override
-  public ItemStack getResultItem(RegistryAccess registryAccess) {
-    return ItemStack.EMPTY;
+    // if the original tool did not have overslime, its treated as having no slime
+    int maxNeeded = OverslimeModule.INSTANCE.getAmount(result.getTool()) - OverslimeModule.INSTANCE.getAmount(tool);
+    IncrementalModifierRecipe.updateInputs(inv, ingredient, maxNeeded, restoreAmount * OverslimeModule.getOverworkedBonus(tool), ItemStack.EMPTY);
   }
 
   @Override
@@ -123,11 +122,18 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
     return TinkerModifiers.overslimeSerializer.get();
   }
 
+
   /* JEI display */
   /** Cache of modifier result, same for all overslime */
-  private static final ModifierEntry RESULT = new ModifierEntry(TinkerModifiers.overslime, 1);
+  public static final ModifierEntry RESULT = new ModifierEntry(TinkerModifiers.overslime, 1);
   /** Cache of input and output tools for display */
   private List<ItemStack> toolWithoutModifier, toolWithModifier = null;
+
+  @Nullable
+  @Override
+  public ResourceLocation getRecipeId() {
+    return getId();
+  }
 
   @Override
   public int getInputCount() {
@@ -137,14 +143,29 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
   @Override
   public List<ItemStack> getDisplayItems(int slot) {
     if (slot == 0) {
-      return Arrays.asList(ingredient.getItems());
+      return List.of(ingredient.getItems());
     }
-    return Collections.emptyList();
+    return List.of();
   }
+
+  @Override
+  public boolean isTool(ItemStack check) {
+    return tools.test(check);
+  }
+
   @Override
   public List<ItemStack> getToolWithoutModifier() {
     if (toolWithoutModifier == null) {
-      toolWithoutModifier = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DURABILITY).map(MAP_TOOL_FOR_RENDERING).toList();
+      // ensure tools are the proper stack size for without
+      int maxSize = shrinkToolSlotBy();
+      toolWithoutModifier = Arrays.stream(this.tools.getItems()).map(MAP_TOOL_STACK_FOR_RENDERING).map(stack -> {
+        // only copy if something changes
+        int stackMax = stack.getMaxStackSize();
+        if (stackMax > 1) {
+          return stack.copyWithCount(Math.min(maxSize, stackMax));
+        }
+        return stack;
+      }).toList();
     }
     return toolWithoutModifier;
   }
@@ -152,11 +173,11 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
   @Override
   public List<ItemStack> getToolWithModifier() {
     if (toolWithModifier == null) {
-      OverslimeModifier overslime = TinkerModifiers.overslime.get();
-      toolWithModifier = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DURABILITY)
-                                       .map(MAP_TOOL_FOR_RENDERING)
-                                       .map(stack -> IDisplayModifierRecipe.withModifiers(stack, null, RESULT, data -> overslime.setShield(data, restoreAmount)))
-                                       .toList();
+      List<ModifierEntry> result = List.of(RESULT);
+      int maxSize = shrinkToolSlotBy();
+      toolWithModifier = getToolWithoutModifier().stream()
+        .map(stack -> withModifiers(stack, maxSize, result, data -> OverslimeModule.INSTANCE.setAmountRaw(data, restoreAmount)))
+        .toList();
     }
     return toolWithModifier;
   }
@@ -166,26 +187,24 @@ public class OverslimeModifierRecipe implements ITinkerStationRecipe, IDisplayMo
     return RESULT;
   }
 
-  public static class Serializer extends LoggingRecipeSerializer<OverslimeModifierRecipe> {
-    @Override
-    public OverslimeModifierRecipe fromJson(ResourceLocation id, JsonObject json) {
-      Ingredient ingredient = Ingredient.fromJson(JsonHelper.getElement(json, "ingredient"));
-      int restoreAmount = GsonHelper.getAsInt(json, "restore_amount");
-      return new OverslimeModifierRecipe(id, ingredient, restoreAmount);
-    }
+  @Nullable
+  @Override
+  public Component canApply(IToolStackView tool) {
+    // any tool can get overslime; not bothering to check overslime amount
+    return null;
+  }
 
-    @Nullable
-    @Override
-    protected OverslimeModifierRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      Ingredient ingredient = Ingredient.fromNetwork(buffer);
-      int restoreAmount = buffer.readVarInt();
-      return new OverslimeModifierRecipe(id, ingredient, restoreAmount);
+  @Override
+  public void applyModifier(ToolStack tool) {
+    ModifierId overslime = TinkerModifiers.overslime.getId();
+    if (tool.getUpgrades().getLevel(overslime) == 0) {
+      tool.addModifier(overslime, 1);
     }
+    OverslimeModule.INSTANCE.addAmount(tool, restoreAmount);
+  }
 
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, OverslimeModifierRecipe recipe) {
-      recipe.ingredient.toNetwork(buffer);
-      buffer.writeVarInt(recipe.restoreAmount);
-    }
+  @Override
+  public boolean shouldDisplayValidate() {
+    return false;
   }
 }

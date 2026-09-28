@@ -1,15 +1,18 @@
 package slimeknights.tconstruct.library.client.data.material;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.gson.JsonObject;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
+import net.minecraftforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialSpriteProvider.MaterialSpriteInfo;
-import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoJson;
-import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoJson.MaterialGeneratorJson;
+import slimeknights.tconstruct.library.client.materials.MaterialGeneratorInfo;
+import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 
@@ -21,15 +24,19 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /** Base data generator for use in addons */
+@SuppressWarnings("unused")  // API
 public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProvider {
   /** Map of material ID to builder, there is at most one builder for each ID */
   private final Map<MaterialVariantId,RenderInfoBuilder> allRenderInfo = new HashMap<>();
   @Nullable
   private final AbstractMaterialSpriteProvider materialSprites;
+  @Nullable
+  private final ExistingFileHelper existingFileHelper;
 
   public AbstractMaterialRenderInfoProvider(FabricDataOutput output, @Nullable AbstractMaterialSpriteProvider materialSprites) {
     super(output, PackType.CLIENT_RESOURCES, MaterialRenderInfoLoader.FOLDER, MaterialRenderInfoLoader.GSON);
     this.materialSprites = materialSprites;
+    this.existingFileHelper = existingFileHelper;
   }
 
   public AbstractMaterialRenderInfoProvider(FabricDataOutput output) {
@@ -52,15 +59,12 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
   /* Helpers */
 
   /** Initializes a builder for the given material */
-  private RenderInfoBuilder getBuilder(ResourceLocation texture) {
-    RenderInfoBuilder builder = new RenderInfoBuilder();
-    if (materialSprites != null) {
+  private RenderInfoBuilder getBuilder(@Nullable ResourceLocation texture) {
+    RenderInfoBuilder builder = new RenderInfoBuilder().texture(texture);
+    if (materialSprites != null && texture != null) {
       MaterialSpriteInfo spriteInfo = materialSprites.getMaterialInfo(texture);
       if (spriteInfo != null) {
-        String[] fallbacks = spriteInfo.getFallbacks();
-        if (fallbacks.length > 0) {
-          builder.fallbacks(fallbacks);
-        }
+        builder.fallbacks(spriteInfo.getFallbacks());
         // colors are in AABBGGRR format, we want AARRGGBB, so swap red and blue
         int color = spriteInfo.getTransformer().getFallbackColor();
         if (color != 0xFFFFFFFF) {
@@ -74,33 +78,55 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
 
   /** Starts a builder for a general render info */
   protected RenderInfoBuilder buildRenderInfo(MaterialVariantId materialId) {
-    return allRenderInfo.computeIfAbsent(materialId, id -> getBuilder(materialId.getLocation('_')));
+    return buildRenderInfo(materialId, materialId.getLocation('_'));
   }
 
   /**
    * Starts a builder for a general render info with an overridden texture.
    * Use {@link #buildRenderInfo(MaterialVariantId)} if you plan to override the texture without copying the datagen settings
    */
-  protected RenderInfoBuilder buildRenderInfo(MaterialVariantId materialId, ResourceLocation texture) {
-    return allRenderInfo.computeIfAbsent(materialId, id -> getBuilder(texture).texture(texture));
+  protected RenderInfoBuilder buildRenderInfo(MaterialVariantId materialId, @Nullable ResourceLocation texture) {
+    return allRenderInfo.computeIfAbsent(materialId, id -> getBuilder(texture));
+  }
+
+  /** Creates a builder that redirects the given material to the given target material. Uses the default texture name (but you can override that if the target doesn't) */
+  protected RenderInfoBuilder redirect(MaterialVariantId materialId, MaterialVariantId target) {
+    // we need to set texture as if unset, its inferred from the ID
+    return buildRenderInfo(materialId, null).parentMaterial(target).texture(target.getLocation('_'));
   }
 
   @Accessors(fluent = true, chain = true)
+  @CanIgnoreReturnValue
   protected static class RenderInfoBuilder {
     @Setter
+    @Nullable
     private ResourceLocation texture = null;
-    private String[] fallbacks;
     @Setter
+    @Nullable
+    private ResourceLocation parent = null;
+    private String[] fallbacks = new String[0];
     private int color = -1;
-    @Setter
-    private boolean skipUniqueTexture;
     @Setter
     private int luminosity = 0;
     @Setter
-    private MaterialGeneratorJson generator = null;
+    private MaterialGeneratorInfo generator = null;
+
+    /** Sets the parent to the given material ID */
+    public RenderInfoBuilder parentMaterial(MaterialVariantId material) {
+      return parent(material.getLocation('/'));
+    }
+
+    /** Sets the color */
+    public RenderInfoBuilder color(int color) {
+      if ((color & 0xFF000000) == 0) {
+        color |= 0xFF000000;
+      }
+      this.color = color;
+      return this;
+    }
 
     /** Sets the fallback names */
-    public RenderInfoBuilder fallbacks(@Nullable String... fallbacks) {
+    public RenderInfoBuilder fallbacks(String... fallbacks) {
       this.fallbacks = fallbacks;
       return this;
     }
@@ -110,9 +136,23 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
       return texture(variantId.getLocation('_'));
     }
 
+    /** Tells the builder to skip the unique texture for this material */
+    public RenderInfoBuilder skipUniqueTexture() {
+      return texture(null);
+    }
+
     /** Builds the material */
-    public MaterialRenderInfoJson build() {
-      return new MaterialRenderInfoJson(texture, fallbacks, String.format("%06X", color), skipUniqueTexture ? Boolean.TRUE : null, luminosity, generator);
+    @CheckReturnValue
+    public JsonObject build(MaterialVariantId id) {
+      JsonObject json = new JsonObject();
+      if (parent != null) {
+        json.addProperty("parent", parent.toString());
+      }
+      MaterialRenderInfo.LOADABLE.serialize(new MaterialRenderInfo(id, texture, fallbacks, color, luminosity), json);
+      if (generator != null) {
+        json.add("generator", MaterialGeneratorInfo.LOADABLE.serialize(generator));
+      }
+      return json;
     }
   }
 }

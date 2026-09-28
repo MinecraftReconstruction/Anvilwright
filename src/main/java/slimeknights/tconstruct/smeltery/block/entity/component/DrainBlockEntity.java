@@ -6,17 +6,14 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutputBlockEntity.SmelteryFluidIO;
 import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
-import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler;
 
-import java.util.Objects;
+import javax.annotation.Nonnull;
 
 /**
  * Fluid IO extension to display controller fluid
@@ -33,6 +30,12 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
     super(type, pos, state);
   }
 
+  @Nonnull
+  @Override
+  public ModelData getModelData() {
+    return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, displayFluid).build();
+  }
+
   @Override
   public void notifyDisplayFluidUpdated(FluidStack fluid) {
     if (!fluid.isFluidEqual(displayFluid)) {
@@ -45,21 +48,8 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
     }
   }
 
-  @Override
-  public BlockPos getListenerPos() {
-    return getBlockPos();
-  }
-
 
   /* Updating */
-
-  /** Attaches this TE to the master as a display fluid listener */
-  private void attachFluidListener() {
-    BlockPos masterPos = getMasterPos();
-    if (masterPos != null && level != null && level.isClientSide) {
-      BlockEntityHelper.get(ISmelteryTankHandler.class, level, masterPos).ifPresent(te -> te.addDisplayListener(this));
-    }
-  }
 
   // override instead of writeSynced to avoid writing master to the main tag twice
   @Override
@@ -81,18 +71,5 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
   @Override
   protected boolean shouldSyncOnUpdate() {
     return true;
-  }
-
-  @Override
-  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-    CompoundTag tag = pkt.getTag();
-    if (tag != null) {
-      BlockPos oldMaster = getMasterPos();
-      load(tag);
-      if (!Objects.equals(oldMaster, getMasterPos())) {
-        attachFluidListener();
-      }
-
-    }
   }
 }

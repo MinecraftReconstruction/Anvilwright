@@ -10,19 +10,20 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.helper.ItemOutput;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 @RequiredArgsConstructor(staticName = "molding")
 public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBuilder> {
   private final ItemOutput output;
-  private final MoldingRecipe.Serializer<?> serializer;
+  private final TypeAwareRecipeSerializer<MoldingRecipe> serializer;
   private Ingredient material = Ingredient.EMPTY;
   private Ingredient pattern = Ingredient.EMPTY;
   private boolean patternConsumed = false;
@@ -85,7 +86,7 @@ public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBui
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(output.get().getItem())));
+    save(consumer, Loadables.ITEM.getKey(output.get().getItem()));
   }
 
   @Override
@@ -94,7 +95,7 @@ public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBui
       throw new IllegalStateException("Missing material for molding recipe");
     }
     ResourceLocation advancementId = buildOptionalAdvancement(id, "molding");
-    consumer.accept(new Finished(id, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(new MoldingRecipe(serializer, id, material, pattern, patternConsumed, output), MoldingRecipe.LOADER, advancementId));
   }
 
   private class Finished extends AbstractFinishedRecipe {
@@ -111,7 +112,7 @@ public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBui
           json.addProperty("pattern_consumed", true);
         }
       }
-      json.add("result", output.serialize());
+      json.add("result", output.serialize(false));
     }
 
     @Override

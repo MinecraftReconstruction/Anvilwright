@@ -1,5 +1,0 @@
-{
-    "parent": "forge:item/bucket_drip",
-    "loader": "porting_lib:fluid_container",
-    "fluid": "tconstruct:molten_lumium"
-}

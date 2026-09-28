@@ -6,27 +6,15 @@ import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
@@ -35,32 +23,17 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import slimeknights.mantle.client.ResourceColorManager;
-import slimeknights.mantle.client.TooltipKey;
-import slimeknights.mantle.data.GenericLoaderRegistry.IGenericLoader;
-import slimeknights.mantle.data.GenericLoaderRegistry.IHaveLoader;
+import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierManager.ModifierRegistrationEvent;
-import slimeknights.tconstruct.library.modifiers.hook.TooltipModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeDamageModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.combat.MeleeHitModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedContext;
 import slimeknights.tconstruct.library.modifiers.util.ModifierLevelDisplay;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
-import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.context.EquipmentContext;
-import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
-import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.nbt.IToolContext;
+import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
+import slimeknights.tconstruct.library.module.ModuleHook;
+import slimeknights.tconstruct.library.module.ModuleHookMap;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
-import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
-import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
@@ -69,41 +42,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.function.BiConsumer;
 
 /**
- * Class representing both modifiers and traits. Acts as a storage container for {@link ModifierHook} modules, which are used to implement various modifier behaviors.
- * TODO 1.19: consider making {@link #registerHooks(Builder)} abstract as everyone is going to need it in the future.
- * @see TinkerHooks
+ * Class representing both modifiers and traits. Acts as a storage container for {@link ModuleHook} modules, which are used to implement various modifier behaviors.
+ * @see ModifierHooks
  * @see #registerHooks(Builder)
  */
 @SuppressWarnings("unused")
-public class Modifier implements IHaveLoader<Modifier> {
-  /** Default loader instance for a modifier with no properties */
-  public static final IGenericLoader<Modifier> DEFAULT_LOADER = new IGenericLoader<>() {
-    @Override
-    public Modifier deserialize(JsonObject json) {
-      return new Modifier();
-    }
-
-    @Override
-    public Modifier fromNetwork(FriendlyByteBuf buffer) {
-      return new Modifier();
-    }
-
-    @Override
-    public void serialize(Modifier object, JsonObject json) {
-      if (object.getClass() != Modifier.class) {
-        throw new IllegalStateException("Attempting to serialize a subclass of Modifier using the default modifier loader, this likely means the modifier did not override getLoader()");
-      }
-    }
-
-    @Override
-    public void toNetwork(Modifier object, FriendlyByteBuf buffer) {}
-  };
-
+public class Modifier implements IdAwareObject {
   /** Modifier random instance, use for chance based effects */
-  protected static Random RANDOM = new Random();
+  public static Random RANDOM = new Random();
 
   /** Priority of modfiers by default */
   public static final int DEFAULT_PRIORITY = 100;
@@ -113,7 +61,7 @@ public class Modifier implements IHaveLoader<Modifier> {
 
   /** Cached key used for translations */
   @Nullable
-  private String translationKey;
+  protected String translationKey;
   /** Cached text component for display names */
   @Nullable
   private Component displayName;
@@ -125,30 +73,28 @@ public class Modifier implements IHaveLoader<Modifier> {
   private Component description;
   /** Map of all modifier hooks registered to this modifier */
   @Getter
-  private final ModifierHookMap hooks;
+  private final ModuleHookMap hooks;
 
   /** Creates a new modifier using the given hook map */
-  protected Modifier(ModifierHookMap hooks) {
+  protected Modifier(ModuleHookMap hooks) {
     this.hooks = hooks;
   }
 
   /** Creates a new instance using the hook builder */
   public Modifier() {
-    ModifierHookMap.Builder hookBuilder = new ModifierHookMap.Builder();
+    ModuleHookMap.Builder hookBuilder = ModuleHookMap.builder();
     registerHooks(hookBuilder);
     this.hooks = hookBuilder.build();
   }
 
   /**
    * Registers a hook to the modifier.
-   * Note that this is run in the constructor, so you are unable to use any instance fields in this method unless initialized in this method
+   * Note that this is run in the constructor, so you are unable to use any instance fields in this method unless initialized in this method.
+   * TODO 1.19: consider making abstract as everyone is going to need it in the future.
+   * @deprecated Use {@link slimeknights.tconstruct.library.modifiers.modules.ModifierModule} with {@link slimeknights.tconstruct.tools.data.ModifierProvider}
    */
-  protected void registerHooks(ModifierHookMap.Builder hookBuilder) {}
-
-  @Override
-  public IGenericLoader<? extends Modifier> getLoader() {
-    return DEFAULT_LOADER;
-  }
+  @Deprecated
+  protected void registerHooks(ModuleHookMap.Builder hookBuilder) {}
 
   /**
    * Override this method to make your modifier run earlier or later.
@@ -170,10 +116,7 @@ public class Modifier implements IHaveLoader<Modifier> {
     this.id = name;
   }
 
-  /**
-   * Gets the modifier ID
-   * @return  Modifier ID
-   */
+  @Override
   public ModifierId getId() {
     return Objects.requireNonNull(id, "Modifier has null registry name");
   }
@@ -226,7 +169,8 @@ public class Modifier implements IHaveLoader<Modifier> {
   }
 
   /**
-   * Overridable method to create the display name for this modifier, ideal to modify colors
+   * Overridable method to create the display name for this modifier, ideal to modify colors.
+   * TODO: this method does not really seem to do much, is it really needed? I feel like it was supposed to be called in {@link #getDisplayName()}, but it needs to be mutable for that.
    * @return  Display name
    */
   protected Component makeDisplayName() {
@@ -265,21 +209,12 @@ public class Modifier implements IHaveLoader<Modifier> {
   /**
    * Stack sensitive version of {@link #getDisplayName(int)}. Useful for displaying persistent data such as overslime or redstone amount
    * @param tool   Tool instance
-   * @param level  Tool level
+   * @param entry  Tool level
+   * @param access Registry access intance
    * @return  Stack sensitive display name
    */
-  public Component getDisplayName(IToolStackView tool, int level) {
-    return getDisplayName(level);
-  }
-
-  /** @deprecated use {@link slimeknights.tconstruct.library.modifiers.hook.TooltipModifierHook} */
-  @Deprecated
-  public void addInformation(IToolStackView tool, int level, @Nullable Player player, List<Component> tooltip, slimeknights.tconstruct.library.utils.TooltipKey tooltipKey, TooltipFlag tooltipFlag) {}
-
-  /** @deprecated use {@link slimeknights.tconstruct.library.modifiers.hook.TooltipModifierHook} */
-  @Deprecated
-  public void addInformation(IToolStackView tool, int level, @Nullable Player player, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
-    addInformation(tool, level, player, tooltip, slimeknights.tconstruct.library.utils.TooltipKey.fromMantle(tooltipKey), tooltipFlag);
+  public Component getDisplayName(IToolStackView tool, ModifierEntry entry, @Nullable RegistryAccess access) {
+    return entry.getDisplayName();
   }
 
   /**
@@ -288,6 +223,7 @@ public class Modifier implements IHaveLoader<Modifier> {
    */
   public List<Component> getDescriptionList() {
     if (descriptionList == null) {
+      String key = getTranslationKey();
       descriptionList = Arrays.asList(
         Component.translatable(getTranslationKey() + ".flavor").withStyle(ChatFormatting.ITALIC),
         Component.translatable(getTranslationKey() + ".description"));
@@ -307,11 +243,11 @@ public class Modifier implements IHaveLoader<Modifier> {
   /**
    * Gets the description for this modifier, sensitive to the tool
    * @param tool  Tool containing this modifier
-   * @param level Modifier level
+   * @param entry Modifier level
    * @return  Description for this modifier
    */
-  public List<Component> getDescriptionList(IToolStackView tool, int level) {
-    return getDescriptionList(level);
+  public List<Component> getDescriptionList(IToolStackView tool, ModifierEntry entry) {
+    return getDescriptionList(entry.getLevel());
   }
 
   /** Converts a list of text components to a single text component, newline separated */
@@ -357,9 +293,9 @@ public class Modifier implements IHaveLoader<Modifier> {
    * Gets the description for this modifier
    * @return  Description for this modifier
    */
-  public final Component getDescription(IToolStackView tool, int level) {
+  public final Component getDescription(IToolStackView tool, ModifierEntry entry) {
     // if the method is not overridden, use the cached description component
-    List<Component> extendedDescription = getDescriptionList(tool, level);
+    List<Component> extendedDescription = getDescriptionList(tool, entry);
     if (extendedDescription == getDescriptionList()) {
       return getDescription();
     }
@@ -649,52 +585,19 @@ public class Modifier implements IHaveLoader<Modifier> {
   }
 
   /**
-   * Gets the damage percentage for display.  First tool returning something other than NaN will determine display durability
-   * @param tool   Tool instance
-   * @param level  Modifier level
-   * @return  Damage percentage. 0 is undamaged, 1 is fully damaged.
+   * Determines if the modifier should display in modifier lists
+   * @param context  Context displaing the modifier. Might be a block, a book, or a tool.
+   * @return  True if the modifier should show
    */
-  public double getDamagePercentage(IToolStackView tool, int level) {
-    return Double.NaN;
+  public boolean shouldDisplay(ModifierTooltip context) {
+    return context.isNew() || shouldDisplay(context == ModifierTooltip.TINKER_STATION);
   }
 
-  /**
-   * Override the default tool logic for showing the durability bar
-   * @param tool   Tool instance
-   * @param level  Modifier level
-   * @return  True forces the bar to show, false forces it to hide. Return null to allow default behavior
-   */
-  @Nullable
-  public Boolean showDurabilityBar(IToolStackView tool, int level) {
-    return null;
-  }
 
-  /**
-   * Gets the RGB for the durability bar
-   * @param tool   Tool instance
-   * @param level  Modifier level
-   * @return  RGB, or -1 to not handle it
-   */
-  public int getDurabilityRGB(IToolStackView tool, int level) {
-    return -1;
-  }
+  /* Hooks */
 
 
   /* Modules */
-
-  /**
-   * Gets a submodule of this modifier.
-   *
-   * Submodules will contain tool stack sensitive hooks, and do not contain storage. Generally returning the same instance each time is preferred.
-   * @param type  Module type to fetch
-   * @param <T>   Module return type
-   * @return  Module, or null if the module is not contained
-   * @deprecated use {@link #getHook(ModifierHook)}
-   */
-  @Nullable @Deprecated
-  public <T> T getModule(Class<T> type) {
-    return null;
-  }
 
   /**
    * Gets a hook of this modifier. To modify the return values, use {@link #registerHooks(Builder)}
@@ -703,7 +606,7 @@ public class Modifier implements IHaveLoader<Modifier> {
    * @param <T>   Hook return type
    * @return  Submodule implementing the hook, or default instance if its not implemented
    */
-  public final <T> T getHook(ModifierHook<T> hook) {
+  public final <T> T getHook(ModuleHook<T> hook) {
     return hooks.getOrDefault(hook);
   }
 
@@ -744,11 +647,8 @@ public class Modifier implements IHaveLoader<Modifier> {
     return tool.isBroken() ? null : tool;
   }
 
-  /**
-   * Gets the mining speed modifier for the current conditions, notably potions and armor enchants
-   * @param entity  Entity to check
-   * @return  Mining speed modifier
-   */
+  /** @deprecated use {@link BreakSpeedContext#getMiningModifier(LivingEntity)} */
+  @Deprecated(forRemoval = true)
   public static float getMiningModifier(LivingEntity entity) {
     float modifier = 1.0f;
     // haste effect

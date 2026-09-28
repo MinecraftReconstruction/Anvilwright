@@ -42,7 +42,7 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
                        .pattern("##")
                        .unlockedBy("has_item", has(SlimeType.EARTH.getSlimeballTag()))
                        .group("tconstruct:congealed_slime")
-                       .save(consumer, modResource("common/slime/earth/congealed"));
+                       .save(consumer, location("common/slime/earth/congealed"));
 
     // does not need green as its the fallback
     for (SlimeType slimeType : SlimeType.TINKER) {
@@ -107,6 +107,7 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
     woodCrafting(consumer, TinkerWorld.greenheart, woodFolder + "greenheart/");
     woodCrafting(consumer, TinkerWorld.skyroot, woodFolder + "skyroot/");
     woodCrafting(consumer, TinkerWorld.bloodshroom, woodFolder + "bloodshroom/");
+    woodCrafting(consumer, TinkerWorld.enderbark, woodFolder + "enderbark/");
 
     // geodes
     geodeRecipes(consumer, TinkerWorld.earthGeode, SlimeType.EARTH, "common/slime/earth/");
@@ -131,6 +132,6 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
     SimpleCookingRecipeBuilder.blasting(Ingredient.of(dirt), RecipeCategory.MISC, geode, 0.2f, 400)
                               .unlockedBy("has_dirt", has(dirt))
                               .group("tconstruct:slime_dirt")
-                              .save(consumer, modResource(folder + "crystal_growing"));
+                              .save(consumer, location(folder + "crystal_growing"));
   }
 }

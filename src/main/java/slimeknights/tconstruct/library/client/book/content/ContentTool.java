@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -26,44 +27,49 @@ import slimeknights.mantle.client.screen.book.BookScreen;
 import slimeknights.mantle.client.screen.book.element.BookElement;
 import slimeknights.mantle.client.screen.book.element.ImageElement;
 import slimeknights.mantle.client.screen.book.element.TextElement;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.ItemStackList;
+import slimeknights.mantle.util.html.HtmlElement;
+import slimeknights.mantle.util.html.HtmlGroup;
+import slimeknights.mantle.util.html.HtmlSerializable;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.book.elements.TinkerItemElement;
-import slimeknights.tconstruct.library.tools.definition.PartRequirement;
+import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolPartsHook;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
-import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ContentTool extends PageContent {
-  public static final transient ResourceLocation ID = TConstruct.getResource("tool");
-  private static final transient String KEY_PROPERTIES = TConstruct.makeTranslationKey("book", "tool.properties");
+  public static final ResourceLocation ID = TConstruct.getResource("tool");
+  private static final String KEY_PROPERTIES = TConstruct.makeTranslationKey("book", "tool.properties");
 
   /* Slot backgrounds */
-  private static final transient ImageData IMG_SLOT_1x1 = ContentModifier.IMG_SLOT_1;
-  private static final transient ImageData IMG_SLOT_1x2 = new ImageData(ContentModifier.BOOK_MODIFY, 40, 75, 22, 40, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
-  private static final transient ImageData IMG_SLOT_1x3 = new ImageData(ContentModifier.BOOK_MODIFY, 62, 75, 22, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
-  private static final transient ImageData IMG_SLOT_2x1 = ContentModifier.IMG_SLOT_2;
-  private static final transient ImageData IMG_SLOT_2x2 = ContentModifier.IMG_SLOT_4;
-  private static final transient ImageData IMG_SLOT_2x3 = new ImageData(ContentModifier.BOOK_MODIFY, 84, 75, 40, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
-  private static final transient ImageData IMG_SLOT_3x1 = ContentModifier.IMG_SLOT_3;
-  private static final transient ImageData IMG_SLOT_3x2 = new ImageData(ContentModifier.BOOK_MODIFY, 58, 133, 58, 40, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
-  private static final transient ImageData IMG_SLOT_3x3 = new ImageData(ContentModifier.BOOK_MODIFY, 58, 173, 58, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
-  private static final transient ImageData[] IMG_SLOTS_SHAPELESS = {
+  private static final ImageData IMG_SLOT_1x1 = ContentModifier.IMG_SLOT_1;
+  private static final ImageData IMG_SLOT_1x2 = new ImageData(ContentModifier.BOOK_MODIFY, 40, 75, 22, 40, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
+  private static final ImageData IMG_SLOT_1x3 = new ImageData(ContentModifier.BOOK_MODIFY, 62, 75, 22, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
+  private static final ImageData IMG_SLOT_2x1 = ContentModifier.IMG_SLOT_2;
+  private static final ImageData IMG_SLOT_2x2 = ContentModifier.IMG_SLOT_4;
+  private static final ImageData IMG_SLOT_2x3 = new ImageData(ContentModifier.BOOK_MODIFY, 84, 75, 40, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
+  private static final ImageData IMG_SLOT_3x1 = ContentModifier.IMG_SLOT_3;
+  private static final ImageData IMG_SLOT_3x2 = new ImageData(ContentModifier.BOOK_MODIFY, 58, 133, 58, 40, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
+  private static final ImageData IMG_SLOT_3x3 = new ImageData(ContentModifier.BOOK_MODIFY, 58, 173, 58, 58, ContentModifier.TEX_SIZE, ContentModifier.TEX_SIZE);
+  private static final ImageData[] IMG_SLOTS_SHAPELESS = {
     IMG_SLOT_1x1, IMG_SLOT_2x1, IMG_SLOT_3x1,
     IMG_SLOT_2x2, ContentModifier.IMG_SLOT_5, IMG_SLOT_3x2,
     IMG_SLOT_3x3, IMG_SLOT_3x3, IMG_SLOT_3x3
   };
-  private static final transient ImageData[][] IMG_SLOTS_SHAPED = {
+  private static final ImageData[][] IMG_SLOTS_SHAPED = {
     { IMG_SLOT_1x1, IMG_SLOT_2x1, IMG_SLOT_3x1, },
     { IMG_SLOT_1x2, IMG_SLOT_2x2, IMG_SLOT_3x2, },
     { IMG_SLOT_1x3, IMG_SLOT_2x3, IMG_SLOT_3x3, }
@@ -72,17 +78,17 @@ public class ContentTool extends PageContent {
 
   /* Slot positions */
   /** Locations for slots between 0 and 9 for a width of 3 */
-  private static final transient SlotPos[] SLOTS_WIDTH_3 = {new SlotPos(3,  3), new SlotPos(21,  3), new SlotPos(39,  3),
+  private static final SlotPos[] SLOTS_WIDTH_3 = {new SlotPos(3,  3), new SlotPos(21,  3), new SlotPos(39,  3),
                                                             new SlotPos(3, 22), new SlotPos(21, 22), new SlotPos(39, 22),
                                                             new SlotPos(3, 40), new SlotPos(21, 40), new SlotPos(39, 40)};
   /** Locations for slots between 0 and 6 in a 2x size grid */
-  private static final transient SlotPos[] SLOTS_WIDTH_2 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[1], SLOTS_WIDTH_3[3], SLOTS_WIDTH_3[4], SLOTS_WIDTH_3[6], SLOTS_WIDTH_3[7]};
+  private static final SlotPos[] SLOTS_WIDTH_2 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[1], SLOTS_WIDTH_3[3], SLOTS_WIDTH_3[4], SLOTS_WIDTH_3[6], SLOTS_WIDTH_3[7]};
   /** Locations for slots between 0 and 3 in a 1x size grid */
-  private static final transient SlotPos[] SLOTS_WIDTH_1 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[3], SLOTS_WIDTH_3[6]};
+  private static final SlotPos[] SLOTS_WIDTH_1 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[3], SLOTS_WIDTH_3[6]};
   /** Array of width to slot positions */
-  private static final transient SlotPos[][] SLOTS_WIDTH = {SLOTS_WIDTH_1, SLOTS_WIDTH_2, SLOTS_WIDTH_3};
+  private static final SlotPos[][] SLOTS_WIDTH = {SLOTS_WIDTH_1, SLOTS_WIDTH_2, SLOTS_WIDTH_3};
   /** Locations for slots between 0 and 5 in a 5 slot shapeless recipe */
-  private static final transient SlotPos[] SLOTS_5 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[1], SLOTS_WIDTH_3[2], new SlotPos(12, 22), new SlotPos(30, 22)};
+  private static final SlotPos[] SLOTS_5 = {SLOTS_WIDTH_3[0], SLOTS_WIDTH_3[1], SLOTS_WIDTH_3[2], new SlotPos(12, 22), new SlotPos(30, 22)};
 
   /* Page computed data */
   @Nullable
@@ -101,12 +107,22 @@ public class ContentTool extends PageContent {
   public ContentTool() {
   }
 
-  @SuppressWarnings("unused")
   public ContentTool(IModifiableDisplay tool) {
     this.tool = tool;
     this.toolName = Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(tool.asItem())).toString();
   }
 
+  public ContentTool(Item item) {
+    this.toolName = Loadables.ITEM.getKey(item.asItem()).toString();
+    if (item instanceof IModifiableDisplay tool) {
+      this.tool = tool;
+    } else {
+      this.tool = new Fallback(item);
+    }
+    this.text = new TextData[] { new TextData(ForgeI18n.getPattern(tool.asItem().getDescriptionId() + ".description"))};
+  }
+
+  @SuppressWarnings("removal")
   public IModifiableDisplay getTool() {
     if (this.tool == null) {
       if (this.toolName == null) {
@@ -116,12 +132,13 @@ public class ContentTool extends PageContent {
       if (tool instanceof IModifiableDisplay) {
         this.tool = (IModifiableDisplay) tool;
       } else {
-        this.tool = new Fallback(tool == null ? Items.BARRIER : tool);
+        this.tool = new Fallback(item == null ? Items.BARRIER : item);
       }
     }
     return this.tool;
   }
 
+  @Nonnull
   @Override
   public String getTitle() {
     if (tool != null) {
@@ -159,13 +176,16 @@ public class ContentTool extends PageContent {
       } else {
         ImmutableList.Builder<ItemStackList> partBuilder = ImmutableList.builder();
         for (int i = 0; i < required.size(); i++) {
-          IToolPart part = required.get(i).getPart();
-          if (part != null) {
-            // mark the part as display to suppress the invalid material tooltip
-            ItemStack stack = part.withMaterialForDisplay(ToolBuildHandler.getRenderMaterial(i));
-            stack.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
-            partBuilder.add(ItemStackList.of(stack));
-          }
+          partBuilder.add(ItemStackList.of(ToolBuildHandler.getDisplayPart(required.get(i), i)));
+        }
+        // fetch the tool building recipe for extra ingredients
+        List<Ingredient> extraRequirements = Optional.ofNullable(Minecraft.getInstance().level)
+                                                     .flatMap(world -> world.getRecipeManager().byType(TinkerRecipeTypes.TINKER_STATION.get()).values().stream()
+                                                                            .filter(r -> r instanceof ToolBuildingRecipe toolRecipe && toolRecipe.getOutput() == tool)
+                                                                            .map(r -> ((ToolBuildingRecipe)r).getExtraRequirements())
+                                                                            .findFirst()).orElse(List.of());
+        for (Ingredient ingredient : extraRequirements) {
+          partBuilder.add(ItemStackList.of(ingredient.getItems()));
         }
         this.parts = partBuilder.build();
       }
@@ -196,7 +216,7 @@ public class ContentTool extends PageContent {
     // description
     int h = BookScreen.PAGE_WIDTH / 3 - 10;
     int y = getTitleHeight();
-    list.add(new TextElement(padding, y, BookScreen.PAGE_WIDTH - padding * 2, h, text));
+    list.add(new TextElement(padding, y, BookScreen.PAGE_WIDTH - padding * 2, h + 5, text));
 
     // do we want to show the crafting recipe here perhaps? or just nothing?
     int imgWidth = 0;
@@ -220,9 +240,7 @@ public class ContentTool extends PageContent {
 
       List<TextData> effectData = Lists.newArrayList();
       for (String e : properties) {
-        effectData.add(new TextData("\u25CF "));
-        effectData.add(new TextData(e));
-        effectData.add(new TextData("\n"));
+        effectData.add(new TextData("● " + e).linebreak(true));
       }
 
       list.add(new TextElement(padding, 44 + h, BookScreen.PAGE_WIDTH / 2 + 5, BookScreen.PAGE_HEIGHT - h - 20, effectData));
@@ -247,6 +265,21 @@ public class ContentTool extends PageContent {
       //partItem.noTooltip = true;
       list.add(partItem);
     }
+  }
+
+  @Override
+  public HtmlSerializable toHTML(BookData book) {
+    return HtmlGroup.indent().add(
+      makeTitleHTML(),
+      HtmlElement.div().style("padding-left", 10).add(
+        HtmlElement.div().classes("column").style("height", 128)
+          .add(TextData.toHtml(text, book)),
+        HtmlElement.div().style("width", 210)
+          .add(HtmlElement.p().classes("underline").add(I18n.get(KEY_PROPERTIES))
+          .add(HtmlElement.ul().style("margin-top", 8).classes("prop-list").add(HTMLUtils.toListItems(properties)))
+        )
+      )
+    );
   }
 
   /** Simple record to hold a XY pair */

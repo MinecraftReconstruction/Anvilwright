@@ -3,20 +3,27 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.mantle.recipe.ICommonRecipe;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.material.IMaterialValue;
 import slimeknights.tconstruct.tables.TinkerTables;
-import slimeknights.tconstruct.tables.block.entity.inventory.PartBuilderContainerWrapper;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/** Common interface for part builder recipes */
 public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer> {
+  /** Default patterns in a part builder recipe, Forge has cache invalidation for vanilla, so this is fine as long as that persists */
+  Ingredient DEFAULT_PATTERNS = Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS);
+  /** Pattern to use for recipes that don't implement the standard pattern behavior */
+  Pattern MISSING = new Pattern(TConstruct.MOD_ID, "missingno");
+
   /** Gets the pattern needed for this recipe,
    * if there are multiple recipes with the same pattern, they are effectively merged */
   Pattern getPattern();
@@ -31,6 +38,11 @@ public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer>
    * @return  Material amount
    */
   int getCost();
+
+  /** If true, allows crafting despite the material being uncraftable. */
+  default boolean allowUncraftable() {
+    return false;
+  }
 
   /**
    * Checks if the recipe can possibly match. Should treat empty input as a match, and does not need to check sizes
@@ -51,8 +63,8 @@ public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer>
   }
 
   /** Assembles the result with the given pattern */
-  default ItemStack assemble(IPartBuilderContainer inv, Pattern pattern, RegistryAccess registryAccess) {
-    return assemble(inv, registryAccess);
+  default ItemStack assemble(IPartBuilderContainer inv, RegistryAccess access, Pattern pattern) {
+    return assemble(inv, access);
   }
 
   /* Recipe data */
@@ -67,33 +79,13 @@ public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer>
     return new ItemStack(TinkerTables.partBuilder);
   }
 
-  /** @deprecated use {@link #getLeftover(PartBuilderContainerWrapper, Pattern)} */
-  @Deprecated
-  default ItemStack getLeftover(PartBuilderContainerWrapper inventoryWrapper) {
+  /** Gets the leftover from performing this recipe */
+  default ItemStack getLeftover(IPartBuilderContainer inventoryWrapper, Pattern pattern) {
     IMaterialValue recipe = inventoryWrapper.getMaterial();
     if (recipe != null) {
-      int value = recipe.getValue();
-      if (value > 1) {
-        int remainder = (value - getCost()) % value;
-        if (remainder < 0) {
-          remainder += value;
-        }
-        if (remainder != 0) {
-          ItemStack leftover = recipe.getLeftover();
-          leftover.setCount(leftover.getCount() * remainder);
-          return leftover;
-        }
-      }
+      return recipe.getLeftover(getCost());
     }
     return ItemStack.EMPTY;
-  }
-
-  /**
-   * Gets the leftover from performing this recipe
-   * TODO: switch to the interface for the parameter
-   */
-  default ItemStack getLeftover(PartBuilderContainerWrapper inventoryWrapper, Pattern pattern) {
-    return getLeftover(inventoryWrapper);
   }
 
   /** Gets the title to display on the part builder panel. If null, displays default info */
@@ -104,6 +96,6 @@ public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer>
 
   /** Gets the text to display on the part builder screen */
   default List<Component> getText(IPartBuilderContainer inv) {
-    return Collections.emptyList();
+    return List.of();
   }
 }

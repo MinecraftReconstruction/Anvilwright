@@ -10,18 +10,19 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /**
  * Builder for a recipe that melts an ingredient into a fuel
@@ -30,13 +31,12 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBuilder> {
   private final Ingredient input;
-  private final FluidStack output;
+  private final FluidOutput output;
   private final int temperature;
   private final int time;
   @Nullable
   private OreRateType oreRate = null;
-  @Nullable
-  private OreRateType[] byproductRates = null;
+  private List<OreRateType> byproductRates = List.of();
   @Nullable
   private long[] unitSizes;
   private final List<FluidStack> byproducts = new ArrayList<>();
@@ -50,9 +50,20 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
    * @return  Builder instance
    */
   public static MeltingRecipeBuilder melting(Ingredient input, FluidStack output, int temperature, int time) {
-    if (temperature < 0) throw new IllegalArgumentException("Invalid temperature " + temperature + ", must be greater than zero");
-    if (time <= 0) throw new IllegalArgumentException("Invalid time " + time + ", must be greater than zero");
-    return new MeltingRecipeBuilder(input, output, temperature, time);
+    return melting(input, FluidOutput.fromStack(output), temperature, time);
+  }
+
+  /**
+   * Creates a new builder instance using a specific temperature
+   * @param input        Recipe input
+   * @param fluid        Recipe result
+   * @param amount       Result amount
+   * @param timeFactor   Factor this recipe takes compared to the standard of ingots
+   * @return  Builder instance
+   */
+  public static MeltingRecipeBuilder melting(Ingredient input, FluidObject<?> fluid, int amount, float timeFactor) {
+    int temperature = getTemperature(fluid);
+    return melting(input, fluid.result(amount), temperature, IMeltingRecipe.calcTime(temperature, timeFactor));
   }
 
   /**
@@ -96,7 +107,7 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
    */
   public MeltingRecipeBuilder setOre(OreRateType rate, OreRateType... byproductRates) {
     this.oreRate = rate;
-    this.byproductRates = byproductRates.length == 0 ? null : byproductRates;
+    this.byproductRates = List.of(byproductRates);
     return this;
   }
 
@@ -111,14 +122,24 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
 
   /**
    * Adds a byproduct to this recipe
-   * @param fluidStack  Byproduct to add
+   * @param fluid  Byproduct to add
    * @return  Builder instance
    */
-  public MeltingRecipeBuilder addByproduct(FluidStack fluidStack) {
-    byproducts.add(fluidStack);
+  public MeltingRecipeBuilder addByproduct(FluidOutput fluid) {
+    byproducts.add(fluid);
     return this;
   }
 
+  /**
+   * Adds a byproduct to this recipe
+   * @param fluid  Byproduct to add
+   * @return  Builder instance
+   */
+  public MeltingRecipeBuilder addByproduct(FluidStack fluid) {
+    return addByproduct(FluidOutput.fromStack(fluid));
+  }
+
+  @SuppressWarnings("deprecation")
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
     save(consumer, BuiltInRegistries.FLUID.getKey(output.getFluid()));
@@ -131,62 +152,19 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
     }
     // only build JSON if needed
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "melting");
-    consumer.accept(new Result(id, advancementId));
-  }
-
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      if (oreRate != null) {
-        json.addProperty("rate", oreRate.getName());
-      }
-      if (!group.isEmpty()) {
-        json.addProperty("group", group);
-      }
-      json.add("ingredient", input.toJson());
-      JsonObject result = RecipeHelper.serializeFluidStack(output);
-      if (unitSizes != null) {
-        if (unitSizes.length > 0) {
-          result.addProperty("unit_size", unitSizes[0]);
-        } else {
-          result.addProperty("unit_size", 1);
-        }
-      }
-      json.add("result", result);
-      json.addProperty("temperature", temperature);
-      json.addProperty("time", time);
-      if (!byproducts.isEmpty()) {
-        JsonArray array = new JsonArray();
-        for (int i = 0; i < byproducts.size(); i++) {
-          FluidStack fluidStack = byproducts.get(i);
-          JsonObject byproduct = RecipeHelper.serializeFluidStack(fluidStack);
-          if (unitSizes != null && i <= unitSizes.length) {
-            byproduct.addProperty("unit_size", unitSizes[i+1]);
-          } else if (oreRate != null && byproductRates != null && i < byproductRates.length) {
-            OreRateType rate = byproductRates[i];
-            if (rate != null) {
-              byproduct.addProperty("rate", rate.getName());
-            }
-          }
-          array.add(byproduct);
-        }
-        json.add("byproducts", array);
-      }
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      if (oreRate != null) {
-        return TinkerSmeltery.oreMeltingSerializer.get();
-      }
-      if (unitSizes != null) {
-        return TinkerSmeltery.damagableMeltingSerializer.get();
-      }
-      return TinkerSmeltery.meltingSerializer.get();
+    // based on properties, choose which recipe to build
+    if (oreRate != null) {
+      consumer.accept(new LoadableFinishedRecipe<>(
+        new OreMeltingRecipe(id, group, input, output, temperature, time, byproducts, oreRate, byproductRates),
+        OreMeltingRecipe.LOADER, advancementId));
+    } else if (unitSizes != null) {
+      consumer.accept(new LoadableFinishedRecipe<>(
+        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))),
+        DamageableMeltingRecipe.LOADER, advancementId));
+    } else {
+      consumer.accept(new LoadableFinishedRecipe<>(
+        new MeltingRecipe(id, group, input, output, temperature, time, byproducts),
+        MeltingRecipe.LOADER, advancementId));
     }
   }
 }

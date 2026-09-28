@@ -1,70 +1,28 @@
 package slimeknights.tconstruct.world.worldgen.trees;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.TinkerStructures;
-
-import javax.annotation.Nullable;
+import slimeknights.tconstruct.world.block.FoliageType;
 
 public class SlimeTree extends AbstractTreeGrower {
 
-  private final SlimeType foliageType;
+  private final FoliageType foliageType;
 
-  public SlimeTree(SlimeType foliageType) {
+  public SlimeTree(FoliageType foliageType) {
     this.foliageType = foliageType;
   }
 
-  @Deprecated
-  @Nullable
   @Override
-  protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource randomIn, boolean largeHive) {
-    return null;
-  }
-
-  /**
-   * Get a {@link ConfiguredFeature} of tree
-   */
-  @Nullable
-  private ConfiguredFeature<?, ?> getSlimeTreeFeature(RegistryAccess registryAccess) {
-    switch (this.foliageType) {
-      case EARTH:
-        return registryAccess.registryOrThrow(Registries.CONFIGURED_FEATURE).get(TinkerStructures.earthSlimeTree);
-      case SKY:
-        return registryAccess.registryOrThrow(Registries.CONFIGURED_FEATURE).get(TinkerStructures.skySlimeTree);
-      case ENDER:
-        return registryAccess.registryOrThrow(Registries.CONFIGURED_FEATURE).get(TinkerStructures.enderSlimeTree);
-      case BLOOD:
-        return registryAccess.registryOrThrow(Registries.CONFIGURED_FEATURE).get(TinkerStructures.bloodSlimeFungus);
-      case ICHOR:
-        return registryAccess.registryOrThrow(Registries.CONFIGURED_FEATURE).get(TinkerStructures.ichorSlimeFungus);
-    }
-
-    return null;
-  }
-
-  @Override
-  public boolean growTree(ServerLevel world, ChunkGenerator chunkGenerator, BlockPos pos, BlockState state, RandomSource rand) {
-    ConfiguredFeature<?, ?> configuredFeature = this.getSlimeTreeFeature(world.registryAccess());
-    if (configuredFeature == null) {
-      return false;
-    }
-    world.setBlock(pos, Blocks.AIR.defaultBlockState(), 4);
-    if (configuredFeature.place(world, chunkGenerator, rand, pos)) {
-      return true;
-    }
-    else {
-      world.setBlock(pos, state, 4);
-      return false;
-    }
+  protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource random, boolean largeHive) {
+    return switch (this.foliageType) {
+      case EARTH -> TinkerStructures.earthSlimeTree;
+      case SKY -> TinkerStructures.skySlimeTree;
+      case ENDER -> random.nextFloat() < 0.85f ? TinkerStructures.enderSlimeTreeTall : TinkerStructures.enderSlimeTree;
+      case BLOOD -> TinkerStructures.bloodSlimeFungus;
+      case ICHOR -> TinkerStructures.ichorSlimeFungus;
+    };
   }
 }

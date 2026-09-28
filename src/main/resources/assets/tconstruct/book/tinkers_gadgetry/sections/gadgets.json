@@ -5,11 +5,6 @@
     "data": "gadgets/index.json"
   },
   {
-    "name": "slimesling",
-    "type": "mantle:showcase",
-    "data": "gadgets/slimesling.json"
-  },
-  {
     "name": "cake",
     "type": "mantle:image_text",
     "data": "gadgets/cake.json"
@@ -20,24 +15,19 @@
     "data": "gadgets/piggybackpack.json"
   },
   {
-    "name": "flint_shuriken",
-    "type": "mantle:showcase",
-    "data": "gadgets/flint_shuriken.json"
-  },
-  {
-    "name": "quartz_shuriken",
-    "type": "mantle:showcase",
-    "data": "gadgets/quartz_shuriken.json"
-  },
-  {
-    "name": "glowball",
-    "type": "mantle:showcase",
-    "data": "gadgets/glowball.json"
-  },
-  {
     "name": "hidden",
     "type": "mantle:image_text",
-	"data": "gadgets/melvin.json"
+    "data": "gadgets/melvin.json"
+  },
+  {
+    "name": "armor_stand",
+    "type": "mantle:image_text",
+    "data": "gadgets/armor_stand.json"
+  },
+  {
+    "name": "armor_stand_details",
+    "type": "mantle:text",
+    "data": "gadgets/armor_stand_details.json"
   },
   {
     "name": "fancy_frames",
@@ -48,5 +38,10 @@
     "name": "fancy_frame_details",
     "type": "mantle:text",
     "data": "gadgets/fancy_frame_details.json"
+  },
+  {
+    "name": "fluid_cannon",
+    "type": "mantle:showcase",
+    "data": "gadgets/fluid_cannon.json"
   }
 ]

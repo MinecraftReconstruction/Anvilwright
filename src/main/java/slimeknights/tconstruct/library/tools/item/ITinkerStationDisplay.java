@@ -27,14 +27,6 @@ public interface ITinkerStationDisplay extends ItemLike {
     return Component.translatable(asItem().getDescriptionId());
   }
 
-  /** @deprecated {@link #getStatInformation(IToolStackView, Player, List, TooltipKey, TooltipFlag)} */
-  @Deprecated
-  default List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, slimeknights.tconstruct.library.utils.TooltipKey key, TooltipFlag tooltipFlag) {
-    tooltips = TooltipUtil.getDefaultStats(tool, player, tooltips, key.asMantle(), tooltipFlag);
-    TooltipUtil.addAttributes(this, tool, player, tooltips, TooltipUtil.SHOW_MELEE_ATTRIBUTES, EquipmentSlot.MAINHAND);
-    return tooltips;
-  }
-
   /**
    * Returns the tool stat information for this tool
    * @param tool         Tool to display
@@ -42,7 +34,9 @@ public interface ITinkerStationDisplay extends ItemLike {
    * @param tooltipFlag  Determines the type of tooltip to display
    */
   default List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipKey key, TooltipFlag tooltipFlag) {
-    return getStatInformation(tool, player, tooltips, slimeknights.tconstruct.library.utils.TooltipKey.fromMantle(key), tooltipFlag);
+    tooltips = TooltipUtil.getDefaultStats(tool, player, tooltips, key, tooltipFlag);
+    TooltipUtil.addAttributes(this, tool, player, tooltips, TooltipUtil.SHOW_MELEE_ATTRIBUTES, EquipmentSlot.MAINHAND);
+    return tooltips;
   }
 
   /**

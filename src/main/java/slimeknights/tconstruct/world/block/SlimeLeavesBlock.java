@@ -3,34 +3,22 @@ package slimeknights.tconstruct.world.block;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.shared.block.SlimeType;
-
-import java.util.Random;
 
 public class SlimeLeavesBlock extends LeavesBlock {
   @Getter
-  private final SlimeType foliageType;
-  public SlimeLeavesBlock(Properties properties, SlimeType foliageType) {
+  private final FoliageType foliageType;
+  public SlimeLeavesBlock(Properties properties, FoliageType foliageType) {
     super(properties);
     this.foliageType = foliageType;
   }
 
-  /**
-   * Update the provided state given the provided neighbor facing and neighbor state, returning a new state.
-   * For example, fences make their connections to the passed in state if possible, and wet concrete powder immediately
-   * returns its solidified counterpart.
-   * Note that this method should ideally consider only the specific face passed in.
-   */
   @Override
   public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
     int i = getDistance(facingState) + 1;

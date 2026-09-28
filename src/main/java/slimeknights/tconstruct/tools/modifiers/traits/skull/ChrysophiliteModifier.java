@@ -14,61 +14,34 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.ComputableDataKey;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
-import slimeknights.tconstruct.library.tools.item.ModifiableArmorItem;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.shared.TinkerAttributes;
+import slimeknights.tconstruct.tools.modules.armor.GoldenAttributeModule;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
 
+/** @deprecated use {@link GoldenAttributeModule} with {@link TinkerAttributes#CHRYSOPHILITE} */
+@Deprecated(forRemoval = true)
 public class ChrysophiliteModifier extends NoLevelsModifier {
+  /** @deprecated use {@link slimeknights.tconstruct.shared.TinkerAttributes#CHRYSOPHILITE} */
+  @Deprecated(forRemoval = true)
   public static final ComputableDataKey<TotalGold> TOTAL_GOLD = TConstruct.createKey("chrysophilite", TotalGold::new);
   public ChrysophiliteModifier() {
     LivingEntityEvents.DROPS.register(ChrysophiliteModifier::onLivingDrops);
   }
 
   @Override
-  public void onEquip(IToolStackView tool, int level, EquipmentChangeContext context) {
-    // adding a helmet? activate bonus
-    if (context.getChangedSlot() == EquipmentSlot.HEAD) {
-      context.getTinkerData().ifPresent(data -> {
-        TotalGold gold = data.get(TOTAL_GOLD);
-        if (gold == null) {
-          data.computeIfAbsent(TOTAL_GOLD).initialize(context);
-        } else {
-          gold.setGold(EquipmentSlot.HEAD, tool.getVolatileData().getBoolean(ModifiableArmorItem.PIGLIN_NEUTRAL));
-        }
-      });
-    }
+  protected void registerHooks(Builder hookBuilder) {
+    hookBuilder.addModule(GoldenAttributeModule.builder(TinkerAttributes.CHRYSOPHILITE, Operation.ADDITION).amount(1, 1));
   }
 
-  @Override
-  public void onUnequip(IToolStackView tool, int level, EquipmentChangeContext context) {
-    if (context.getChangedSlot() == EquipmentSlot.HEAD) {
-      IToolStackView newTool = context.getReplacementTool();
-      // when replacing with a helmet that lacks this modifier, remove bonus
-      if (newTool == null || newTool.getModifierLevel(this) == 0) {
-        context.getTinkerData().ifPresent(data -> data.remove(TOTAL_GOLD));
-      }
-    }
-  }
-
-  @Override
-  public void onEquipmentChange(IToolStackView tool, int level, EquipmentChangeContext context, EquipmentSlot slotType) {
-    // adding a helmet? activate bonus
-    EquipmentSlot changed = context.getChangedSlot();
-    if (slotType == EquipmentSlot.HEAD && changed.getType() == Type.ARMOR) {
-      boolean hasGold = ChrysophiliteModifier.hasGold(context, changed);
-      context.getTinkerData().ifPresent(data -> data.computeIfAbsent(TOTAL_GOLD).setGold(changed, hasGold));
-    }
-  }
-
-  /** Checks if the entity has gold in the given slot */
+  /** @deprecated use {@link GoldenAttributeModule#hasGold(EquipmentChangeContext, EquipmentSlot)} */
+  @Deprecated(forRemoval = true)
   public static boolean hasGold(EquipmentChangeContext context, EquipmentSlot slotType) {
     IToolStackView tool = context.getToolInSlot(slotType);
     if (tool != null) {
@@ -79,7 +52,8 @@ public class ChrysophiliteModifier extends NoLevelsModifier {
     }
   }
 
-  /** Gets the level of the modifier on an entity */
+  /** @deprecated use {@link slimeknights.tconstruct.shared.TinkerAttributes#CHRYSOPHILITE} */
+  @Deprecated(forRemoval = true)
   public static int getTotalGold(@Nullable Entity entity) {
     return Optional.ofNullable(entity)
                    .flatMap(e -> TinkerDataCapability.CAPABILITY.maybeGet(e))
@@ -115,44 +89,7 @@ public class ChrysophiliteModifier extends NoLevelsModifier {
     return false;
   }
 
-  /** Tracker to count how many slots contain gold */
-  public static class TotalGold {
-    private final boolean[] hasGold = new boolean[4];
-    /** Gold value of the modifier, will be 1 for the modifier, and +1 for each golden armor piece */
-    @Getter
-    private int totalGold = 0;
-
-    /**
-     * Updates the status of gold in a slot on the entity
-     * @param slotType  Slot to update
-     * @param value     New value
-     */
-    protected boolean setGold(EquipmentSlot slotType, boolean value) {
-      if (slotType.getType() == Type.ARMOR) {
-        int index = slotType.getIndex();
-        if (hasGold[index] != value) {
-          hasGold[index] = value;
-          if (value) {
-            totalGold++;
-          } else {
-            totalGold--;
-          }
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /** Initializes the gold data */
-    public void initialize(EquipmentChangeContext context) {
-      totalGold = 1;
-      for (EquipmentSlot slotType : ModifiableArmorMaterial.ARMOR_SLOTS) {
-        boolean gold = hasGold(context, slotType);
-        hasGold[slotType.getIndex()] = gold;
-        if (gold) {
-          totalGold++;
-        }
-      }
-    }
-  }
+  /** @deprecated use {@link GoldenAttributeModule.TotalGold} */
+  @Deprecated(forRemoval = true)
+  public static class TotalGold extends GoldenAttributeModule.TotalGold {}
 }

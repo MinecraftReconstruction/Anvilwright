@@ -15,10 +15,14 @@ import java.util.UUID;
  * Logic to keep track of the side of the block that was last hit
  */
 public class BlockSideHitListener {
-  private static final Map<UUID,Direction> HIT_FACE = new HashMap<>();
+  private static final TinkerDataKey<Direction> HIT_FACE = TConstruct.createKey("hit_face");
+  private static final TinkerDataKey<Integer> LAST_XP = TConstruct.createKey("last_xp");
+  @Getter
+  private static Direction clientSideHit = Direction.UP;
   private static boolean init = false;
 
-  /** Initializies this listener */
+  /** @apiNote Internal method to initialize the listener. */
+  @Internal
   public static void init() {
     if (init) {
       return;
@@ -44,6 +48,22 @@ public class BlockSideHitListener {
    * @return  Side last hit
    */
   public static Direction getSideHit(Player player) {
-    return HIT_FACE.getOrDefault(player.getUUID(), Direction.UP);
+    if (player.level().isClientSide()) {
+      return clientSideHit;
+    }
+    TinkerDataCapability.Holder data = TinkerDataCapability.getData(player);
+    if (data != null) {
+      return data.get(HIT_FACE, Direction.UP);
+    }
+    return Direction.UP;
+  }
+
+  /** Gets the last XP from the break block event */
+  public static int getLastXP(Player player) {
+    TinkerDataCapability.Holder data = TinkerDataCapability.getData(player);
+    if (data != null) {
+      return data.get(LAST_XP, 0);
+    }
+    return 0;
   }
 }

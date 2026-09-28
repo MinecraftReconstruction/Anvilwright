@@ -1,17 +1,11 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:incremental"
-    },
-    {
       "type": "tconstruct:attribute",
-      "unique": "tconstruct.modifier.strength",
       "attribute": "minecraft:generic.attack_damage",
+      "each_level": 0.1,
       "operation": "multiply_total",
-      "amount": 0.1,
       "slots": [
         "feet",
         "legs",

@@ -78,7 +78,7 @@ public class ClientInteractionHandler {
       return;
     }
     // figure out if we have a chestplate making us care
-    Player player = event.getPlayer();
+    Player player = event.getEntity();
     ItemStack tool = event.getItemStack();
     if (!player.isSpectator() && tool.is(TinkerTags.Items.INTERACTABLE_LEFT)) {
       // found an interaction, time to notify the server and run logic for the client

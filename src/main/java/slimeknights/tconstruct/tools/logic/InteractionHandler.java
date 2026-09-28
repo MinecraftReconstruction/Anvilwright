@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -31,20 +32,24 @@ import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.ConditionalStatModifierHook;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.ComputableDataKey;
+import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -57,7 +62,7 @@ public class InteractionHandler {
   static InteractionResult beforeEntityInteract(Player player, Entity target, InteractionHand hand) {
     ItemStack stack = player.getItemInHand(hand);
     InteractionSource source = InteractionSource.RIGHT_CLICK;
-    if (!stack.is(TinkerTags.Items.HELD)) {
+    if (!stack.is(TinkerTags.Items.INTERACTABLE_RIGHT)) {
       // if the hand is empty, allow performing chestplate interaction (assuming a modifiable chestplate)
       if (stack.isEmpty()) {
         stack = player.getItemBySlot(EquipmentSlot.CHEST);
@@ -104,7 +109,7 @@ public class InteractionHandler {
         if (target instanceof LivingEntity livingTarget) {
           for (ModifierEntry entry : tool.getModifierList()) {
             // exit on first successful result
-            result = entry.getHook(TinkerHooks.ENTITY_INTERACT).afterEntityUse(tool, entry, player, livingTarget, hand, InteractionSource.ARMOR);
+            result = entry.getHook(ModifierHooks.ENTITY_INTERACT).afterEntityUse(tool, entry, player, livingTarget, hand, InteractionSource.ARMOR);
             if (result.consumesAction()) {
               return result;
             }
@@ -147,6 +152,7 @@ public class InteractionHandler {
     // only handle chestplate interacts if the current hand is empty
     if (player.getItemInHand(hand).isEmpty() && !player.isSpectator()) {
       // item must be a chestplate
+      // TODO 1.21: add a modifier tag so we only perform the cancellation if a modifier needs it
       ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
       if (chestplate.is(TinkerTags.Items.INTERACTABLE_ARMOR) && !player.getCooldowns().isOnCooldown(chestplate.getItem())) {
         // no turning back, from this point we are fully in charge of interaction logic (since we need to ensure order of the hooks)
@@ -183,7 +189,7 @@ public class InteractionHandler {
 //        event.setCancellationResult(InteractionResult.PASS);
         if (/*useItem != Result.DENY && (useItem == Result.ALLOW || */(!player.getCooldowns().isOnCooldown(chestplate.getItem()))) {
           // finally, after block use (in forge, onItemUse)
-          InteractionResult result = onBlockUse(context, tool, chestplate, entry -> entry.getHook(TinkerHooks.BLOCK_INTERACT).afterBlockUse(tool, entry, context, InteractionSource.ARMOR));
+          InteractionResult result = onBlockUse(context, tool, chestplate, entry -> entry.getHook(ModifierHooks.BLOCK_INTERACT).afterBlockUse(tool, entry, context, InteractionSource.ARMOR));
           if (result.consumesAction()) {
             if (player instanceof ServerPlayer serverPlayer) {
               CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, ItemStack.EMPTY);
@@ -209,7 +215,7 @@ public class InteractionHandler {
     // first, run the modifier hook
     ToolStack tool = ToolStack.from(chestplate);
     for (ModifierEntry entry : tool.getModifierList()) {
-      InteractionResult result = entry.getHook(TinkerHooks.CHARGEABLE_INTERACT).onToolUse(tool, entry, player, hand, InteractionSource.ARMOR);
+      InteractionResult result = entry.getHook(ModifierHooks.GENERAL_INTERACT).onToolUse(tool, entry, player, hand, InteractionSource.ARMOR);
       if (result.consumesAction()) {
         return result;
       }
@@ -234,6 +240,11 @@ public class InteractionHandler {
     return InteractionResult.PASS;
   }
 
+  /** Armor interaction data class */
+  private record ArmorInteractData(ModifierId modifier, int startTime) {}
+  /** Key for storing data related to armor interaction */
+  private static final ComputableDataKey<Map<EquipmentSlot,ArmorInteractData>> INTERACT_KEY = TConstruct.createKey("armor_interact_data", () -> new EnumMap<>(EquipmentSlot.class));
+
   /**
    * Handles interaction from a helmet
    * @param player  Player instance
@@ -245,7 +256,12 @@ public class InteractionHandler {
       if (helmet.is(TinkerTags.Items.ARMOR)) {
         ToolStack tool = ToolStack.from(helmet);
         for (ModifierEntry entry : tool.getModifierList()) {
-          if (entry.getHook(TinkerHooks.ARMOR_INTERACT).startInteract(tool, entry, player, slotType, modifierKey)) {
+          if (entry.getHook(ModifierHooks.ARMOR_INTERACT).startInteract(tool, entry, player, slotType, modifierKey)) {
+            // store data so we know when interaction started
+            TinkerDataCapability.Holder data = TinkerDataCapability.getData(player);
+            if (data != null) {
+              data.computeIfAbsent(INTERACT_KEY).put(slotType, new ArmorInteractData(entry.getId(), player.tickCount));
+            }
             break;
           }
         }
@@ -265,9 +281,27 @@ public class InteractionHandler {
       ItemStack helmet = player.getItemBySlot(slotType);
       if (helmet.is(TinkerTags.Items.ARMOR)) {
         ToolStack tool = ToolStack.from(helmet);
-        for (ModifierEntry entry : tool.getModifierList()) {
-          entry.getHook(TinkerHooks.ARMOR_INTERACT).stopInteract(tool, entry, player, slotType);
+        // fetch interaction data if present
+        int chargeTime = 0;
+        ModifierEntry activeModifier = ModifierEntry.EMPTY;
+        TinkerDataCapability.Holder data = TinkerDataCapability.getData(player);
+        if (data != null) {
+          Map<EquipmentSlot,ArmorInteractData> interactMap = data.get(INTERACT_KEY);
+          if (interactMap != null) {
+            ArmorInteractData interactData = interactMap.remove(slotType);
+            if (interactData != null) {
+              activeModifier = tool.getModifier(interactData.modifier);
+              chargeTime = player.tickCount - interactData.startTime;
+            }
+          }
         }
+        // run modifier hook for stop interact
+        // TODO 1.21: consider only running hook on the active modifier
+        for (ModifierEntry entry : tool.getModifierList()) {
+          entry.getHook(ModifierHooks.ARMOR_INTERACT).stopInteract(tool, entry, player, slotType, chargeTime, activeModifier);
+        }
+        // cleanup drawtime on the tool
+        GeneralInteractionModifierHook.finishUsing(tool);
         return true;
       }
     }
@@ -277,7 +311,7 @@ public class InteractionHandler {
   /** Runs the left click interaction for left click */
   private static InteractionResult onLeftClickInteraction(IToolStackView tool, Player player, InteractionHand hand) {
     for (ModifierEntry entry : tool.getModifierList()) {
-      InteractionResult result = entry.getHook(TinkerHooks.CHARGEABLE_INTERACT).onToolUse(tool, entry, player, hand, InteractionSource.LEFT_CLICK);
+      InteractionResult result = entry.getHook(ModifierHooks.GENERAL_INTERACT).onToolUse(tool, entry, player, hand, InteractionSource.LEFT_CLICK);
       if (result.consumesAction()) {
         return result;
       }
@@ -298,12 +332,12 @@ public class InteractionHandler {
     if (result.consumesAction()) {
       // success means swing hand
       if (result == InteractionResult.SUCCESS) {
-        event.getPlayer().swing(event.getHand());
+        event.getEntity().swing(event.getHand());
       }
       event.setCancellationResult(result);
       // don't cancel the result in survival as it does not actually prevent breaking the block, just causes really weird desyncs
       // leaving uncanceled lets us still do blocky stuff but if you hold click it digs
-      if (event.getPlayer().getAbilities().instabuild) {
+      if (event.getEntity().getAbilities().instabuild) {
         event.setCanceled(true);
       }
     }
@@ -354,7 +388,7 @@ public class InteractionHandler {
     ToolStack tool = ToolStack.from(stack);
     List<ModifierEntry> modifiers = tool.getModifierList();
     for (ModifierEntry entry : modifiers) {
-      InteractionResult result = entry.getHook(TinkerHooks.BLOCK_INTERACT).beforeBlockUse(tool, entry, context, InteractionSource.LEFT_CLICK);
+      InteractionResult result = entry.getHook(ModifierHooks.BLOCK_INTERACT).beforeBlockUse(tool, entry, context, InteractionSource.LEFT_CLICK);
       if (result.consumesAction()) {
         setLeftClickEventResult(event, result);
         // always cancel block interaction, prevents breaking glows/fires
@@ -364,7 +398,7 @@ public class InteractionHandler {
     }
     // TODO: don't think there is an equivalence to block interactions
     for (ModifierEntry entry : modifiers) {
-      InteractionResult result = entry.getHook(TinkerHooks.BLOCK_INTERACT).afterBlockUse(tool, entry, context, InteractionSource.LEFT_CLICK);
+      InteractionResult result = entry.getHook(ModifierHooks.BLOCK_INTERACT).afterBlockUse(tool, entry, context, InteractionSource.LEFT_CLICK);
       if (result.consumesAction()) {
         setLeftClickEventResult(event, result);
         // always cancel block interaction, prevents breaking glows/fires
@@ -424,8 +458,27 @@ public class InteractionHandler {
       // first check block angle
       if (!tool.isBroken() && canBlock(event.getEntity(), event.getDamageSource().getSourcePosition(), tool)) {
         // TODO: hook for conditioning block amount based on on damage type
+        // handle block amount
         event.setBlockedDamage(Math.min(event.getBlockedDamage(), tool.getStats().get(ToolStats.BLOCK_AMOUNT)));
-        // TODO: consider handling the item damage ourself
+
+        // handle damaging the shield ourselves to fix a couple of shield related bugs
+        if (entity instanceof Player player) {
+          event.setShieldTakesDamage(false);
+          // this code is based on code from Player#hurtCurrentlyUsedShield
+          if (!entity.level().isClientSide) {
+            player.awardStat(Stats.ITEM_USED.get(tool.getItem()));
+          }
+
+          float damage = event.getBlockedDamage();
+          if (damage >= 3) {
+            InteractionHand usingHand = entity.getUsedItemHand();
+            if (ToolDamageUtil.damageAnimated(tool, 1 + Mth.floor(damage), entity, usingHand)) {
+              ForgeEventFactory.onPlayerDestroyItem(player, activeStack, usingHand);
+              entity.stopUsingItem();
+              entity.playSound(SoundEvents.SHIELD_BREAK, 0.8F, 0.8F + entity.level().random.nextFloat() * 0.4F);
+            }
+          }
+        }
       } else {
         event.setCanceled(true);
       }

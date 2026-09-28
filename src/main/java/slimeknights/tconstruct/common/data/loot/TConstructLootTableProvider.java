@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import slimeknights.tconstruct.TConstruct;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ public class TConstructLootTableProvider extends ModdedLootTableProvider {
     ));
   }
 
+  /*
   @Override
   protected void validate(Map<ResourceLocation,LootTable> map, ValidationContext validationtracker) {
     map.forEach((loc, table) -> table.validate(validationtracker));
@@ -30,12 +30,13 @@ public class TConstructLootTableProvider extends ModdedLootTableProvider {
     // This ensures the remaining generator logic doesn't write those to files.
     map.keySet().removeIf((loc) -> !loc.getNamespace().equals(TConstruct.MOD_ID));
   }
-
-  /**
-   * Gets a name for this provider, to use in logging.
    */
+
+  /*
+   * Gets a name for this provider, to use in logging.
+   *
   @Override
   public String getName() {
     return "TConstruct LootTables";
-  }
+  }*/
 }

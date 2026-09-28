@@ -1,42 +1,37 @@
 package slimeknights.tconstruct.library.recipe.worktable;
 
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.json.predicate.modifier.ModifierPredicate;
-import slimeknights.tconstruct.library.json.predicate.modifier.TagModifierPredicate;
-import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.ModifierManager;
 import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -47,9 +42,20 @@ import java.util.stream.Collectors;
 /** Recipe to add or remove a modifier from a set in persistent data */
 public class ModifierSetWorktableRecipe extends AbstractWorktableRecipe {
   /** Message to display if there are no matching modifiers on the tool */
-  private static final Component NO_MATCHES = TConstruct.makeTranslation("recipe", "modifier_set_worktable.empty");
+  public static final Component NO_MATCHES = TConstruct.makeTranslation("recipe", "modifier_set_worktable.empty");
   /** Logic to fetch a list of strings from the persistent data */
-  private static final BiFunction<CompoundTag, String, ListTag> LIST_GETTER = (tag, name) -> tag.getList(name, Tag.TAG_STRING);
+  public static final BiFunction<CompoundTag, String, ListTag> LIST_GETTER = (tag, name) -> tag.getList(name, Tag.TAG_STRING);
+  /** Loader instance */
+  public static final RecordLoadable<ModifierSetWorktableRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    Loadables.RESOURCE_LOCATION.requiredField("data_key", r -> r.dataKey),
+    INPUTS_FIELD, TOOL_FIELD,
+    // TODO: move modifier predicate to base recipe
+    ModifierPredicate.LOADER.defaultField("modifier_predicate", false, r -> r.modifierPredicate),
+    // TODO: switch to an enum with ADD, REMOVE, and TOGGLE options
+    BooleanLoadable.INSTANCE.requiredField("add_to_set", r -> r.addToSet),
+    BooleanLoadable.INSTANCE.defaultField("allow_traits", false, r -> r.allowTraits),
+    ModifierSetWorktableRecipe::new);
 
   /** Title to display in the UI and JEI */
   @Getter
@@ -79,18 +85,6 @@ public class ModifierSetWorktableRecipe extends AbstractWorktableRecipe {
     this.modifierPredicate = modifierPredicate;
     this.entryFilter = entry -> modifierPredicate.matches(entry.getId());
     this.allowTraits = allowTraits;
-  }
-
-  /** @deprecated use {@link #ModifierSetWorktableRecipe(ResourceLocation, ResourceLocation, List, Ingredient, IJsonPredicate, boolean, boolean)} */
-  @Deprecated
-  public ModifierSetWorktableRecipe(ResourceLocation id, ResourceLocation dataKey, List<SizedIngredient> inputs, IJsonPredicate<ModifierId> modifierPredicate, boolean addToSet) {
-    this(id, dataKey, inputs, Ingredient.of(TinkerTags.Items.MODIFIABLE), modifierPredicate, addToSet, false);
-  }
-
-  /** @deprecated use {@link #ModifierSetWorktableRecipe(ResourceLocation, ResourceLocation, List, Ingredient, IJsonPredicate, boolean, boolean)} */
-  @Deprecated
-  public ModifierSetWorktableRecipe(ResourceLocation id, ResourceLocation dataKey, List<SizedIngredient> inputs, TagKey<Modifier> blacklist, boolean addToSet) {
-    this(id, dataKey, inputs, new TagModifierPredicate(blacklist).inverted(), addToSet);
   }
 
   /** Gets the modifiers from the container */
@@ -124,31 +118,25 @@ public class ModifierSetWorktableRecipe extends AbstractWorktableRecipe {
   }
 
   @Override
-  public RecipeResult<ToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier) {
+  public RecipeResult<LazyToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier) {
     ToolStack tool = inv.getTinkerable().copy();
     ModDataNBT persistentData = tool.getPersistentData();
-    ListTag tagList;
-    if (persistentData.contains(dataKey, Tag.TAG_LIST)) {
-      tagList = persistentData.get(dataKey, LIST_GETTER);
-    } else {
-      tagList = new ListTag();
-      persistentData.put(dataKey, tagList);
-    }
+    // get or create the tag
+    ListTag tagList = persistentData.get(dataKey, LIST_GETTER);
     String value = modifier.getId().toString();
-    boolean found = false;
-    for (int i = 0; i < tagList.size(); i++) {
-      if (tagList.getString(i).equals(value)) {
-        if (!addToSet) {
-          tagList.remove(i);
-        }
-        found = true;
-        break;
-      }
+    // try to find the selected modifier
+    boolean found = isInSet(tagList, modifier.getId(), !addToSet);
+    // if removing and removed the last entry, remove the list
+    if (!addToSet && tagList.isEmpty()) {
+      persistentData.remove(dataKey);
     }
+    // add to list if not in list
     if (!found && addToSet) {
       tagList.add(StringTag.valueOf(value));
+      // this might be the first one added, so ensure the list is there
+      persistentData.put(dataKey, tagList);
     }
-    return RecipeResult.success(tool);
+    return LazyToolStack.successCopy(tool, inv.getTinkerableStack());
   }
 
   @Override
@@ -166,61 +154,21 @@ public class ModifierSetWorktableRecipe extends AbstractWorktableRecipe {
     if (!modData.contains(key, Tag.TAG_LIST)) {
       return false;
     }
+    return isInSet(modData.get(key, LIST_GETTER), modifier, false);
+  }
+
+  /** Checks if the given modifier is in the set. Removes the modifier if requested. */
+  public static boolean isInSet(ListTag list, ModifierId modifier, boolean remove) {
     String modifierStr = modifier.toString();
-    for (Tag tag : modData.get(key, LIST_GETTER)) {
-      if (modifierStr.equals(tag.getAsString())) {
+    Iterator<Tag> iterator = list.iterator();
+    while (iterator.hasNext()) {
+      if (modifierStr.equals(iterator.next().getAsString())) {
+        if (remove) {
+          iterator.remove();
+        }
         return true;
       }
     }
     return false;
-  }
-
-  public static class Serializer extends LoggingRecipeSerializer<ModifierSetWorktableRecipe> {
-    @Override
-    public ModifierSetWorktableRecipe fromJson(ResourceLocation id, JsonObject json) {
-      ResourceLocation dataKey = JsonHelper.getResourceLocation(json, "data_key");
-      Ingredient tool = Ingredient.fromJson(JsonHelper.getElement(json, "tools"));
-      List<SizedIngredient> ingredients = JsonHelper.parseList(json, "inputs", SizedIngredient::deserialize);
-      IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.ALWAYS;
-      if (json.has("modifier_predicate")) {
-        modifierPredicate = ModifierPredicate.LOADER.getAndDeserialize(json, "modifier_predicate");
-      } else if (json.has("blacklist")) {
-        // TODO: drop backwards compat in 1.19
-        modifierPredicate = new TagModifierPredicate(ModifierManager.getTag(JsonHelper.getResourceLocation(json, "blacklist"))).inverted();
-        TConstruct.LOG.info("Recipe " + id + " is using deprecated blacklist key, this will be removed in 1.19");
-      }
-      boolean addToSet = GsonHelper.getAsBoolean(json, "add_to_set");
-      boolean allowTraits = GsonHelper.getAsBoolean(json, "allow_traits", false);
-      return new ModifierSetWorktableRecipe(id, dataKey, ingredients, tool, modifierPredicate, addToSet, allowTraits);
-    }
-
-    @Nullable
-    @Override
-    protected ModifierSetWorktableRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      ResourceLocation dataKey = buffer.readResourceLocation();
-      Ingredient ingredient = Ingredient.fromNetwork(buffer);
-      int size = buffer.readVarInt();
-      ImmutableList.Builder<SizedIngredient> ingredients = ImmutableList.builder();
-      for (int i = 0; i < size; i++) {
-        ingredients.add(SizedIngredient.read(buffer));
-      }
-      IJsonPredicate<ModifierId> modifierPredicate = ModifierPredicate.LOADER.fromNetwork(buffer);
-      boolean addToSet = buffer.readBoolean();
-      boolean allowTraits = buffer.readBoolean();
-      return new ModifierSetWorktableRecipe(id, dataKey, ingredients.build(), ingredient, modifierPredicate, addToSet, allowTraits);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, ModifierSetWorktableRecipe recipe) {
-      buffer.writeResourceLocation(recipe.dataKey);
-      recipe.toolRequirement.toNetwork(buffer);
-      buffer.writeVarInt(recipe.inputs.size());
-      for (SizedIngredient ingredient : recipe.inputs) {
-        ingredient.write(buffer);
-      }
-      ModifierPredicate.LOADER.toNetwork(recipe.modifierPredicate, buffer);
-      buffer.writeBoolean(recipe.addToSet);
-      buffer.writeBoolean(recipe.allowTraits);
-    }
   }
 }

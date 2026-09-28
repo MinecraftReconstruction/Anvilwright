@@ -12,7 +12,6 @@ import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -24,6 +23,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.Slime;
@@ -39,14 +39,16 @@ import net.minecraft.world.level.block.SkullBlock.Type;
 
 import java.util.Map;
 
-/** Generics do not match to use the vanilla armor layer */
+/** Generics do not match to use the vanilla armor layer, so this is a reimplementation of some of {@link HumanoidArmorLayer} */
 public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T,M> {
   private final A armorModel;
   public final Map<Type,SkullModelBase> skullModels;
-  public SlimeArmorLayer(RenderLayerParent<T,M> pRenderer, A armorModel, EntityModelSet modelSet) {
+  private final boolean lavaSlime;
+  public SlimeArmorLayer(RenderLayerParent<T,M> pRenderer, A armorModel, EntityModelSet modelSet, boolean lavaSlime) {
     super(pRenderer);
     this.armorModel = armorModel;
     this.skullModels = SkullBlockRenderer.createSkullRenderers(modelSet);
+    this.lavaSlime = lavaSlime;
   }
 
   @Override
@@ -54,7 +56,15 @@ public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A 
     ItemStack helmet = entity.getItemBySlot(EquipmentSlot.HEAD);
     if (!helmet.isEmpty()) {
       matrices.pushPose();
-      matrices.translate(0, 1.5, 0);
+      if (lavaSlime) {
+        float squish = Mth.lerp(partialTicks, entity.oSquish, entity.squish);
+        if (squish < 0) {
+          squish = 0;
+        }
+        matrices.translate(0, 1.5 - 0.425 * squish, 0);
+      } else {
+        matrices.translate(0, 1.5, 0);
+      }
       matrices.scale(0.9f, 0.9f, 0.9f);
 
       Item item = helmet.getItem();
@@ -116,6 +126,7 @@ public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A 
    * @param type Subtype, can be null or "overlay"
    * @return ResourceLocation pointing at the armor's texture
    */
+  @SuppressWarnings("removal")
   public static ResourceLocation getArmorResource(Entity entity, ItemStack stack, ArmorItem armor, String type) {
     String texture = armor.getMaterial().getName();
     String domain = "minecraft";

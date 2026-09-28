@@ -9,14 +9,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 public class MeltingFuelHandler {
   /**
@@ -24,18 +21,20 @@ public class MeltingFuelHandler {
    * Sorted from highest to lowest temperature
    */
   private static List<Pair<Integer,List<FluidStack>>> fuelLookup = Collections.emptyList();
+  /** List of all solid fuels from the JEI recipe manager. */
+  private static List<ItemStack> allSolidFuels = List.of();
+  /** Map of fuel durations for all stacks */
+  private static Object2IntMap<Object> fuelDurations = Object2IntMaps.emptyMap();
+  /** Ingredient showing examples of fuels */
+  private static final Ingredient FUEL_EXAMPLES = Ingredient.of(TinkerTags.Items.FUEL_EXAMPLES);
+  /** List of solid fuels for solid melting examples */
+  public static final Lazy<List<ItemStack>> SOLID_FUELS = Lazy.of(() -> List.of(FUEL_EXAMPLES.getItems()));
+  /** Item stack helper for grabbing cache keys */
+  private static IIngredientHelper<ItemStack> itemHelper = null;
 
   /**
-   * Lookup from fluid to fluids melting temperature
-   */
-  private static Map<Fluid,Integer> temperatureLookup = Collections.emptyMap();
-
-  /** List of solid fuels for solid melting */
-  public static final Lazy<List<ItemStack>> SOLID_FUELS = Lazy.of(() -> Arrays.asList(
-    new ItemStack(Items.COAL), new ItemStack(Items.CHARCOAL), new ItemStack(Blocks.OAK_LOG), new ItemStack(Blocks.OAK_PLANKS), new ItemStack(Items.BLAZE_ROD)));
-
-  /**
-   * Updates the melting cache, called on JEI load
+   * Updates the melting cache, called on JEI load.
+   * TODO 1.21: fix method name.
    * @param fuels  List of fuel recipes
    */
   public static void setMeltngFuels(List<MeltingFuel> fuels) {
@@ -43,18 +42,13 @@ public class MeltingFuelHandler {
     fuels.sort(Comparator.comparingInt(MeltingFuel::getTemperature));
     // get a list of temperature to fuel
     fuelLookup = fuels.stream()
-                      .mapToInt(MeltingFuel::getTemperature)
-                      .distinct()
-                      .mapToObj((temperature) -> Pair.of(temperature, fuels.stream()
-                          .filter(fuel -> fuel.getTemperature() >= temperature)
-                          .flatMap(fuel -> fuel.getInputs().stream())
-                          .collect(Collectors.toList())))
-                      .collect(Collectors.toList());
-    // get a map of fluid to temperature
-    temperatureLookup = fuels.stream().collect(HashMap::new, (map, fuel) -> {
-      int temperature = fuel.getTemperature();
-      fuel.getInputs().forEach((fluid) -> map.put(fluid.getFluid(), temperature));
-    }, Map::putAll);
+      .mapToInt(MeltingFuel::getTemperature)
+      .distinct()
+      .mapToObj((temperature) -> Pair.of(temperature, fuels.stream()
+        .filter(fuel -> fuel.getTemperature() >= temperature && !fuel.getInputs().isEmpty())
+        .flatMap(fuel -> fuel.getInputs().stream())
+        .toList()))
+      .toList();
   }
 
   /**
@@ -72,16 +66,44 @@ public class MeltingFuelHandler {
     return Collections.emptyList();
   }
 
-  /**
-   * Gets the temperature for the given fluid
-   * @param fluid  Fluid to lookup
-   * @return  Temperature, or empty if the fluid is not valid
-   */
-  public static OptionalInt getTemperature(Fluid fluid) {
-    Integer temperature = temperatureLookup.get(fluid);
-    if (temperature != null) {
-      return OptionalInt.of(temperature);
+
+  /* Solid fuels */
+
+  /** Sets the solid fuels from the given fuel stacks */
+  public static void registerSolidFuels(IIngredientManager ingredientManager) {
+    Collection<ItemStack> allStacks = ingredientManager.getAllItemStacks();
+    List<ItemStack> fuels = new ArrayList<>(allStacks.size());
+    Object2IntMap<Object> newFuels = new Object2IntOpenHashMap<>(allStacks.size());
+    itemHelper = ingredientManager.getIngredientHelper(VanillaTypes.ITEM_STACK);
+    RecipeType<?> fuel = TinkerRecipeTypes.FUEL.get();
+    for (ItemStack stack : allStacks) {
+      try {
+        int burnTime = ForgeHooks.getBurnTime(stack, fuel);
+        if (burnTime > 0) {
+          fuels.add(stack);
+          newFuels.put(itemHelper.getUid(stack, UidContext.Ingredient), burnTime);
+        }
+      } catch (RuntimeException | LinkageError e) {
+        TConstruct.LOG.error("Failed to check if item is fuel {}.", stack, e);
+      }
     }
-    return OptionalInt.empty();
+    allSolidFuels = List.copyOf(fuels);
+    fuelDurations = Object2IntMaps.unmodifiable(newFuels);
+  }
+
+  /** Gets a list of all solid fuels for display in the fuel category */
+  public static List<ItemStack> getAllSolidFuels() {
+    if (allSolidFuels.isEmpty()) {
+      return SOLID_FUELS.get();
+    }
+    return allSolidFuels;
+  }
+
+  /** Gets the duration of the given item stack */
+  public static int getFuelDuration(ItemStack stack) {
+    if (itemHelper != null) {
+      return fuelDurations.getOrDefault(itemHelper.getUid(stack, UidContext.Ingredient), 0);
+    }
+    return 0;
   }
 }

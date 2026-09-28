@@ -6,9 +6,8 @@ import lombok.Getter;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
@@ -24,26 +23,18 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.client.model.NBTKeyModel;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.client.GuiUtil;
-import slimeknights.tconstruct.library.materials.IMaterialRegistry;
-import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.library.json.IntRange;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
-import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
-import slimeknights.tconstruct.library.tools.item.IModifiable;
-import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.TinkerTools;
-import slimeknights.tconstruct.tools.item.ArmorSlotType;
 import slimeknights.tconstruct.tools.item.CreativeSlotItem;
-import slimeknights.tconstruct.tools.stats.SkullStats;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -52,35 +43,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModifierRecipeCategory implements IRecipeCategory<IDisplayModifierRecipe> {
-  protected static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/tinker_station.png");
+/** Category for display recipes for crafting {@link ModifierEntry}. */
+public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDisplayModifierRecipe> {
+  protected static final ResourceLocation BACKGROUND_LOC = AbstractTinkerStationCategory.BACKGROUND_LOC;
   private static final Component TITLE = TConstruct.makeTranslation("jei", "modifiers.title");
 
   // translation
-  private static final List<Component> TEXT_FREE = Collections.singletonList(TConstruct.makeTranslation("jei", "modifiers.free"));
-  private static final List<Component> TEXT_INCREMENTAL = Collections.singletonList(TConstruct.makeTranslation("jei", "modifiers.incremental"));
-  private static final String KEY_SLOT = TConstruct.makeTranslationKey("jei", "modifiers.slot");
-  private static final String KEY_SLOTS = TConstruct.makeTranslationKey("jei", "modifiers.slots");
-  private static final String KEY_MAX = TConstruct.makeTranslationKey("jei", "modifiers.max");
+  private static final Component TEXT_INCREMENTAL = TConstruct.makeTranslation("jei", "modifiers.incremental");
+  private static final String KEY_MIN = TConstruct.makeTranslationKey("jei", "modifiers.level.min");
+  private static final String KEY_MAX = TConstruct.makeTranslationKey("jei", "modifiers.level.max");
+  private static final String KEY_RANGE = TConstruct.makeTranslationKey("jei", "modifiers.level.range");
+  private static final String KEY_EXACT = TConstruct.makeTranslationKey("jei", "modifiers.level.exact");
+
+  /** Draws the slotless input icon. */
+  private static final IDrawable SLOTLESS = new IDrawable() {
+    @Override
+    public int getWidth() {
+      return SlotIngredientRenderer.INPUT.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+      return SlotIngredientRenderer.INPUT.getHeight();
+    }
+
+    @Override
+    public void draw(GuiGraphics graphics, int xOffset, int yOffset) {
+      SlotIngredientRenderer.INPUT.render(graphics, null, xOffset, yOffset);
+    }
+  };
 
   private final ModifierIngredientRenderer modifierRenderer = new ModifierIngredientRenderer(124, 10);
 
-  @Getter
-  private final IDrawable background;
-  @Getter
-  private final IDrawable icon;
-  private final String maxPrefix;
   private final IDrawable requirements, incremental;
-  private final IDrawable[] slotIcons;
-  private final Map<SlotType,TextureAtlasSprite> slotTypeSprites = new HashMap<>();
   public ModifierRecipeCategory(IGuiHelper helper) {
-    this.maxPrefix = ForgeI18n.getPattern(KEY_MAX);
-    this.background = helper.createDrawable(BACKGROUND_LOC, 0, 0, 128, 77);
-    this.icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem), SlotType.UPGRADE));
-    this.slotIcons = new IDrawable[6];
-    for (int i = 0; i < 6; i++) {
-      slotIcons[i] = helper.createDrawable(BACKGROUND_LOC, 128 + i * 16, 0, 16, 16);
-    }
+    super(helper, TConstructJEIConstants.MODIFIERS, TITLE, helper.createDrawableItemStack(CreativeSlotItem.withSlot(new ItemStack(TinkerModifiers.creativeSlotItem), SlotType.UPGRADE)));
     this.requirements = helper.createDrawable(BACKGROUND_LOC, 128, 17, 16, 16);
     this.incremental = helper.createDrawable(BACKGROUND_LOC, 128, 33, 16, 16);
   }
@@ -121,7 +118,12 @@ public class ModifierRecipeCategory implements IRecipeCategory<IDisplayModifierR
         // failed to use the model, use missing texture
         sprite = modelManager.getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(MissingTextureAtlasSprite.getLocation());
       }
-      slotTypeSprites.put(slotType, sprite);
+    } else if (min == max) {
+      return Component.translatable(KEY_EXACT, min);
+    } else if (max == ModifierEntry.VALID_LEVEL.max()) {
+      return Component.translatable(KEY_MIN, min);
+    } else {
+      return Component.translatable(KEY_RANGE, min, max);
     }
     RenderSystem.setShader(GameRenderer::getPositionTexShader);
     RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
@@ -192,72 +194,29 @@ public class ModifierRecipeCategory implements IRecipeCategory<IDisplayModifierR
 
   @Override
   public void setRecipe(IRecipeLayoutBuilder builder, IDisplayModifierRecipe recipe, IFocusGroup focuses) {
-    // inputs
-    builder.addSlot(RecipeIngredientRole.INPUT,  3, 33).addItemStacks(recipe.getDisplayItems(0));
-    builder.addSlot(RecipeIngredientRole.INPUT, 25, 15).addItemStacks(recipe.getDisplayItems(1));
-    builder.addSlot(RecipeIngredientRole.INPUT, 47, 33).addItemStacks(recipe.getDisplayItems(2));
-    builder.addSlot(RecipeIngredientRole.INPUT, 43, 58).addItemStacks(recipe.getDisplayItems(3));
-    builder.addSlot(RecipeIngredientRole.INPUT,  7, 58).addItemStacks(recipe.getDisplayItems(4));
+    super.setRecipe(builder, recipe, focuses);
+
     // modifiers
-    builder.addSlot(RecipeIngredientRole.OUTPUT, 3, 3)
-           .setCustomRenderer(TConstructJEIConstants.MODIFIER_TYPE, modifierRenderer)
-           .addIngredient(TConstructJEIConstants.MODIFIER_TYPE, recipe.getDisplayResult());
-    // tool
-    List<ItemStack> toolWithoutModifier = recipe.getToolWithoutModifier();
-    List<ItemStack> toolWithModifier = recipe.getToolWithModifier();
+    builder.addOutputSlot(3, 3)
+      .setCustomRenderer(TConstructJEIConstants.MODIFIER_TYPE, modifierRenderer)
+      .addIngredient(TConstructJEIConstants.MODIFIER_TYPE, recipe.getDisplayResult());
 
-    // hack: if any slimeskull is selected, add all known variants to the recipe lookup
-    Item slimeskull = TinkerTools.slimesuit.get(ArmorSlotType.HELMET);
-    for (ItemStack stack : toolWithoutModifier) {
-      if (stack.is(slimeskull)) {
-        builder.addInvisibleIngredients(RecipeIngredientRole.CATALYST).addItemStacks(getSlimeskullHelmets());
-        break;
-      }
+    // modifier slots
+    SlotCount slots = recipe.getSlots();
+    if (slots != null) {
+      builder.addInputSlot(102, 58)
+        .setCustomRenderer(TConstructJEIConstants.SLOT_TYPE, SlotIngredientRenderer.INPUT)
+        .addIngredient(TConstructJEIConstants.SLOT_TYPE, recipe.getSlots());
     }
 
-    // JEI is currently being dumb and using ingredient subtypes within recipe focuses
-    // we use a more strict subtype for tools in ingredients so they all show in JEI, but do not care in recipes
-    // thus, manually handle the focuses
-    IFocus<ItemStack> focus = focuses.getFocuses(VanillaTypes.ITEM_STACK).filter(f -> f.getRole() == RecipeIngredientRole.CATALYST).findFirst().orElse(null);
-    if (focus != null) {
-      Item item = focus.getTypedValue().getIngredient().getItem();
-      for (ItemStack stack : toolWithoutModifier) {
-        if (stack.is(item)) {
-          toolWithoutModifier = List.of(stack);
-          break;
-        }
-      }
-      for (ItemStack stack : toolWithModifier) {
-        if (stack.is(item)) {
-          toolWithModifier = List.of(stack);
-          break;
-        }
-      }
-    }
-    builder.addSlot(RecipeIngredientRole.CATALYST,  25, 38).addItemStacks(toolWithoutModifier);
-    builder.addSlot(RecipeIngredientRole.CATALYST, 105, 34).addItemStacks(toolWithModifier);
+    // result slots is determined based on the volatile data hook. Its a bit of a heuristic, but is good enough for our usecases
+    builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addIngredients(TConstructJEIConstants.SLOT_TYPE, recipe.getResultSlots());
   }
 
-
-  /* Slimeskull workaround */
-  /** internal list of slimeskulls for the sake of ingredient lookup, needed since they are technically distinct but modifiers treat them as the same */
-  private static List<ItemStack> SLIMESKULL_HELMETS = null;
-
-  /** called to clear the cache on ingredient reload as materials may have changed */
+  /** @deprecated never needed to be called by an addon */
+  @Deprecated(forRemoval = true)
+  @Internal
   public static void clearSlimeskullCache() {
-    SLIMESKULL_HELMETS = null;
-  }
-
-  /** gets the list of slimeskull helmets, loading it if needed */
-  private static List<ItemStack> getSlimeskullHelmets() {
-    if (SLIMESKULL_HELMETS == null) {
-      IMaterialRegistry registry = MaterialRegistry.getInstance();
-      IModifiable slimeskull = TinkerTools.slimesuit.get(ArmorSlotType.HELMET);
-      SLIMESKULL_HELMETS = registry.getAllMaterials().stream()
-                                   .filter(material -> registry.getMaterialStats(material.getIdentifier(), SkullStats.ID).isPresent())
-                                   .map(material -> ToolBuildHandler.buildItemFromMaterials(slimeskull, MaterialNBT.of(material)))
-                                   .toList();
-    }
-    return SLIMESKULL_HELMETS;
+    AbstractTinkerStationCategory.clearLookupCache();
   }
 }

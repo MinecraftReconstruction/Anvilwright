@@ -8,11 +8,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.config.Config;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
@@ -20,7 +22,6 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 import slimeknights.tconstruct.library.utils.DomainDisplayName;
-import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
@@ -40,9 +41,9 @@ public class MaterialItem extends Item implements IMaterialItem {
   }
 
   /** Gets the material ID for the given NBT compound */
-  private static MaterialVariantId getMaterialId(@Nullable CompoundTag nbt) {
+  public static MaterialVariantId getMaterialId(@Nullable CompoundTag nbt) {
     if (nbt != null) {
-      String str = nbt.getString(NBTTags.PART_MATERIAL);
+      String str = nbt.getString(MATERIAL_TAG);
       if (!str.isEmpty()) {
         MaterialVariantId id = MaterialVariantId.tryParse(str);
         if (id != null) {
@@ -50,7 +51,7 @@ public class MaterialItem extends Item implements IMaterialItem {
         }
       }
     }
-    return IMaterial.UNKNOWN_ID;
+    return MaterialId.UNKNOWN;
   }
 
   @Override
@@ -107,15 +108,15 @@ public class MaterialItem extends Item implements IMaterialItem {
     return null;
   }
 
-  @Override
-  public Component getName(ItemStack stack) {
+  /** Static helper to get part name, used also by {@link slimeknights.tconstruct.library.tools.part.block.MaterialBlockItem} */
+  public static Component getName(IMaterialItem self, ItemStack stack) {
     // if no material, return part name directly
-    MaterialVariantId material = getMaterial(stack);
-    if (material.equals(IMaterial.UNKNOWN_ID)) {
-      return super.getName(stack);
+    MaterialVariantId material = self.getMaterial(stack);
+    String key = self.asItem().getDescriptionId(stack);
+    if (material.equals(MaterialId.UNKNOWN)) {
+      return Component.translatable(key);
     }
     // try variant first
-    String key = this.getDescriptionId(stack);
     if (material.hasVariant()) {
       Component component = getName(key, material);
       if (component != null) {
@@ -148,6 +149,7 @@ public class MaterialItem extends Item implements IMaterialItem {
    * @param tooltip   Tooltip list
    * @param material  Material to add
    */
+  @Deprecated(forRemoval = true)
   protected static void addModTooltip(IMaterial material, List<Component> tooltip) {
     if (material != IMaterial.UNKNOWN) {
       tooltip.add(Component.empty());
@@ -157,14 +159,6 @@ public class MaterialItem extends Item implements IMaterialItem {
 
   @Override
   public void verifyTagAfterLoad(CompoundTag nbt) {
-    // if the material exists and was changed, update it
-    MaterialVariantId id = getMaterialId(nbt);
-    if (!id.equals(IMaterial.UNKNOWN_ID)) {
-      MaterialId original = id.getId();
-      MaterialId resolved = MaterialRegistry.getInstance().resolve(original);
-      if (original != resolved) {
-        nbt.putString(NBTTags.PART_MATERIAL, MaterialVariantId.create(resolved, id.getVariant()).toString());
-      }
-    }
+    verifyTag(nbt);
   }
 }

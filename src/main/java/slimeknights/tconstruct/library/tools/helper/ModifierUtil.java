@@ -9,142 +9,51 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlot.Type;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.ConditionalStatModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.LootingModifierHook;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataKeys;
-import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
-import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
+import slimeknights.tconstruct.tools.TinkerTools;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /** Generic modifier hooks that don't quite fit elsewhere */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ModifierUtil {
-  /** Vanilla enchantments tag */
-  public static final String TAG_ENCHANTMENTS = "Enchantments";
-
-  /** Key for marking a modifier in use */
-  private static final ResourceLocation ACTIVE_MODIFIER = TConstruct.getResource("active_modifier");
-
-  /**
-   * Adds all enchantments from tools. Separate method as tools don't have enchants all the time.
-   * Typically called before actions which involve loot, such as breaking blocks or attacking mobs.
-   * @param tool     Tool instance
-   * @param stack    Base stack instance
-   * @param context  Tool harvest context
-   * @return  Old tag if enchants were applied
-   */
-  @Nullable
-  public static ListTag applyHarvestEnchantments(ToolStack tool, ItemStack stack, ToolHarvestContext context) {
-    ListTag originalEnchants = null;
-    Player player = context.getPlayer();
-    if (player == null || !player.isCreative()) {
-      Map<Enchantment, Integer> enchantments = new HashMap<>();
-      BiConsumer<Enchantment,Integer> enchantmentConsumer = (ench, add) -> {
-        if (ench != null && add != null) {
-          Integer level = enchantments.get(ench);
-          if (level != null) {
-            add += level;
-          }
-          enchantments.put(ench, add);
-        }
-      };
-      for (ModifierEntry entry : tool.getModifierList()) {
-        entry.getHook(TinkerHooks.TOOL_HARVEST_ENCHANTMENTS).applyHarvestEnchantments(tool, entry, context, enchantmentConsumer);
-      }
-      // lucky pants
-      if (player != null) {
-        ItemStack pants = player.getItemBySlot(EquipmentSlot.LEGS);
-        if (pants.is(TinkerTags.Items.LEGGINGS)) {
-          ToolStack pantsTool = ToolStack.from(pants);
-          for (ModifierEntry entry : pantsTool.getModifierList()) {
-            entry.getHook(TinkerHooks.LEGGINGS_HARVEST_ENCHANTMENTS).applyHarvestEnchantments(pantsTool, entry, context, enchantmentConsumer);
-          }
-        }
-      }
-      if (!enchantments.isEmpty()) {
-        // note this returns a new list if there is no tag, this is intentional as we need non-null to tell the tool to remove the tag
-        originalEnchants = stack.getEnchantmentTags();
-        EnchantmentHelper.setEnchantments(enchantments, stack);
-      }
+  /** Drops an item at the given position */
+  public static void dropItem(Level level, double x, double y, double z, ItemStack stack) {
+    if (!stack.isEmpty() && !level.isClientSide) {
+      ItemEntity ent = new ItemEntity(level, x, y, z, stack);
+      ent.setDefaultPickUpDelay();
+      RandomSource rand = level.random;
+      ent.setDeltaMovement(ent.getDeltaMovement().add((rand.nextFloat() - rand.nextFloat()) * 0.1F,
+                                                      rand.nextFloat() * 0.05F,
+                                                      (rand.nextFloat() - rand.nextFloat()) * 0.1F));
+      level.addFreshEntity(ent);
     }
-    return originalEnchants;
-  }
-
-  /**
-   * Restores the original enchants to the given stack
-   * @param stack        Stack to clear enchants
-   * @param originalTag  Original list of enchantments. If empty, will remove the tag
-   */
-  public static void restoreEnchantments(ItemStack stack, ListTag originalTag) {
-    CompoundTag nbt = stack.getTag();
-    if (nbt != null) {
-      if (originalTag.isEmpty()) {
-        nbt.remove(TAG_ENCHANTMENTS);
-      } else {
-        nbt.put(TAG_ENCHANTMENTS, originalTag);
-      }
-    }
-  }
-
-  /**
-   * Gets the looting value for the given tool
-   * @param tool           Tool used
-   * @param holder         Entity holding the tool
-   * @param target         Target being looted
-   * @param damageSource   Damage source for looting, may ben null if no attack
-   * @return  Looting value for the tool
-   */
-  public static int getLootingLevel(IToolStackView tool, LivingEntity holder, Entity target, @Nullable DamageSource damageSource) {
-    if (tool.isBroken()) {
-      return 0;
-    }
-    return LootingModifierHook.getLootingValue(TinkerHooks.TOOL_LOOTING, tool, holder, target, damageSource, 0);
-  }
-
-  /**
-   * Gets the looting value for the leggings
-   * @param holder         Entity holding the tool
-   * @param target         Target being looted
-   * @param damageSource   Damage source for looting, may ben null if no attack
-   * @param toolLooting    Looting from the tool
-   * @return  Looting value for the tool
-   */
-  public static int getLeggingsLootingLevel(LivingEntity holder, Entity target, @Nullable DamageSource damageSource, int toolLooting) {
-    ItemStack pants = holder.getItemBySlot(EquipmentSlot.LEGS);
-    if (!pants.isEmpty() && pants.is(TinkerTags.Items.LEGGINGS)) {
-      ToolStack pantsTool = ToolStack.from(pants);
-      if (!pantsTool.isBroken()) {
-        toolLooting = LootingModifierHook.getLootingValue(TinkerHooks.LEGGINGS_LOOTING, pantsTool, holder, target, damageSource, toolLooting);
-      }
-    }
-    return toolLooting;
   }
 
   /** Drops an item at the entity position */
@@ -158,6 +67,36 @@ public final class ModifierUtil {
                                                       (rand.nextFloat() - rand.nextFloat()) * 0.1F));
       target.level().addFreshEntity(ent);
     }
+    return null;
+  }
+
+  /** Gets the entity as a player, or null if they are not a player */
+  @Nullable
+  public static Player asPlayer(@Nullable Entity entity) {
+    if (entity instanceof Player player) {
+      return player;
+    }
+    return null;
+  }
+
+  /**
+   * Checks if the given entity pays the resource costs of using a tool, such as draining the tank or consuming ammo.
+   * Creative players get their resources for free, matching {@link ToolDamageUtil#directDamage(IToolStackView, int, LivingEntity, ItemStack)} skipping durability for them.
+   * @param entity  Entity using the tool. Anything that is not a creative player consumes, including mobs and null.
+   * @return  True if resources should be consumed.
+   */
+  public static boolean consumesResources(@Nullable LivingEntity entity) {
+    return !(entity instanceof Player player) || consumesResources(player);
+  }
+
+  /**
+   * Checks if the given player pays the resource costs of using a tool, such as draining the tank or consuming ammo.
+   * Creative players get their resources for free, matching {@link ToolDamageUtil#directDamage(IToolStackView, int, LivingEntity, ItemStack)} skipping durability for them.
+   * @param player  Player using the tool. Null consumes, as only creative players get their resources for free.
+   * @return  True if resources should be consumed.
+   */
+  public static boolean consumesResources(@Nullable Player player) {
+    return player == null || !player.isCreative();
   }
 
   /**
@@ -176,8 +115,8 @@ public final class ModifierUtil {
           String key = modifier.toString();
           for (int i = 0; i < size; i++) {
             CompoundTag entry = list.getCompound(i);
-            if (key.equals(entry.getString(ModifierNBT.TAG_MODIFIER))) {
-              return entry.getInt(ModifierNBT.TAG_LEVEL);
+            if (key.equals(entry.getString(ModifierEntry.TAG_MODIFIER))) {
+              return entry.getInt(ModifierEntry.TAG_LEVEL);
             }
           }
         }
@@ -197,7 +136,7 @@ public final class ModifierUtil {
 
   /** Checks if the given slot may contain armor */
   public static boolean validArmorSlot(LivingEntity living, EquipmentSlot slot) {
-    return slot.getType() == Type.ARMOR || living.getItemBySlot(slot).is(TinkerTags.Items.HELD);
+    return slot.isArmor() || living.getItemBySlot(slot).is(TinkerTags.Items.HELD);
   }
 
   /** Checks if the given slot may contain armor */
@@ -291,6 +230,15 @@ public final class ModifierUtil {
     return false;
   }
 
+  /** Shortcut to get a persistent flag when the tool stack is not needed otherwise */
+  public static boolean checkPersistentPresent(ItemStack stack, ResourceLocation key) {
+    CompoundTag nbt = stack.getTag();
+    if (nbt != null && nbt.contains(ToolStack.TAG_VOLATILE_MOD_DATA, Tag.TAG_COMPOUND)) {
+      return nbt.getCompound(ToolStack.TAG_VOLATILE_MOD_DATA).contains(key.toString());
+    }
+    return false;
+  }
+
   /** Shortcut to get a volatile int value when the tool stack is not needed otherwise */
   public static int getVolatileInt(ItemStack stack, ResourceLocation flag) {
     CompoundTag nbt = stack.getTag();
@@ -326,11 +274,11 @@ public final class ModifierUtil {
   public static boolean canPerformAction(IToolStackView tool, ToolAction action) {
     if (!tool.isBroken()) {
       // can the tool do this action inherently?
-      if (tool.getDefinition().getData().canPerformAction(action)) {
+      if (tool.getHook(ToolHooks.TOOL_ACTION).canPerformAction(tool, action)) {
         return true;
       }
       for (ModifierEntry entry : tool.getModifierList()) {
-        if (entry.getHook(TinkerHooks.TOOL_ACTION).canPerformAction(tool, entry, action)) {
+        if (entry.getHook(ModifierHooks.TOOL_ACTION).canPerformAction(tool, entry, action)) {
           return true;
         }
       }
@@ -338,47 +286,118 @@ public final class ModifierUtil {
     return false;
   }
 
-  /** Starts using the given hand with the given modifier, will allow filtering modifier hooks so only the one for the given modifier is called */
-  public static void startUsingItem(IToolStackView tool, ModifierId modifier, LivingEntity living, InteractionHand hand) {
-    tool.getPersistentData().putString(ACTIVE_MODIFIER, modifier.toString());
-    living.startUsingItem(hand);
+  /**
+   * Makes the tool use the blocking animation if the blocking modifier is installed, falling back to the given animation.
+   * Allows your tool to block while charging up.
+   */
+  public static UseAnim blockWhileCharging(IToolStackView tool, UseAnim fallback) {
+    return canPerformAction(tool, ToolActions.SHIELD_BLOCK) ? UseAnim.BLOCK : fallback;
   }
 
-  /** Gets the currently active modifier, or null if none is active */
+  /** Calculates inaccuracy from the conditional tool stat. */
+  public static float getInaccuracy(IToolStackView tool, @Nullable LivingEntity living) {
+    return 3 * (1 / ConditionalStatModifierHook.getModifiedStat(tool, living, ToolStats.ACCURACY) - 1);
+  }
+
+  /** @deprecated use {@link GeneralInteractionModifierHook#addCooldown(IToolStackView, Player, float)} */
+  @Deprecated(forRemoval = true)
+  public static void addCooldown(IToolStackView tool, Player player) {
+    GeneralInteractionModifierHook.addCooldown(tool, player, 1);
+  }
+
+  /** Checks if this modifier is the one actively being used. Used for failure sound effects. */
+  public static boolean isActiveModifier(IToolStackView tool, ModifierEntry modifier, ModifierEntry activeModifier) {
+    // active modifier being us, or a bow is firing and no drawback ammo
+    return modifier == activeModifier || (activeModifier.getLevel() == 0 && !tool.getPersistentData().contains(ModifiableLauncherItem.KEY_DRAWBACK_AMMO));
+  }
+
+  /**
+   * Called before you call {@link Projectile#discard()} to update the fishing rod stack on the player.
+   *
+   * @param projectile  Projectile, will check if its our fishing bobber.
+   * @param damage      Damage to deal to the rod.
+   * @param applyCooldown  If true, applies draw speed as an item cooldown.
+   * @return hand containing the fishing rod, or null if its in neither hand.
+   */
+  @SuppressWarnings("UnusedReturnValue") // API
   @Nullable
-  public static ModifierEntry getActiveModifier(IToolStackView tool) {
-    IModDataView persistentData = tool.getPersistentData();
-    if (persistentData.contains(ACTIVE_MODIFIER, Tag.TAG_STRING)) {
-      ModifierId modifier = ModifierId.tryParse(persistentData.getString(ACTIVE_MODIFIER));
-      if (modifier != null) {
-        return tool.getModifiers().getEntry(modifier);
+  public static InteractionHand updateFishingRod(Projectile projectile, int damage, boolean applyCooldown) {
+    return updateFishingRod(projectile, damage, applyCooldown, ModifierId.EMPTY);
+  }
+
+  /**
+   * Called before you call {@link Projectile#discard()} to update the fishing rod stack on the player.
+   *
+   * @param projectile  Projectile, will check if its our fishing bobber.
+   * @param damage      Damage to deal to the rod.
+   * @param applyCooldown  If true, applies draw speed as an item cooldown.
+   * @param cause       Modifier causing the retraction.
+   * @return hand containing the fishing rod, or null if its in neither hand.
+   */
+  @Nullable
+  public static InteractionHand updateFishingRod(Projectile projectile, int damage, boolean applyCooldown, ModifierId cause) {
+    if (projectile.getType() == TinkerTools.fishingHook.get() && projectile.getOwner() instanceof LivingEntity living) {
+      ItemStack stack = living.getMainHandItem();
+      InteractionHand hand = InteractionHand.MAIN_HAND;
+      // must be able to cast
+      if (!stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+        stack = living.getOffhandItem();
+        if (!stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+          return null;
+        }
+        hand = InteractionHand.OFF_HAND;
+      }
+      // must be modifiable
+      if (stack.is(TinkerTags.Items.MODIFIABLE)) {
+        // skip making the tool stack object if not needed, might be asking just for the hand.
+        if (applyCooldown || damage > 0) {
+          IToolStackView tool = ToolStack.from(stack);
+          // trigger cooldown on the item
+          if (applyCooldown && living instanceof Player player) {
+            addCooldown(tool, player);
+          }
+          // damage the rod
+          if (damage > 0) {
+            // if we are applying cooldown, means this is a full retraction from block so this was primary damage
+            // no cooldown is done on secondary effects like entity hitting
+            ToolDamageUtil.damageAnimated(tool, damage, living, hand, cause);
+          }
+        }
+        return hand;
       }
     }
     return null;
   }
 
-  /** @deprecated No longer needed, will be removed in 1.19. */
-  @Deprecated
-  public static void checkFastUsingItem(IToolStackView tool, LivingEntity living) {}
+  /** Interface used for {@link #foodConsumer} */
+  public interface FoodConsumer {
+    /** Called when food is eaten to notify compat that food was eaten */
+    void onConsume(Player player, ItemStack stack, int hunger, float saturation);
 
-  /** @deprecated No longer needed. Use {@link #finishUsingItem(IToolStackView)} when you stop using a modifier */
-  @Deprecated
-  public static void finishUsingItem(LivingEntity living) {}
-
-  /** @deprecated No longer needed. Use {@link #finishUsingItem(IToolStackView)} when you stop using a modifier */
-  @Deprecated
-  public static void finishUsingItem(LivingEntity living, IToolStackView tool) {
-    finishUsingItem(tool);
+    /** Called when a list of foods is eaten at once is eaten to notify compat that food was eaten */
+    default void onConsume(Player player, List<ItemStack> stacks, int hunger, float saturation) {}
   }
 
-  /** Called to clear any data modifiers set when usage starts */
-  public static void finishUsingItem(IToolStackView tool) {
-    tool.getPersistentData().remove(ACTIVE_MODIFIER);
+  /** Instance of the current food consumer, will be either no-op or an implementation calling the Diet API, never null. */
+  @Nonnull
+  public static FoodConsumer foodConsumer = (player, stack, hunger, saturation) -> {};
+
+  /* Shield disabling */
+  /** Map of how to disable shields for different targets */
+  private static final Map<EntityType<?>, Consumer<Entity>> SHIELD_DISABLER = new HashMap<>();
+
+  /** Registers a method for shield disabling */
+  public static void registerShieldDisabler(Consumer<Entity> disabler, EntityType<?>... types) {
+    for (EntityType<?> type : types){
+      SHIELD_DISABLER.putIfAbsent(type, disabler);
+    }
   }
 
-  /** Calculates inaccuracy from the conditional tool stat. TODO: reconsidering velocity impacting inaccuracy, remove parameter in 1.19 */
-  @SuppressWarnings("unused")
-  public static float getInaccuracy(IToolStackView tool, LivingEntity living, float velocity) {
-    return 3 * (1 / ConditionalStatModifierHook.getModifiedStat(tool, living, ToolStats.ACCURACY) - 1);
+  /** Disables shield for the target entity */
+  public static void disableShield(Entity entity) {
+    Consumer<Entity> consumer = SHIELD_DISABLER.get(entity.getType());
+    if (consumer != null) {
+      consumer.accept(entity);
+    }
   }
 }

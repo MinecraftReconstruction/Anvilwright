@@ -17,7 +17,6 @@ import net.minecraft.world.level.material.Fluids;
 import slimeknights.tconstruct.smeltery.block.entity.CastingBlockEntity;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 @RequiredArgsConstructor
@@ -195,6 +194,7 @@ public class CastingFluidHandler extends SnapshotParticipant<CastingFluidHandler
   }
 
   /** Write the tank from NBT */
+  @SuppressWarnings("deprecation")
   public CompoundTag writeToTag(CompoundTag nbt) {
     nbt.putLong(TAG_CAPACITY, capacity);
     if (!fluid.isEmpty()) {

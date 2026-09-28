@@ -22,21 +22,42 @@
   },
   {
     "name": "melee_harvest_materials",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tier": 3 } },
+    "data": "no-load",
+    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:melee_harvest", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
     "icon": {
-      "item": "tconstruct:slimesteel_ingot"
+      "item": {
+        "type": "forge:nbt",
+        "item": "tconstruct:hammer_head",
+        "nbt": { "Material": "tconstruct:slimesteel" }
+      }
     }
   },
   {
     "name": "ranged_materials",
-    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tier": 3 } },
+    "data": "no-load",
+    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:ranged", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
     "icon": {
-      "item": "tconstruct:nahuatl"
+      "item": {
+        "type": "forge:nbt",
+        "item": "tconstruct:bow_limb",
+        "nbt": { "Material": "tconstruct:nahuatl" }
+      }
+    }
+  },
+  {
+    "name": "armor_materials",
+    "data": "no-load",
+    "extraData": { "tconstruct:material_tier": { "type": "tconstruct:armor", "tier": 3, "predicate": { "type": "mantle:inverted", "inverted_type": "mantle:tag", "tag": "tconstruct:book/distant" }}},
+    "icon": {
+      "item": {
+        "type": "forge:nbt",
+        "item": "tconstruct:chestplate_plating",
+        "nbt": { "Material": "tconstruct:obsidian" }
+      }
     }
   },
   {
     "name": "tools",
-    "data": "sections/tools.json",
     "icon": {
       "item": {
         "fabric:type": "fabric:nbt",
@@ -55,6 +76,22 @@
           ]
         }
       }
+    },
+    "data": "sections/tools.json"
+  },
+  {
+    "name": "armor",
+    "icon": {
+      "item": "minecraft:diamond_chestplate"
+    },
+    "condition": {
+      "type": "tconstruct:tag_not_empty",
+      "registry": "minecraft:item",
+      "tag": "tconstruct:modifiable/book_armor/mighty_smelting"
+    },
+    "data": "no-load",
+    "extraData": {
+      "tconstruct:load_tools": { "tag": "tconstruct:modifiable/book_armor/mighty_smelting", "path": "armor", "sort": false }
     }
   },
   {

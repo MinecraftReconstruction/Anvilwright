@@ -1,4 +1,4 @@
-package slimeknights.mantle.data;
+package slimeknights.mantle.data.listener;
 
 import com.google.gson.JsonElement;
 import net.minecraft.resources.ResourceLocation;

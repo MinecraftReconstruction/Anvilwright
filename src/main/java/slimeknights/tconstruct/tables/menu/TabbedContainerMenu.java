@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.shared.inventory.TriggeringMultiModuleContainerMenu;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tables.block.ITabbedBlock;
@@ -131,7 +132,6 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
           // try internal access first
           if (hasItemHandler(world, neighbor, null)) {
             inventoryTE = te;
-            accessDir = null;
             break;
           }
 
@@ -159,6 +159,7 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
    * @param tileEntity  Tile to check
    * @return  True if blacklisted
    */
+  @SuppressWarnings("deprecation")  // your tag utils are overkill
   private static boolean isUsable(BlockEntity tileEntity, Player player) {
     // must not be blacklisted and be usable
     return !RegistryHelper.contains(BuiltInRegistries.BLOCK_ENTITY_TYPE, TinkerTags.TileEntityTypes.CRAFTING_STATION_BLACKLIST, tileEntity.getType())

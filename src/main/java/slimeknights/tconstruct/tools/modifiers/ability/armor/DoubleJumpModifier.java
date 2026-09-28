@@ -18,6 +18,9 @@ public class DoubleJumpModifier extends TotalArmorLevelModifier {
   private static final ResourceLocation JUMPS = TConstruct.getResource("jumps");
   private static final TinkerDataKey<Integer> EXTRA_JUMPS = TConstruct.createKey("extra_jumps");
 
+/** @deprecated use {@link TinkerAttributes#JUMP_COUNT} */
+@Deprecated(forRemoval = true)
+public class DoubleJumpModifier extends Modifier {
   private Component levelOneName = null;
   private Component levelTwoName = null;
 
@@ -43,11 +46,8 @@ public class DoubleJumpModifier extends TotalArmorLevelModifier {
     return super.getDisplayName(level);
   }
 
-  /**
-   * Causes the player to jump an extra time, if possible
-   * @param entity  Entity instance who wishes to jump again
-   * @return  True if the entity jumpped, false if not
-   */
+  /** @deprecated use {@link slimeknights.tconstruct.tools.logic.DoubleJumpHandler#extraJump(Player)} */
+  @Deprecated(forRemoval = true)
   public static boolean extraJump(Player entity) {
     // validate preconditions, no using when swimming, elytra, or on the ground
     if (!entity.onGround() && !entity.onClimbable() && !entity.isInWaterOrBubble()) {

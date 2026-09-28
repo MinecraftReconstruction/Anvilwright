@@ -17,6 +17,18 @@ public class Patterns {
 
   /** Repair icon, not an outline but a button icon */
   public static final Pattern REPAIR = pattern("button_repair");
+  /** Icon with multiple plate armor pieces */
+  public static final Pattern PLATE_ARMOR = pattern("plate_armor");
+  /** Icon with multiple ammo items */
+  public static final Pattern THROWN_AMMO = pattern("thrown_ammo");
+  /** Pattern for generic plating */
+  public static final Pattern PLATING = pattern("plating");
+  /** Pattern for generic arrow parts */
+  public static final Pattern ARROW_PART = pattern("arrow_part");
+  /** Feather for arrows */
+  public static final Pattern FEATHER = pattern("feather");
+  /** Icon for a result slot */
+  public static final Pattern RESULT = pattern("result");
 
   private static Pattern pattern(String name) {
     return new Pattern(TConstruct.MOD_ID, name);

@@ -21,7 +21,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
-import slimeknights.mantle.client.model.data.SinglePropertyData;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
@@ -32,13 +31,12 @@ import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
 import slimeknights.tconstruct.smeltery.block.controller.MelterBlock;
-import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule;
+import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity.ITankInventoryBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.module.MeltingModuleInventory;
+import slimeknights.tconstruct.smeltery.block.entity.module.SolidFuelModule;
 import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 
 public class MelterBlockEntity extends NameableBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity, ChunkUnloadListeningBlockEntity {
 
@@ -67,12 +65,11 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankBlock
 
   /* Heating */
   /** Handles all the melting needs */
-  @Getter
   private final MeltingModuleInventory meltingInventory = new MeltingModuleInventory(this, tank, Config.COMMON.melterOreRate, 3);
 
   /** Fuel handling logic */
   @Getter
-  private final FuelModule fuelModule = new FuelModule(this, () -> Collections.singletonList(this.worldPosition.below()));
+  private final SolidFuelModule fuelModule;
 
   /** Main constructor */
   public MelterBlockEntity(BlockPos pos, BlockState state) {
@@ -83,12 +80,18 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankBlock
   @SuppressWarnings("WeakerAccess")
   protected MelterBlockEntity(BlockEntityType<? extends MelterBlockEntity> type, BlockPos pos, BlockState state) {
     super(type, pos, state, NAME);
+    this.fuelModule = new SolidFuelModule(this, pos.below());
   }
 
   @Nullable
   @Override
   public AbstractContainerMenu createMenu(int id, Inventory inv, Player playerEntity) {
     return new MelterContainerMenu(id, inv, this);
+  }
+
+  @Override
+  public MeltingModuleInventory getItemHandler() {
+    return meltingInventory;
   }
 
   /*
@@ -146,12 +149,13 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankBlock
     if (isFormed()) {
       switch (tick) {
         // tick 0: find fuel
-        case 0:
+        case 0 -> {
           if (!fuelModule.hasFuel() && meltingInventory.canHeat(fuelModule.findFuel(false))) {
             fuelModule.findFuel(true);
           }
+        }
         // tick 2: heat items and consume fuel
-        case 2: {
+        case 2 -> {
           boolean hasFuel = fuelModule.hasFuel();
           // update the active state
           if (state.getValue(ControllerBlock.ACTIVE) != hasFuel) {
@@ -165,15 +169,23 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankBlock
           }
           // heat items
           if (hasFuel) {
-            meltingInventory.heatItems(fuelModule.getTemperature());
+            meltingInventory.heatItems(fuelModule.getTemperature(), fuelModule.getRate());
             fuelModule.decreaseFuel(1);
           } else {
             meltingInventory.coolItems();
           }
         }
       }
-      tick = (tick + 1) % 4;
+    } else if (tick == 2) {
+      // if we have fuel, lose fuel
+      if (fuelModule.hasFuel()) {
+        fuelModule.decreaseFuel(1);
+      } else {
+        // if we lack fuel, cool items
+        meltingInventory.coolItems();
+      }
     }
+    tick = (tick + 1) % 4;
   }
 
 

@@ -18,6 +18,7 @@ import slimeknights.tconstruct.library.materials.json.MaterialTraitsJson;
 import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.utils.JsonUtils;
 import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.Arrays;
@@ -45,9 +46,9 @@ import java.util.stream.Collectors;
 @Log4j2
 public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.Builder> implements IdentifiableResourceReloadListener {
   public static final String FOLDER = "tinkering/materials/traits";
-  private static final Gson GSON = (new GsonBuilder())
+  public static final Gson GSON = (new GsonBuilder())
     .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(ModifierEntry.class, ModifierEntry.SERIALIZER)
+    .registerTypeAdapter(ModifierEntry.class, ModifierEntry.OPTIONAL_LOADABLE)
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();
@@ -139,22 +140,24 @@ public class MaterialTraitsManager extends MergingJsonDataLoader<MaterialTraits.
     for (Entry<MaterialStatsId,List<ModifierEntry>> entry : json.getPerStat().entrySet()) {
       builder.setTraits(entry.getKey(), entry.getValue());
     }
-    builder.setDefaultTraits(json.getDefaultTraits());
   }
 
   @Override
   protected void finishLoad(Map<ResourceLocation,MaterialTraits.Builder> map, ResourceManager manager) {
     ImmutableMap.Builder<MaterialId,MaterialTraits> builder = ImmutableMap.builder();
-    for (Entry<ResourceLocation,MaterialTraits.Builder> entry : map.entrySet()) {
+    map.entrySet().stream().sorted(Entry.comparingByKey()).forEach(entry -> {
       MaterialTraits traits = entry.getValue().build(statTypeFallbacks);
       builder.put(new MaterialId(entry.getKey()), traits);
-      log.debug("Loaded traits for material '{}': \n\tDefault - {}{}",
-                entry.getKey(),
-                Arrays.toString(traits.getDefaultTraits().toArray()),
-                Util.toIndentedStringList(traits.getTraitsPerStats().entrySet().stream()
-                                                .map(entry2 -> String.format("%s - %s", entry2.getKey(), Arrays.toString(entry2.getValue().toArray())))
-                                                .collect(Collectors.toList())));
-    }
+      if (log.isDebugEnabled() && JsonUtils.debugLogResourceValues()) {
+        log.debug("Loaded traits for material '{}': \n\tDefault - {}{}",
+          entry.getKey(),
+          Arrays.toString(traits.getDefaultTraits().toArray()),
+          Util.toIndentedStringList(traits.getTraitsPerStats().entrySet().stream()
+            .sorted(Entry.comparingByKey())
+            .map(entry2 -> String.format("%s - %s", entry2.getKey(), Arrays.toString(entry2.getValue().toArray())))
+            .collect(Collectors.toList())));
+      }
+    });
     materialTraits = builder.build();
     onLoaded.run();
   }

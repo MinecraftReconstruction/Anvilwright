@@ -27,14 +27,13 @@ import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
 import slimeknights.tconstruct.smeltery.block.controller.MelterBlock;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.block.entity.module.FuelModule;
+import slimeknights.tconstruct.smeltery.block.entity.module.SolidFuelModule;
 import slimeknights.tconstruct.smeltery.block.entity.module.alloying.MixerAlloyTank;
 import slimeknights.tconstruct.smeltery.block.entity.module.alloying.SingleAlloyingModule;
 import slimeknights.tconstruct.smeltery.menu.AlloyerContainerMenu;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 
 /**
  * Dedicated alloying block
@@ -59,7 +58,7 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
   private final SingleAlloyingModule alloyingModule = new SingleAlloyingModule(this, alloyTank);
   /** Fuel handling logic */
   @Getter
-  private final FuelModule fuelModule = new FuelModule(this, () -> Collections.singletonList(this.worldPosition.below()));
+  private final SolidFuelModule fuelModule;
 
   /** Last comparator strength to reduce block updates */
   @Getter @Setter
@@ -74,6 +73,7 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
 
   protected AlloyerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
     super(type, pos, state, NAME);
+    this.fuelModule = new SolidFuelModule(this, pos.below());
   }
 
   /*
@@ -99,40 +99,41 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
 
   /** Handles server tick */
   private void tick(Level level, BlockPos pos, BlockState state) {
-    if (!isFormed()) {
-      return;
-    }
-
-    switch (tick) {
-      // tick 0: find fuel
-      case 0 -> {
-        alloyTank.setTemperature(fuelModule.findFuel(false));
-        if (!fuelModule.hasFuel() && alloyingModule.canAlloy()) {
-          fuelModule.findFuel(true);
-        }
-      }
-      // tick 2: alloy alloys and consume fuel
-      case 2 -> {
-        boolean hasFuel = fuelModule.hasFuel();
-
-        // update state for new fuel state
-        if (state.getValue(ControllerBlock.ACTIVE) != hasFuel) {
-          level.setBlockAndUpdate(pos, state.setValue(ControllerBlock.ACTIVE, hasFuel));
-          // update the heater below
-          BlockPos down = pos.below();
-          BlockState downState = level.getBlockState(down);
-          if (downState.is(TinkerTags.Blocks.FUEL_TANKS) && downState.hasProperty(ControllerBlock.ACTIVE) && downState.getValue(ControllerBlock.ACTIVE) != hasFuel) {
-            level.setBlockAndUpdate(down, downState.setValue(ControllerBlock.ACTIVE, hasFuel));
+    if (isFormed()) {
+      switch (tick) {
+        // tick 0: find fuel
+        case 0 -> {
+          alloyTank.setTemperature(fuelModule.findFuel(false));
+          if (!fuelModule.hasFuel() && alloyingModule.canAlloy()) {
+            fuelModule.findFuel(true);
           }
         }
+        // tick 2: alloy alloys and consume fuel
+        case 2 -> {
+          boolean hasFuel = fuelModule.hasFuel();
 
-        // actual alloying
-        if (hasFuel) {
-          alloyTank.setTemperature(fuelModule.getTemperature());
-          alloyingModule.doAlloy();
-          fuelModule.decreaseFuel(1);
+          // update state for new fuel state
+          if (state.getValue(ControllerBlock.ACTIVE) != hasFuel) {
+            level.setBlockAndUpdate(pos, state.setValue(ControllerBlock.ACTIVE, hasFuel));
+            // update the heater below
+            BlockPos down = pos.below();
+            BlockState downState = level.getBlockState(down);
+            if (downState.is(TinkerTags.Blocks.FUEL_TANKS) && downState.hasProperty(ControllerBlock.ACTIVE) && downState.getValue(ControllerBlock.ACTIVE) != hasFuel) {
+              level.setBlockAndUpdate(down, downState.setValue(ControllerBlock.ACTIVE, hasFuel));
+            }
+          }
+
+          // actual alloying
+          if (hasFuel) {
+            alloyTank.setTemperature(fuelModule.getTemperature());
+            alloyingModule.doAlloy();
+            fuelModule.decreaseFuel(1);
+          }
         }
       }
+    // if no tank, drain the excess leftover fuel from the last operation
+    } else if (tick == 2 && fuelModule.hasFuel()) {
+      fuelModule.decreaseFuel(1);
     }
     tick = (tick + 1) % 4;
   }

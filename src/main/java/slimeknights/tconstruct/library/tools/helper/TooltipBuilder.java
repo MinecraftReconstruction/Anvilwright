@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -11,17 +12,18 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Tier;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
 import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.definition.module.mining.MiningTierToolHook;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.INumericToolStat;
 import slimeknights.tconstruct.library.tools.stat.IToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.Util;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -44,7 +46,7 @@ public class TooltipBuilder {
   @Getter
   private final List<Component> tooltips;
 
-  public TooltipBuilder(ToolStack tool) {
+  public TooltipBuilder(IToolStackView tool) {
     this.tool = tool;
     this.tooltips = new ArrayList<>();
   }
@@ -83,8 +85,7 @@ public class TooltipBuilder {
    * @return the tooltip builder
    */
   public TooltipBuilder addTier() {
-    Tier tier = tool.getDefinition().getData().getHarvestLogic().getTier(tool);
-    this.tooltips.add(ToolStats.HARVEST_TIER.formatValue(tier));
+    this.tooltips.add(ToolStats.HARVEST_TIER.formatValue(MiningTierToolHook.getTier(tool)));
     return this;
   }
 
@@ -183,8 +184,8 @@ public class TooltipBuilder {
    */
   public TooltipBuilder addFreeSlots(SlotType slotType) {
     int slots = tool.getFreeSlots(slotType);
-    if (slots > 0) {
-      this.tooltips.add(IToolStat.formatNumber(slotType.getPrefix(), slotType.getColor(), slots));
+    if (slots != 0) {
+      this.tooltips.add(slotType.format(slots));
     }
     return this;
   }
@@ -201,15 +202,27 @@ public class TooltipBuilder {
     return this;
   }
 
+  /** @deprecated use {@link #addModifierInfo(ModifierTooltip, RegistryAccess)} */
+  @SuppressWarnings("removal")
+  @Deprecated(forRemoval = true)
+  public TooltipBuilder addModifierInfo(boolean advanced, @Nullable RegistryAccess access) {
+    for (ModifierEntry entry : tool.getModifierList()) {
+      if (entry.getModifier().shouldDisplay(advanced)) {
+        this.tooltips.add(entry.getModifier().getDisplayName(tool, entry, access));
+      }
+    }
+    return this;
+  }
+
   /**
    * Adds the modifier information to the tooltip
    *
    * @return the tooltip builder
    */
-  public TooltipBuilder addModifierInfo(boolean advanced) {
+  public TooltipBuilder addModifierInfo(ModifierTooltip context, @Nullable RegistryAccess access) {
     for (ModifierEntry entry : tool.getModifierList()) {
-      if (entry.getModifier().shouldDisplay(advanced)) {
-        this.tooltips.add(entry.getModifier().getDisplayName(tool, entry.getLevel()));
+      if (entry.getModifier().shouldDisplay(context)) {
+        this.tooltips.add(entry.getModifier().getDisplayName(tool, entry, access));
       }
     }
     return this;

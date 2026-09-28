@@ -43,12 +43,36 @@ public class EntityMeltingModule {
   /** Function that returns the bounds to check for entities */
   private final Supplier<AABB> bounds;
 
+
   @Nullable
   private EntityMeltingRecipe lastRecipe;
 
   /** Gets a nonnull world instance from the parent */
   private Level getLevel() {
     return Objects.requireNonNull(parent.getLevel(), "Parent tile entity has null world");
+  }
+
+
+  /* Damage sources */
+
+  @Nullable
+  private DamageSource smelteryMagic = null;
+  /** Damage source for attacking fire immune mobs */
+  private DamageSource smelteryMagic() {
+    if (smelteryMagic == null) {
+      smelteryMagic = TinkerDamageTypes.source(getLevel().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC);
+    }
+    return smelteryMagic;
+  }
+
+  @Nullable
+  private DamageSource smelteryHeat = null;
+  /** Damage source for attacking regular mobs */
+  private DamageSource smelteryHeat() {
+    if (smelteryHeat == null) {
+      smelteryHeat = TinkerDamageTypes.source(getLevel().registryAccess(), TinkerDamageTypes.SMELTERY_HEAT);
+    }
+    return smelteryHeat;
   }
 
   /**
@@ -75,7 +99,7 @@ public class EntityMeltingModule {
    */
   public static FluidStack getDefaultFluid() {
     // TODO: consider a way to put this in a recipe
-    return new FluidStack(TinkerFluids.blood.get(), FluidValues.SLIMEBALL / 5);
+    return new FluidStack(TinkerFluids.liquidSoul.get(), FluidValues.GLASS_PANE / 5);
   }
 
   /**
@@ -87,7 +111,7 @@ public class EntityMeltingModule {
     // fire based mobs are absorbed instead of damaged
     return !entity.isInvulnerableTo(entity.fireImmune() ? TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC) : TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_DAMAGE))
            // have to special case players because for some dumb reason creative players do not return true to invulnerable to
-           && !(entity instanceof Player && ((Player)entity).getAbilities().invulnerable)
+           && !(entity instanceof Player player && player.getAbilities().invulnerable)
            // also have to special case fire resistance, so a blaze with fire resistance is immune to the smeltery
            && !entity.hasEffect(MobEffects.FIRE_RESISTANCE);
   }
@@ -123,8 +147,8 @@ public class EntityMeltingModule {
 
       // only can melt living, ensure its not immune to our damage
       // if canMelt is already found as false, skip instance checks, we only care about items now
-      // if the type is hidden, skip as well, I suppose thats your blacklist if you must have one
-      else if (canMelt != Boolean.FALSE && !type.is(EntityTypes.MELTING_HIDE) && entity instanceof LivingEntity && canMeltEntity((LivingEntity)entity)) {
+      // if its blacklisted, skip as well
+      else if (canMelt != Boolean.FALSE && !type.is(EntityTypes.MELTING_BLACKLIST) && entity instanceof LivingEntity living && canMeltEntity(living)) {
         // only fetch boolean once, its not the fastest as it tries to consume fuel
         if (canMelt == null) canMelt = canMeltEntities.getAsBoolean();
 
@@ -135,7 +159,7 @@ public class EntityMeltingModule {
           int damage;
           EntityMeltingRecipe recipe = findRecipe(entity.getType());
           if (recipe != null) {
-            fluid = recipe.getOutput((LivingEntity) entity);
+            fluid = recipe.getOutput(living);
             damage = recipe.getDamage();
           } else {
             fluid = getDefaultFluid();

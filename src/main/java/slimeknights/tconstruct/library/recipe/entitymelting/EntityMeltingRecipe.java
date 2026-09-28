@@ -6,45 +6,40 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.util.LazySpawnEggItem;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.container.IEmptyContainer;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
-import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Recipe to melt an entity into a fluid
  */
 @RequiredArgsConstructor
 public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer> {
+  public static final RecordLoadable<EntityMeltingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    EntityIngredient.LOADABLE.requiredField("entity", r -> r.ingredient),
+    FluidOutput.Loadable.REQUIRED.requiredField("result", r -> r.output),
+    IntLoadable.FROM_ONE.defaultField("damage", 2, true, r -> r.damage),
+    EntityMeltingRecipe::new);
+
   @Getter
   private final ResourceLocation id;
-  private final EntityIngredient ingredient;
   @Getter
-  private final FluidStack output;
+  private final EntityIngredient ingredient;
+  private final FluidOutput output;
   @Getter
   private final int damage;
-
-  @SuppressWarnings("rawtypes")
-  private List<EntityType> entityInputs;
-  private List<ItemStack> itemInputs;
 
   /**
    * Checks if the recipe matches the given type
@@ -53,6 +48,11 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
    */
   public boolean matches(EntityType<?> type) {
     return ingredient.test(type);
+  }
+
+  /** Gets the non-entity sensitive recipe result */
+  public FluidStack getOutput() {
+    return output.get();
   }
 
   /**

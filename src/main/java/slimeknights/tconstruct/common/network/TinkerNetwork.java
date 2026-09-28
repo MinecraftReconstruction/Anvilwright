@@ -19,7 +19,7 @@ import slimeknights.tconstruct.library.materials.definition.UpdateMaterialsPacke
 import slimeknights.tconstruct.library.materials.stats.UpdateMaterialStatsPacket;
 import slimeknights.tconstruct.library.materials.traits.UpdateMaterialTraitsPacket;
 import slimeknights.tconstruct.library.modifiers.UpdateModifiersPacket;
-import slimeknights.tconstruct.library.modifiers.spilling.UpdateSpillingFluidsPacket;
+import slimeknights.tconstruct.library.modifiers.fluid.UpdateFluidEffectsPacket;
 import slimeknights.tconstruct.library.tools.definition.UpdateToolDefinitionDataPacket;
 import slimeknights.tconstruct.library.tools.layout.UpdateTinkerSlotLayoutsPacket;
 import slimeknights.tconstruct.shared.network.GeneratePartTexturesPacket;
@@ -38,7 +38,10 @@ import slimeknights.tconstruct.tables.network.UpdateStationScreenPacket;
 import slimeknights.tconstruct.tables.network.UpdateTinkerStationRecipePacket;
 import slimeknights.tconstruct.tools.network.EntityMovementChangePacket;
 import slimeknights.tconstruct.tools.network.InteractWithAirPacket;
+import slimeknights.tconstruct.tools.network.PushBlockRowPacket;
+import slimeknights.tconstruct.tools.network.SyncProjectileModifiersPacket;
 import slimeknights.tconstruct.tools.network.TinkerControlPacket;
+import slimeknights.tconstruct.tools.network.ToolContainerFluidUpdatePacket;
 
 import javax.annotation.Nullable;
 
@@ -50,8 +53,16 @@ import javax.annotation.Nullable;
 public class TinkerNetwork extends NetworkWrapper {
   private static TinkerNetwork instance = null;
 
+  /*
+   * Network versions:
+   * 1: 3.10.1 and before
+   * 2: 3.10.2 - new material stat type; item removal
+   * 3: 3.11.2+ - lost track of how much changed but its a lot
+   * 4: 3.12.0 - many internal changes with slimesuit and alike
+   * 5: 3.12.1 - new recipe formats
+   */
   private TinkerNetwork() {
-    super(TConstruct.getResource("network"));
+    super(TConstruct.getResource("network"), "5");
   }
 
   /** Gets the instance of the network */
@@ -98,12 +109,15 @@ public class TinkerNetwork extends NetworkWrapper {
     instance.registerPacket(UpdateMaterialStatsPacket.class, UpdateMaterialStatsPacket::new, NetworkDirection.PLAY_TO_CLIENT);
     instance.registerPacket(UpdateMaterialTraitsPacket.class, UpdateMaterialTraitsPacket::new, NetworkDirection.PLAY_TO_CLIENT);
     instance.registerPacket(UpdateToolDefinitionDataPacket.class, UpdateToolDefinitionDataPacket::new, NetworkDirection.PLAY_TO_CLIENT);
+    instance.registerPacket(ToolContainerFluidUpdatePacket.class, ToolContainerFluidUpdatePacket::new, NetworkDirection.PLAY_TO_CLIENT);
+    instance.registerPacket(SyncProjectileModifiersPacket.class, SyncProjectileModifiersPacket::new, NetworkDirection.PLAY_TO_CLIENT);
 
     // modifiers
     instance.registerPacket(TinkerControlPacket.class, TinkerControlPacket::read, NetworkDirection.PLAY_TO_SERVER);
     instance.registerPacket(InteractWithAirPacket.class, InteractWithAirPacket::read, NetworkDirection.PLAY_TO_SERVER);
     instance.registerPacket(UpdateModifiersPacket.class, UpdateModifiersPacket::new, NetworkDirection.PLAY_TO_CLIENT);
-    instance.registerPacket(UpdateSpillingFluidsPacket.class, UpdateSpillingFluidsPacket::new, NetworkDirection.PLAY_TO_CLIENT);
+    instance.registerPacket(UpdateFluidEffectsPacket.class, UpdateFluidEffectsPacket::decode, NetworkDirection.PLAY_TO_CLIENT);
+    instance.registerPacket(PushBlockRowPacket.class, PushBlockRowPacket::new, NetworkDirection.PLAY_TO_CLIENT);
 
     // smeltery
     instance.registerPacket(FluidUpdatePacket.class, FluidUpdatePacket::new, NetworkDirection.PLAY_TO_CLIENT);

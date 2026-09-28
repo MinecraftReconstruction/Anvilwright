@@ -29,6 +29,9 @@ public class EntityModifierCapability implements EntityComponentInitializer {
 
     @Override
     public void setModifiers(ModifierNBT nbt) {}
+
+    @Override
+    public void addModifiers(ModifierNBT nbt) {}
   };
 
   /* Static helpers */
@@ -40,6 +43,11 @@ public class EntityModifierCapability implements EntityComponentInitializer {
   private static final ResourceLocation ID = TConstruct.getResource("modifiers");
   /** Capability type */
   public static final ComponentKey<EntityModifiers> CAPABILITY = ComponentRegistry.getOrCreate(ID, EntityModifiers.class);
+
+  /** Gets the capability for the entity or an empty instance if missing */
+  public static EntityModifiers getCapability(Entity entity) {
+    return entity.getCapability(CAPABILITY).orElse(EMPTY);
+  }
 
   /** Gets the data or an empty instance if missing */
   public static ModifierNBT getOrEmpty(Entity entity) {
@@ -88,5 +96,15 @@ public class EntityModifierCapability implements EntityComponentInitializer {
 
     /** Sets the stored modifiers */
     void setModifiers(ModifierNBT nbt);
+
+    /** Adds additional modifiers to the stored modifiers */
+    default void addModifiers(ModifierNBT nbt) {
+      ModifierNBT existing = getModifiers();
+      if (existing.isEmpty()) {
+        setModifiers(nbt);
+      } else {
+        setModifiers(ModifierNBT.builder().add(existing).add(nbt).build());
+      }
+    }
   }
 }

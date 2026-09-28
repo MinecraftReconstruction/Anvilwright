@@ -6,13 +6,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import slimeknights.tconstruct.common.TagFixture;
 import slimeknights.tconstruct.fixture.MaterialFixture;
+import slimeknights.tconstruct.fixture.MaterialItemFixture;
 import slimeknights.tconstruct.fixture.ToolDefinitionFixture;
 import slimeknights.tconstruct.library.materials.MaterialRegistryExtension;
+import slimeknights.tconstruct.library.modifiers.ModifierFixture;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.test.BaseMcTest;
+import slimeknights.tconstruct.test.TestHelper;
 
 @ExtendWith(MaterialRegistryExtension.class)
 public abstract class ToolItemTest extends BaseMcTest {
@@ -22,14 +26,15 @@ public abstract class ToolItemTest extends BaseMcTest {
 
   @BeforeAll
   synchronized static void beforeAllToolCore() {
+    MaterialItemFixture.init();
+    ModifierFixture.init();
+    TagFixture.init();
     if (tool == null) {
-      Item.Properties properties = new Item.Properties()
-        //.addToolType(ToolType.PICKAXE, 1)
-        .stacksTo(1);
-      tool = new ModifiableItem(properties, ToolDefinitionFixture.getStandardToolDefinition());
-      tool.setRegistryName("test:toolcore");
-      ForgeRegistries.ITEMS.register(tool);
+      tool = new ModifiableItem(new Item.Properties().stacksTo(1), ToolDefinitionFixture.getStandardToolDefinition());
+      ForgeRegistries.ITEMS.register(TestHelper.id("toolcore"), tool);
     }
+    setupTierSorting();
+    // ModifierStatsBuilder.disableFilter();
   }
 
   @BeforeEach

@@ -1,30 +1,71 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:attack_damage",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.15,
       "operation": "multiply_base",
-      "value": 0.1
+      "stat": "tconstruct:mining_speed"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:projectile_damage",
-      "operation": "multiply_base",
-      "value": 0.1
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.1,
+      "operation": "add",
+      "stat": "tconstruct:accuracy"
+    },
+    {
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.15,
+      "operation": "add",
+      "stat": "tconstruct:knockback_resistance"
     },
     {
       "type": "tconstruct:attribute",
-      "unique": "tconstruct.modifier.heavy",
-      "attribute": "minecraft:generic.movement_speed",
+      "attribute": "minecraft:generic.knockback_resistance",
+      "each_level": 0.1,
       "operation": "multiply_base",
-      "amount": -0.1,
       "slots": [
         "mainhand",
-        "offhand"
+        "offhand",
+        "feet",
+        "legs",
+        "chest",
+        "head"
+      ],
+      "tool": {
+        "type": "mantle:inverted",
+        "inverted_type": "mantle:tag",
+        "tag": "tconstruct:modifiable/armor"
+      }
+    },
+    {
+      "type": "tconstruct:attribute",
+      "attribute": "minecraft:generic.movement_speed",
+      "each_level": -0.1,
+      "operation": "multiply_base",
+      "slots": [
+        "mainhand",
+        "offhand",
+        "feet",
+        "legs",
+        "chest",
+        "head"
       ]
+    },
+    {
+      "type": "tconstruct:attribute",
+      "attribute": "forge:entity_gravity",
+      "each_level": 0.05,
+      "operation": "multiply_total",
+      "slots": [
+        "mainhand",
+        "offhand",
+        "feet",
+        "legs",
+        "chest",
+        "head"
+      ],
+      "tooltip_style": "percent"
     }
   ]
 }

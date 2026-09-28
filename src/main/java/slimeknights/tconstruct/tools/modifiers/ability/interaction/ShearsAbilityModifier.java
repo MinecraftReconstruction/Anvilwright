@@ -6,45 +6,50 @@ import io.github.fabricators_of_create.porting_lib.core.event.BaseEvent;
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.ToolShearEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.ToolActionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.impl.InteractionModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
-import slimeknights.tconstruct.library.tools.definition.module.ToolModuleHooks;
-import slimeknights.tconstruct.library.tools.definition.module.interaction.DualOptionInteraction;
-import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.behavior.ShowOffhandModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.modules.interaction.ShearsModule;
 
+import javax.annotation.Nullable;
+
+/** @deprecated use {@link ShearsModule} */
+@Deprecated(forRemoval = true)
 @RequiredArgsConstructor
-public class ShearsAbilityModifier extends InteractionModifier.NoLevels implements EntityInteractionModifierHook {
-  private final int range;
+public class ShearsAbilityModifier extends NoLevelsModifier implements EntityInteractionModifierHook, ToolActionModifierHook {
+  private final ShearsModule shears;
   @Getter
   private final int priority;
 
-  @Override
-  protected void registerHooks(Builder hookBuilder) {
-    super.registerHooks(hookBuilder);
-    hookBuilder.addHook(this, TinkerHooks.ENTITY_INTERACT);
+  public ShearsAbilityModifier(int range, int priority) {
+    this.shears = new ShearsModule(range, 0, 1);
+    this.priority = priority;
   }
 
   @Override
-  public Component getDisplayName(IToolStackView tool, int level) {
-    return DualOptionInteraction.formatModifierName(tool, this, super.getDisplayName(tool, level));
+  protected void registerHooks(Builder hookBuilder) {
+    hookBuilder.addModule(ShowOffhandModule.DISALLOW_BROKEN);
+    hookBuilder.addHook(this, ModifierHooks.ENTITY_INTERACT, ModifierHooks.TOOL_ACTION);
+  }
+
+  @Override
+  public Component getDisplayName(IToolStackView tool, ModifierEntry entry, @Nullable RegistryAccess access) {
+    return InteractionSource.formatModifierName(tool, this, super.getDisplayName(tool, entry, access));
   }
 
   @Override
@@ -58,17 +63,15 @@ public class ShearsAbilityModifier extends InteractionModifier.NoLevels implemen
    * @param player the current player
    * @param hand the given hand the tool is in
    */
+  @Deprecated(forRemoval = true)
   protected void swingTool(Player player, InteractionHand hand) {
     player.swing(hand);
     player.sweepAttack();
   }
 
   @Override
-  public boolean canPerformAction(IToolStackView tool, int level, ToolAction toolAction) {
-    if (isShears(tool)) {
-      return toolAction == ToolActions.SHEARS_DIG || toolAction == ToolActions.SHEARS_HARVEST || toolAction == ToolActions.SHEARS_CARVE || toolAction == ToolActions.SHEARS_DISARM;
-    }
-    return false;
+  public boolean canPerformAction(IToolStackView tool, ModifierEntry modifier, ToolAction toolAction) {
+    return isShears(tool) && shears.canPerformAction(tool, modifier, toolAction);
   }
 
   /**
@@ -82,44 +85,9 @@ public class ShearsAbilityModifier extends InteractionModifier.NoLevels implemen
 
   @Override
   public InteractionResult beforeEntityUse(IToolStackView tool, ModifierEntry modifier, Player player, Entity target, InteractionHand hand, InteractionSource source) {
-    if (tool.isBroken() || !tool.getDefinitionData().getModule(ToolModuleHooks.INTERACTION).canInteract(tool, modifier.getId(), source)) {
-      return InteractionResult.PASS;
+    if (isShears(tool)) {
+      return shears.beforeEntityUse(tool, modifier, player, target, hand, source);
     }
-    EquipmentSlot slotType = source.getSlot(hand);
-    ItemStack stack = player.getItemBySlot(slotType);
-
-    // use looting instead of fortune, as that is our hook with entity access
-    // modifier can always use tags or the nullable parameter to distinguish if needed
-    int looting = ModifierUtil.getLootingLevel(tool, player, target, null);
-    looting = ModifierUtil.getLeggingsLootingLevel(player, target, null, looting);
-    Level world = player.getCommandSenderWorld();
-    if (isShears(tool) && shearEntity(stack, tool, world, player, target, looting)) {
-      boolean broken = ToolDamageUtil.damageAnimated(tool, 1, player, slotType);
-      this.swingTool(player, hand);
-      runShearHook(tool, player, target, true);
-
-      // AOE shearing
-      if (!broken) {
-        // if expanded, shear all in range
-        int expanded = range + tool.getModifierLevel(TinkerModifiers.expanded.getId());
-        if (expanded > 0) {
-          for (LivingEntity aoeTarget : player.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(expanded, 0.25D, expanded))) {
-            if (aoeTarget != player && aoeTarget != target && (!(aoeTarget instanceof ArmorStand) || !((ArmorStand)aoeTarget).isMarker())) {
-              if (shearEntity(stack, tool, world, player, aoeTarget, looting)) {
-                broken = ToolDamageUtil.damageAnimated(tool, 1, player, slotType);
-                runShearHook(tool, player, aoeTarget, false);
-                if (broken) {
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      return InteractionResult.SUCCESS;
-    }
-
     return InteractionResult.PASS;
   }
 

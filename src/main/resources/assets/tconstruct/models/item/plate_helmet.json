@@ -2,9 +2,18 @@
   "loader": "tconstruct:tool",
   "parent": "forge:item/default",
   "textures": {
-    "tool":   "tconstruct:item/tool/armor/plate/helmet",
-    "broken": "tconstruct:item/tool/armor/plate/helmet_broken"
+    "plating": "tconstruct:item/tool/armor/plate/helmet/plating",
+    "maille":  "tconstruct:item/tool/armor/plate/helmet/maille"
   },
-  "modifier_roots": [ "tconstruct:item/tool/armor/plate/helmet_modifiers/" ],
-  "first_modifiers": [ "tconstruct:embellishment", "tconstruct:golden" ]
+  "modifier_maps": ["tconstruct:plate/helmet", "tconstruct:armor/helmet"],
+  "parts": [
+    { "name": "plating", "index": 0 },
+    { "name": "maille",  "index": 1 }
+  ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tconstruct:item/armor/plate/helmet_broken"
+    }
+  ]
 }

@@ -1,44 +1,62 @@
 package slimeknights.tconstruct.tables.recipe;
 
-import com.google.gson.JsonObject;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.helper.AbstractRecipeSerializer;
-import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IncrementalModifierRecipe;
+import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayToolTinkering;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tables.TinkerTables;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.List;
 
-@RequiredArgsConstructor
-public class TinkerStationDamagingRecipe implements ITinkerStationRecipe {
-  private static final ValidatedResult BROKEN = ValidatedResult.failure(TConstruct.makeTranslationKey("recipe", "damaging.broken"));
+/** Recipe for damaging a tool in the tinker station. */
+public class TinkerStationDamagingRecipe implements ITinkerStationRecipe, IDisplayToolTinkering {
+  public static final RecordLoadable<TinkerStationDamagingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", r -> r.ingredient),
+    IntLoadable.FROM_ONE.requiredField("damage_amount", r -> r.damageAmount),
+    TinkerStationDamagingRecipe::new);
+  private static final RecipeResult<LazyToolStack> BROKEN = RecipeResult.failure(TConstruct.makeTranslationKey("recipe", "damaging.broken"));
+  private static final Component TITLE = TConstruct.makeTranslation("recipe", "tool_damaging");
+  private static final Component TOOLTIP = TConstruct.makeTranslation("recipe", "tool_damaging.tooltip");
+  private static final String KEY_AMOUNT = TConstruct.makeTranslationKey("recipe", "modifier.amount");
 
   @Getter
   private final ResourceLocation id;
   private final Ingredient ingredient;
   private final int damageAmount;
+  private final Component amountText;
+
+  public TinkerStationDamagingRecipe(ResourceLocation id, Ingredient ingredient, int damageAmount) {
+    this.id = id;
+    this.ingredient = ingredient;
+    this.damageAmount = damageAmount;
+    this.amountText = Component.translatable(KEY_AMOUNT, damageAmount);
+  }
 
   @Override
   public boolean matches(ITinkerStationContainer inv, Level world) {
@@ -50,15 +68,17 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe {
   }
 
   @Override
-  public ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    if (ToolDamageUtil.isBroken(inv.getTinkerableStack())) {
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    ToolStack tool = inv.getTinkerable();
+    if (tool.isBroken()) {
       return BROKEN;
     }
     // simply damage the tool directly
-    ToolStack tool = ToolStack.copyFrom(inv.getTinkerableStack());
+    tool = tool.copy();
     int maxDamage = IncrementalModifierRecipe.getAvailableAmount(inv, ingredient, damageAmount);
-    ToolDamageUtil.directDamage(tool, maxDamage, null, inv.getTinkerableStack());
-    return ValidatedResult.success(tool.createStack());
+    ItemStack tinkerable = inv.getTinkerableStack();
+    ToolDamageUtil.directDamage(tool, maxDamage, null, tinkerable);
+    return LazyToolStack.successCopy(tool, 1, tinkerable);
   }
 
   @Override
@@ -67,17 +87,10 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe {
   }
 
   @Override
-  public void updateInputs(ItemStack result, IMutableTinkerStationContainer inv, boolean isServer) {
+  public void updateInputs(LazyToolStack result, IMutableTinkerStationContainer inv, boolean isServer) {
     // how much did we actually consume?
-    int damageTaken = ToolStack.from(result).getDamage() - ToolStack.from(inv.getTinkerableStack()).getDamage();
+    int damageTaken = result.getTool().getDamage() - inv.getTinkerable().getDamage();
     IncrementalModifierRecipe.updateInputs(inv, ingredient, damageTaken, damageAmount, ItemStack.EMPTY);
-  }
-
-  /** @deprecated Use {@link #getValidatedResult(ITinkerStationContainer)} */
-  @Deprecated
-  @Override
-  public ItemStack getResultItem(RegistryAccess registryAccess) {
-    return ItemStack.EMPTY;
   }
 
   @Override
@@ -85,69 +98,94 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe {
     return TinkerTables.tinkerStationDamagingSerializer.get();
   }
 
-  /** Serializer logic */
-  public static class Serializer extends AbstractRecipeSerializer<TinkerStationDamagingRecipe> {
-    @Override
-    public TinkerStationDamagingRecipe fromJson(ResourceLocation id, JsonObject json) {
-      Ingredient ingredient = Ingredient.fromJson(JsonHelper.getElement(json, "ingredient"));
-      int restoreAmount = GsonHelper.getAsInt(json, "damage_amount");
-      return new TinkerStationDamagingRecipe(id, ingredient, restoreAmount);
-    }
 
-    @Nullable
-    @Override
-    public TinkerStationDamagingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-      Ingredient ingredient = Ingredient.fromNetwork(buffer);
-      int damageAmount = buffer.readVarInt();
-      return new TinkerStationDamagingRecipe(id, ingredient, damageAmount);
-    }
+  /* JEI */
 
-    @Override
-    public void toNetwork(FriendlyByteBuf buffer, TinkerStationDamagingRecipe recipe) {
-      recipe.ingredient.toNetwork(buffer);
-      buffer.writeVarInt(recipe.damageAmount);
-    }
+  /** Tools for display in JEI */
+  private List<ItemStack> toolWithoutModifier, toolWithModifier;
+
+  @Override
+  public ResourceLocation getRecipeId() {
+    return getId();
   }
 
-  /** Builder for datagen */
-  @RequiredArgsConstructor(staticName = "damage")
-  public static class Builder extends AbstractRecipeBuilder<Builder> {
-    private final Ingredient ingredient;
-    private final int damageAmount;
+  @Override
+  public Component getTitle() {
+    return TITLE;
+  }
 
-    @Override
-    public void save(Consumer<FinishedRecipe> consumer) {
-      ItemStack[] stacks = ingredient.getItems();
-      if (stacks.length == 0) {
-        throw new IllegalStateException("Empty ingredient not allowed");
-      }
-      save(consumer, BuiltInRegistries.ITEM.getKey(stacks[0].getItem()));
+  @Override
+  public Component getTooltip() {
+    return TOOLTIP;
+  }
+
+  @Override
+  public boolean isToolCatalyst() {
+    return true;
+  }
+
+  @Override
+  public Component getVariant() {
+    return amountText;
+  }
+
+  @Override
+  public int getMaxToolSize() {
+    return 1;
+  }
+
+  @Override
+  public int getInputCount() {
+    return 1;
+  }
+
+  @Override
+  public List<ItemStack> getDisplayItems(int slot) {
+    return slot == 0 ? List.of(ingredient.getItems()) : List.of();
+  }
+
+  @Override
+  public List<ItemStack> getToolWithoutModifier() {
+    if (toolWithoutModifier == null) {
+      // set durability on each tool to 1000, covers most instances
+      CompoundTag stats = StatsNBT.builder().set(ToolStats.DURABILITY, 1000).build().serializeToNBT();
+      toolWithoutModifier = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.DURABILITY)
+        .map(item -> {
+          if (item instanceof IModifiableDisplay modifiable) {
+            ItemStack stack = modifiable.getRenderTool().copy();
+            stack.getOrCreateTag().put(ToolStack.TAG_STATS, stats);
+            return stack;
+          }
+          return ItemStack.EMPTY;
+        })
+        .filter(stack -> !stack.isEmpty())
+        .toList();
     }
+    return toolWithoutModifier;
+  }
 
-    @Override
-    public void save(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
-      if (ingredient == Ingredient.EMPTY) {
-        throw new IllegalStateException("Empty ingredient not allowed");
-      }
-      ResourceLocation advancementId = buildOptionalAdvancement(id, "tinker_station");
-      consumer.accept(new Finished(id, advancementId));
+  @Override
+  public List<ItemStack> getToolWithModifier() {
+    if (toolWithModifier == null) {
+      toolWithModifier = getToolWithoutModifier().stream()
+        .map(stack -> {
+          stack = stack.copy();
+          stack.getOrCreateTag().putInt(ToolStack.TAG_DAMAGE, damageAmount);
+          return stack;
+        }).toList();
     }
+    return toolWithModifier;
+  }
 
-    private class Finished extends AbstractFinishedRecipe {
-      public Finished(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-        super(ID, advancementID);
-      }
+  @Override
+  public boolean isTool(ItemStack check) {
+    return check.is(TinkerTags.Items.DURABILITY);
+  }
 
-      @Override
-      public void serializeRecipeData(JsonObject json) {
-        json.add("ingredient", ingredient.toJson());
-        json.addProperty("damage_amount", damageAmount);
-      }
-
-      @Override
-      public RecipeSerializer<?> getType() {
-        return TinkerTables.tinkerStationDamagingSerializer.get();
-      }
-    }
+  @Override
+  public RecipeResult<ItemStack> onFocused(ItemStack focus) {
+    ToolStack tool = ToolStack.copyFrom(focus);
+    ToolDamageUtil.directDamage(tool, damageAmount, null, focus);
+    return RecipeResult.success(tool.copyStack(focus));
   }
 }

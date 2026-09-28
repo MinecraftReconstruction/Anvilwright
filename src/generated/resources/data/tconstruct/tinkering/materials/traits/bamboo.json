@@ -1,9 +1,15 @@
 {
+  "default": [
+    {
+      "level": 1,
+      "name": "tconstruct:unburdened"
+    }
+  ],
   "perStat": {
-    "tconstruct:ranged": [
+    "tconstruct:ammo": [
       {
-        "name": "tconstruct:flexible",
-        "level": 1
+        "level": 1,
+        "name": "tconstruct:woodwind"
       }
     ]
   }

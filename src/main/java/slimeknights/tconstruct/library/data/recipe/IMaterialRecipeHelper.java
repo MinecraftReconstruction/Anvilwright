@@ -20,6 +20,9 @@ import slimeknights.tconstruct.library.recipe.melting.MaterialMeltingRecipeBuild
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
+import static slimeknights.mantle.Mantle.COMMON;
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+
 /**
  * Interface for adding recipes for tool materials
  */
@@ -54,7 +57,7 @@ public interface IMaterialRecipeHelper extends IRecipeHelper {
     if (leftover != null) {
       builder.setLeftover(leftover);
     }
-    builder.save(consumer, modResource(saveName));
+    builder.save(consumer, location(saveName));
   }
 
   /**
@@ -107,7 +110,7 @@ public interface IMaterialRecipeHelper extends IRecipeHelper {
     materialMeltingCasting(consumer, material, fluid, false, fluidAmount, folder);
   }
 
-  /** Adds recipes to melt and cast a material of ingot size */
+  /** Adds recipes to melt and cast a compat material of ingot size */
   default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, String folder) {
     materialMeltingCasting(consumer, material, fluid, FluidValues.INGOT, folder);
   }

@@ -1,12 +1,9 @@
 package slimeknights.tconstruct.world.item;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -15,24 +12,25 @@ import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import slimeknights.mantle.item.TooltipItem;
-import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.TinkerWorld;
+import slimeknights.tconstruct.world.block.DirtType;
+import slimeknights.tconstruct.world.block.FoliageType;
 import slimeknights.tconstruct.world.block.SlimeVineBlock;
 import slimeknights.tconstruct.world.block.SlimeVineBlock.VineStage;
 
 import javax.annotation.Nullable;
 
 public class SlimeGrassSeedItem extends TooltipItem {
-  private final SlimeType foliage;
-  public SlimeGrassSeedItem(Properties properties, SlimeType foliage) {
+  private final FoliageType foliage;
+  public SlimeGrassSeedItem(Properties properties, FoliageType foliage) {
     super(properties);
     this.foliage = foliage;
   }
 
   /** Gets the slime type for the given block */
   @Nullable
-  private static SlimeType getSlimeType(Block block) {
-    for (SlimeType type : SlimeType.values()) {
+  private static DirtType getDirtType(Block block) {
+    for (DirtType type : DirtType.values()) {
       if (TinkerWorld.allDirt.get(type) == block) {
         return type;
       }
@@ -43,11 +41,11 @@ public class SlimeGrassSeedItem extends TooltipItem {
   /** Gets the vines associated with these seeds */
   @Nullable
   private Block getVines() {
-    switch (foliage) {
-      case SKY:   return TinkerWorld.skySlimeVine.get();
-      case ENDER: return TinkerWorld.enderSlimeVine.get();
-    }
-    return null;
+    return switch (foliage) {
+      case SKY -> TinkerWorld.skySlimeVine.get();
+      case ENDER -> TinkerWorld.enderSlimeVine.get();
+      default -> null;
+    };
   }
 
   @Override
@@ -73,7 +71,7 @@ public class SlimeGrassSeedItem extends TooltipItem {
 
     // if vines did not succeed, try grass
     if (newState == null) {
-      SlimeType type = getSlimeType(state.getBlock());
+      DirtType type = getDirtType(state.getBlock());
       if (type != null) {
         newState = TinkerWorld.slimeGrass.get(type).get(foliage).defaultBlockState();
       } else {

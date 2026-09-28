@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.events.ToolEquipmentChangeEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -93,32 +93,27 @@ public class EquipmentChangeWatcher implements EntityComponentInitializer {
 
     // first, fire event to notify an item was removed
     IToolStackView tool = context.getOriginalTool();
-    if (tool != null) {
+    if (tool != null && ModifierUtil.validArmorSlot(tool, changedSlot)) {
       for (ModifierEntry entry : tool.getModifierList()) {
-        entry.getHook(TinkerHooks.EQUIPMENT_CHANGE).onUnequip(tool, entry, context);
-      }
-      // only path that should bring you here that did not already call the modifier method is when your shield breaks. ideally we will switch to a forge onStoppedUsing method instead
-      // TODO 1.19: consider simplier check, such as the tool having the active modifier tag set. Will need to do a bit of work for bows which don't set modifiers though
-      if (!entity.isUsingItem() || entity.getItemBySlot(changedSlot) != entity.getUseItem()) {
-        ModifierUtil.finishUsingItem(tool);
+        entry.getHook(ModifierHooks.EQUIPMENT_CHANGE).onUnequip(tool, entry, context);
       }
     }
 
     // next, fire event to notify an item was added
     tool = context.getReplacementTool();
-    if (tool != null) {
+    if (tool != null && ModifierUtil.validArmorSlot(tool, changedSlot)) {
       for (ModifierEntry entry : tool.getModifierList()) {
-        entry.getHook(TinkerHooks.EQUIPMENT_CHANGE).onEquip(tool, entry, context);
+        entry.getHook(ModifierHooks.EQUIPMENT_CHANGE).onEquip(tool, entry, context);
       }
     }
 
     // finally, fire events on all other slots to say something changed
     for (EquipmentSlot otherSlot : EquipmentSlot.values()) {
       if (otherSlot != changedSlot) {
-        tool = context.getToolInSlot(otherSlot);
+        tool = context.getValidTool(otherSlot);
         if (tool != null) {
           for (ModifierEntry entry : tool.getModifierList()) {
-            entry.getHook(TinkerHooks.EQUIPMENT_CHANGE).onEquipmentChange(tool, entry, context, otherSlot);
+            entry.getHook(ModifierHooks.EQUIPMENT_CHANGE).onEquipmentChange(tool, entry, context, otherSlot);
           }
         }
       }

@@ -22,7 +22,7 @@ public class RestrictedCompoundTag {
   /**
    * Checks if the data contains the given tag
    * @param name  Namespaced key
-   * @param type  Tag type, see {@link net.minecraftforge.common.util.Constants.NBT} for values
+   * @param type  Tag type, see {@link Tag} for values
    * @return  True if the tag is contained
    */
   public boolean contains(String name, int type) {

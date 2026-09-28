@@ -86,7 +86,7 @@ public class MaterialTraits {
     ImmutableList.Builder<ModifierEntry> builder = ImmutableList.builder();
     int count = buffer.readVarInt();
     for (int i = 0; i < count; i++) {
-      builder.add(ModifierEntry.read(buffer));
+      builder.add(ModifierEntry.LOADABLE.decode(buffer));
     }
     return builder.build();
   }
@@ -99,7 +99,7 @@ public class MaterialTraits {
   private static void writeTraitList(FriendlyByteBuf buffer, List<ModifierEntry> traits) {
     buffer.writeVarInt(traits.size());
     for (ModifierEntry entry : traits) {
-      entry.write(buffer);
+      ModifierEntry.LOADABLE.encode(buffer, entry);
     }
   }
 
@@ -134,10 +134,8 @@ public class MaterialTraits {
       }
     }
 
-    /**
-     * Serializes this object to a trait mapping JSON
-     * @return  Trait mapping Json
-     */
+    /** @deprecated use {@link slimeknights.tconstruct.library.data.material.AbstractMaterialTraitDataProvider.MaterialTraitsBuilder} */
+    @Deprecated(forRemoval = true)
     public MaterialTraitsJson serialize() {
       // need to adjust the map to the right generics
       // also suppress the map if no stat types were defined
@@ -178,12 +176,6 @@ public class MaterialTraits {
         traitsPerStats = builder.build();
       }
       return new MaterialTraits(defaultTraits, traitsPerStats);
-    }
-
-    /** @deprecated use {@link #build(Map)} */
-    @Deprecated
-    public MaterialTraits build() {
-      return build(Collections.emptyMap());
     }
   }
 }

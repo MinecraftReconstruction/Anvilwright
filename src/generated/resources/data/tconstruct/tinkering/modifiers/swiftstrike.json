@@ -1,19 +1,15 @@
 {
-  "type": "tconstruct:composable",
   "level_display": {
     "type": "tconstruct:unique",
+    "first_unique": false,
     "unique_until": 5
   },
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:incremental"
-    },
-    {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:attack_speed",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.05,
       "operation": "multiply_base",
-      "value": 0.05
+      "stat": "tconstruct:attack_speed"
     }
   ]
 }

@@ -3,54 +3,55 @@ package slimeknights.tconstruct.library.tools.nbt;
 import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
+import slimeknights.tconstruct.library.modifiers.ModifierManager;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierTraitHook.TraitBuilder;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.definition.PartRequirement;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
-import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinitionData;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.material.MissingMaterialsToolHook;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
-import slimeknights.tconstruct.library.tools.stat.INumericToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.RestrictedCompoundTag;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Class handling parsing all tool related NBT
  */
-@RequiredArgsConstructor(staticName = "from")
 public class ToolStack implements IToolStackView {
   /** Error messages for when there are not enough remaining modifiers */
   private static final String KEY_VALIDATE_SLOTS = TConstruct.makeTranslationKey("recipe", "modifier.validate_slots");
-  /** flag to set in persistent data to mark a tool as needing persistent data, by default any tools with no persistent data are initialized */
-  public static final ResourceLocation NEEDS_SLOTS_BUILT = TConstruct.getResource("needs_slots_built");
 
   // persistent NBT
   /** Tag for list of materials */
   public static final String TAG_MATERIALS = "tic_materials";
   /** Tag for extra arbitrary modifier data */
-  public static final String TAG_PERSISTENT_MOD_DATA = "tic_persistent_data";
+  public static final String TAG_PERSISTENT_MOD_DATA = "tic_persistent";
   /** Tag for recipe based modifier */
   public static final String TAG_UPGRADES = "tic_upgrades";
   /** Tag marking a tool as broken */
@@ -58,18 +59,18 @@ public class ToolStack implements IToolStackView {
 
   // volatile NBT
   /** Tag for calculated stats */
-  protected static final String TAG_STATS = "tic_stats";
+  public static final String TAG_STATS = "tic_stats";
   /** Tag for tool stat global multipliers */
   protected static final String TAG_MULTIPLIERS = "tic_multipliers";
   /** Tag for arbitrary modifier data rebuilt on stat rebuild */
-  public static final String TAG_VOLATILE_MOD_DATA = "tic_volatile_data";
+  public static final String TAG_VOLATILE_MOD_DATA = "tic_volatile_data"; // TODO: consider dropping "_data" from the key for consistency
   /** Tag for merged modifiers of upgrades and traits */
   public static final String TAG_MODIFIERS = "tic_modifiers";
 
   // vanilla tags
-  protected static final String TAG_DAMAGE = "Damage";
-  public static final String TAG_UNBREAKABLE = "Unbreakable";
-  public static final String TAG_HIDE_FLAGS = "HideFlags";
+  public static final String TAG_DAMAGE = "Damage";
+  private static final String TAG_UNBREAKABLE = "Unbreakable";
+  private static final String TAG_HIDE_FLAGS = "HideFlags";
 
   /** List of tags to disallow editing for the relevant modifier hooks, disallows all tags we touch. Ignores unbreakable as we only look at that tag for vanilla compat */
   private static final Set<String> RESTRICTED_TAGS = ImmutableSet.of(TAG_MATERIALS, TAG_STATS, TAG_MULTIPLIERS, TAG_PERSISTENT_MOD_DATA, TAG_VOLATILE_MOD_DATA, TAG_UPGRADES, TAG_MODIFIERS, TAG_BROKEN, TAG_DAMAGE, TAG_HIDE_FLAGS);
@@ -81,8 +82,8 @@ public class ToolStack implements IToolStackView {
   @Getter
   private final ToolDefinition definition;
   /** Original tool NBT */
-  @Getter
-  private final CompoundTag nbt;
+  @Getter(AccessLevel.PROTECTED)
+  private CompoundTag nbt;
   /** Public view of the internal NBT, to give to modifier hooks */
   private RestrictedCompoundTag restrictedNBT;
 
@@ -102,7 +103,7 @@ public class ToolStack implements IToolStackView {
   private ModifierNBT upgrades;
   /** Data object containing modifier data that persists on stat rebuild */
   @Nullable
-  private ModDataNBT persistentModData;
+  private ToolDataNBT persistentModData;
 
   // nbt cache: these values are calculated tool data
   /** Combination of modifiers from upgrades and material traits */
@@ -119,6 +120,23 @@ public class ToolStack implements IToolStackView {
   private IModDataView volatileModData;
 
   /* Creating */
+  private ToolStack(Item item, ToolDefinition definition, CompoundTag nbt) {
+    this.item = item;
+    this.definition = definition;
+    this.nbt = nbt;
+  }
+
+
+  /**
+   * Creates a new tool stack from item and NBT
+   * @param item        Item instance
+   * @param definition  Item tool definition
+   * @param nbt         Tool stack NBT
+   * @return  Tool stack instance
+   */
+  public static ToolStack from(Item item, ToolDefinition definition, CompoundTag nbt) {
+    return new ToolStack(item, definition, nbt);
+  }
 
   /**
    * Creates a tool stack from an item stack
@@ -140,6 +158,7 @@ public class ToolStack implements IToolStackView {
           // bypass the setter as vanilla insists on setting damage values there, along with verifying the tag
           // both are things we will do later, doing so now causes us to recursively call this method (though not infinite)
           stack.tag = nbt;
+          // no need to set the damage value, if the tool wanted it set the stack would have had a tag already
         } else {
           switch (Config.COMMON.logInvalidToolStack.get()) {
             case STACKTRACE ->
@@ -177,6 +196,7 @@ public class ToolStack implements IToolStackView {
    * Creates a new tool stack for a completely new tool
    * @param item        Item
    * @param definition  Tool definition
+   * @param materials  Materials list
    * @return  Tool stack
    */
   public static ToolStack createTool(Item item, ToolDefinition definition, MaterialNBT materials) {
@@ -185,9 +205,7 @@ public class ToolStack implements IToolStackView {
     tool.damage = 0;
     tool.broken = false;
     tool.upgrades = ModifierNBT.EMPTY;
-    // add slots
-    definition.getData().buildSlots(tool.getPersistentData());
-    // update the materials
+    // update the materials, this will also rebuild the stats
     tool.setMaterials(materials);
     return tool;
   }
@@ -223,10 +241,24 @@ public class ToolStack implements IToolStackView {
     this.persistentModData = null;
   }
 
+  /** Updates the tool stack instance to match the given item stack */
+  @Internal
+  public void refreshTag(ItemStack stack) {
+    CompoundTag tag = stack.getTag();
+    if (tag == null) {
+      tag = new CompoundTag();
+      stack.setTag(tag);
+    }
+    this.nbt = tag;
+    clearCache();
+  }
+
   /** Creates an item stack from this tool stack */
   public ItemStack createStack(int size) {
     ItemStack stack = new ItemStack(item, size);
-    stack.setTag(nbt);
+    // set the raw tag to avoid going through verifyTagAfterLoad and rebuilding stats again
+    stack.tag = nbt;
+    // damage value is already enforced via the stack creation above
     return stack;
   }
 
@@ -241,11 +273,40 @@ public class ToolStack implements IToolStackView {
    * @return  New NBT
    */
   public ItemStack updateStack(ItemStack stack) {
+    return updateStack(stack, true);
+  }
+
+  /**
+   * Sets the NBT on the given stack
+   * @param stack  Stack instance
+   * @param copyNBT  If true, copies the NBT
+   * @return  New NBT
+   */
+  public ItemStack updateStack(ItemStack stack, boolean copyNBT) {
     if (stack.getItem() != item) {
       throw new IllegalArgumentException("Wrong item in stack");
     }
-    stack.setTag(nbt.copy());
+    // set the raw tag to avoid going through verifyTagAfterLoad and rebuilding stats again
+    if (copyNBT) {
+      stack.tag = nbt.copy();
+    } else {
+      stack.tag = nbt;
+    }
+    // ensure the damage value is set on the stack for the sake of stacking, since bypassing the vanilla setter skips that
+    if (!stack.tag.contains(TAG_DAMAGE, Tag.TAG_ANY_NUMERIC) && stack.getItem().isDamageable(stack)) {
+      stack.tag.putInt(TAG_DAMAGE, 0);
+    }
     return stack;
+  }
+
+  /** Creates a stack a copy of the given stack */
+  public ItemStack copyStack(ItemStack stack) {
+    return updateStack(stack.copy(), false);
+  }
+
+  /** Creates a stack a copy of the given stack with size no greater than the passed amount */
+  public ItemStack copyStack(ItemStack stack, int size) {
+    return updateStack(stack.copyWithCount(size), false);
   }
 
   /**
@@ -259,7 +320,15 @@ public class ToolStack implements IToolStackView {
     return restrictedNBT;
   }
 
-  /* Damaging */
+  @Override
+  public boolean isSameStack(ItemStack stack) {
+    // tool stacks share NBT with their stack instance unless copied so changes are mirrored
+    // item check allows empty as empty stacks change their item to air. This won't false positive with ItemStack#EMPTY as the NBT won't match.
+    return nbt == stack.getTag() && (stack.isEmpty() || stack.getItem() == item);
+  }
+
+
+  /* Durability */
 
   /**
    * Checks if this tool is currently broken
@@ -378,11 +447,8 @@ public class ToolStack implements IToolStackView {
     }
   }
 
-  /**
-   * Gets the tool stats if parsed, or parses from NBT if not yet parsed
-   * @return stats
-   */
-  protected MultiplierNBT getMultipliers() {
+  @Override
+  public MultiplierNBT getMultipliers() {
     if (multipliers == null) {
       multipliers = MultiplierNBT.readFromNBT(nbt.get(TAG_MULTIPLIERS));
     }
@@ -403,20 +469,12 @@ public class ToolStack implements IToolStackView {
     }
   }
 
-  @Override
-  public float getMultiplier(INumericToolStat<?> stat) {
-    MultiplierNBT multipliers = getMultipliers();
-    if (multipliers.hasStat(stat)) {
-      return multipliers.get(stat);
-    }
-    return 1.0f;
-  }
 
   /* Materials */
 
   @Override
   public MaterialNBT getMaterials() {
-    if (!getDefinition().isMultipart()) {
+    if (!getDefinition().hasMaterials()) {
       return MaterialNBT.EMPTY;
     }
     if (materials == null) {
@@ -445,6 +503,16 @@ public class ToolStack implements IToolStackView {
   public void setMaterials(MaterialNBT materials) {
     setMaterialsRaw(materials);
     rebuildStats();
+  }
+
+  /**
+   * Replaces the material at the given index
+   * @param index        Index to replace
+   * @param replacement  New material
+   * @throws IndexOutOfBoundsException  If the index is invalid
+   */
+  public void replaceMaterial(int index, MaterialVariant replacement) {
+    setMaterials(getMaterials().replaceMaterial(index, replacement));
   }
 
   /**
@@ -496,6 +564,21 @@ public class ToolStack implements IToolStackView {
   }
 
   /**
+   * Adds a single modifier to this tool
+   * @param modifier  Modifier to add
+   * @param amount    Amount to add
+   * @param needed    Amount needed for a full level
+   */
+  public void addModifierAmount(ModifierId modifier, int amount, int needed) {
+    if (needed <= 0) {
+      throw new IllegalArgumentException("Invalid needed, must be above 0");
+    }
+    if (amount > 0) {
+      setUpgrades(getUpgrades().addAmount(modifier, amount, needed));
+    }
+  }
+
+  /**
    * Removes a single modifier to this tool
    * @param modifier  Modifier to remove
    * @param level     Level to remove
@@ -531,16 +614,16 @@ public class ToolStack implements IToolStackView {
   /* Data */
 
   @Override
-  public ModDataNBT getPersistentData() {
+  public ToolDataNBT getPersistentData() {
     if (persistentModData == null) {
       // parse if the tag already exists
       if (nbt.contains(TAG_PERSISTENT_MOD_DATA, Tag.TAG_COMPOUND)) {
-        persistentModData = ModDataNBT.readFromNBT(nbt.getCompound(TAG_PERSISTENT_MOD_DATA));
+        persistentModData = ToolDataNBT.readFromNBT(nbt.getCompound(TAG_PERSISTENT_MOD_DATA));
       } else {
         // if no tag exists, create it
         CompoundTag tag = new CompoundTag();
         nbt.put(TAG_PERSISTENT_MOD_DATA, tag);
-        persistentModData = ModDataNBT.readFromNBT(tag);
+        persistentModData = ToolDataNBT.readFromNBT(tag);
       }
     }
     return persistentModData;
@@ -556,7 +639,7 @@ public class ToolStack implements IToolStackView {
     if (volatileModData == null) {
       // parse if the tag already exists
       if (nbt.contains(TAG_VOLATILE_MOD_DATA, Tag.TAG_COMPOUND)) {
-        volatileModData = ModDataNBT.readFromNBT(nbt.getCompound(TAG_VOLATILE_MOD_DATA));
+        volatileModData = ToolDataNBT.readFromNBT(nbt.getCompound(TAG_VOLATILE_MOD_DATA));
       } else {
         // if no tag exists, return empty
         volatileModData = IModDataView.EMPTY;
@@ -569,7 +652,7 @@ public class ToolStack implements IToolStackView {
    * Updates the volatile mod data in NBT, called in {@link #rebuildStats()}
    * @param modData  New data
    */
-  protected void setVolatileModData(ModDataNBT modData) {
+  protected void setVolatileModData(ToolDataNBT modData) {
     CompoundTag data = modData.getData();
     if (data.isEmpty()) {
       volatileModData = IModDataView.EMPTY;
@@ -593,8 +676,15 @@ public class ToolStack implements IToolStackView {
     }
     // next, ensure modifiers validate
     Component result;
-    for (ModifierEntry entry : getModifierList()) {
-      result = entry.getHook(TinkerHooks.VALIDATE).validate(this, entry);
+    for (ModifierEntry entry : getModifiers()) {
+      result = entry.getHook(ModifierHooks.VALIDATE).validate(this, entry);
+      if (result != null) {
+        return result;
+      }
+    }
+    // some validations should only run if the modifier was crafted on the tool
+    for (ModifierEntry entry : getUpgrades()) {
+      result = entry.getHook(ModifierHooks.VALIDATE_UPGRADE).validate(this, entry);
       if (result != null) {
         return result;
       }
@@ -602,118 +692,91 @@ public class ToolStack implements IToolStackView {
     return null;
   }
 
-  /**
-   * Checks if this tool stack is in a valid state
-   * @return  Pass if the tool is valid, failure result if invalid
-   * @deprecated use {@link #tryValidate()}
-   */
-  @Deprecated
-  public ValidatedResult validate() {
-    // first check slot counts
-    for (SlotType slotType : SlotType.getAllSlotTypes()) {
-      if (getFreeSlots(slotType) < 0) {
-        return ValidatedResult.failure(KEY_VALIDATE_SLOTS, slotType.getDisplayName());
-      }
-    }
-    // next, ensure modifiers validate
-    Component result;
-    for (ModifierEntry entry : getModifierList()) {
-      result = entry.getHook(TinkerHooks.VALIDATE).validate(this, entry);
-      if (result != null) {
-        return ValidatedResult.failure(result);
-      }
-    }
-    return ValidatedResult.PASS;
-  }
-
-  /** Initializes modifier slots on the tool if needed */
-  public void ensureSlotsBuilt() {
-    // no persistent data means no slots added yet, so time to build them
-    // note that empty persistent data will not trigger this, which is important when a tool has no slots remaining
-    if (!nbt.contains(TAG_PERSISTENT_MOD_DATA, Tag.TAG_COMPOUND) || getPersistentData().getBoolean(NEEDS_SLOTS_BUILT)) {
-      ModDataNBT persistentData = getPersistentData();
-      persistentData.remove(NEEDS_SLOTS_BUILT);
-      definition.getData().buildSlots(persistentData);
-    }
-  }
-
-  /** Called on inventory tick to ensure the tool has all required data including materials, prevents tools with no stats from existing */
+  /** Called on inventory tick to ensure the tool has all required data including materials and starting slots, prevents tools with no stats from existing */
   public void ensureHasData() {
-    if (!definition.isDataLoaded()) {
-      return;
+    // if we try initializing before datapacks load we will get garbage data
+    if (definition.isDataLoaded()) {
+      // check if missing materials; either means we have none or too few
+      MissingMaterialsToolHook missingMaterials = definition.getHook(ToolHooks.MISSING_MATERIALS);
+      boolean needsMaterials = definition.hasMaterials() && (!nbt.contains(TAG_MATERIALS, Tag.TAG_LIST) || missingMaterials.needsMaterials(definition, nbt.getList(TAG_MATERIALS, Tag.TAG_STRING).size()));
+      // build data if we either lack data (signified by no stats) or we lack materials but expect them
+      if (needsMaterials || !isInitialized(nbt)) {
+        // randomize materials if missing
+        if (needsMaterials) {
+          setMaterialsRaw(missingMaterials.fillMaterials(definition, getMaterials(), RandomSource.create()));
+        }
+        rebuildStats();
+      }
     }
-    ensureSlotsBuilt();
-
-    // if the tool has stats already, nothing more to do
-    if (isInitialized(nbt)) {
-      return;
-    }
-    // need materials to build stats, randomize them if missing
-    if (definition.isMultipart() && !nbt.contains(TAG_MATERIALS, Tag.TAG_LIST)) {
-      setMaterialsRaw(ToolBuildHandler.randomMaterials(definition.getData(), definition.getDefaultMaxTier(), false));
-    }
-    rebuildStats();
   }
 
   /**
    * Recalculates any relevant cached data. Called after either the materials or modifiers list changes
    */
   public void rebuildStats() {
-    // hide enchants and attributes, both are added ourself (filtered)
-    // TODO: remove this line in 1.19, for best compat
-    // will break old tools if we do not remove in 1.18
-    nbt.remove(TAG_HIDE_FLAGS);
+    // quick safety checks: to rebuild stats we need
+    // * tool definition (contains stats and traits)
+    // * material registry (to fetch material stats and traits)
+    // * modifier registry (run relevant modifier hooks)
+    // * item tags (control tool behaviors in various places)
+    // if any of these are missing, attempting to rebuild stats may corrupt the tool's state (persistent data, damage, broken)
+    if (!definition.isDataLoaded() || !MaterialRegistry.isFullyLoaded() || !ModifierManager.INSTANCE.isDynamicModifiersLoaded() || !TinkerTags.isTagsLoaded()) {
+      return;
+    }
 
-    // first, rebuild the list of all modifiers
+    // add tool slots to volatile data, ensures it is there even from an empty tool, and properly updates on datapack update
+    ToolDefinitionData toolData = getDefinitionData();
+
+    // first, determine the list of modifiers, this is done in a couple stages
+    // we start by cloning upgrades and adding tool traits and material traits
+    MaterialNBT materials = getMaterials();
     ModifierNBT.Builder modBuilder = ModifierNBT.builder();
     modBuilder.add(getUpgrades());
-    modBuilder.add(getDefinition().getData().getTraits());
-    List<PartRequirement> parts = getDefinition().getData().getParts();
-    MaterialNBT materials = getMaterials();
-    int max = Math.min(materials.size(), parts.size());
-    for (int i = 0; i < max; i++) {
-      modBuilder.add(MaterialRegistry.getInstance().getTraits(materials.get(i).getId(), parts.get(i).getStatType()));
-    }
-    ModifierNBT allMods = modBuilder.build();
-    setModifiers(allMods);
+    toolData.getHook(ToolHooks.TOOL_TRAITS).addTraits(definition, materials, modBuilder);
+    ModifierNBT beforeTraits = modBuilder.build();
 
-    // pass in the list to stats, note for no part tools this should always be empty
-    StatsNBT stats = definition.buildStats(materials);
-    ModifierStatsBuilder statBuilder = ModifierStatsBuilder.builder();
-    definition.getData().buildStatMultipliers(statBuilder);
+    // temporary context while we add modifier traits, will recreate if we have modifiers
+    // clear out volatile data, mostly affects the volatile data hook
+    ToolRebuildContext context = new ToolRebuildContext(item, definition, materials, getUpgrades(), beforeTraits, getPersistentData());
 
-    // next, update modifier related properties
-    List<ModifierEntry> modifierList = allMods.getModifiers();
-    if (modifierList.isEmpty()) {
-      // if no modifiers, clear out data that only exists with modifiers
-      nbt.remove(TAG_VOLATILE_MOD_DATA);
-      volatileModData = IModDataView.EMPTY;
+    // if we have modifiers, apply modifier traits, saves creating some builders if empty
+    List<ModifierEntry> modifierList = Collections.emptyList();
+    if (beforeTraits.isEmpty()) {
+      // if no modifiers, just clear modifiers
+      setModifiers(ModifierNBT.EMPTY);
     } else {
-      ModDataNBT volatileData = new ModDataNBT();
+      modBuilder = ModifierNBT.builder();
+      TraitBuilder traitBuilder = new TraitBuilder(context, modBuilder);
+      traitBuilder.add(beforeTraits);
 
+      // set the final modifier list on the tool
+      ModifierNBT allMods = modBuilder.build();
+      setModifiers(allMods);
+      modifierList = allMods.getModifiers();
       // context for further modifier hooks
-      ToolRebuildContext context = new ToolRebuildContext(item, getDefinition(), getMaterials(), getUpgrades(), allMods, stats, getPersistentData(), volatileData);
-
-      // build persistent data first, its a parameter to the other two hooks
-      for (ModifierEntry entry : modifierList) {
-        entry.getHook(TinkerHooks.VOLATILE_DATA).addVolatileData(context, entry, volatileData);
-      }
-
-      // regular stats last so we can include volatile data
-      for (ModifierEntry entry : modifierList) {
-        entry.getHook(TinkerHooks.TOOL_STATS).addToolStats(context, entry, statBuilder);
-      }
-
-      // set into NBT
-      setVolatileModData(volatileData);
+      context = context.withModifiers(allMods);
     }
-    // build stats from the tool stats
-    setStats(statBuilder.build(stats, item));
-    setMultipliers(statBuilder.buildMultipliers(item));
+
+    // build volatile data first, it's a parameter to the other hooks
+    ToolDataNBT volatileData = new ToolDataNBT();
+    toolData.getHook(ToolHooks.VOLATILE_DATA).addVolatileData(context, volatileData);
+    for (ModifierEntry entry : modifierList) {
+      entry.getHook(ModifierHooks.VOLATILE_DATA).addVolatileData(context, entry, volatileData);
+    }
+    setVolatileModData(volatileData);
+
+    // regular stats last so we can include volatile data
+    ModifierStatsBuilder statBuilder = ModifierStatsBuilder.builder();
+    toolData.getHook(ToolHooks.TOOL_STATS).addToolStats(context, statBuilder);
+    for (ModifierEntry entry : modifierList) {
+      entry.getHook(ModifierHooks.TOOL_STATS).addToolStats(context, entry, statBuilder);
+    }
+    setStats(statBuilder.build());
+    setMultipliers(statBuilder.buildMultipliers());
 
     // finally, update raw data, called last to make the parameters more convenient mostly, plus no other hooks should be responding to this data
     for (ModifierEntry entry : modifierList) {
-      entry.getHook(TinkerHooks.RAW_DATA).addRawData(this, entry, getRestrictedNBT());
+      entry.getHook(ModifierHooks.RAW_DATA).addRawData(this, entry, getRestrictedNBT());
     }
   }
 
@@ -740,22 +803,12 @@ public class ToolStack implements IToolStackView {
   }
 
   /**
-   * Checks if the given tool stats have been initialized, used as a marker to indicate slots are not yet applied
-   * @param stack  Stack to check
-   * @return  True if initialized
-   */
-  public static boolean hasMaterials(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    return nbt != null && nbt.contains(TAG_MATERIALS, Tag.TAG_LIST);
-  }
-
-  /**
    * Ensures the given item stack is initialized. Called in crafting hooks
    * @param stack ItemStack to initialize
    */
   public static void ensureInitialized(ItemStack stack) {
-    if (stack.getItem() instanceof IModifiable) {
-      ensureInitialized(stack, ((IModifiable) stack.getItem()).getToolDefinition());
+    if (stack.getItem() instanceof IModifiable modifiable) {
+      ensureInitialized(stack, modifiable.getToolDefinition());
     }
   }
 
@@ -787,12 +840,12 @@ public class ToolStack implements IToolStackView {
    */
   public static void verifyTag(Item item, CompoundTag tag, ToolDefinition definition) {
     // this function is sometimes called before datapack contents load, do nothing then
-    if (!definition.isDataLoaded() || tag.getBoolean(TooltipUtil.KEY_DISPLAY)) {
+    if (tag.getBoolean(TooltipUtil.KEY_DISPLAY)) {
       return;
     }
 
     // resolve all material redirects
-    boolean hasMaterials = tag.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST);
+    boolean hasMaterials = MaterialRegistry.isFullyLoaded() && tag.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST);
     if (hasMaterials) {
       MaterialIdNBT stored = MaterialIdNBT.readFromNBT(tag.getList(ToolStack.TAG_MATERIALS, Tag.TAG_STRING));
       MaterialIdNBT resolved = stored.resolveRedirects();
@@ -800,11 +853,9 @@ public class ToolStack implements IToolStackView {
         resolved.updateNBT(tag);
       }
     }
-    // rebuild stats
-    ToolStack tool = ToolStack.from(item, definition, tag);
-    tool.ensureSlotsBuilt();
-    if (hasMaterials || !definition.isMultipart()) {
-      tool.rebuildStats();
+    // only rebuild stats if we either have materials, or we don't need materials
+    if (definition.isDataLoaded() && (hasMaterials || !definition.hasMaterials())) {
+      ToolStack.from(item, definition, tag).rebuildStats();
     }
   }
 }

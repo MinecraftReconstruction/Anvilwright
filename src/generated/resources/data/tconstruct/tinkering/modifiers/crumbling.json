@@ -1,7 +1,5 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
       "type": "tconstruct:conditional_mining_speed",
@@ -9,8 +7,9 @@
         "type": "mantle:inverted",
         "inverted_type": "mantle:requires_tool"
       },
-      "require_effective": false,
-      "bonus": 0.5
+      "each_level": 1.0,
+      "percent": false,
+      "require_effective": false
     }
   ]
 }

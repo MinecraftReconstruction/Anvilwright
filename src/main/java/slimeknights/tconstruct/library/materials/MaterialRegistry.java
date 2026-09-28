@@ -15,22 +15,23 @@ import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialManager;
 import slimeknights.tconstruct.library.materials.definition.UpdateMaterialsPacket;
-import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatType;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsManager;
 import slimeknights.tconstruct.library.materials.stats.UpdateMaterialStatsPacket;
 import slimeknights.tconstruct.library.materials.traits.MaterialTraitsManager;
 import slimeknights.tconstruct.library.materials.traits.UpdateMaterialTraitsPacket;
-import slimeknights.tconstruct.tools.stats.BowstringMaterialStats;
-import slimeknights.tconstruct.tools.stats.ExtraMaterialStats;
+import slimeknights.tconstruct.shared.command.argument.MaterialTagSource;
 import slimeknights.tconstruct.tools.stats.GripMaterialStats;
 import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
 import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
 import slimeknights.tconstruct.tools.stats.LimbMaterialStats;
-import slimeknights.tconstruct.tools.stats.RepairKitStats;
+import slimeknights.tconstruct.tools.stats.PlatingMaterialStats;
+import slimeknights.tconstruct.tools.stats.RepairStats;
 import slimeknights.tconstruct.tools.stats.SkullStats;
+import slimeknights.tconstruct.tools.stats.SlimeStats;
+import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,10 @@ public final class MaterialRegistry {
   public static final MaterialStatsId MELEE_HARVEST = new MaterialStatsId(TConstruct.getResource("melee_harvest"));
   /** Internal material stats ID for the sake of adding traits exclusive to ranged materials */
   public static final MaterialStatsId RANGED = new MaterialStatsId(TConstruct.getResource("ranged"));
+  /** Internal material stats ID for the sake of adding traits exclusive to armor materials */
+  public static final MaterialStatsId ARMOR = new MaterialStatsId(TConstruct.getResource("armor"));
+  /** Internal material stats ID for the sake of adding traits exclusive to ammo materials */
+  public static final MaterialStatsId AMMO = new MaterialStatsId(TConstruct.getResource("ammo"));
 
   static MaterialRegistry INSTANCE;
 
@@ -60,10 +65,17 @@ public final class MaterialRegistry {
   @VisibleForTesting
   static boolean fullyLoaded = false;
 
+  /**
+   * Gets the created instance of the material registry.
+   * Only valid after {@link #init()} has been called in {@link TConstruct}, so do not call during mod constructor or static init.
+   * Registry events are the recommended time to use {@link IMaterialRegistry#registerStatType(MaterialStatType)}.
+   */
   public static IMaterialRegistry getInstance() {
     return INSTANCE.registry;
   }
 
+  /** @apiNote Internal method to initialize the material registry. Addons should never call this as it may break the registry state. */
+  @Internal
   public static void init() {
     // create registry instance
     INSTANCE = new MaterialRegistry();
@@ -99,14 +111,33 @@ public final class MaterialRegistry {
     });
     registry = new MaterialRegistryImpl(materialManager, materialStatsManager, materialTraitsManager);
 
-    registry.registerStatType(HeadMaterialStats.DEFAULT, HeadMaterialStats.class, HeadMaterialStats::new, MELEE_HARVEST);
-    registry.registerStatType(HandleMaterialStats.DEFAULT, HandleMaterialStats.class, HandleMaterialStats::new, MELEE_HARVEST);
-    registry.registerStatType(ExtraMaterialStats.DEFAULT, ExtraMaterialStats.class, buffer -> ExtraMaterialStats.DEFAULT, MELEE_HARVEST);
-    registry.registerStatType(LimbMaterialStats.DEFAULT, LimbMaterialStats.class, LimbMaterialStats::new, RANGED);
-    registry.registerStatType(GripMaterialStats.DEFAULT, GripMaterialStats.class, GripMaterialStats::new, RANGED);
-    registry.registerStatType(BowstringMaterialStats.DEFAULT, BowstringMaterialStats.class, buffer -> BowstringMaterialStats.DEFAULT, RANGED);
-    registry.registerStatType(RepairKitStats.DEFAULT, RepairKitStats.class, RepairKitStats::new);
-    registry.registerStatType(SkullStats.DEFAULT, SkullStats.class, SkullStats::new);
+    // melee harvest
+    registry.registerStatType(HeadMaterialStats.TYPE, MELEE_HARVEST);
+    registry.registerStatType(HandleMaterialStats.TYPE, MELEE_HARVEST);
+    registry.registerStatType(StatlessMaterialStats.BINDING.getType(), MELEE_HARVEST);
+    // ranged
+    registry.registerStatType(LimbMaterialStats.TYPE, RANGED);
+    registry.registerStatType(GripMaterialStats.TYPE, RANGED);
+    registry.registerStatType(StatlessMaterialStats.BOWSTRING.getType(), RANGED);
+    // armor
+    for (MaterialStatType<?> type : PlatingMaterialStats.TYPES) {
+      registry.registerStatType(type, ARMOR);
+    }
+    registry.registerStatType(StatlessMaterialStats.CUIRASS.getType(), ARMOR);
+    registry.registerStatType(StatlessMaterialStats.MAILLE.getType(), ARMOR);
+    registry.registerStatType(StatlessMaterialStats.SHIELD_CORE.getType(), ARMOR);
+    // slimesuit
+    registry.registerStatType(SlimeStats.TYPE, ARMOR);
+    registry.registerStatType(SkullStats.TYPE, ARMOR);
+    registry.registerStatType(RepairStats.RIBCAGE); // not registered as armor as we want melee/harvest traits to win out
+    registry.registerStatType(RepairStats.SHELL, ARMOR);
+    registry.registerStatType(RepairStats.LACES, ARMOR);
+    // ammo
+    registry.registerStatType(StatlessMaterialStats.ARROW_HEAD.getType(), AMMO);
+    registry.registerStatType(StatlessMaterialStats.ARROW_SHAFT.getType(), AMMO);
+    registry.registerStatType(StatlessMaterialStats.FLETCHING.getType(), AMMO);
+    // misc
+    registry.registerStatType(StatlessMaterialStats.REPAIR_KIT.getType());
   }
 
   @VisibleForTesting
@@ -164,34 +195,19 @@ public final class MaterialRegistry {
     return INSTANCE.registry.getVisibleMaterials();
   }
 
+  /** Gets the tag source for materials for use in commands. Generally better to use methods from {@link IMaterialRegistry} for addons for the sake of tests */
+  public static TagSource<IMaterial> getTagSource() {
+    return new MaterialTagSource(INSTANCE.materialManager);
+  }
+
 
   /* Stats */
-
-  /**
-   * Gets the class for a material stat ID
-   * @param id  Material stat type
-   * @return  Material stat class
-   */
-  @Nullable
-  public static Class<? extends IMaterialStats> getClassForStat(MaterialStatsId id) {
-    return INSTANCE.materialStatsManager.getClassForStat(id);
-  }
-
-  /**
-   * Gets the class for a material stat ID
-   * @param id  Material stat type
-   * @return  Material stat class
-   */
-  @Nullable
-  public static Function<FriendlyByteBuf,? extends IMaterialStats> getStatDecoder(MaterialStatsId id) {
-    return INSTANCE.materialStatsManager.getStatDecoder(id);
-  }
 
   /** Loads the first material of a stat type */
   private static final Function<MaterialStatsId,IMaterial> FIRST_LOADER = statsId -> {
     IMaterialRegistry instance = getInstance();
     for (IMaterial material : instance.getVisibleMaterials()) {
-      if (instance.getMaterialStats(material.getIdentifier(), statsId).isPresent()) {
+      if (!material.isHidden() && instance.getMaterialStats(material.getIdentifier(), statsId).isPresent()) {
         return material;
       }
     }

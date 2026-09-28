@@ -152,6 +152,23 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
     return inventoryWrapper.getMaterial();
   }
 
+  /** If true, hides the uncraftable error message on the screen */
+  public boolean allowUncraftable() {
+    // if a recipe is selected, its behavior dictates the message
+    IPartBuilderRecipe recipe = getPartRecipe();
+    if (recipe != null) {
+      return recipe.allowUncraftable();
+    }
+    // otherwise, if any button says its allowed then its allowed
+    for (IPartBuilderRecipe button : getCurrentRecipes().values()) {
+      if (button.allowUncraftable()) {
+        return true;
+      }
+    }
+    // no button says its allowed? then its not
+    return false;
+  }
+
   /**
    * Refreshes the current recipe
    * @param refreshRecipeList  If true, refreshes the full recipe list too
@@ -164,8 +181,8 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
     this.selectedPatternIndex = -2;
     this.craftingResult.clearContent();
     // update screen display
-    if (refreshRecipeList && level != null && !level.isClientSide) {
-      syncToRelevantPlayers(this::syncScreen);
+    if (refreshRecipeList) {
+      syncScreenToRelevantPlayers();
     }
   }
 
@@ -222,8 +239,10 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
         this.inventoryWrapper.refreshMaterial();
         refresh(true);
         // if size changed, we are still the same material but might no longer have enough
-      } else if (original.getCount() != stack.getCount()) {
+        // same stack calling this method typically indicates a size change, stacks being mutable is annoying
+      } else if (original.getCount() != stack.getCount() || original == stack) {
         this.craftingResult.clearContent();
+        syncScreenToRelevantPlayers();
       }
       // any other slot, only an item change means update
     } else if (original.getItem() != stack.getItem()) {
@@ -254,6 +273,9 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
    * @param amount  Amount to shrink
    */
   private void shrinkSlot(int slot, int amount, Player player) {
+    if (amount <= 0) {
+      return;
+    }
     ItemStack stack = getItem(slot);
     if (!stack.isEmpty()) {
       ItemStack container = stack.getRecipeRemainder().copy();
@@ -300,8 +322,6 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
     }
 
     // sync display, mainly for the material value
-    if (level != null && !level.isClientSide) {
-      syncToRelevantPlayers(this::syncScreen);
-    }
+    syncScreenToRelevantPlayers();
   }
 }

@@ -1,12 +1,16 @@
-name: 1.20 Enhancement
-description: Suggest a change to existing 1.20 features
-labels: [1.20, Enhancement, Unreviewed]
+name: 1.20 Simple Enhancement
+description: Suggest a small change to existing 1.20 gameplay
+labels: ["1.20", Enhancement, Unreviewed]
 body:
   - type: markdown
     attributes:
       value: |
-        If your idea requires discussion or is complicated, [join our discord](https://discord.gg/mgaZt4GND5) instead of posting a new issue.
+        If your idea requires discussion or is complicated, [join our discord](https://discord.gg/njGrvuh) before posting a new issue.
         Please search the following links to make sure your enhancement is not covered:
+        
+        * **[Roadmap](https://slimeknights.github.io/docs/roadmap/)**: Discusses unimplemented features and planned new changes
+        * **[What's New](https://slimeknights.github.io/docs/whats-new/)**: Discusses many of the major changes in Tinkers' Construct 3
+        * **[FAQ](https://slimeknights.github.io/faq/)**: Answers to many frequently asked questions about the Tinkers' Construct 3 versions
   
   - type: markdown
     attributes:
@@ -25,16 +29,22 @@ body:
     validations:
       required: true
   - type: input
-    id: fabric-version
+    id: forge-version
     attributes:
-      label: Fabric Version
-      placeholder: "Ex: 0.90.4-1.20.1"
+      label: Forge Version
+      placeholder: "Ex: 36.1.0"
     validations:
       required: true
   - type: input
-    id: hephaestus-version
+    id: mantle-version
     attributes:
-      label: "Hephaestus Version"
+      label: Mantle Version
+    validations:
+      required: true
+  - type: input
+    id: tinkers-version
+    attributes:
+      label: "Tinkers' Construct Version"
       description: "'Latest' is not a valid answer, write an exact version number"
     validations:
       required: true
@@ -56,15 +66,15 @@ body:
     id: solution
     attributes:
       label: Suggested solution
-      description: "Describe the solution you would suggest to the above problem"
+      description: "Describe the solution you would suggest to the above problem."
     validations:
       required: true
   
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives considered
-      description: "Describe any alternatives you have considered to your suggested solution"
+      label: Alternatives
+      description: "Describe existing alternatives and why they do not solve your problem."
     validations:
       required: true
   
@@ -85,11 +95,12 @@ body:
     id: searched
     attributes:
       label: "Searched for existing enhancement?"
-      description: "Select all that apply. Please check the [search bar](/SlimeKnights/TinkersConstruct/issues), and [the FAQ](/SlimeKnights/TinkersConstruct/wiki/Tinkers%27-Construct-3-FAQ) to see if your enhancement is covered."
+      description: "Select all that apply. Please check the [search bar](/SlimeKnights/TinkersConstruct/issues), the [roadmap](https://slimeknights.github.io/docs/roadmap/), and [the FAQ](https://slimeknights.github.io/faq/) to see if your enhancement is covered."
       multiple: true
       options:
         - 'Used the search bar'
         - 'Checked the FAQ'
+        - 'Checked the Roadmap'
         - 'Checked the in game books'
         - 'I did not search'
     validations:

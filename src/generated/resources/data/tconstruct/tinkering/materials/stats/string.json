@@ -1,10 +1,12 @@
 {
   "stats": {
-    "tconstruct:skull": {
-      "durability": 140,
-      "armor": 0
+    "tconstruct:binding": {},
+    "tconstruct:bowstring": {},
+    "tconstruct:laces": {
+      "repair_amount": 140
     },
-    "tconstruct:extra": {},
-    "tconstruct:bowstring": {}
+    "tconstruct:skull": {
+      "durability": 140
+    }
   }
 }

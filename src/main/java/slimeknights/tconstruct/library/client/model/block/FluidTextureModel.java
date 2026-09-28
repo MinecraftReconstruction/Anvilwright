@@ -44,12 +44,12 @@ import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.client.model.util.ColoredBlockModel.ColorData;
 import slimeknights.mantle.client.model.util.DynamicBakedWrapper;
 import slimeknights.mantle.client.model.util.ModelHelper;
-import slimeknights.mantle.item.RetexturedBlockItem;
+import slimeknights.mantle.client.model.util.SimpleBlockModel;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.LogicHelper;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
 
 import java.util.BitSet;
 import java.util.Collections;
@@ -90,7 +90,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
     BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides, modelLocation, isGui3d);
 
     // determine which block parts are fluids
-    Set<String> fluidTextures = this.fluids.isEmpty() ? Collections.emptySet() : RetexturedModel.getAllRetextured(owner, model.getModel(), this.fluids);
+    Set<String> fluidTextures = this.fluids.isEmpty() ? Collections.emptySet() : RetexturedModel.getAllRetextured(owner, model, this.fluids);
     List<BlockElement> elements = model.getElements();
     int size = elements.size();
     BitSet fluidParts = new BitSet(size);
@@ -110,7 +110,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
         }
       }
     }
-    Set<String> retextured = this.retextured.isEmpty() ? Collections.emptySet() : RetexturedModel.getAllRetextured(owner, this.model.getModel(), this.retextured);
+    Set<String> retextured = this.retextured.isEmpty() ? Collections.emptySet() : RetexturedModel.getAllRetextured(owner, this.model, this.retextured);
     return new Baked(baked, elements, model.getColorData(), owner, transform, fluidTextures, fluidParts, retextured);
   }
 
@@ -127,6 +127,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
     private final Set<String> fluids;
     private final BitSet fluidParts;
     private final Set<String> retextured;
+    private final ItemOverrides overrides = new RetexturedOverride();
 
     protected Baked(BakedModel originalModel, List<BlockElement> elements, List<ColorData> colorData, BlockModel owner, ModelState transform, Set<String> fluids, BitSet fluidParts, Set<String> retextured) {
       super(originalModel);
@@ -147,11 +148,14 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
       // if textured, retexture. Its fine to nest these configurations
       BlockModel textured = this.owner;
       if (key.texture != null) {
-        textured = new RetexturedConfiguration(textured, this.retextured, key.texture);
+        textured = new RetexturedContext(textured, this.retextured, key.texture);
       }
 
+      // setup transformers, quadTransformer will be applied to all parts while fluid also adds in colors for the fluid
+      IQuadTransformer quadTransformer = SimpleBlockModel.applyTransform(transform, owner.getRootTransform());
+      IQuadTransformer fluidTransformer = quadTransformer;
+
       // get fluid details if needed
-      int color = -1;
       int luminosity = 0;
       if (!key.fluid.isEmpty()) {
         color = FluidVariantRendering.getColor(key.fluid.getType());
@@ -163,19 +167,20 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
       TextureAtlasSprite particle = spriteGetter.apply(textured.getMaterial("particle"));
       SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(owner.hasAmbientOcclusion(), owner.getGuiLight().lightLikeBlock(), true, owner.getTransforms(), ItemOverrides.EMPTY).particle(particle);
 
-      // add in elements
       boolean defaultUvLock = transform.isUvLocked();
       int size = elements.size();
       for (int i = 0; i < size; i++) {
         BlockElement element = elements.get(i);
         ColorData colors = LogicHelper.getOrDefault(colorData, i, ColorData.DEFAULT);
         if (fluidParts.get(i)) {
-          ColoredBlockModel.bakePart(builder, textured, element, color, luminosity, transform.getRotation(), colors.isUvLock(defaultUvLock), spriteGetter, TankModel.BAKE_LOCATION);
+          ColoredBlockModel.bakePart(builder, textured, element, luminosity, spriteGetter, transform.getRotation(), fluidTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         } else {
-          ColoredBlockModel.bakePart(builder, textured, element, colors.color(), colors.luminosity(), transform.getRotation(), colors.isUvLock(defaultUvLock), spriteGetter, TankModel.BAKE_LOCATION);
+          int partColor = colors.color();
+          IQuadTransformer partTransformer = partColor == -1 ? quadTransformer : ColoredBlockModel.applyColorQuadTransformer(partColor).andThen(quadTransformer);
+          ColoredBlockModel.bakePart(builder, textured, element, colors.luminosity(), spriteGetter, transform.getRotation(), partTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         }
       }
-      return builder.build();
+      return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
     }
 
     /** Gets a retextured model for the given fluid, using the cached model if possible */
@@ -190,7 +195,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
         if (fluid == null) {
         fluid = FluidStack.EMPTY;
       }
-      Block block = retextured.isEmpty() ? null : data.getData(RetexturedHelper.BLOCK_PROPERTY);
+      Block block = retextured.isEmpty() ? null : data.get(RetexturedHelper.BLOCK_PROPERTY);
       if (!fluid.isEmpty() || block != null) {
         BakedCacheKey key = new BakedCacheKey(fluid, block != null ? ModelHelper.getParticleTexture(block) : null);
           getCachedModel(key).emitBlockQuads(blockView, state, pos, randomSupplier, context);
@@ -202,7 +207,27 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
 
     @Override
     public ItemOverrides getOverrides() {
-      return RetexturedOverride.INSTANCE;
+      return overrides;
+    }
+
+    /** Override list to swap the texture in from NBT */
+    private class RetexturedOverride extends ItemOverrides {
+      @Nullable
+      @Override
+      public BakedModel resolve(BakedModel originalModel, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int pSeed) {
+        if (stack.isEmpty() || !stack.hasTag()) {
+          return originalModel;
+        }
+
+        // get the block first, ensuring its valid
+        Block block = RetexturedHelper.getTexture(stack);
+        if (block == Blocks.AIR) {
+          return originalModel;
+        }
+
+        // if valid, use the block
+        return getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
+      }
     }
   }
 
@@ -245,5 +270,6 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
         return baked.getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
       return slimeknights.tconstruct.library.client.model.ModelHelper.unwrap(originalModel, Baked.class).getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
     }
+    return new FluidTextureModel(model, fluids, retextured);
   }
 }

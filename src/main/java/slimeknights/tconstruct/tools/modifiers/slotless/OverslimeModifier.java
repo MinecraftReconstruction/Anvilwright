@@ -1,29 +1,38 @@
 package slimeknights.tconstruct.tools.modifiers.slotless;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import slimeknights.tconstruct.TConstruct;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.TinkerTags.Items;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.modifiers.ModifierManager;
+import slimeknights.tconstruct.library.modifiers.hook.build.ToolStatsModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.DurabilityShieldModifier;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
-import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.OverslimeModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
 
-public class OverslimeModifier extends DurabilityShieldModifier {
-  /** Key for max overslime on a tool */
-  private static final ResourceLocation KEY_OVERSLIME_CAP = TConstruct.getResource("overslime_cap");
-  /**
-   * Key marking another modifier as an overslime "friend". If no friends exist, overslime causes some debuffs.
-   * Use {@link #getFriendKey()} when possible
-   */
-  public static final ResourceLocation KEY_OVERSLIME_FRIEND = TConstruct.getResource("overslime_friend");
+/** @deprecated use helpers from {@link OverslimeModule} if possible. */
+@Deprecated
+public class OverslimeModifier extends DurabilityShieldModifier implements ToolStatsModifierHook {
+  /** @deprecated use {@link OverslimeModule#OVERSLIME_STAT} */
+  @Deprecated(forRemoval = true)
+  public static final FloatToolStat OVERSLIME_STAT = OverslimeModule.OVERSLIME_STAT;
+
+  @Override
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addHook(this, ModifierHooks.TOOL_STATS);
+  }
 
   @Override
   public Component getDisplayName(int level) {
@@ -31,18 +40,20 @@ public class OverslimeModifier extends DurabilityShieldModifier {
     return super.getDisplayName();
   }
 
+  @Override
+  public int getPriority() {
+    // higher than reinforced, reinforced does not protect overslime
+    return 150;
+  }
+
 
   /* Tool building */
 
   @Override
-  public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
-    // base cap
-    addCapacity(volatileData, (int)(50 * context.getDefinition().getData().getMultiplier(ToolStats.DURABILITY)));
-  }
-
-  @Override
-  public void addToolStats(ToolRebuildContext context, int level, ModifierStatsBuilder builder) {
-    if (!context.getVolatileData().getBoolean(KEY_OVERSLIME_FRIEND)) {
+  public void addToolStats(IToolContext context, ModifierEntry modifier, ModifierStatsBuilder builder) {
+    // TODO 1.21: encode stat debuffs using JSON?
+    OVERSLIME_STAT.add(builder, 50);
+    if (!context.getModifiers().has(TinkerTags.Modifiers.OVERSLIME_FRIEND)) {
       if (context.hasTag(Items.MELEE)) {
         ToolStats.ATTACK_DAMAGE.multiply(builder, 0.9f);
       }
@@ -59,140 +70,65 @@ public class OverslimeModifier extends DurabilityShieldModifier {
   }
 
 
-  /* Hooks */
-
-  @Override
-  public int getPriority() {
-    // higher than reinforced, reinforced does not protect overslime
-    return 150;
-  }
-
-
   /* Display */
 
   @Nullable
   @Override
-  public Boolean showDurabilityBar(IToolStackView tool, int level) {
+  public Boolean showDurabilityBar(IToolStackView tool, ModifierEntry modifier) {
     // only show as fully repaired if overslime is full
-    return getOverslime(tool) < getCapacity(tool);
+    return getAmount(tool) < getCapacity(tool, modifier) ? true : null;
   }
 
   @Override
-  public int getDurabilityRGB(IToolStackView tool, int level) {
-    if (getOverslime(tool) > 0) {
+  public int getDurabilityRGB(IToolStackView tool, ModifierEntry modifier) {
+    if (getAmount(tool) > 0) {
       // just always display light blue, not much point in color changing really
-      return 0x00D0FF;
+      return 0x00A0FF;
     }
     return -1;
   }
 
 
-  /* Data keys */
+  /* Shield implementation */
 
   @Override
-  protected ResourceLocation getShieldKey() {
-    return getId();
+  public int beforeDamageTool(IToolStackView tool, ModifierEntry modifier, int amount, @Nullable LivingEntity holder, @Nullable ItemStack stack, ModifierId cause) {
+    // allow overslime bypass
+    if (!ModifierManager.isInTag(cause, TinkerTags.Modifiers.BYPASS_OVERSLIME)) {
+      return super.beforeDamageTool(tool, modifier, amount, holder, stack, cause);
+    }
+    return amount;
   }
 
-  /** Gets the key for overslime capacity */
-  public ResourceLocation getCapacityKey() {
-    return KEY_OVERSLIME_CAP;
+  /** @deprecated use {@link OverslimeModule#getCapacity(IToolStackView)} */
+  @Deprecated
+  @Override
+  public int getShieldCapacity(IToolStackView tool, ModifierEntry modifier) {
+    return OverslimeModule.getCapacity(tool);
   }
 
-  /** Gets the key for overslime friends */
-  public ResourceLocation getFriendKey() {
-    return KEY_OVERSLIME_FRIEND;
-  }
-
-  /** Sets the friend key in this tool */
-  public void setFriend(ModDataNBT volatileData) {
-    volatileData.putBoolean(getFriendKey(), true);
-  }
-
-  /* Capacity helpers */
-
-  /**
-   * Gets the current overslime cap
-   * @param volatileData  Volatile data instance
-   * @return  Current cap
-   */
-  public int getCapacity(IModDataView volatileData) {
-    return volatileData.getInt(getCapacityKey());
-  }
-
-  /**
-   * Helper to reduce code errors
-   * @param tool  Tool instance
-   * @return  Overslime cap
-   */
-  public int getCapacity(IToolStackView tool) {
-    return getCapacity(tool.getVolatileData());
+  /** @deprecated use {@link OverslimeModule#getOverworkedBonus(IToolStackView)} */
+  @Deprecated(forRemoval = true)
+  public static int getOverworkedBonus(IToolStackView tool) {
+    return OverslimeModule.getOverworkedBonus(tool);
   }
 
   @Override
-  protected int getShieldCapacity(IToolStackView tool, int level) {
-    return getCapacity(tool);
-  }
-
-  /**
-   * Sets the given amount to the cap, if you are going to use this method, your modifier should be high priority to prevent blocking others
-   * In general, {@link #addCapacity(ModDataNBT, int)} or {@link #multiplyCapacity(ModDataNBT, float)} will serve you better
-   * @param volatileData  Volatile data instance
-   * @param amount        Amount to set
-   */
-  public void setCapacity(ModDataNBT volatileData, int amount) {
-    volatileData.putInt(KEY_OVERSLIME_CAP, amount);
-  }
-
-  /**
-   * Adds the given amount to the cap
-   * @param volatileData  Volatile data instance
-   * @param amount        Amount to add
-   */
-  public void addCapacity(ModDataNBT volatileData, int amount) {
-    setCapacity(volatileData, getCapacity(volatileData) + amount);
-  }
-
-  /**
-   * Adds the given amount to the cap
-   * @param volatileData  Volatile data instance
-   * @param factor        Multiplication factor
-   */
-  public void multiplyCapacity(ModDataNBT volatileData, float factor) {
-    volatileData.putInt(KEY_OVERSLIME_CAP, (int)(getCapacity(volatileData) * factor));
-  }
-
-
-  /* Overslime helpers */
-
-  /**
-   * Gets the current overslime on the tool
-   * @param tool  Tool stack instance
-   * @return  Default cap
-   */
-  public int getOverslime(IToolStackView tool) {
-    return getShield(tool);
-  }
-
-  @Override
-  public void setShield(ModDataNBT persistentData, int amount) {
-    super.setShield(persistentData, amount);
-  }
-
-  /**
-   * Sets the overslime on a tool
-   */
-  public void setOverslime(IToolStackView tool, int amount) {
-    setShield(tool, 0, amount); // level is unused for overslime capacity
-  }
-
-  /**
-   * Adds to the overslime on a tool
-   */
-  public void addOverslime(IToolStackView tool, int amount) {
+  public void addAmount(IToolStackView tool, ModifierEntry modifier, int amount) {
     // yeah, I am hardcoding overworked. If you need something similar, put in an issue request on github
     // grants +100% restoring per level
-    int overworked = tool.getModifierLevel(TinkerModifiers.overworked.getId());
-    addShield(tool, 0, amount * (1 + overworked));
+    super.addAmount(tool, modifier, amount * getOverworkedBonus(tool));
+  }
+
+  /** @deprecated use {@link OverslimeModule#addAmount(IToolStackView, int)} */
+  @Deprecated(forRemoval = true)
+  public void addOverslime(IToolStackView tool, ModifierEntry entry, int amount) {
+    addAmount(tool, entry, amount);
+  }
+
+  /** @deprecated use {@link OverslimeModule#removeAmount(IToolStackView, int)} */
+  @Deprecated(forRemoval = true)
+  public void removeOverslime(IToolStackView tool, ModifierEntry entry, int amount) {
+    removeAmount(tool, entry, amount);
   }
 }

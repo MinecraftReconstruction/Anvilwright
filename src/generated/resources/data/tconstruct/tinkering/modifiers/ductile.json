@@ -1,37 +1,29 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:durability",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.1,
       "operation": "multiply_base",
-      "value": 0.04
+      "stat": "tconstruct:durability"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:attack_damage",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.05,
       "operation": "multiply_base",
-      "value": 0.04
+      "stat": "tconstruct:attack_damage"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:mining_speed",
-      "operation": "multiply_base",
-      "value": 0.04
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.25,
+      "operation": "add",
+      "stat": "tconstruct:projectile_damage"
     },
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:velocity",
-      "operation": "multiply_base",
-      "value": 0.03
-    },
-    {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:projectile_damage",
-      "operation": "multiply_base",
-      "value": 0.03
+      "type": "tconstruct:stat_boost",
+      "each_level": 1.0,
+      "operation": "add",
+      "stat": "tconstruct:armor_toughness"
     }
   ]
 }

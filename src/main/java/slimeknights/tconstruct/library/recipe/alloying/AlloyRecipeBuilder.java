@@ -9,26 +9,36 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.mantle.registration.object.FluidObject;
+import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe.AlloyIngredient;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
+
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /** Builder for alloy recipes */
 @SuppressWarnings("unused")
 @RequiredArgsConstructor(staticName = "alloy")
 public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder> {
-  private final FluidStack output;
+  private final FluidOutput output;
   private final int temperature;
-  private final List<FluidIngredient> inputs = new ArrayList<>();
+  private final List<AlloyIngredient> inputs = new ArrayList<>();
+
+  /**
+   * Creates a new recipe producing the given fluid
+   * @param fluid    fluid to alloy
+   * @param amount   fluid amount
+   * @return  Builder instance
+   */
+  public static AlloyRecipeBuilder alloy(FluidObject<?> fluid, int amount) {
+    return alloy(fluid.result(amount), getTemperature(fluid));
+  }
 
   /**
    * Creates a new recipe producing the given fluid
@@ -58,7 +68,17 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @return  Builder instance
    */
   public AlloyRecipeBuilder addInput(FluidIngredient input) {
-    inputs.add(input);
+    inputs.add(new AlloyIngredient(input, false));
+    return this;
+  }
+
+  /**
+   * Adds an input that is not consumed
+   * @param input  Catalyst ingredient
+   * @return  Builder instance
+   */
+  public AlloyRecipeBuilder addCatalyst(FluidIngredient input) {
+    inputs.add(new AlloyIngredient(input, true));
     return this;
   }
 
@@ -104,30 +124,10 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
     if (inputs.size() < 2) {
       throw new IllegalStateException("Invalid alloying recipe " + id + ", must have at least two inputs");
     }
-    ResourceLocation advancementId = this.buildOptionalAdvancement(id, "alloys");
-    consumer.accept(new Result(id, advancementId));
-  }
-
-  /** Result class for the builder */
-  private class Result extends AbstractFinishedRecipe {
-    public Result(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-      super(ID, advancementID);
-    }
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      JsonArray inputArray = new JsonArray();
-      for (FluidIngredient input : inputs) {
-        inputArray.add(input.serialize());
-      }
-      json.add("inputs", inputArray);
-      json.add("result", RecipeHelper.serializeFluidStack(output));
-      json.addProperty("temperature", temperature);
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerSmeltery.alloyingSerializer.get();
-    }
+    consumer.accept(new LoadableFinishedRecipe<>(
+      new AlloyRecipe(id, inputs, output, temperature),
+      AlloyRecipe.LOADER,
+      this.buildOptionalAdvancement(id, "alloys")
+    ));
   }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -12,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.multiblock.IServantLogic;
-import slimeknights.tconstruct.library.utils.TagUtil;
+import slimeknights.tconstruct.smeltery.block.component.SearedBlock;
 import slimeknights.tconstruct.smeltery.block.entity.multiblock.HeatingStructureMultiblock.StructureData;
 
 import javax.annotation.Nullable;
@@ -61,6 +62,7 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     return new StructureData(min, max, Collections.emptySet(), hasFloor, hasFrame, hasCeiling, tanks);
   }
 
+  @Nullable
   @Override
   public StructureData detectMultiblock(Level world, BlockPos master, Direction facing) {
     // clear tanks from last check before calling
@@ -68,18 +70,13 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     return super.detectMultiblock(world, master, facing);
   }
 
-  /**
-   * Reads the structure data from Tag
-   * @param  nbt  Tag tag
-   * @return Structure data, or null if invalid
-   */
   @Override
   @Nullable
-  public StructureData readFromTag(CompoundTag nbt) {
+  public StructureData readFromTag(CompoundTag nbt, BlockPos controllerPos) {
     // add all tanks from Tag, will be picked up in the create call
     tanks.clear();
-    tanks.addAll(readPosList(nbt, TAG_TANKS));
-    return super.readFromTag(nbt);
+    tanks.addAll(readPosList(nbt, TAG_TANKS, controllerPos));
+    return super.readFromTag(nbt, controllerPos);
   }
 
   /**
@@ -92,10 +89,10 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     BlockEntity te = world.getBlockEntity(pos);
 
     // slave-blocks are only allowed if they already belong to this smeltery
-    if (te instanceof IServantLogic) {
-      return ((IServantLogic)te).isValidMaster(parent);
+    if (te instanceof IServantLogic servant) {
+      return servant.isValidMaster(parent);
     }
-
+    // this is notably reached for structure blocks with conditional block entities
     return true;
   }
 
@@ -143,12 +140,18 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     if (pos.equals(parent.getBlockPos())) {
       return true;
     }
-    if (!isValidSlave(world, pos)) {
+    // blocks need to have an in structure property, else we don't believe they support multiblocks
+    // if they have one, make sure its not true (already in a smeltery)
+    BlockState state = world.getBlockState(pos);
+    if (!state.hasProperty(SearedBlock.IN_STRUCTURE)) {
+      return false;
+    }
+    // if its currently in a structure, make sure its in our structure
+    if (state.getValue(SearedBlock.IN_STRUCTURE) && !isValidSlave(world, pos)) {
       return false;
     }
 
     // floor has a smaller list
-    BlockState state = world.getBlockState(pos);
     // treat frame blocks as walls, its more natural
     if (side == CuboidSide.FLOOR && !isFrame) {
       return isValidFloor(state.getBlock());
@@ -172,7 +175,7 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
       // if not part of the actual structure, we only care if its a block that's not air in the inner section
       // in other words, ignore blocks added into the frame
       // note we don't do a check for a valid inner block, if it is a valid inner block we need to update to include it
-      return structure.isInside(pos) && !state.isAir();
+      return structure.isInside(pos) && !isAirBlock(state);
     }
 
     // if its one block above, might be trying to expand upwards
@@ -258,21 +261,22 @@ public abstract class HeatingStructureMultiblock<T extends MantleBlockEntity & I
     }
 
     @Override
-    public CompoundTag writeClientTag() {
-      CompoundTag nbt = super.writeClientTag();
-      nbt.put(TAG_TANKS, writePosList(tanks));
+    public CompoundTag writeClientTag(BlockPos controllerPos) {
+      CompoundTag nbt = super.writeClientTag(controllerPos);
+      nbt.put(TAG_TANKS, writePosList(tanks, controllerPos));
       return nbt;
     }
 
     /**
      * Writes this structure to Tag
      * @return  structure as Tag
+     * @param controllerPos  Position of the controller for relative saving, use {@link BlockPos#ZERO} for absolute.
      */
     @Override
-    public CompoundTag writeToTag() {
-      CompoundTag nbt = super.writeToTag();
+    public CompoundTag writeToTag(BlockPos controllerPos) {
+      CompoundTag nbt = super.writeToTag(controllerPos);
       if (insideCheck != null) {
-        nbt.put(TAG_INSIDE_CHECK, TagUtil.writePos(insideCheck));
+        nbt.put(TAG_INSIDE_CHECK, NbtUtils.writeBlockPos(insideCheck.subtract(controllerPos)));
       }
       return nbt;
     }

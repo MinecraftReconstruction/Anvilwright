@@ -7,11 +7,12 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -21,8 +22,8 @@ import java.util.function.Consumer;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<ContainerFillingRecipeBuilder> {
   private final ResourceLocation result;
-  private final long fluidAmount;
-  private final ContainerFillingRecipeSerializer<?> recipeSerializer;
+  private final int fluidAmount;
+  private final TypeAwareRecipeSerializer<? extends ContainerFillingRecipe> recipeSerializer;
 
   /**
    * Creates a new builder instance using the given result, amount, and serializer
@@ -31,8 +32,8 @@ public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<Contain
    * @param recipeSerializer  Serializer
    * @return  Builder instance
    */
-  public static ContainerFillingRecipeBuilder castingRecipe(ItemLike result, long fluidAmount, ContainerFillingRecipeSerializer<?> recipeSerializer) {
-    return new ContainerFillingRecipeBuilder(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(result.asItem())), fluidAmount, recipeSerializer);
+  public static ContainerFillingRecipeBuilder castingRecipe(ItemLike result, int fluidAmount, TypeAwareRecipeSerializer<? extends ContainerFillingRecipe> recipeSerializer) {
+    return new ContainerFillingRecipeBuilder(Loadables.ITEM.getKey(result.asItem()), fluidAmount, recipeSerializer);
   }
 
   /**
@@ -102,6 +103,7 @@ public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<Contain
         json.addProperty("group", group);
       }
       json.addProperty("fluid_amount", fluidAmount);
+      // TODO: consider another way to spoof this for datagen?
       json.addProperty("container", result.toString());
     }
   }

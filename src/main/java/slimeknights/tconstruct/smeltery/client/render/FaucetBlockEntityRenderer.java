@@ -41,8 +41,8 @@ public class FaucetBlockEntityRenderer implements BlockEntityRenderer<FaucetBloc
 
     // fetch faucet model to determine where to render fluids
     BlockState state = tileEntity.getBlockState();
-    FluidsModel.Baked model = ModelHelper.getBakedModel(state, FluidsModel.Baked.class);
-    if (model != null) {
+    List<FluidCuboid> fluids = FluidCuboid.REGISTRY.get(state, List.of());
+    if (!fluids.isEmpty()) {
       // if side, rotate fluid model
       Direction direction = state.getValue(FaucetBlock.FACING);
       boolean isRotated = RenderingHelper.applyRotation(matrices, direction);
@@ -57,12 +57,12 @@ public class FaucetBlockEntityRenderer implements BlockEntityRenderer<FaucetBloc
 
       // render all cubes in the model
       VertexConsumer buffer = bufferIn.getBuffer(MantleRenderTypes.FLUID);
-      for (FluidCuboid cube : model.getFluids()) {
-        FluidRenderer.renderCuboid(matrices, buffer, cube, 0, still, flowing, color, combinedLightIn, isGas);
+      for (FluidCuboid cube : fluids) {
+        FluidRenderer.renderCuboid(matrices, buffer, cube, 0, still, flowing, color, combinedLightIn, false);
       }
 
       // render into the block(s) below
-      FaucetFluidLoader.renderFaucetFluids(world, tileEntity.getBlockPos(), direction, matrices, buffer, still, flowing, color, combinedLightIn);
+      RenderingHelper.renderFaucetFluids(world, tileEntity.getBlockPos(), direction, matrices, buffer, still, flowing, color, combinedLightIn);
 
       // if rotated, pop back rotation
       if(isRotated) {

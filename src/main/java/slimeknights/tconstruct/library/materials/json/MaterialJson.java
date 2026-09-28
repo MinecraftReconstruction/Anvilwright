@@ -1,12 +1,16 @@
 package slimeknights.tconstruct.library.materials.json;
 
 import lombok.Data;
-import slimeknights.mantle.client.book.data.JsonCondition;
+import net.minecraft.world.item.Rarity;
+import net.minecraftforge.common.crafting.conditions.ICondition;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("ClassCanBeRecord") // GSON does not support records
 @Data
+@Internal
 public class MaterialJson {
   @Nullable
   private final JsonCondition condition;
@@ -16,6 +20,8 @@ public class MaterialJson {
   private final Integer tier;
   @Nullable
   private final Integer sortOrder;
+  @Nullable
+  private final Rarity rarity;
   @Nullable
   private final Boolean hidden;
   @Nullable

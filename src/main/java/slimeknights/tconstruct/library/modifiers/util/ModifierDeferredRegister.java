@@ -6,8 +6,10 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager.ModifierRegistrationEvent;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /** Utility similar to {@link net.minecraftforge.registries.DeferredRegister} but for modifiers, as they no longer use a forge registry */
@@ -18,7 +20,7 @@ public class ModifierDeferredRegister {
   /** List of entries to register */
   private final Map<ModifierId,Supplier<? extends Modifier>> entries = new LinkedHashMap<>();
   /** List of dynamic modifiers to expect */
-  private final Map<ModifierId,Class<?>> expected = new LinkedHashMap<>();
+  private final Set<ModifierId> expected = new LinkedHashSet<>();
 
   /** If true, the registration event has been seen, so its now too late to register new modifiers */
   private boolean seenRegisterEvent = false;
@@ -34,13 +36,15 @@ public class ModifierDeferredRegister {
    * @param supplier  Supplier to modifier instance
    * @param <T>       Type of modifier
    * @return StaticModifier instance that will resolve to the modifier once static modifiers are registered
+   * @deprecated Use {@link slimeknights.tconstruct.tools.data.ModifierProvider} with {@link slimeknights.tconstruct.library.modifiers.modules.ModifierModule} for any custom modifier logic.
    */
+  @Deprecated
   public <T extends Modifier> StaticModifier<T> register(String name, Supplier<? extends T> supplier) {
     if (seenRegisterEvent) {
       throw new IllegalStateException("Cannot register new entries to DeferredRegister after ModifierRegistrationEvent has been fired.");
     }
     ModifierId id = new ModifierId(modId, name);
-    if (expected.containsKey(id)) {
+    if (expected.contains(id)) {
       throw new IllegalArgumentException("Already registered as an dynamic modifier " + id);
     }
     Supplier<? extends Modifier> original = entries.put(id, supplier);
@@ -53,11 +57,9 @@ public class ModifierDeferredRegister {
   /**
    * Registers a modifier as an expected dynamic modifier
    * @param name         Modifier name, if this modifier is missing from datapacks a warning will be logged
-   * @param classFilter  Class filter, if the modifier does not match this type in datapacks a warning will be logged
-   * @param <T>  Class type
    * @return  Dynamic modifier instance
    */
-  public <T extends Modifier> DynamicModifier<T> registerDynamic(String name, Class<T> classFilter) {
+  public DynamicModifier registerDynamic(String name) {
     if (seenRegisterEvent) {
       throw new IllegalStateException("Cannot register new entries to DeferredRegister after ModifierRegistrationEvent has been fired.");
     }
@@ -65,11 +67,8 @@ public class ModifierDeferredRegister {
     if (entries.containsKey(id)) {
       throw new IllegalArgumentException("Already registered as a static modifier " + id);
     }
-    Class<?> original = expected.put(id, classFilter);
-    if (original != null) {
-      throw new IllegalArgumentException("Duplicate dynamic registration " + id);
-    }
-    return new DynamicModifier<>(id, classFilter);
+    expected.add(id);
+    return new DynamicModifier(id);
   }
 
   /** Called on modifier registration to register all entries */
@@ -78,8 +77,8 @@ public class ModifierDeferredRegister {
     for (Entry<ModifierId, Supplier<? extends Modifier>> entry : entries.entrySet()) {
       event.registerStatic(entry.getKey(), entry.getValue().get());
     }
-    for (Entry<ModifierId, Class<?>> entry : expected.entrySet()) {
-      event.registerExpected(entry.getKey(), entry.getValue());
+    for (ModifierId id : expected) {
+      event.registerExpected(id);
     }
   }
 }

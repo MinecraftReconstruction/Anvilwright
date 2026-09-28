@@ -11,9 +11,7 @@ import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IMutableTinkerStationContainer;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -54,35 +52,23 @@ public interface IModifierWorktableRecipe extends ICommonRecipe<ITinkerableConta
    * @return Tool stack result. Can be the same instance as previousResult or a new instance.
    *         Should never share NBT with {@link ITinkerableContainer#getTinkerable()}, needs to be a copy.
    */
-  RecipeResult<ToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier);
+  RecipeResult<LazyToolStack> getResult(ITinkerableContainer inv, ModifierEntry modifier);
 
-  /** Gets the number to shrink the tool slot by and the size of the output, perfectly valid for this to be higher than the contained number of tools */
-  default int toolResultSize() {
-    return ITinkerStationRecipe.DEFAULT_TOOL_STACK_SIZE;
-  }
-  
-  /** Recipe sensitive result size */
-  default int toolResultSize(ITinkerableContainer inv, ModifierEntry selected) {
-    return Math.min(inv.getTinkerableStack().getCount(), toolResultSize());
-  }
-
-  /** @deprecated use {@link #updateInputs(IToolStackView, ITinkerableContainer.Mutable, ModifierEntry, boolean)} */
-  @Deprecated
-  default void updateInputs(IToolStackView result, ITinkerableContainer.Mutable inv, boolean isServer) {
-    // shrink all stacks by 1
-    for (int index = 0; index < inv.getInputCount(); index++) {
-      inv.shrinkInput(index, 1);
-    }
+  default int shrinkToolSlotBy(LazyToolStack result) {
+    return result.getSize();
   }
 
   /**
    * Updates the input stacks upon crafting this recipe
-   * @param result  Result from {@link #getResult(ITinkerableContainer, ModifierEntry)}
-   * @param inv     Inventory instance to modify inputs
+   * @param result    Result from {@link #getResult(ITinkerableContainer, ModifierEntry)}
+   * @param inv       Inventory instance to modify inputs
    * @param isServer  If true, this is on the serverside. Use to handle randomness, {@link IMutableTinkerStationContainer#giveItem(ItemStack)} should handle being called serverside only
    */
-  default void updateInputs(IToolStackView result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
-    updateInputs(result, inv, isServer);
+  default void updateInputs(LazyToolStack result, ITinkerableContainer.Mutable inv, ModifierEntry selected, boolean isServer) {
+    // shrink all stacks by 1
+    for (int index = 0; index < inv.getInputCount(); index++) {
+      inv.shrinkInput(index, 1);
+    }
   }
 
   /** Gets input tool options, need not be rendered with the modifiers, simply be valid tools */
@@ -91,12 +77,22 @@ public interface IModifierWorktableRecipe extends ICommonRecipe<ITinkerableConta
   /**
    * Gets an ingredients to display in JEI.
    * @param  slot  Slot index to display
-   * @return  Display item list
+   * @return  Display item list, or {@link List#of()} if an invalid index.
    */
   List<ItemStack> getDisplayItems(int slot);
 
   /** Gets the number of inputs for this recipe */
   int getInputCount();
+
+  /** If true, the input in the tool slot is consumed rather than being a catalyst. */
+  default boolean isToolInput() {
+    return false;
+  }
+
+  /** If true, attempts a focus link on the tools and modifier slots */
+  default boolean linkToolsModifiers() {
+    return false;
+  }
 
   /** If true, the recipe modifier is an output */
   default boolean isModifierOutput() {
@@ -108,13 +104,13 @@ public interface IModifierWorktableRecipe extends ICommonRecipe<ITinkerableConta
 
   @Override
   @Deprecated
-  default ItemStack getResultItem(RegistryAccess registryAccess) {
+  default ItemStack getResultItem(RegistryAccess access) {
     return ItemStack.EMPTY;
   }
 
   @Deprecated
   @Override
-  default ItemStack assemble(ITinkerableContainer inv, RegistryAccess registryAccess) {
+  default ItemStack assemble(ITinkerableContainer inv, RegistryAccess access) {
     return ItemStack.EMPTY;
   }
 }

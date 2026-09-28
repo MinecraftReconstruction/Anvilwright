@@ -7,8 +7,6 @@ import io.github.fabricators_of_create.porting_lib.util.TrueCondition;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
@@ -16,8 +14,6 @@ import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
 import slimeknights.tconstruct.common.registration.CastItemObject;
-import slimeknights.tconstruct.library.json.TagDifferencePresentCondition;
-import slimeknights.tconstruct.library.json.TagIntersectionPresentCondition;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.casting.ItemCastingRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
@@ -26,19 +22,34 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+
+import static slimeknights.mantle.Mantle.COMMON;
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /**
  * Recipe helper for methods related to melting and casting
  */
 public interface ISmelteryRecipeHelper extends ICastCreationHelper {
+  /* Builders for casting and melting from tags */
+
+  /** Creates a smeltery builder for a standard fluid */
+  default SmelteryRecipeBuilder fluid(Consumer<FinishedRecipe> consumer, String name, FluidObject<?> fluid) {
+    return SmelteryRecipeBuilder.fluid(consumer, location(name), fluid);
+  }
+
+  /** Creates a smeltery builder for a molten fluid */
+  default SmelteryRecipeBuilder molten(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid) {
+    return fluid(consumer, fluid.getId().getPath().substring("molten_".length()), fluid);
+  }
+
+
   /* Melting */
 
   /**
-   * Base logic for {@link  #metalMelting(Consumer, Fluid, String, boolean, String, boolean, IByproduct...)}
+   * Creates a melting recipe with a tag input
    * @param consumer    Recipe consumer
    * @param fluid       Fluid to melt into
-   * @param amount      Amount to melt into
+   * @param temperature Minimum melting temperature
    * @param tagName     Input tag
    * @param factor      Melting factor
    * @param recipePath  Recipe output name
@@ -51,16 +62,14 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
   }
 
   /**
-   * Base logic for {@link  #metalMelting(Consumer, Fluid, String, boolean, String, boolean, IByproduct...)}
+   * Common usage of {@link #tagMelting(Consumer, FluidOutput, int, String, float, String, boolean)}
    * @param consumer    Recipe consumer
    * @param fluid       Fluid to melt into
-   * @param amount      Amount to melt into
+   * @param amount      Fluid output amount
    * @param tagName     Input tag
    * @param factor      Melting factor
    * @param recipePath  Recipe output name
-   * @param oreRate     Ore rate for boosting
    * @param isOptional  If true, recipe is optional
-   * @param byproducts  List of byproduct options for this metal, first one that is present will be used
    */
   default void oreMelting(Consumer<FinishedRecipe> consumer, Fluid fluid, long amount, String tagName, @Nullable TagKey<Item> size, float factor, String recipePath, boolean isOptional, OreRateType oreRate, float byproductScale, IByproduct... byproducts) {
     Consumer<FinishedRecipe> wrapped;
@@ -159,8 +168,6 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
       oreMelting(consumer, fluid, FluidValues.INGOT * 6, name + "_ores", Tags.Items.ORE_RATES_DENSE,    4.5f, prefix + "ore_dense",    isOptional, OreRateType.METAL, 6.0f, byproducts);
       georeMelting(consumer, fluid, FluidValues.INGOT, name, prefix);
     }
-    // remaining forms are always optional as we don't ship them
-    // allow disabling dust as some mods treat dust as distinct from ingots
     if (hasDust) {
       tagMelting(consumer, fluid, FluidValues.INGOT, name + "_dusts", 0.75f, prefix + "dust", true);
     }
@@ -208,6 +215,50 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
       oreMelting(consumer, fluid, FluidValues.GEM * 3, name + "_ores", Tags.Items.ORE_RATES_DENSE,    4.5f, prefix + "ore_dense",    isOptional, OreRateType.GEM, 3.0f, byproducts);
       georeMelting(consumer, fluid, FluidValues.GEM, name, prefix);
     }
+    metalMelting(builder, hasOre, hasDust);
+  }
+
+  /** @deprecated use {@link SmelteryRecipeBuilder} via {@link SmelteryRecipeBuilder#fluid(Consumer, ResourceLocation, Fluid)} */
+  @Deprecated(forRemoval = true)
+  default void metalMelting(Consumer<FinishedRecipe> consumer, Fluid fluid, String name, boolean hasOre, boolean hasDust, String folder, boolean isOptional, IByproduct... byproducts) {
+    SmelteryRecipeBuilder builder = SmelteryRecipeBuilder.fluid(consumer, location(name), fluid).meltingFolder(folder).optional(isOptional);
+    if (hasOre) {
+      builder.ore(byproducts);
+    }
+    metalMelting(builder, hasOre, hasDust);
+  }
+
+  /** Shared logic for gem melting */
+  @Deprecated(forRemoval = true)
+  private static void gemMelting(SmelteryRecipeBuilder builder, boolean hasOre, int blockSize) {
+    // not using the gem helper as it will add casting
+    builder.oreRate(OreRateType.GEM).baseUnit(FluidValues.GEM).damageUnit(FluidValues.GEM_SHARD);
+    builder.melting(blockSize, "block", "storage_blocks", 3.0f, false, false);
+    builder.melting(1, "gem", 1, false);
+    if (hasOre) {
+      builder.sparseOre(0.5f).singularOre(1).denseOre(3);
+      // removed geoes as no addon will have that, use the builder if you really need them
+    }
+  }
+
+  /** @deprecated use {@link SmelteryRecipeBuilder} vua {@link #molten(Consumer, FluidObject)} */
+  @Deprecated(forRemoval = true)
+  default void gemMelting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, String name, boolean hasOre, int blockSize, String folder, boolean isOptional, IByproduct... byproducts) {
+    SmelteryRecipeBuilder builder = SmelteryRecipeBuilder.fluid(consumer, location(name), fluid).meltingFolder(folder).optional(isOptional);
+    if (hasOre) {
+      builder.ore(byproducts);
+    }
+    gemMelting(builder, hasOre, blockSize);
+  }
+
+  /** @deprecated use {@link SmelteryRecipeBuilder} via {@link SmelteryRecipeBuilder#fluid(Consumer, ResourceLocation, Fluid)} */
+  @Deprecated(forRemoval = true)
+  default void gemMelting(Consumer<FinishedRecipe> consumer, Fluid fluid, String name, boolean hasOre, int blockSize, String folder, boolean isOptional, IByproduct... byproducts) {
+    SmelteryRecipeBuilder builder = SmelteryRecipeBuilder.fluid(consumer, location(name), fluid).meltingFolder(folder).optional(isOptional);
+    if (hasOre) {
+      builder.ore(byproducts);
+    }
+    gemMelting(builder, hasOre, blockSize);
   }
 
 
@@ -370,47 +421,27 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
    * Adds a casting recipe using a nugget cast
    * @param consumer  Recipe consumer
    * @param fluid     Input fluid
-   * @param forgeTag  If true, uses the forge tag from the fluid instead of the local tag
    * @param nugget    Nugget output
    * @param location  Recipe base
    */
-  default void nuggetCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, boolean forgeTag, ItemLike nugget, String location) {
-    castingWithCast(consumer, fluid, forgeTag, FluidValues.NUGGET, TinkerSmeltery.nuggetCast, nugget, location);
+  default void nuggetCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, ItemLike nugget, String location) {
+    castingWithCast(consumer, fluid, FluidValues.NUGGET, TinkerSmeltery.nuggetCast, nugget, location);
   }
 
-  /**
-   * Adds a casting recipe using a nugget cast
-   * @param consumer  Recipe consumer
-   * @param fluid     Input fluid
-   * @param nugget    Nugget output
-   * @param location  Recipe base
-   */
-  default void nuggetCastingRecipe(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, ItemLike nugget, String location) {
-    nuggetCasting(consumer, fluid, false, nugget, location);
-  }
-
-  /**
-   * Add recipes for a standard mineral, uses local tag
-   * @param consumer  Recipe consumer
-   * @param fluid     Fluid input
-   * @param forgeTag  If true, uses the forge tag from the fluid instead of the local tag
-   * @param block     Block result
-   * @param ingot     Ingot result
-   * @param nugget    Nugget result
-   * @param folder    Output folder
-   */
-  default void metalCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, boolean forgeTag, @Nullable ItemLike block, @Nullable ItemLike ingot, @Nullable ItemLike nugget, String folder, String metal) {
+  /** @deprecated use {@link SmelteryRecipeBuilder} with {@link #molten(Consumer, FluidObject)} */
+  @Deprecated(forRemoval = true)
+  default void metalCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, @Nullable ItemLike block, @Nullable ItemLike ingot, @Nullable ItemLike nugget, String folder, String metal) {
     String metalFolder = folder + metal + "/";
     if (block != null) {
       ItemCastingRecipeBuilder.basinRecipe(block)
-                              .setFluidAndTime(fluid, forgeTag, FluidValues.METAL_BLOCK)
-                              .save(consumer, modResource(metalFolder + "block"));
+                              .setFluidAndTime(fluid, FluidValues.METAL_BLOCK)
+                              .save(consumer, location(metalFolder + "block"));
     }
     if (ingot != null) {
-      ingotCasting(consumer, fluid, forgeTag, ingot, metalFolder + "ingot");
+      ingotCasting(consumer, fluid, ingot, metalFolder + "ingot");
     }
     if (nugget != null) {
-      nuggetCasting(consumer, fluid, forgeTag, nugget, metalFolder + "nugget");
+      nuggetCasting(consumer, fluid, nugget, metalFolder + "nugget");
     }
     // plates are always optional, we don't ship them
     tagCasting(consumer, fluid, forgeTag, FluidValues.INGOT, TinkerSmeltery.plateCast, metal + "_plates", folder + metal + "/plate", true);
@@ -420,38 +451,14 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
     tagCasting(consumer, fluid, forgeTag, FluidValues.INGOT / 2, TinkerSmeltery.wireCast, metal + "_wires", folder + metal + "/wire", true);
   }
 
-  /**
-   * Add recipes for a standard mineral, uses local tag
-   * @param consumer  Recipe consumer
-   * @param fluid     Fluid input
-   * @param block     Block result
-   * @param ingot     Ingot result
-   * @param nugget    Nugget result
-   * @param folder    Output folder
-   */
-  default void metalCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, @Nullable ItemLike block, @Nullable ItemLike ingot, @Nullable ItemLike nugget, String folder, String metal) {
-    metalCasting(consumer, fluid, false, block, ingot, nugget, folder, metal);
-  }
-
-  /**
-   * Add recipes for a standard mineral, uses local tag
-   * @param consumer  Recipe consumer
-   * @param fluid     Fluid input
-   * @param metal     Metal object
-   * @param folder    Output folder
-   */
+  /** @deprecated use {@link SmelteryRecipeBuilder} with {@link #molten(Consumer, FluidObject)}. */
+  @Deprecated(forRemoval = true)
   default void metalCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, MetalItemObject metal, String folder, String name) {
     metalCasting(consumer, fluid, metal.get(), metal.getIngot(), metal.getNugget(), folder, name);
   }
 
-  /**
-   * Add recipes for a standard mineral, uses forge tag
-   * @param consumer       Recipe consumer
-   * @param fluid          Fluid input
-   * @param name           Name of ore
-   * @param folder         Output folder
-   * @param forceStandard  If true, all default materials will always get a recipe, used for common materials provided by the mod (e.g. copper)
-   */
+  /** @deprecated use {@link SmelteryRecipeBuilder} with {@link #molten(Consumer, FluidObject)} */
+  @Deprecated(forRemoval = true)
   default void metalTagCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, String name, String folder, boolean forceStandard) {
     // nugget and ingot
     tagCasting(consumer, fluid, true, FluidValues.NUGGET, TinkerSmeltery.nuggetCast, name + "_nuggets", folder + name + "/nugget", !forceStandard);

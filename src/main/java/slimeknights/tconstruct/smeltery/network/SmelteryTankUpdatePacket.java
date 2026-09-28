@@ -2,7 +2,6 @@ package slimeknights.tconstruct.smeltery.network;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.AllArgsConstructor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
@@ -13,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Packet sent whenever the contents of the smeltery tank change
+ * Packet sent whenever the contents of the smeltery tank change.
+ * TODO 1.21: make record
  */
 @AllArgsConstructor
-public class SmelteryTankUpdatePacket implements IThreadsafePacket {
+public class SmelteryTankUpdatePacket implements BlockEntityPacket<ISmelteryTankHandler> {
   private final BlockPos pos;
   private final List<FluidStack> fluids;
 
@@ -39,13 +39,17 @@ public class SmelteryTankUpdatePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public BlockPos pos() {
+    return pos;
   }
 
-  private static class HandleClient {
-    private static void handle(SmelteryTankUpdatePacket packet) {
-      BlockEntityHelper.get(ISmelteryTankHandler.class, Minecraft.getInstance().level, packet.pos).ifPresent(te -> te.updateFluidsFromPacket(packet.fluids));
-    }
+  @Override
+  public Class<ISmelteryTankHandler> type() {
+    return ISmelteryTankHandler.class;
+  }
+
+  @Override
+  public void handleBlockEntity(Context context, ISmelteryTankHandler be) {
+    be.updateFluidsFromPacket(fluids);
   }
 }

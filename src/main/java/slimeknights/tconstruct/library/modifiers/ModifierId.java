@@ -1,20 +1,25 @@
 package slimeknights.tconstruct.library.modifiers;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.utils.IdParser;
+import slimeknights.tconstruct.library.utils.ResourceId;
 
 import javax.annotation.Nullable;
 
 /**
- * This is just a copy of ResourceLocation for type safety.
+ * This is just a copy of ResourceLocation for type safety in modifier JSON.
  */
-public class ModifierId extends ResourceLocation {
+public class ModifierId extends ResourceId {
+  public static final IdParser<ModifierId> PARSER = new IdParser<>(ModifierId::new, "Modifier");
+  /** ID of the default modifier. Used in a few contexts to indicate "no modifier" instead of using null. */
+  public static final ModifierId EMPTY = new ModifierId(TConstruct.MOD_ID, "empty");
+  /**
+   * Context key used in {@link slimeknights.tconstruct.library.client.modifiers.ModifierModelMapManager}.
+   * Note when the modifier itself is the JSON file (such as modifier JSON), {@link ContextKey#ID} will be used instead.
+   */
+  public static final ContextKey<ModifierId> CONTEXT_KEY = new ContextKey<>("modifier");
 
   public ModifierId(String resourceName) {
     super(resourceName);
@@ -24,76 +29,23 @@ public class ModifierId extends ResourceLocation {
     super(namespaceIn, pathIn);
   }
 
-  public ModifierId(ResourceLocation resourceLocation) {
-    super(resourceLocation.getNamespace(), resourceLocation.getPath());
+  public ModifierId(ResourceLocation location) {
+    super(location);
   }
 
-  /**
-   * Creates a new modifier ID from the given string
-   * @param string  String
-   * @return  Material ID, or null if invalid
-   */
+  private ModifierId(String namespace, String path, @Nullable Dummy pDummy) {
+    super(namespace, path, pDummy);
+  }
+
+  /** {@return Modifier ID, or null if invalid} */
   @Nullable
   public static ModifierId tryParse(String string) {
-    try {
-      return new ModifierId(string);
-    } catch (ResourceLocationException resourcelocationexception) {
-      return null;
-    }
+    return tryParse(string, (namespace, path) -> new ModifierId(namespace, path, null));
   }
 
-  /**
-   * Gets a modifier ID from JSON, throwing a nice exception if invalid
-   * @param tag  Compound object
-   * @param key   Key to fetch
-   * @return  Resource location parsed
-   */
-  public static ModifierId getFromNbt(CompoundTag tag, String key) {
-    String text = tag.getString(key);
-    ModifierId location = tryParse(text);
-    if (location == null) {
-      throw new JsonSyntaxException("Expected " + key + " to be a Modifier ID, was '" + text + "'");
-    }
-    return location;
-  }
-
-  /**
-   * Gets a modifier ID from JSON, throwing a nice exception if invalid
-   * @param json  JSON object
-   * @param key   Key to fetch
-   * @return  Resource location parsed
-   */
-  public static ModifierId getFromJson(JsonObject json, String key) {
-    String text = GsonHelper.getAsString(json, key);
-    ModifierId location = tryParse(text);
-    if (location == null) {
-      throw new JsonSyntaxException("Expected " + key + " to be a Modifier ID, was '" + text + "'");
-    }
-    return location;
-  }
-
-  /**
-   * Gets a modifier ID from JSON, throwing a nice exception if invalid
-   * @param json  JSON object
-   * @param key   Key to fetch
-   * @return  Resource location parsed
-   */
-  public static ModifierId convertFromJson(JsonElement json, String key) {
-    String text = GsonHelper.convertToString(json, key);
-    ModifierId location = tryParse(text);
-    if (location == null) {
-      throw new JsonSyntaxException("Expected " + key + " to be a Modifier ID, was '" + text + "'");
-    }
-    return location;
-  }
-
-  /** Writes an ID to the packet buffer */
-  public void toNetwork(FriendlyByteBuf buf) {
-    buf.writeUtf(toString());
-  }
-
-  /** Reads an ID from the packet buffer */
-  public static ModifierId fromNetwork(FriendlyByteBuf buf) {
-    return new ModifierId(buf.readUtf(Short.MAX_VALUE));
+  /** {@return Modifier ID, or null if invalid} */
+  @Nullable
+  public static ModifierId tryBuild(String namespace, String path) {
+    return tryBuild(namespace, path, (n, p) -> new ModifierId(namespace, path, null));
   }
 }

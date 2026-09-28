@@ -9,13 +9,15 @@ import slimeknights.mantle.util.BlockEntityHelper;
 
 public class FluidUpdatePacket implements IThreadsafePacket {
 
+/**
+ * Packet for when the fluid changes in a block entity.
+ * TODO 1.21: make record.
+ */
+@RequiredArgsConstructor
+@ToString
+public class FluidUpdatePacket implements BlockEntityPacket<IFluidPacketReceiver> {
   protected final BlockPos pos;
   protected final FluidStack fluid;
-
-  public FluidUpdatePacket(BlockPos pos, FluidStack fluid) {
-    this.pos = pos;
-    this.fluid = fluid;
-  }
 
   public FluidUpdatePacket(FriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
@@ -29,25 +31,26 @@ public class FluidUpdatePacket implements IThreadsafePacket {
   }
 
   @Override
-  public void handleThreadsafe(Context context) {
-    HandleClient.handle(this);
+  public BlockPos pos() {
+    return pos;
+  }
+
+  @Override
+  public Class<IFluidPacketReceiver> type() {
+    return IFluidPacketReceiver.class;
+  }
+
+  @Override
+  public void handleBlockEntity(Context context, IFluidPacketReceiver be) {
+    be.updateFluidTo(fluid);
   }
 
   /** Interface to implement for anything wishing to receive fluid updates */
   public interface IFluidPacketReceiver {
-
     /**
      * Updates the current fluid to the specified value
-     *
      * @param fluid New fluidstack
      */
     void updateFluidTo(FluidStack fluid);
-  }
-
-  /** Safely runs client side only code in a method only called on client */
-  private static class HandleClient {
-    private static void handle(FluidUpdatePacket packet) {
-      BlockEntityHelper.get(IFluidPacketReceiver.class, Minecraft.getInstance().level, packet.pos).ifPresent(te -> te.updateFluidTo(packet.fluid));
-    }
   }
 }

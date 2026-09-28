@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Consumer;
 
 /**
  * Fluid handler implementation for the smeltery
@@ -136,6 +137,7 @@ public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> ex
       fluids.remove(index);
       fluids.add(0, fluid);
       parent.notifyFluidsChanged(FluidChange.CHANGED, FluidStack.EMPTY);
+      tankListChange.run();
     }
   }
 
@@ -241,6 +243,7 @@ public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> ex
     FluidStack newFirst = getFluidInTank(0);
     if (!oldFirst.isFluidEqual(newFirst)) {
       parent.notifyFluidsChanged(FluidChange.ORDER_CHANGED, newFirst);
+      tankListChange.run();
     }
   }
 

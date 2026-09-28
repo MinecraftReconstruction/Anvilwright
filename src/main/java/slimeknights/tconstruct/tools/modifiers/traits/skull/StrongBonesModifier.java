@@ -14,14 +14,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.modifiers.impl.TotalArmorLevelModifier;
-import slimeknights.tconstruct.library.modifiers.spilling.ISpillingEffect;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
+import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
+import slimeknights.tconstruct.library.modifiers.impl.SingleLevelModifier;
+import slimeknights.tconstruct.library.modifiers.modules.technical.ArmorLevelModule;
+import slimeknights.tconstruct.library.modifiers.modules.technical.CureOnRemovalModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
-import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.utils.JsonUtils;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nonnull;
@@ -30,6 +31,9 @@ public class StrongBonesModifier extends TotalArmorLevelModifier {
   private static final TinkerDataKey<Integer> STRONG_BONES = TConstruct.createKey("strong_bones");
   /** Key for modifiers that are boosted by drinking milk */
   public static final TinkerDataKey<Integer> CALCIFIABLE = TConstruct.createKey("calcifable");
+  /** Module to add to any calcifiable modifiers */
+  public static final ArmorLevelModule CALCIFIABLE_MODULE = new ArmorLevelModule(CALCIFIABLE, false, TinkerTags.Items.HELD_ARMOR);
+
   public StrongBonesModifier() {
     super(STRONG_BONES, true);
     LivingEntityUseItemEvents.LIVING_USE_ITEM_FINISH.register(StrongBonesModifier::onItemFinishUse);
@@ -47,16 +51,29 @@ public class StrongBonesModifier extends TotalArmorLevelModifier {
     }
   }
 
-  private static void drinkMilk(LivingEntity living, int duration) {
-    if (ModifierUtil.getTotalModifierLevel(living, STRONG_BONES) > 0) {
-      MobEffectInstance effect = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, duration);
+  private static boolean drinkMilk(LivingEntity living, int flat, int eachLevel, FluidAction action) {
+    // strong bones has to be the helmet as we use it for curing
+    // TODO 1.20: can use the new cure effects to make this work in any slot
+    ItemStack helmet = living.getItemBySlot(EquipmentSlot.HEAD);
+    boolean didSomething = false;
+    int level = ModifierUtil.getModifierLevel(helmet, TinkerModifiers.strongBones.getId());
+    if (level > 0) {
+      MobEffectInstance effect = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, flat + eachLevel * level);
       effect.getCurativeItems().clear();
-      effect.getCurativeItems().add(new ItemStack(living.getItemBySlot(EquipmentSlot.HEAD).getItem()));
-      living.addEffect(effect);
+      effect.getCurativeItems().add(new ItemStack(helmet.getItem()));
+      // on simulate, don't apply the effect, just ask if we can apply
+      didSomething = action.execute() ? living.addEffect(effect) : living.canBeAffected(effect);
+      // quick exit on simulate: no more information needed
+      if (didSomething && action.simulate()) {
+        return true;
+      }
     }
-    if (ModifierUtil.getTotalModifierLevel(living, CALCIFIABLE) > 0) {
-      TinkerModifiers.calcifiedEffect.get().apply(living, duration, 0, true);
+    level = ArmorLevelModule.getLevel(living, CALCIFIABLE);
+    if (level > 0) {
+      MobEffectInstance effect = new MobEffectInstance(TinkerModifiers.calcifiedEffect.get(), flat + eachLevel * level, 0);
+      didSomething |= action.execute() ? living.addEffect(effect) : living.canBeAffected(effect);
     }
+    return didSomething;
   }
 
   /** Called when you finish drinking milk */
@@ -70,27 +87,13 @@ public class StrongBonesModifier extends TotalArmorLevelModifier {
 
   /* Spilling effect */
 
-  /** ID for the spilling effect */
-  public static final ResourceLocation SPILLING_EFFECT_ID = TConstruct.getResource("calcified");
-
-  /** GSON does not support anonymous classes */
-  private static class SpillingEffect implements ISpillingEffect {
-    @Override
-    public void applyEffects(FluidStack fluid, float scale, ToolAttackContext context) {
-      LivingEntity target = context.getLivingTarget();
-      if (target != null) {
-        drinkMilk(target, (int)(400 * scale));
-      }
+  /** Singleton instance spilling effect */
+  public static final FluidEffect<FluidEffectContext.Entity> FLUID_EFFECT = FluidEffect.simple((fluid, scale, context, action) -> {
+    LivingEntity target = context.getLivingTarget();
+    // while we could scale, doing it flat ensures we don't charge extra
+    if (target != null && drinkMilk(target, 0, (int)(20*10 * scale.value()), action)) {
+      return scale.value();
     }
-
-    @Override
-    public JsonObject serialize(JsonSerializationContext context) {
-      return JsonUtils.withType(SPILLING_EFFECT_ID);
-    }
-  }
-  /** Singleton instance the spilling effect */
-  public static final ISpillingEffect SPILLING_EFFECT = new SpillingEffect();
-
-  /** Loader for the spilling effect */
-  public static final JsonDeserializer<ISpillingEffect> SPILLING_EFFECT_LOADER = (json, type, context) -> SPILLING_EFFECT;
+    return 0;
+  });
 }

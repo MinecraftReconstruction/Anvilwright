@@ -1,13 +1,7 @@
 {
-  "type": "tconstruct:composable",
-  "level_display": "tconstruct:default",
-  "tooltip_display": "always",
-  "modules": [
+  "redirects": [
     {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:durability",
-      "operation": "multiply_base",
-      "value": 0.15
+      "id": "tconstruct:ductile"
     }
   ]
 }

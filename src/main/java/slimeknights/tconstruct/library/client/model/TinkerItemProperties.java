@@ -6,39 +6,34 @@ import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.common.ToolActions;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
+import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.item.ModifiableLauncherItem;
+import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableCrossbowItem;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.tools.item.ModifiableCrossbowItem;
 
 /** Properties for tinker tools */
+@SuppressWarnings("deprecation")
 public class TinkerItemProperties {
-  /** ID for the pull property */
-  private static final ResourceLocation PULL_ID = new ResourceLocation("pull");
-  /** Property for bow pull amount */
-  private static final ItemPropertyFunction PULL = (stack, level, holder, seed) -> {
-    if (holder == null || holder.getUseItem() != stack) {
-      return 0.0F;
-    }
-    float drawSpeed = TinkerDataCapability.CAPABILITY.maybeGet(holder).map(data -> data.get(ModifiableLauncherItem.DRAWSPEED)).orElse(1/20f);
-    return (float)(stack.getUseDuration() - holder.getUseItemRemainingTicks()) * drawSpeed;
+  /** ID for broken property */
+  private static final ResourceLocation BROKEN_ID = TConstruct.getResource("broken");
+  /** Property declaring broken */
+  private static final ItemPropertyFunction BROKEN = (stack, level, entity, seed) -> {
+    return ToolDamageUtil.isBroken(stack) ? 1 : 0;
   };
-
-  /** ID for the pulling property */
-  private static final ResourceLocation PULLING_ID = new ResourceLocation("pulling");
-  /**
-   * Boolean indicating the bow is pulling
-   * TODO: ditch in favor of charging?
-   */
-  private static final ItemPropertyFunction PULLING = (stack, level, holder, seed) -> holder != null && holder.isUsingItem() && holder.getUseItem() == stack ? 1.0F : 0.0F;
 
   /** ID for ammo property */
   private static final ResourceLocation AMMO_ID = TConstruct.getResource("ammo");
+  /** ID of fireworks rocket for NBT check */
+  private static final String FIREWORKS_ID = "minecraft:firework_rocket";
   /** Int declaring ammo type */
   private static final ItemPropertyFunction AMMO = (stack, level, entity, seed) -> {
     CompoundTag nbt = stack.getTag();
@@ -48,7 +43,7 @@ public class TinkerItemProperties {
         CompoundTag ammo = persistentData.getCompound(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO.toString());
         if (!ammo.isEmpty()) {
           // no sense having two keys for ammo, just set 1 for arrow, 2 for fireworks
-          return ammo.getString("id").equals(BuiltInRegistries.ITEM.getKey(Items.FIREWORK_ROCKET).toString()) ? 2 : 1;
+          return FIREWORKS_ID.equals(ammo.getString("id")) ? 2 : 1;
         }
       }
     }
@@ -62,9 +57,15 @@ public class TinkerItemProperties {
     if (holder != null && holder.isUsingItem() && holder.getUseItem() == stack) {
       UseAnim anim = stack.getUseAnimation();
       if (anim == UseAnim.BLOCK) {
-        return 2;
-      } else if (anim != UseAnim.EAT && anim != UseAnim.DRINK) {
-        return 1;
+        return ModifierUtil.checkPersistentPresent(stack, ModifiableLauncherItem.KEY_DRAWBACK_AMMO) ? 2.5f : 2;
+      }
+      // TODO 1.21: space this out a bit more
+      if (anim == UseAnim.SPEAR) {
+        // shouldn't need to worry about arrows on spearing, everything supporting arrows uses just bow or block
+        return 1.75f;
+      }
+      if (anim != UseAnim.EAT && anim != UseAnim.DRINK) {
+        return ModifierUtil.checkPersistentPresent(stack, ModifiableLauncherItem.KEY_DRAWBACK_AMMO) ? 1.5f : 1;
       }
     }
     return 0;
@@ -76,24 +77,42 @@ public class TinkerItemProperties {
     if (holder == null || holder.getUseItem() != stack) {
       return 0.0F;
     }
-    return (float)(stack.getUseDuration() - holder.getUseItemRemainingTicks()) / ModifierUtil.getPersistentInt(stack, ModifiableLauncherItem.KEY_DRAWTIME, 20);
+    int drawtime = ModifierUtil.getPersistentInt(stack, GeneralInteractionModifierHook.KEY_DRAWTIME, -1);
+    return drawtime == -1 ? 0 : (float)(stack.getUseDuration() - holder.getUseItemRemainingTicks()) / drawtime;
+  };
+  /** ID for the cast fishing rods */
+  private static final ResourceLocation CAST_ID = TConstruct.getResource("cast");
+  /** Property for casting a fishing rod */
+  private static final ItemPropertyFunction CAST = (stack, level, holder, seed) -> {
+    // must be a fishing rod, and the player must be fishing
+    // does player check first since its the fastest, avoids NBT parsing
+    if (holder instanceof Player player && player.fishing != null && stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+      // must be in a hand, but if both hands have fishing rods, must be the one in the main hand
+      ItemStack mainhand = holder.getMainHandItem();
+      if (mainhand == stack || holder.getOffhandItem() == stack && !mainhand.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
+        return 1;
+      }
+    }
+    return 0;
   };
 
-  /** Registers properties for a bow */
-  public static void registerBowProperties(Item item) {
-    ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(PULL_ID, PULL);
-    ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(PULLING_ID, PULLING);
+  /** Registers properties for a tool, including the option to have charge/block animations */
+  public static void registerBrokenProperty(Item item) {
+    ItemProperties.register(item, BROKEN_ID, BROKEN);
+  }
+
+  /** Registers properties for a tool, including the option to have charge/block animations */
+  public static void registerToolProperties(ItemLike itemlike) {
+    Item item = itemlike.asItem();
+    registerBrokenProperty(item);
+    ItemProperties.register(item, CHARGING_ID, CHARGING);
+    ItemProperties.register(item, CHARGE_ID, CHARGE);
+    ItemProperties.register(item, CAST_ID, CAST);
   }
 
   /** Registers properties for a bow */
-  public static void registerCrossbowProperties(Item item) {
-    registerBowProperties(item);
-    ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(AMMO_ID, AMMO);
-  }
-
-  /** Registers properties for a bow */
-  public static void registerToolProperties(Item item) {
-    ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(CHARGING_ID, CHARGING);
-    ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(CHARGE_ID, CHARGE);
+  public static void registerCrossbowProperties(ItemLike item) {
+    registerToolProperties(item);
+    ItemProperties.register(item.asItem(), AMMO_ID, AMMO);
   }
 }

@@ -3,29 +3,32 @@ package slimeknights.tconstruct.tables.client.inventory;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import slimeknights.mantle.client.screen.ScalableElementScreen;
 import slimeknights.tconstruct.tables.block.entity.chest.AbstractChestBlockEntity;
 import slimeknights.tconstruct.tables.client.inventory.module.ScalingChestScreen;
 import slimeknights.tconstruct.tables.menu.TabbedContainerMenu;
 import slimeknights.tconstruct.tables.menu.TinkerChestContainerMenu;
 
 public class TinkerChestScreen extends BaseTabbedScreen<AbstractChestBlockEntity,TabbedContainerMenu<AbstractChestBlockEntity>> {
-
-  protected static final ScalableElementScreen BACKGROUND = new ScalableElementScreen(7 + 18, 7, 18, 18);
+  // TODO: can this safely be removed? its unused
+  //protected static final ScalableElementScreen BACKGROUND = new ScalableElementScreen(7 + 18, 7, 18, 18);
   public ScalingChestScreen<AbstractChestBlockEntity> scalingChestScreen;
 
   public TinkerChestScreen(TabbedContainerMenu<AbstractChestBlockEntity> container, Inventory playerInventory, Component title) {
     super(container, playerInventory, title);
+
+    this.imageHeight = 184;
     TinkerChestContainerMenu.DynamicChestInventory chestContainer = container.getSubContainer(TinkerChestContainerMenu.DynamicChestInventory.class);
     if (chestContainer != null) {
       this.scalingChestScreen = new ScalingChestScreen<>(this, chestContainer, playerInventory, title);
+      // add one extra row to the height
+      this.scalingChestScreen.imageHeight += 18;
       this.addModule(scalingChestScreen);
     }
   }
 
   @Override
   protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-    this.drawBackground(graphics, BLANK_BACK);
+    this.drawBackground(graphics, BLANK_BACK_PLUS_1);
 
     if (this.scalingChestScreen != null) {
       this.scalingChestScreen.update(mouseX, mouseY);

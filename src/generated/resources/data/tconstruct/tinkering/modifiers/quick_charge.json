@@ -1,16 +1,11 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:incremental"
-    },
-    {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:draw_speed",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.25,
       "operation": "multiply_base",
-      "value": 0.25
+      "stat": "tconstruct:draw_speed"
     }
   ]
 }

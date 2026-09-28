@@ -2,28 +2,35 @@ package slimeknights.tconstruct.library.tools.definition.module.interaction;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import slimeknights.mantle.data.GenericLoaderRegistry.IGenericLoader;
-import slimeknights.mantle.data.GenericLoaderRegistry.SingletonLoader;
-import slimeknights.tconstruct.TConstruct;
+import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
+import slimeknights.tconstruct.library.module.HookProvider;
+import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.worktable.ModifierSetWorktableRecipe;
-import slimeknights.tconstruct.library.tools.definition.module.IToolModule;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
+import java.util.List;
+
 /** Tool that supports interaction with either hand. Uses persistent NBT to choose which hand is allowed to interact */
-public class DualOptionInteraction implements InteractionToolModule, IToolModule {
+public enum DualOptionInteraction implements InteractionToolModule, ToolModule {
   /** Singleton instance */
-  public static final DualOptionInteraction INSTANCE = new DualOptionInteraction();
+  INSTANCE;
+
+  private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<DualOptionInteraction>defaultHooks(ToolHooks.INTERACTION);
   /** Loader instance */
   public static final SingletonLoader<DualOptionInteraction> LOADER = new SingletonLoader<>(INSTANCE);
-  /** Key for persistent data set of modifiers */
-  public static final ResourceLocation KEY = TConstruct.getResource("attack_modifiers");
-  /** Key for denoting this feature in the tooltip */
-  private static final String MODIFIER_FORMAT = TConstruct.makeTranslationKey("modifier", "attack_toggled");
+  /** @deprecated use {@link InteractionSource#getKey()} */
+  @Deprecated(forRemoval = true)
+  public static final ResourceLocation KEY = InteractionSource.LEFT_CLICK.getKey();
 
-  private DualOptionInteraction() {}
+  @Override
+  public List<ModuleHook<?>> getDefaultHooks() {
+    return DEFAULT_HOOKS;
+  }
 
   @Override
   public boolean canInteract(IToolStackView tool, ModifierId modifier, InteractionSource source) {
@@ -31,15 +38,13 @@ public class DualOptionInteraction implements InteractionToolModule, IToolModule
   }
 
   @Override
-  public IGenericLoader<? extends IToolModule> getLoader() {
+  public SingletonLoader<DualOptionInteraction> getLoader() {
     return LOADER;
   }
 
-  /** Adds the format string to the modifier name */
+  /** @deprecated use {@link InteractionSource#formatModifierName(IToolStackView, Modifier, Component)} */
+  @Deprecated(forRemoval = true)
   public static Component formatModifierName(IToolStackView tool, Modifier modifier, Component originalName) {
-    if (ModifierSetWorktableRecipe.isInSet(tool.getPersistentData(), KEY, modifier.getId())) {
-      return modifier.applyStyle(Component.translatable(MODIFIER_FORMAT, originalName));
-    }
-    return originalName;
+    return InteractionSource.formatModifierName(tool, modifier, originalName);
   }
 }

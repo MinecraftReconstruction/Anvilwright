@@ -25,15 +25,15 @@ public class Config {
    * Common specific configuration
    */
   public static class Common {
-
     public final BooleanValue shouldSpawnWithTinkersBook;
-    public final List<ConfigurableAction> damageSourceTweaks;
+    public final List<ConfigurableAction> toolTweaks;
+    public final BooleanValue syncKnockbackResistance;
+    public final EnumValue<ToolSyncType> toolInventorySync;
 
     // recipes
     public final BooleanValue addGravelToFlintRecipe;
     public final BooleanValue cheaperNetheriteAlloy;
     public final BooleanValue witherBoneDrop;
-    public final BooleanValue witherBoneConversion;
     public final BooleanValue slimeRecipeFix;
     public final BooleanValue glassRecipeFix;
     public final Map<TinkerHeadType,BooleanValue> headDrops;
@@ -41,34 +41,25 @@ public class Config {
 
     // loot
     public final BooleanValue slimyLootChests;
-    public final IntValue barterBlazingBlood;
-    public final IntValue tinkerToolBonusChest;
     public final BooleanValue dropDragonScales;
+    public final IntValue wandererAncientToolWeight;
 
     public final OreRate melterOreRate;
     public final OreRate smelteryOreRate;
     public final OreRate foundryOreRate, foundryByproductRate;
 
-    public final BooleanValue generateCobalt;
-    public final ConfigValue<Integer> veinCountCobalt;
-
-    // overworld
-    public final BooleanValue forceGeodeRecipes;
-    public final BooleanValue earthGeodes;
-    public final BooleanValue skyGeodes;
-    public final BooleanValue ichorGeodes;
-    public final BooleanValue enderGeodes;
-
-    public final ConfigValue<String> showOnlyToolMaterial;
-    public final ConfigValue<String> showOnlyPartMaterial;
-    public final BooleanValue showAllTableVariants;
-    public final BooleanValue showAllAnvilVariants;
-    public final BooleanValue showAllSmelteryVariants;
+    // compatability
+    public final BooleanValue allowIngotlessAlloys;
+    public final DoubleValue chemthrowerShotValue;
+    public final BooleanValue allowMonsterMeleeModifiers;
 
     // debug
     public final BooleanValue forceIntegrationMaterials;
+    public final BooleanValue disableSideInventoryWhitelist;
+    public final BooleanValue quickApplyToolModifiersSurvival;
+    public final BooleanValue debugLogResourceValues;
     public final EnumValue<LogInvalidToolStack> logInvalidToolStack;
-    public enum LogInvalidToolStack { STACKTRACE, WARNING, IGNORED };
+    public enum LogInvalidToolStack { STACKTRACE, WARNING, IGNORED }
 
     Common(ModConfigSpec.Builder builder) {
       builder.comment("Everything to do with gameplay").push("gameplay");
@@ -79,7 +70,6 @@ public class Config {
         .worldRestart()
         .define("shouldSpawnWithTinkersBook", true);
 
-      builder.comment("Tweaks to vanilla damage sources to better work with armor").push("damageTweaks");
       ImmutableList.Builder<ConfigurableAction> actions = ImmutableList.builder();
 //      actions.add(new ConfigurableAction(builder, "wither", true, "Makes withering damage count as magic", DamageSource.WITHER::setMagic)); TODO: PORT?
 //      actions.add(new ConfigurableAction(builder, "dragon_breath", true, "Makes dragons breath count as magic", DamageSource.DRAGON_BREATH::setMagic));
@@ -95,42 +85,14 @@ public class Config {
         .comment("Amount of durability restored by a repair kit in terms of ingots. Does not affect the cost to create the kit, that is controlled by JSON.")
         .defineInRange("repairKitAmount", 2f, 0f, Short.MAX_VALUE);
 
-      builder.pop();
+      this.toolInventorySync = builder
+        .comment("Method of syncing on opening a tool inventory. Options:",
+          "FULL_STACK: syncs the entire tool item stack to client. May cause issues with packet size if too many tools are inside the tool, but best for laggy servers.",
+          "MINIMAL (default): syncs the minimal info to prevent an inventory desync if the client lost the stack.",
+          "DISABLED: syncs nothing. May cause inventory desync issues if the client lost the tool.")
+        .defineEnum("toolInventorySync", ToolSyncType.MINIMAL);
 
-//      this.chestsKeepInventory = builder
-//        .comment("Pattern and Part chests keep their inventory when harvested.")
-//        .translation("tconstruct.configgui.chestsKeepInventory")
-//        .worldRestart()
-//        .define("chestsKeepInventory", true);
-
-      this.showOnlyToolMaterial = builder
-        .comment("If non-empty, only this material will be shown on tools in creative and JEI (or the first valid material if this is invalid for the tool).", "If empty, all materials will show")
-        .translation("tconstruct.configgui.showOnlyToolMaterial")
-        .worldRestart()
-        .define("showOnlyToolMaterial", "");
-
-      this.showOnlyPartMaterial = builder
-        .comment("If non-empty, only material will be shown on parts in creative and JEI (or the first valid material if this is invalid for the part).", "If empty, all materials will show")
-        .translation("tconstruct.configgui.showOnlyPartMaterial")
-        .worldRestart()
-        .define("showOnlyPartMaterial", "");
-
-      this.showAllTableVariants = builder
-        .comment("If true, tables such as the part builder and tinker station will show all variants. If false shows only a variant with a default texture.")
-        .translation("tconstruct.configgui.showAllTableVariants")
-        .define("showAllTableVariants", true);
-
-      this.showAllAnvilVariants = builder
-        .comment("If true, anvils will show all metal variants. If false, shows only a variant with the default texture")
-        .translation("tconstruct.configgui.showAllAnvilVariants")
-        .define("showAllAnvilVariants", true);
-
-      this.showAllSmelteryVariants = builder
-        .comment("If true, smeltery and foundry controllers, drains, ducts, and chutes will show all variants")
-        .translation("tconstruct.configgui.showAllSmelteryVariants")
-        .define("showAllSmelteryVariants", true);
-
-      builder.pop();
+      builder.pop(); // gameplay
 
       builder.comment("Options related to recipes, limited options as a datapack allows most recipes to be modified").push("recipes");
 
@@ -151,12 +113,6 @@ public class Config {
         .translation("tconstruct.configgui.witherBoneDrop")
         .worldRestart()
         .define("witherBoneDrop", true);
-
-      this.witherBoneConversion = builder
-        .comment("Allows converting wither bones to regular bones")
-        .translation("tconstruct.configgui.witherBoneConversion")
-        .worldRestart()
-        .define("witherBoneConversion", true);
 
       this.slimeRecipeFix = builder
         .comment("Slimeballs not being usable in vanilla recipes that require slimeballs. Config option exists to disable easily in case this fix is redundant to another mod")
@@ -183,7 +139,7 @@ public class Config {
         this.foundryOreRate = new OreRate(builder, 9, 4);
         builder.pop();
 
-        builder.comment("Byprouct rates when melting in the foundry").push("foundry_byproduct");
+        builder.comment("Byproduct rates when melting in the foundry").push("foundry_byproduct");
         this.foundryByproductRate = new OreRate(builder, 3, 4);
         builder.pop();
       }
@@ -207,51 +163,33 @@ public class Config {
         .comment("Adds slimy saplings and seeds into various loot chests. Helps for worlds without slime islands")
         .worldRestart()
         .define("slimy_loot", true);
-      barterBlazingBlood = builder
-        .comment("Weight of blazing blood in the piglin bartering tables. Set to 0 to disable")
-        .worldRestart()
-        .defineInRange("barter_blazing_blood", 20, 0, 100);
-      tinkerToolBonusChest = builder
-        .comment("Weight of tinker tools in the vanilla spawn bonus chest, randomly replacing the vanilla axe or shovel. Tool will have a random tier 1 head and binding, plus a wooden handle. Set to 0 to disable.",
-                 "For comparison, vanilla wooden axes and pickaxes have a weight of 3, and stone axes/pickaxes have a weight of 1")
-        .worldRestart()
-        .defineInRange("tinker_tool_bonus_chest", 2, 0, 25);
       dropDragonScales = builder
         .comment("If true, ender dragons will drop scales when damaged by explosions")
         .define("drop_dragon_Scales", true);
+      wandererAncientToolWeight = builder
+        .comment("Weight of the ancient tool trade for the wandering trader. All traders randomly choose 1 rare trade, so this is roughly the chance the trade occurs compared to the vanilla options (of which there are 6).")
+        .defineInRange("wanderer_ancient_tool_weight", 6, 0, 100);
 
       builder.pop();
 
-      builder.comment("Everything to do with world generation").push("worldgen");
+      builder.comment("Configuration related to integration with other mods").push("compatability");
       {
-        this.generateCobalt = builder
-          .comment("Generate Cobalt")
-          .translation("tconstruct.configgui.generateCobalt")
+        this.allowIngotlessAlloys = builder
+          .comment("If true, integration alloy materials will be enabled if any of their components is present, allowing creating them from their molten liquid forms.",
+            "If false, they will only be only be present if another mod adds an ingot.",
+            "This config option is provided as while most players prefer the additional materials, some dislike having no proper ingot. Note we do have NBT ingots for these materials.")
           .worldRestart()
-          .define("generateCobalt", true);
-        this.veinCountCobalt = builder
-          .comment("Approx Ores per Chunk")
-          .translation("tconstruct.configgui.veinCountCobalt")
-          .worldRestart()
-          .define("veinCountCobalt", 8);
-
-        builder.comment("Options related to slime geodes").push("geodes");
-        this.forceGeodeRecipes = builder
-          .comment("If true, recipes using slime crystals will ignore the other geode configs, useful if you add other ways to get the slime crystals. When false (default), recipes using slime crystals will be substituted for an alternative if the geode is disabled.")
-          .define("forceRecipes", false);
-        this.earthGeodes = builder
-          .comment("If true, earthslime geodes generate deep in the world as another way to get slime")
-            .define("earth", true);
-        this.skyGeodes = builder
-          .comment("If true, skyslime geodes generate above amethyst as another way to get skyslime")
-          .define("sky", true);
-        this.ichorGeodes = builder
-          .comment("If true, ichor geodes generate high in the nether. Strongly encouraged to keep enabled even if you disable the other geodes, as ichor crystals have some unique recipes and the fallbacks kinda suck for gameplay.")
-          .define("ichor", true);
-        this.enderGeodes = builder
-          .comment("If true, enderslime geodes generate as additional islands in the end")
-          .define("ender", true);
-        builder.pop();
+          .define("allowIngotlessAlloys", true);
+        chemthrowerShotValue = builder
+          .comment(
+            "Amount of fluid each chemthrower shot projectile from Immersive Engineering is worth towards our fluid effect registry.",
+            "IE launches 8 projectiles per tick while consuming the value in their config, so dividing it by 8 makes them comparable to our projectiles.",
+            "However, keeping it as a separate config option gives pack makers more control over how strong TiC ends up in the chemthrower.")
+          .defineInRange("immersive_engineering_chemthrower_shot_value", 1.25, 0, Integer.MAX_VALUE);
+        this.allowMonsterMeleeModifiers = builder
+          .comment("If true, monsters will run melee modifiers when attacking with a modifiable weapon. Provided to work around potential issues with addons allowing more monsters to use tools.",
+            "Note that if its just a specific mob or damage source that has an issue, there are tag blacklists.")
+          .define("allowMonsterMeleeModifiers", true);
       }
       builder.pop();
 
@@ -261,6 +199,17 @@ public class Config {
                  "Does not provide recipes for any of them, they will only be available to cheat in creative.")
         .worldRestart()
         .define("forceIntegrationMaterials", false);
+      this.disableSideInventoryWhitelist = builder
+        .comment("Set to true if you wish to test whether a side inventory works without constantly reloading datapacks.",
+                "Once you find an inventory works, add it to the block entity tag `tconstruct:side_inventories` and disable this option; leaving it enabled will lead to crashes and dupe bugs.")
+        .define("disableSideInventoryWhitelist", false);
+      this.quickApplyToolModifiersSurvival = builder
+        .comment("If true, modifier crystals and creative slots can be applied to tools in the inventory on right click for operators in survival. If false, this only works for players in creative mode.",
+                 "This option makes testing of tools and modifiers easier, but may cause misleading assumptions about how these items will function for non-operators.")
+        .define("quickApplyToolModifiersSurvival", false);
+      this.debugLogResourceValues = builder
+        .comment("If true, the values of data pack and resource pack registries such as materials will be dumped to the debug log. If false, the info is still accessible using the in game commands.")
+        .define("debugLogResourceValues", false);
       this.logInvalidToolStack = builder
         .comment("If STACKTRACE, logs the stacktrace whenever a tool stack is created from a non-modifiable item. If WARNING (default), logs a shorter but more efficient error. If IGNORE, disables logging (useful for modpacks/players *after* they reported the issue). The stacktrace helps debug which mod is causing it, but is rather expensive on the chance they are doing it a lot.")
         .defineEnum("logInvalidToolStack", LogInvalidToolStack.WARNING);
@@ -281,6 +230,17 @@ public class Config {
     public final ModConfigSpec.BooleanValue renderShieldSlotItem;
     public final ModConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
     public final ModConfigSpec.IntValue maxSmelteryItemQuads;
+
+    // JEI
+    public final BooleanValue showModifiersInJEI;
+    public final ConfigValue<String> showOnlyToolMaterial;
+    public final ConfigValue<String> showOnlyPartMaterial;
+    public final BooleanValue showAllTableVariants;
+    public final BooleanValue showAllAnvilVariants;
+    public final BooleanValue showAllSmelteryVariants;
+    public final BooleanValue showFilledFluidTanks;
+    public final BooleanValue showPotionFluidInJEI;
+    public final BooleanValue showToolInModifiers;
 
     // framed modifier
     public final ModConfigSpec.BooleanValue renderItemFrame;
@@ -308,11 +268,6 @@ public class Config {
         .translation("tconstruct.configgui.tankFluidModel")
         .define("tankFluidModel", false);
 
-      this.extraToolTips = builder
-        .comment("If true tools will show additional info in their tooltips")
-        .translation("tconstruct.configgui.extraToolTips")
-        .define("extraToolTips", true);
-
       this.logMissingMaterialTextures = builder
         .comment("If true, the game will log all material textures which do not exist in resource packs but can be added, can be helpful for moddevs or resourcepack makers")
         .translation("tconstruct.configgui.logMissingMaterialTextures")
@@ -323,10 +278,55 @@ public class Config {
         .translation("tconstruct.configgui.logMissingMaterialTextures")
         .define("logMissingModifierTextures", false);
 
-      this.showModifiersInJEI = builder
-        .comment("If true, modifiers will be added to the JEI ingredient list. If false, they will only be visible in the modifiers recipe tab.")
-        .translation("tconstruct.configgui.showModifiersInJEI")
-        .define("showModifiersInJEI", true);
+      builder.comment("JEI configuration").push("jei");
+      {
+        this.showModifiersInJEI = builder
+          .comment("If true, modifiers will be added to the JEI ingredient list. If false, they will only be visible in the modifiers recipe tab.")
+          .translation("tconstruct.configgui.showModifiersInJEI")
+          .define("showModifiers", true);
+
+        this.showOnlyToolMaterial = builder
+          .comment("If non-empty, only this material will be shown on tools in JEI (or the first valid material if this is invalid for the tool).", "If empty, all materials will show")
+          .translation("tconstruct.configgui.showOnlyToolMaterial")
+          .worldRestart()
+          .define("showOnlyToolMaterial", "");
+
+        this.showOnlyPartMaterial = builder
+          .comment("If non-empty, only material will be shown on parts in JEI (or the first valid material if this is invalid for the part).", "If empty, all materials will show")
+          .translation("tconstruct.configgui.showOnlyPartMaterial")
+          .worldRestart()
+          .define("showOnlyPartMaterial", "");
+
+        this.showAllTableVariants = builder
+          .comment("If true, tables such as the part builder and tinker station will show all variants in JEI. If false the variants only show in the table variants tab")
+          .translation("tconstruct.configgui.showAllTableVariants")
+          .define("showAllTableVariants", false);
+
+        this.showAllAnvilVariants = builder
+          .comment("If true, anvils will show all metal variants in JEI. If false, the variants only show in the table variants tab")
+          .translation("tconstruct.configgui.showAllAnvilVariants")
+          .define("showAllAnvilVariants", true);
+
+        this.showAllSmelteryVariants = builder
+          .comment("If true, smeltery and foundry controllers, drains, ducts, and chutes will show all variants in JEI. If false, the variants only shows in the table variants tab")
+          .translation("tconstruct.configgui.showAllSmelteryVariants")
+          .define("showAllSmelteryVariants", false);
+
+        this.showFilledFluidTanks = builder
+          .comment("If true, filled copper cans and fluid gauges will show in JEI. If false only empty ones will show")
+          .define("showFilledFluidTanks", false);
+
+        this.showPotionFluidInJEI = builder
+          .comment("If true, variants of our potion fluid for every potion will show in JEI. If false it will be hidden, but still usable.")
+          .define("showPotionFluid", true);
+
+        this.showToolInModifiers = builder
+          .comment("[Experimental] If true, modifier recipe lookup from a specific tool will show your tool in JEI. If false, a generic display tool will be shown.")
+          .define("showToolInModifiers", true);
+      }
+      builder.pop(); // jei
+
+
 
       this.maxSmelteryItemQuads = builder
         .comment("Maximum number of quads to render for items in the smeltery. Most blocks are about 6 quads, items like ingots are around 26.",
@@ -344,6 +344,9 @@ public class Config {
         this.renderShieldSlotItem = builder
           .comment("If true, the shield slot legging modifier will render the next offhand item above the offhand slot.")
           .define("renderShieldSlotItem", true);
+        this.renderSleevesItem = builder
+          .comment("If true, the selected item from sleeves will render next to the offhand slit.")
+          .define("renderSleevesItem", true);
 
         builder.comment("Settings related to the frame helmet modifier").push("itemFrame");
         {
@@ -364,6 +367,24 @@ public class Config {
             .defineInRange("itemsPerRow", 5, 0, 100);
         }
         builder.pop();
+
+        builder.comment("Settings related to the minimap modifier").push("minimap");
+        {
+          this.mapXOffset = builder
+            .comment("Offset in the X direction for the minimap.")
+            .defineInRange("xOffset", 0, Short.MIN_VALUE, Short.MAX_VALUE);
+          this.mapYOffset = builder
+            .comment("Offset in the Y direction for the minimap.")
+            .defineInRange("yOffset", 0, Short.MIN_VALUE, Short.MAX_VALUE);
+          this.mapScale = builder
+            .comment("Size to render the minimap. Set to 0 to disable the renderer")
+            .defineInRange("scale", 0.75f, 0, 100);
+          this.mapLocation = builder
+            .comment("Location of the minimap on the screen.")
+            .defineEnum("location", Orientation2D.TOP_LEFT);
+        }
+        builder.pop();
+
       }
       builder.pop();
 
@@ -422,6 +443,7 @@ public class Config {
       return switch (rate) {
         case METAL -> amount * nuggetsPerMetal.get() / 9;
         case GEM -> amount * shardsPerGem.get() / 4;
+        default -> amount;
       };
     }
   }

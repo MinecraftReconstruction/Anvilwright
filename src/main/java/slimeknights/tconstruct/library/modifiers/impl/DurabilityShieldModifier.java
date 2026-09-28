@@ -1,73 +1,56 @@
 package slimeknights.tconstruct.library.modifiers.impl;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import slimeknights.tconstruct.library.modifiers.IncrementalModifierEntry;
 import slimeknights.tconstruct.library.modifiers.Modifier;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.ToolDamageModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.display.DurabilityDisplayModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.special.CapacityBarHook;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.CapacityBarModule;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.CapacityBarValidator;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.DurabilityShieldModule;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.OverslimeModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 
 import javax.annotation.Nullable;
 
-public abstract class DurabilityShieldModifier extends Modifier {
+/** @deprecated use {@link DurabilityShieldModule} with {@link CapacityBarHook} */
+@Deprecated
+public abstract class DurabilityShieldModifier extends Modifier implements CapacityBarHook, ToolDamageModifierHook, DurabilityDisplayModifierHook {
   @Override
-  public Component getDisplayName(IToolStackView tool, int level) {
-    return getDisplayName(level).copy()
-                                .append(": " + getShield(tool) + " / " + getShieldCapacity(tool, level));
-  }
-
-
-  /* Tool building */
-
-  @Override
-  public ValidatedResult validate(IToolStackView tool, int level) {
-    // clear excess overslime
-    if (level > 0) {
-      int cap = getShieldCapacity(tool, level);
-      if (getShield(tool) > cap) {
-        setShield(tool.getPersistentData(), cap);
-      }
-    }
-    return ValidatedResult.PASS;
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addModule(new CapacityBarValidator(this));
+    hookBuilder.addHook(this, ModifierHooks.TOOL_DAMAGE, ModifierHooks.DURABILITY_DISPLAY, ModifierHooks.CAPACITY_BAR);
   }
 
   @Override
-  public void onRemoved(IToolStackView tool) {
-    // remove all overslime on removal
-    tool.getPersistentData().remove(getShieldKey());
+  public Component getDisplayName(IToolStackView tool, ModifierEntry entry, @Nullable RegistryAccess access) {
+    return IncrementalModifierEntry.addAmountToName(getDisplayName(entry.getLevel()), getAmount(tool), getCapacity(tool, entry));
   }
 
 
   /* Damaging */
 
   @Override
-  public int onDamageTool(IToolStackView tool, int level, int amount, @Nullable LivingEntity holder) {
-    int shield = getShield(tool);
-    if (shield > 0) {
-      // if we have more overslime than amount, remove some overslime
-      if (shield >= amount) {
-        setShield(tool, level, shield - amount);
-        return 0;
-      }
-      // amount is more than overslime, reduce and clear overslime
-      amount -= shield;
-      setShield(tool, level, 0);
-    }
-    return amount;
+  public int onDamageTool(IToolStackView tool, ModifierEntry modifier, int amount, @Nullable LivingEntity holder) {
+    return DurabilityShieldModule.onDamageTool(this, tool, modifier, amount);
   }
 
   @Override
-  public double getDamagePercentage(IToolStackView tool, int level) {
-    int shield = getShield(tool);
+  public int getDurabilityWidth(IToolStackView tool, ModifierEntry modifier) {
+    int shield = getAmount(tool);
     if (shield > 0) {
-      int cap = getShieldCapacity(tool, level);
-      if (shield > cap) {
-        return 0;
-      }
-      return ((double) (cap - shield) / cap);
+      return DurabilityDisplayModifierHook.getWidthFor(shield, getCapacity(tool, modifier));
     }
-    return Double.NaN;
+    return 0;
   }
 
 
@@ -78,32 +61,60 @@ public abstract class DurabilityShieldModifier extends Modifier {
     return getId();
   }
 
-  /** Gets the current shield amount */
-  protected int getShield(IToolStackView tool) {
+  /** @deprecated use {@link #getAmount(IToolStackView)} */
+  @Deprecated
+  public int getShield(IToolStackView tool) {
     return tool.getPersistentData().getInt(getShieldKey());
   }
 
-  /** Gets the capacity of the shield for the given tool */
-  protected abstract int getShieldCapacity(IToolStackView tool, int level);
+  @Override
+  public int getAmount(IToolStackView tool) {
+    return getShield(tool);
+  }
+
+  @Override
+  public int getCapacity(IToolStackView tool, ModifierEntry entry) {
+    return getShieldCapacity(tool, entry);
+  }
+
+  /**
+   * Gets the capacity of the shield for the given tool.
+   * @deprecated use {@link CapacityBarHook#getCapacity(IToolStackView, ModifierEntry)}. Overriding is okay though you really should migrate to {@link CapacityBarModule} or alike.
+   */
+  @Deprecated
+  public abstract int getShieldCapacity(IToolStackView tool, ModifierEntry modifier);
 
   /**
    * Sets the shield, bypassing the capacity
    * @param persistentData  Persistent data
    * @param amount          Amount to set
+   * @deprecated use {@link OverslimeModule#setAmountRaw(ModDataNBT, int)}. For non-overslime usages, this currently has no migration.
    */
-  protected void setShield(ModDataNBT persistentData, int amount) {
+  @Deprecated
+  public void setShield(ModDataNBT persistentData, int amount) {
     persistentData.putInt(getShieldKey(), Math.max(amount, 0));
   }
 
   /**
-   * Sets the shield on a tool
+   * Sets the shield on a tool.
+   * @deprecated use {@link #setAmount(IToolStackView, ModifierEntry, int)}
    */
-  protected void setShield(IToolStackView tool, int level, int amount) {
-    setShield(tool.getPersistentData(), Math.min(amount, getShieldCapacity(tool, level)));
+  @Deprecated
+  public void setShield(IToolStackView tool, ModifierEntry modifier, int amount) {
+    setShield(tool.getPersistentData(), Math.min(amount, getShieldCapacity(tool, modifier)));
   }
 
-  /** Adds the given amount to the current shield */
-  protected void addShield(IToolStackView tool, int level, int amount) {
-    setShield(tool, level, amount + getShield(tool));
+  @Override
+  public void setAmount(IToolStackView tool, ModifierEntry entry, int amount) {
+    setShield(tool, entry, amount);
+  }
+
+  /**
+   * Adds the given amount to the current shield.
+   * @deprecated use {@link #addAmount(IToolStackView, ModifierEntry, int)}
+   */
+  @Deprecated
+  protected void addShield(IToolStackView tool, ModifierEntry modifier, int amount) {
+    setShield(tool, modifier, amount + getAmount(tool));
   }
 }

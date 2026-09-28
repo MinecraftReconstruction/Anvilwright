@@ -23,6 +23,9 @@ public class BoonOfSssssModifier extends TotalArmorLevelModifier {
     PotionEvents.POTION_ADDED.register(BoonOfSssssModifier::onPotionStart);
   }
 
+/** @deprecated use {@link TinkerAttributes#GOOD_EFFECT_DURATION} and {@link ReduceEffectOnUnequipModule} */
+@Deprecated(forRemoval = true)
+public class BoonOfSssssModifier extends NoLevelsModifier {
   @Override
   public void onUnequip(IToolStackView tool, int level, EquipmentChangeContext context) {
     super.onUnequip(tool, level, context);

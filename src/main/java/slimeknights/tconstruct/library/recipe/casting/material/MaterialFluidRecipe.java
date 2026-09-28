@@ -3,27 +3,38 @@ package slimeknights.tconstruct.library.recipe.casting.material;
 import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
+import slimeknights.tconstruct.library.recipe.material.IDisplayMaterialRecipe;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 /** Recipe defining casting and composite fluids for a given input */
-public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContainer> {
+public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContainer>, IDisplayMaterialRecipe {
+  public static final RecordLoadable<MaterialFluidRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    FluidIngredient.LOADABLE.requiredField("fluid", r -> r.fluid),
+    IntLoadable.FROM_ZERO.requiredField("temperature", r -> r.temperature),
+    MaterialVariantId.LOADABLE.nullableField("input", r -> r.input != null ? r.input.getVariant() : null),
+    MaterialVariantId.LOADABLE.nullableField("output", r -> r.output.getVariant()),
+    BooleanLoadable.INSTANCE.defaultField("hide_in_book", false, false, r -> r.hideInBook),
+    MaterialFluidRecipe::new);
+  /** Empty recipe instance, used as a fallback */
+  public static final MaterialFluidRecipe EMPTY = new MaterialFluidRecipe(TConstruct.getResource("missingno"), FluidIngredient.EMPTY, 0, null, MaterialId.UNKNOWN);
+
   @Getter
   private final ResourceLocation id;
   private final FluidIngredient fluid;
@@ -35,30 +46,34 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
   /** Output material ID */
   @Getter
   private final MaterialVariant output;
+  @Getter
+  private final boolean hideInBook;
 
+  /** @deprecated use {@link #MaterialFluidRecipe(ResourceLocation, FluidIngredient, int, MaterialVariantId, MaterialVariantId, boolean)} */
+  @Deprecated(forRemoval = true)
   public MaterialFluidRecipe(ResourceLocation id, FluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId) {
+    this(id, fluid, temperature, inputId, outputId, false);
+  }
+
+  protected MaterialFluidRecipe(ResourceLocation id, FluidIngredient fluid, int temperature, @Nullable MaterialVariantId inputId, MaterialVariantId outputId, boolean hideInBook) {
     this.id = id;
     this.fluid = fluid;
     this.temperature = temperature;
     this.input = inputId == null ? null : MaterialVariant.of(inputId);
     this.output = MaterialVariant.of(outputId);
+    this.hideInBook = hideInBook;
     MaterialCastingLookup.registerFluid(this);
   }
 
-  /** Checks if the recipe matches the given inventory */
-  public boolean matches(ICastingContainer inv) {
-    if (output.isUnknown() || !fluid.test(inv.getFluid())) {
-      return false;
-    }
-    if (input != null) {
-      // if the input ID is null, want to avoid checking this
-      // not null means we should have a material and it failed to find
-      if (input.isUnknown()) {
-        return false;
-      }
-      return input.matchesVariant(inv.getStack());
-    }
-    return true;
+  /** Checks if this recipe is valid for the given fluid and material */
+  public boolean matches(Fluid fluid) {
+    return !output.isUnknown() && this.fluid.test(fluid);
+  }
+
+  /** Checks if this recipe is valid for the given fluid and material */
+  public boolean matches(Fluid fluid, MaterialVariantId material) {
+    // disallow casting if the input material matches the output (including variant) to prevent wasted resources
+    return matches(fluid) && (input == null || input.matchesVariant(material)) && !output.sameVariant(material);
   }
 
   /** Gets the amount of fluid to cast this recipe */
@@ -67,13 +82,15 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
   }
 
   /** Gets a list of fluids for display */
+  @Override
   public List<FluidStack> getFluids() {
     return fluid.getFluids();
   }
 
   @Override
   public final boolean matches(ICastingContainer inv, Level worldIn) {
-    return matches(inv);
+    // if the input ID is null, can skip fetching the input stack material
+    return matches(inv.getFluid()) && (input == null || input.matchesVariant(inv.getStack()));
   }
 
   @Override
@@ -86,43 +103,23 @@ public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContaine
     return TinkerRecipeTypes.DATA.get();
   }
 
-  public static class Serializer extends LoggingRecipeSerializer<MaterialFluidRecipe> {
-    @Override
-    public MaterialFluidRecipe fromJson(ResourceLocation id, JsonObject json) {
-      FluidIngredient fluid = FluidIngredient.deserialize(json, "fluid");
-      int temperature = GsonHelper.getAsInt(json, "temperature");
-      MaterialVariantId input = null;
-      if (json.has("input")) {
-        input = MaterialVariantId.fromJson(json, "input");
-      }
-      MaterialVariantId output = MaterialVariantId.fromJson(json, "output");
-      return new MaterialFluidRecipe(id, fluid, temperature, input, output);
-    }
+  /** Checks that all materials in this recipe are known */
+  public boolean isVisible() {
+    return !output.isUnknown() && !output.get().isHidden()
+      && (input == null || !input.isUnknown() && !input.get().isHidden());
+  }
 
-    @Nullable
-    @Override
-    protected MaterialFluidRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      FluidIngredient fluid = FluidIngredient.read(buffer);
-      int temperature = buffer.readInt();
-      MaterialVariantId input = null;
-      if (buffer.readBoolean()) {
-        input = MaterialVariantId.parse(buffer.readUtf(Short.MAX_VALUE));
-      }
-      MaterialVariantId output = MaterialVariantId.parse(buffer.readUtf(Short.MAX_VALUE));
-      return new MaterialFluidRecipe(id, fluid, temperature, input, output);
-    }
 
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, MaterialFluidRecipe recipe) {
-      recipe.fluid.write(buffer);
-      buffer.writeInt(recipe.temperature);
-      if (recipe.input != null) {
-        buffer.writeBoolean(true);
-        buffer.writeUtf(recipe.input.getVariant().toString());
-      } else {
-        buffer.writeBoolean(false);
-      }
-      buffer.writeUtf(recipe.output.getVariant().toString());
-    }
+  /* JEI */
+
+  @Override
+  public ResourceLocation getRecipeId() {
+    return getId();
+  }
+
+  /** Alias for {@link #getOutput()} for the sake of implementing {@link IDisplayMaterialRecipe} */
+  @Override
+  public MaterialVariant getMaterial() {
+    return output;
   }
 }

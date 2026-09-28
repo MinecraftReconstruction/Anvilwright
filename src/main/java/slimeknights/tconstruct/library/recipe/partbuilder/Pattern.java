@@ -1,27 +1,20 @@
 package slimeknights.tconstruct.library.recipe.partbuilder;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
+import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.tconstruct.library.utils.IdParser;
+import slimeknights.tconstruct.library.utils.ResourceId;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 /**
- * This is a copy of resource location with a couple extra helpers
+ * Resource location variant for pattern buttons in the part builder. Also used in a few spots for convenient icon loading.
  */
-public class Pattern extends ResourceLocation {
-  public static final Serializer SERIALIZER = new Serializer();
+public class Pattern extends ResourceId {
+  public static final IdParser<Pattern> PARSER = new IdParser<>(Pattern::new, "Pattern");
 
   public Pattern(String resourceName) {
     super(resourceName);
@@ -31,22 +24,20 @@ public class Pattern extends ResourceLocation {
     super(namespaceIn, pathIn);
   }
 
-  public Pattern(ResourceLocation resourceLocation) {
-    super(resourceLocation.getNamespace(), resourceLocation.getPath());
+  public Pattern(ResourceLocation location) {
+    super(location);
+  }
+
+  private Pattern(String namespace, String path, @Nullable Dummy pDummy) {
+    super(namespace, path, pDummy);
   }
 
   /**
-   * Creates a new modifier ID from the given string
-   * @param string  String
-   * @return  Material ID, or null if invalid
+   * Gets the translation key for this pattern
+   * @return  Translation key
    */
-  @Nullable
-  public static ModifierId tryCreate(String string) {
-    try {
-      return new ModifierId(string);
-    } catch (ResourceLocationException resourcelocationexception) {
-      return null;
-    }
+  public String getTranslationKey() {
+    return Util.makeTranslationKey("pattern", this);
   }
 
   /**
@@ -54,7 +45,7 @@ public class Pattern extends ResourceLocation {
    * @return  Display name
    */
   public Component getDisplayName() {
-    return Component.translatable(Util.makeTranslationKey("pattern", this));
+    return Component.translatable(getTranslationKey());
   }
 
   /**
@@ -62,19 +53,24 @@ public class Pattern extends ResourceLocation {
    * @return  Pattern texture
    */
   public ResourceLocation getTexture() {
-    return new ResourceLocation(getNamespace(), "gui/tinker_pattern/" + getPath());
+    return withPrefix("gui/tinker_pattern/");
   }
 
-  /** Type sensitive version of the resource location serializer */
-  protected static class Serializer implements JsonDeserializer<Pattern>, JsonSerializer<Pattern> {
-    @Override
-    public Pattern deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
-      return new Pattern(GsonHelper.convertToString(json, "location"));
-    }
 
-    @Override
-    public JsonElement serialize(Pattern pattern, Type type, JsonSerializationContext context) {
-      return new JsonPrimitive(pattern.toString());
-    }
+  /** {@return Pattern ID, or null if invalid} */
+  @Nullable
+  public static Pattern tryParse(String string) {
+    return tryParse(string, (namespace, path) -> new Pattern(namespace, path, null));
+  }
+
+  /** {@return Pattern ID, or null if invalid} */
+  @Nullable
+  public static Pattern tryBuild(String namespace, String path) {
+    return tryBuild(namespace, path, (n, p) -> new Pattern(namespace, path, null));
+  }
+
+  /** Gets the pattern for the given item ID */
+  public static Pattern fromItem(ItemLike item) {
+    return new Pattern(Loadables.ITEM.getKey(item.asItem()));
   }
 }

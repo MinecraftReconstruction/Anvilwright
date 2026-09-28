@@ -37,6 +37,11 @@ public enum TinkerHeadType implements Type, StringRepresentable {
     return this.name().toLowerCase(Locale.ROOT);
   }
 
+  /** If true, this is a piglin head, so it uses the ears model */
+  public boolean isPiglin() {
+    return this == PIGLIN_BRUTE || this == ZOMBIFIED_PIGLIN;
+  }
+
   /**
    * Gets the head type for the given entity type
    * @param type  Entity type

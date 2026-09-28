@@ -2,6 +2,7 @@ package slimeknights.tconstruct.smeltery.block.component;
 
 import net.fabricmc.fabric.api.registry.LandPathNodeTypesRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -12,16 +13,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryComponentBlockEntity;
 
 import javax.annotation.Nullable;
 
 public class SearedBlock extends Block implements EntityBlock, LandPathNodeTypesRegistry.StaticPathNodeTypeProvider {
   public static final BooleanProperty IN_STRUCTURE = BooleanProperty.create("in_structure");
+  public static final StateArgumentPredicate<EntityType<?>> VALID_SPAWN = (s, r, p, e) -> !s.hasProperty(SearedBlock.IN_STRUCTURE) || !s.getValue(SearedBlock.IN_STRUCTURE);
 
-  public SearedBlock(Properties properties) {
+  protected final boolean requiredBlockEntity;
+  public SearedBlock(Properties properties, boolean requiredBlockEntity) {
     super(properties);
+    this.requiredBlockEntity = requiredBlockEntity;
     this.registerDefaultState(this.defaultBlockState().setValue(IN_STRUCTURE, false));
     LandPathNodeTypesRegistry.register(this, this);
   }
@@ -34,16 +37,29 @@ public class SearedBlock extends Block implements EntityBlock, LandPathNodeTypes
   @Nullable
   @Override
   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-    return new SmelteryComponentBlockEntity(pos, state);
+    if (requiredBlockEntity || state.getValue(IN_STRUCTURE)) {
+      return new SmelteryComponentBlockEntity(pos, state);
+    }
+    return null;
   }
 
   @Override
   @Deprecated
-  public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-    if (!newState.is(this)) {
-      BlockEntityHelper.get(SmelteryComponentBlockEntity.class, worldIn, pos).ifPresent(te -> te.notifyMasterOfChange(pos, newState));
+  public void onRemove(BlockState oldState, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
+    if (requiredBlockEntity || oldState.getValue(IN_STRUCTURE)) {
+      // if the block is unchanged, remove the block entity if we no longer have one
+      if (newState.is(this)) {
+        if (!requiredBlockEntity && !newState.getValue(IN_STRUCTURE)) {
+          world.removeBlockEntity(pos);
+        }
+      } else {
+        // block changed, tell the master then ditch the block entity
+        if (world.getBlockEntity(pos) instanceof SmelteryComponentBlockEntity te) {
+          te.notifyMasterOfChange(pos, newState);
+        }
+        world.removeBlockEntity(pos);
+      }
     }
-    super.onRemove(state, worldIn, pos, newState, isMoving);
   }
 
   @Override

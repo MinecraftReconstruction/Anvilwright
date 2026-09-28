@@ -1,31 +1,18 @@
 package slimeknights.tconstruct.tools.modifiers.upgrades.ranged;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.phys.EntityHitResult;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.ProjectileHitModifierHook;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
-import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
-import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.tools.modules.armor.FreezingCounterModule;
+import slimeknights.tconstruct.tools.modules.combat.FreezingAttackModule;
 
-import javax.annotation.Nullable;
-
-public class FreezingModifier extends Modifier implements ProjectileHitModifierHook {
+/** @deprecated use {@link FreezingAttackModule} and {@link FreezingCounterModule} */
+@Deprecated(forRemoval = true)
+public class FreezingModifier extends Modifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
-    hookBuilder.addHook(this, TinkerHooks.PROJECTILE_HIT);
-  }
-  @Override
-  public boolean onProjectileHitEntity(ModifierNBT modifiers, NamespacedNBT persistentData, ModifierEntry modifier, Projectile projectile, EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
-    if (target != null && target.canFreeze()) {
-      // freeze them
-      int level = modifier.getLevel();
-      target.setTicksFrozen(Math.max(target.getTicksRequiredToFreeze(), target.getTicksFrozen()) + (level + 1) * 80);
-      target.setRemainingFireTicks(0);
-    }
-    return false;
+    hookBuilder.addModule(new FreezingAttackModule(new LevelingValue(4, 4)));
+    hookBuilder.addModule(FreezingCounterModule.builder().constant(new LevelingValue(4, 4)).toolTag(TinkerTags.Items.ARMOR).build());
   }
 }

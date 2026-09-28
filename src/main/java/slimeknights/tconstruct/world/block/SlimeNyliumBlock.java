@@ -11,14 +11,13 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LightEngine;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.shared.block.SlimeType;
 
 /**
  * Slimy variant of nylium, mostly changes the way it bonemeals
  */
 public class SlimeNyliumBlock extends Block implements BonemealableBlock {
-  private final SlimeType foliageType;
-  public SlimeNyliumBlock(Properties properties, SlimeType foliageType) {
+  private final FoliageType foliageType;
+  public SlimeNyliumBlock(Properties properties, FoliageType foliageType) {
     super(properties);
     this.foliageType = foliageType;
   }
@@ -30,6 +29,7 @@ public class SlimeNyliumBlock extends Block implements BonemealableBlock {
     return i < reader.getMaxLightLevel();
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void randomTick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource random) {
     if (!isDarkEnough(state, worldIn, pos)) {

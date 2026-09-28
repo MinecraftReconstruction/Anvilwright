@@ -22,11 +22,9 @@ public class TinkersChestBlock extends ChestBlock implements BlockPickInteractio
   @Override
   public ItemStack getPickedStack(BlockState state, BlockGetter world, BlockPos pos, @Nullable Player player, @Nullable HitResult result) {
     ItemStack stack = new ItemStack(this);
-    BlockEntityHelper.get(TinkersChestBlockEntity.class, world, pos).ifPresent(te -> {
-      if (te.hasColor()) {
-        ((DyeableLeatherItem) stack.getItem()).setColor(stack, te.getColor());
-      }
-    });
+    if (world.getBlockEntity(pos) instanceof TinkersChestBlockEntity te && te.hasColor()) {
+      ((DyeableLeatherItem) stack.getItem()).setColor(stack, te.getColor());
+    }
     return stack;
   }
 }

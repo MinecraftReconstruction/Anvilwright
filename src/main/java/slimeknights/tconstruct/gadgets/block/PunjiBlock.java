@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -30,6 +29,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class PunjiBlock extends Block implements LandPathNodeTypesRegistry.StaticPathNodeTypeProvider {
 
@@ -202,18 +203,15 @@ public class PunjiBlock extends Block implements LandPathNodeTypesRegistry.Stati
   }
 
   /* Bounds */
-  private static final ImmutableMap<Direction, VoxelShape> BOUNDS;
-
+  private static final Map<Direction, VoxelShape> BOUNDS;
   static {
-    ImmutableMap.Builder<Direction, VoxelShape> builder = ImmutableMap.builder();
-    builder.put(Direction.DOWN, Shapes.box(0.1875, 0, 0.1875, 0.8125, 0.375, 0.8125));
-    builder.put(Direction.UP, Shapes.box(0.1875, 0.625, 0.1875, 0.8125, 1, 0.8125));
-    builder.put(Direction.NORTH, Shapes.box(0.1875, 0.1875, 0, 0.8125, 0.8125, 0.375));
-    builder.put(Direction.SOUTH, Shapes.box(0.1875, 0.1875, 0.625, 0.8125, 0.8125, 1));
-    builder.put(Direction.EAST, Shapes.box(0.625, 0.1875, 0.1875, 1, 0.8125, 0.8125));
-    builder.put(Direction.WEST, Shapes.box(0, 0.1875, 0.1875, 0.375, 0.8125, 0.8125));
-
-    BOUNDS = builder.build();
+    BOUNDS = new EnumMap<>(Direction.class);
+    BOUNDS.put(Direction.DOWN, Shapes.box(0.1875, 0, 0.1875, 0.8125, 0.375, 0.8125));
+    BOUNDS.put(Direction.UP, Shapes.box(0.1875, 0.625, 0.1875, 0.8125, 1, 0.8125));
+    BOUNDS.put(Direction.NORTH, Shapes.box(0.1875, 0.1875, 0, 0.8125, 0.8125, 0.375));
+    BOUNDS.put(Direction.SOUTH, Shapes.box(0.1875, 0.1875, 0.625, 0.8125, 0.8125, 1));
+    BOUNDS.put(Direction.EAST, Shapes.box(0.625, 0.1875, 0.1875, 1, 0.8125, 0.8125));
+    BOUNDS.put(Direction.WEST, Shapes.box(0, 0.1875, 0.1875, 0.375, 0.8125, 0.8125));
   }
 
   @SuppressWarnings("deprecation")

@@ -5,15 +5,19 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.util.ModelHelper;
 import slimeknights.tconstruct.common.config.Config;
-import slimeknights.tconstruct.library.client.model.block.TankModel.Baked;
+import slimeknights.tconstruct.library.client.SafeClient;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
+import slimeknights.tconstruct.smeltery.item.TankItem;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
 
 /**
@@ -25,6 +29,14 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
    * @return  Tank
    */
   FluidTankAnimated getTank();
+
+  /**
+   * Sets the tag on the stack based on the contained tank
+   * @param stack  Stack
+   */
+  default void setTankTag(ItemStack stack) {
+    TankItem.setTank(stack, getTank());
+  }
 
   /*
    * Comparator
@@ -71,7 +83,6 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
     return Config.CLIENT.tankFluidModel.get();
   }
 
-  @SuppressWarnings("ConstantConditions")
   @Override
   default void updateFluidTo(FluidStack fluid) {
     // update tank fluid
@@ -97,6 +108,7 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
     });
   }
 
+
   /*
    * Tile entity methods
    */
@@ -105,6 +117,7 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
   default BlockEntity getTE() {
     return (BlockEntity) this;
   }
+
 
   /*
    * Helpers
@@ -117,10 +130,23 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
    * @return  Comparator power
    */
   static int getComparatorInputOverride(LevelAccessor world, BlockPos pos) {
-    BlockEntity te = world.getBlockEntity(pos);
-    if (!(te instanceof ITankBlockEntity)) {
-      return 0;
+    if (world.getBlockEntity(pos) instanceof ITankBlockEntity te) {
+      return te.comparatorStrength();
     }
-    return ((ITankBlockEntity) te).comparatorStrength();
+    return 0;
+  }
+
+  /** Helper to implement {@link net.minecraft.world.level.block.Block#getCloneItemStack(BlockState, HitResult, BlockGetter, BlockPos, Player)} */
+  static ItemStack getCloneItemStack(ItemStack stack, BlockGetter world, BlockPos pos) {
+    if (world.getBlockEntity(pos) instanceof ITankBlockEntity tank) {
+      tank.setTankTag(stack);
+    }
+    return stack;
+  }
+
+  /** Represents a  tank block entity with an inventory */
+  interface ITankInventoryBlockEntity extends ITankBlockEntity {
+    /** Gets the associated item handler for this tank with an inventory */
+    IItemHandler getItemHandler();
   }
 }

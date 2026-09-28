@@ -13,8 +13,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.data.SinglePropertyData;
@@ -22,9 +23,9 @@ import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.utils.NBTTags;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
-import slimeknights.tconstruct.smeltery.item.TankItem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -106,31 +107,25 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   public void onTankContentsChanged() {
     ITankBlockEntity.super.onTankContentsChanged();
     if (this.level != null) {
-      level.getLightEngine().checkBlock(this.worldPosition);
+      updateLight(this, tank);
+      this.requestModelDataUpdate();
     }
   }
 
   @Override
-  public void updateFluidTo(FluidStack fluid) {
-    ITankBlockEntity.super.updateFluidTo(fluid);
-    // update light if the fluid changes
-    if (this.level != null) {
-      level.getLightEngine().checkBlock(this.worldPosition);
+  public void onLoad() {
+    super.onLoad();
+    if (level != null && !level.isClientSide) {
+      BlockPos masterPos = getMasterPos();
+      if (masterPos != null && level.getBlockEntity(masterPos) instanceof IMasterLogic master) {
+        master.onServantLoad(this);
+      }
     }
   }
-
 
   /*
    * NBT
    */
-
-  /**
-   * Sets the tag on the stack based on the contained tank
-   * @param stack  Stack
-   */
-  public void setTankTag(ItemStack stack) {
-    TankItem.setTank(stack, tank);
-  }
 
   /**
    * Updates the tank from an NBT tag, used in the block
@@ -141,9 +136,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
       tank.setFluid(FluidStack.EMPTY);
     } else {
       tank.readFromNBT(nbt);
-      if (level != null) {
-        level.getLightEngine().checkBlock(worldPosition);
-      }
+      updateLight(this, tank);
     }
   }
 

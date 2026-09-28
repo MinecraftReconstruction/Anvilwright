@@ -15,7 +15,7 @@ import slimeknights.tconstruct.transfer.EmptySlottedStorage;
 
 import java.util.Optional;
 
-public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerScreen {
+public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerScreen<MultiModuleScreen<?>,BaseContainerMenu<T>> {
   private final IScalingContainer scaling;
   public ScalingChestScreen(MultiModuleScreen<?> parent, BaseContainerMenu<T> container, Inventory playerInventory, Component title) {
     super(parent, container, playerInventory, title);

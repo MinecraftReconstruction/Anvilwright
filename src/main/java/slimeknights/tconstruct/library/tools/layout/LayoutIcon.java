@@ -21,7 +21,6 @@ import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 /** Data holder for a button icon, currently supports item stack icons and pattern icons */
 public abstract class LayoutIcon {

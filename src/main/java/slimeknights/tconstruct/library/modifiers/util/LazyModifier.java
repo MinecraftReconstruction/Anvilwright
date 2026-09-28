@@ -3,6 +3,8 @@ package slimeknights.tconstruct.library.modifiers.util;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.tags.TagKey;
+import slimeknights.mantle.registration.object.IdAwareObject;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
@@ -12,7 +14,7 @@ import java.util.function.Supplier;
 
 /** Supplier that will return a modifier once they are fully registered, typically used with {@link ModifierDeferredRegister} */
 @RequiredArgsConstructor
-public class LazyModifier implements Supplier<Modifier> {
+public class LazyModifier implements Supplier<Modifier>, IdAwareObject {
   /** ID of the modifier to fetch */
   @Getter
   protected final ModifierId id;
@@ -33,16 +35,16 @@ public class LazyModifier implements Supplier<Modifier> {
   protected Modifier getUnchecked() {
     if (result == null) {
       result = ModifierManager.getValue(id);
+      if (result == ModifierManager.INSTANCE.getDefaultValue() && !ModifierId.EMPTY.equals(id)) {
+        TConstruct.LOG.error("Attempted to fetch modifier with ID {}, but it was not registered. Returning the empty modifier and hoping things don't break.", id);
+      }
     }
     return result;
   }
 
   /** Returns true if this static modifier has a value. A return of true here means a useful value is returned by {@link #get()} */
   public boolean isBound() {
-    if (!ModifierManager.INSTANCE.isDynamicModifiersLoaded()) {
-      return false;
-    }
-    return getUnchecked() != ModifierManager.INSTANCE.getDefaultValue();
+    return ModifierManager.INSTANCE.isDynamicModifiersLoaded() && getUnchecked() != ModifierManager.INSTANCE.getDefaultValue();
   }
 
   /**
@@ -52,8 +54,7 @@ public class LazyModifier implements Supplier<Modifier> {
   @Override
   public Modifier get() {
     if (!ModifierManager.INSTANCE.isDynamicModifiersLoaded()) {
-      throw new IllegalStateException("Attempted to load a modifier before dynamic modifiers are loaded");
-      //return ModifierManager.INSTANCE.getDefaultValue();
+      throw new IllegalStateException("Attempted to fetch a modifier before modifiers are loaded");
     }
     return getUnchecked();
   }

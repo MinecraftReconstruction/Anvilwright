@@ -1,14 +1,8 @@
 package slimeknights.tconstruct.tools.modifiers.upgrades.general;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents.LivingTickEvent;
 import slimeknights.tconstruct.TConstruct;
@@ -66,10 +60,14 @@ public class MagneticModifier extends TotalArmorLevelModifier implements PlantHa
     }
   }
 
+/** @deprecated use {@link MagneticEffect} or {@link MobEffectModule.ToolUsage} */
+@Deprecated(forRemoval = true)
+public class MagneticModifier extends Modifier {
   @Override
   protected void registerHooks(Builder hookBuilder) {
     super.registerHooks(hookBuilder);
-    hookBuilder.addHook(this, TinkerHooks.PLANT_HARVEST, TinkerHooks.SHEAR_ENTITY);
+    hookBuilder.addModule(MobEffectModule.builder(TinkerEffects.magnetic).time(RandomLevelingValue.flat(40)).buildToolUsage());
+    hookBuilder.addModule(new ArmorLevelModule(TinkerDataKeys.MAGNET, false, null));
   }
 
 
@@ -121,8 +119,15 @@ public class MagneticModifier extends TotalArmorLevelModifier implements PlantHa
     }
   }
 
-  /** Performs the magnetic effect */
+  /** @deprecated use {@link MagneticEffect#applyVelocity(Level, Vec3, int, Class, int, float, int)} */
+  @Deprecated(forRemoval = true)
+  public static <T extends Entity> void applyVelocity(Level level, Vec3 origin, int amplifier, Class<T> targetClass, int minRange, float speed, int maxPush) {
+    MagneticEffect.applyVelocity(level, origin, amplifier, targetClass, minRange, speed, maxPush);
+  }
+
+  /** @deprecated use {@link MagneticEffect#applyMagnet(LivingEntity, int)} */
+  @Deprecated(forRemoval = true)
   public static void applyMagnet(LivingEntity entity, int amplifier) {
-    applyVelocity(entity, amplifier, ItemEntity.class, 3, 0.05f, 100);
+    MagneticEffect.applyMagnet(entity, amplifier);
   }
 }

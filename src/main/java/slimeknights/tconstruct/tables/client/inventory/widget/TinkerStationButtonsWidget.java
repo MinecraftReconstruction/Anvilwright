@@ -7,7 +7,7 @@ import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
 
 import java.util.List;
 
-public class TinkerStationButtonsWidget extends SideButtonsWidget<SlotButtonItem> {
+public class TinkerStationButtonsWidget extends SideButtonsWidgetPaged<SlotButtonItem> {
 
   public static final int WOOD_STYLE = 2;
   public static final int METAL_STYLE = 1;
@@ -44,8 +44,7 @@ public class TinkerStationButtonsWidget extends SideButtonsWidget<SlotButtonItem
   private void addInfoButton(SlotButtonItem slotButtonItem, int style) {
     slotButtonItem.setGraphics(Icons.BUTTON.shift(0, -18 * style),
       Icons.BUTTON_HOVERED.shift(0, -18 * style),
-      Icons.BUTTON_PRESSED.shift(0, -18 * style),
-      Icons.ICONS);
+      Icons.BUTTON_PRESSED.shift(0, -18 * style));
     this.buttons.add(slotButtonItem);
   }
 

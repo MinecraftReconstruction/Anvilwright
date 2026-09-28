@@ -158,6 +158,9 @@ public class MeltingModuleInventory implements SlottedStackStorage {
     if (strictSize) {
       throw new IllegalStateException("Cannot resize this melting module inventory");
     }
+    if (newSize > MAX_SIZE) {
+      newSize = MAX_SIZE;
+    }
     // nothing to do
     if (newSize == modules.length) {
       return;
@@ -289,10 +292,10 @@ public class MeltingModuleInventory implements SlottedStackStorage {
    * Heats all items in the inventory
    * @param temperature  Heating structure temperature
    */
-  public void heatItems(int temperature) {
+  public void heatItems(int temperature, int rate) {
     for (MeltingModule module : modules) {
       if (module != null) {
-        module.heatItem(temperature);
+        module.heatItem(temperature, rate);
       }
     }
   }

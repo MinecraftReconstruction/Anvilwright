@@ -6,24 +6,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import slimeknights.tconstruct.common.Sounds;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
-import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
-import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.TinkerTools;
-import slimeknights.tconstruct.tools.data.ModifierIds;
-import slimeknights.tconstruct.tools.item.ArmorSlotType;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import slimeknights.tconstruct.tools.data.material.MaterialIds;
 import slimeknights.tconstruct.world.TinkerWorld;
 
-public class SkySlimeEntity extends ArmoredSlimeEntity {
+public class SkySlimeEntity extends TravelersPlateSlimeEntity {
   private double bounceAmount = 0f;
   public SkySlimeEntity(EntityType<? extends SkySlimeEntity> type, Level worldIn) {
     super(type, worldIn);

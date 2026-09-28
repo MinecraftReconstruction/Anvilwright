@@ -1,79 +1,108 @@
 package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
+import lombok.Getter;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.StringLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.registry.NamedComponentRegistry;
 import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.mantle.util.JsonHelper;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
+import slimeknights.tconstruct.library.json.IntRange;
+import slimeknights.tconstruct.library.json.field.MergingField;
+import slimeknights.tconstruct.library.json.field.MergingField.MissingMode;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.recipe.modifiers.ModifierMatch;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static slimeknights.tconstruct.TConstruct.getResource;
+import static slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe.modifiersForResult;
+import static slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe.withModifiers;
 
 /**
  * Standard recipe to add a modifier
  */
 public class SwappableModifierRecipe extends ModifierRecipe {
+
+  private static final String ALREADY_PRESENT = TConstruct.makeTranslationKey("recipe", "swappable.already_present");
+  public static final RecordLoadable<SwappableModifierRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    INPUTS_FIELD, TOOLS_FIELD, MAX_TOOL_SIZE_FIELD,
+    new MergingField<>(ModifierId.PARSER.requiredField("name", r -> r.result.getId()), "result", MissingMode.DISALLOWED),
+    new MergingField<>(StringLoadable.DEFAULT.requiredField("value", r -> r.value), "result", MissingMode.DISALLOWED),
+    VariantFormatter.LOADER.defaultField("variant_formatter", VariantFormatter.DEFAULT, r -> r.variantFormatter),
+    SLOTS_FIELD, ALLOW_CRYSTAL_FIELD,
+    SwappableModifierRecipe::new);
+
   /** Value of the modifier being swapped, distinguishing this recipe from others for the same modifier */
   private final String value;
-  public SwappableModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements, String requirementsError, ModifierId result, String value, @Nullable SlotCount slots, boolean allowCrystal) {
-    super(id, inputs, toolRequirement, maxToolSize, requirements, requirementsError, new ModifierEntry(result, 1), 1, slots, allowCrystal);
+  /** Logic to format the variant, needed for syncing */
+  private final VariantFormatter variantFormatter;
+  /** Display component for the variant string */
+  @Getter
+  private final Component variant;
+
+  public SwappableModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierId result, String value, VariantFormatter variantFormatter, @Nullable SlotCount slots, boolean allowCrystal) {
+    super(id, inputs, toolRequirement, maxToolSize, result, new IntRange(1, 1), slots, allowCrystal, false);
     this.value = value;
+    this.variantFormatter = variantFormatter;
+    this.variant = variantFormatter.format(result, value);
   }
 
-  /** @deprecated use {@link SwappableModifierRecipe(ResourceLocation, List, Ingredient, int, ModifierMatch, String, ModifierId, String, SlotCount, boolean)} */
-  @Deprecated
-  public SwappableModifierRecipe(ResourceLocation id, List<SizedIngredient> inputs, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements, String requirementsError, ModifierId result, String value, @Nullable SlotCount slots) {
-    this(id, inputs, toolRequirement, maxToolSize, requirements, requirementsError, result, value, slots, false);
-  }
-
-    /**
-     * Gets the recipe result, or an object containing an error message if the recipe matches but cannot be applied.
-     * @return Validated result
-     */
   @Override
-  public ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack tinkerable = inv.getTinkerableStack();
-    ToolStack tool = ToolStack.from(tinkerable);
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    ToolStack tool = inv.getTinkerable();
 
     // if the tool has the modifier already, can skip most requirements
     ModifierId modifier = result.getId();
 
-    ValidatedResult commonError;
     boolean needsModifier;
-    if (tool.getUpgrades().getLevel(modifier) == 0) {
+    int level = tool.getUpgrades().getLevel(modifier);
+    if (level == 0) {
       needsModifier = true;
-      commonError = validatePrerequisites(tool);
+      // no need to check level as we know the level is 0 and we are making it 1
+      Component slotError = checkSlots(tool, getSlots());
+      if (slotError != null) {
+        return RecipeResult.failure(slotError);
+      }
     } else {
       needsModifier = false;
-      commonError = validateRequirements(tool);
     }
-    if (commonError.hasError()) {
-      return commonError;
+
+    // do not allow adding the modifier if this variant is already present
+    if (level > 0 && tool.getPersistentData().getString(modifier).equals(value)) {
+      return RecipeResult.failure(ALREADY_PRESENT, result.get().getDisplayName(), variant);
     }
 
     // consume slots
     tool = tool.copy();
-    ModDataNBT persistentData = tool.getPersistentData();
+    ToolDataNBT persistentData = tool.getPersistentData();
     if (needsModifier) {
       SlotCount slots = getSlots();
       if (slots != null) {
-        persistentData.addSlots(slots.getType(), -slots.getCount());
+        persistentData.addSlots(slots.type(), -slots.count());
       }
     }
 
@@ -88,12 +117,11 @@ public class SwappableModifierRecipe extends ModifierRecipe {
     }
 
     // ensure no modifier problems
-    ValidatedResult toolValidation = tool.validate();
-    if (toolValidation.hasError()) {
-      return toolValidation;
+    Component toolValidation = tool.tryValidate();
+    if (toolValidation != null) {
+      return RecipeResult.failure(toolValidation);
     }
-
-    return ValidatedResult.success(tool.createStack(Math.min(tinkerable.getCount(), shrinkToolSlotBy())));
+    return success(tool, inv);
   }
 
   @Override
@@ -108,51 +136,62 @@ public class SwappableModifierRecipe extends ModifierRecipe {
   public List<ItemStack> getToolWithModifier() {
     if (toolWithModifier == null) {
       ResourceLocation id = result.getId();
-      toolWithModifier = getToolInputs().stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, requirements, result, data -> data.putString(id, value))).collect(Collectors.toList());
-      toolWithModifier = getToolInputs().stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, requirements, result, data -> data.putString(id, value))).collect(Collectors.toList());
+      ModifierEntry result = getDisplayResult();
+      toolWithModifier = getToolInputs().stream().map(stack -> withModifiers(stack, maxToolSize, modifiersForResult(result, result), data -> data.putString(id, value))).collect(Collectors.toList());
     }
     return toolWithModifier;
   }
 
-  public static class Serializer extends AbstractModifierRecipe.Serializer<SwappableModifierRecipe> {
-
-    @Override
-    protected ModifierEntry readResult(JsonObject json) {
-      JsonObject result = GsonHelper.getAsJsonObject(json, "result");
-      return new ModifierEntry(ModifierId.getFromJson(result, "name"), 1);
+  @Override
+  public List<SlotCount> getResultSlots() {
+    if (resultSlots == null) {
+      ItemStack[] tools = toolRequirement.getItems();
+      resultSlots = getResultSlots(getDisplayResult(), tools.length > 0 ? tools[0].getItem() : Items.AIR, value);
     }
+    return resultSlots;
+  }
 
-    @Override
-    public SwappableModifierRecipe fromJson(ResourceLocation id, JsonObject json, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements,
-																				String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots) {
-      List<SizedIngredient> ingredients = JsonHelper.parseList(json, "inputs", SizedIngredient::deserialize);
-      String value = GsonHelper.getAsString(GsonHelper.getAsJsonObject(json, "result"), "value");
-      boolean allowCrystal = GsonHelper.getAsBoolean(json, "allow_crystal", false);
-      return new SwappableModifierRecipe(id, ingredients, toolRequirement, maxToolSize, requirements, requirementsError, result.getId(), value, slots, allowCrystal);
+  @Nullable
+  @Override
+  public Component canApply(IToolStackView tool) {
+    ModifierId result = this.result.getId();
+    // only check slots if we lack the modifier
+    if (tool.getUpgrades().getLevel(result) == 0) {
+      return checkSlots(tool, getSlots());
     }
+    // if we already have it, ensure the variant is changing
+    if (tool.getPersistentData().getString(result).equals(value)) {
+      return Component.translatable(ALREADY_PRESENT, this.result.get().getDisplayName(), variant);
+    }
+    return null;
+  }
 
-    @Override
-    public SwappableModifierRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer, Ingredient toolRequirement, int maxToolSize, ModifierMatch requirements,
-																				String requirementsError, ModifierEntry result, int maxLevel, @Nullable SlotCount slots) {
-      int size = buffer.readVarInt();
-      ImmutableList.Builder<SizedIngredient> builder = ImmutableList.builder();
-      for (int i = 0; i < size; i++) {
-        builder.add(SizedIngredient.read(buffer));
-      }
-      String value = buffer.readUtf();
-      boolean allowCrystal = buffer.readBoolean();
-      return new SwappableModifierRecipe(id, builder.build(), toolRequirement, maxToolSize, requirements, requirementsError, result.getId(), value, slots, allowCrystal);
+  @Override
+  public void applyModifier(ToolStack tool) {
+    ModifierId result = this.result.getId();
+    // only add the modifier if we lack it
+    if (tool.getUpgrades().getLevel(result) == 0) {
+      super.applyModifier(tool);
     }
+    // apply the variant
+    tool.getPersistentData().putString(result, value);
+  }
 
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, SwappableModifierRecipe recipe) {
-      super.toNetworkSafe(buffer, recipe);
-      buffer.writeVarInt(recipe.inputs.size());
-      for (SizedIngredient ingredient : recipe.inputs) {
-        ingredient.write(buffer);
-      }
-      buffer.writeUtf(recipe.value);
-      buffer.writeBoolean(recipe.allowCrystal);
-    }
+  /** Methods of formatting the variant string */
+  @FunctionalInterface
+  public interface VariantFormatter {
+    NamedComponentRegistry<VariantFormatter> LOADER = new NamedComponentRegistry<>("Unknown variant formatter");
+
+    /** Formats the variant given the modifier */
+    Component format(ModifierId modifier, String variant);
+
+
+    /* Formatters */
+    /** Formats using the modifier ID as a base translation key */
+    VariantFormatter DEFAULT = LOADER.register(getResource("default"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier) + "." + variant));
+    /** Formats using the material translation key */
+    VariantFormatter MATERIAL = LOADER.register(getResource("material"), (modifier, variant) -> MaterialTooltipCache.getDisplayName(Objects.requireNonNullElse(MaterialVariantId.tryParse(variant), MaterialId.UNKNOWN)));
+    /** Formats using the modifier ID as the base with the variant as a parameter */
+    VariantFormatter PARAMETER = LOADER.register(getResource("parameter"), (modifier, variant) -> Component.translatable(Util.makeTranslationKey("modifier", modifier) + ".variant", variant));
   }
 }

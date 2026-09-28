@@ -4,9 +4,11 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayout;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
@@ -20,18 +22,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /** Base data generator to generate station slot layouts */
+@SuppressWarnings("deprecation")  // just let me get item keys forge
 public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvider {
 
+  // TODO 1.21: rework these to have a bit more space between numbers
   /** Sort index for weapons */
   protected static final int SORT_WEAPON = 3;
   /** Sort index for harvest */
   protected static final int SORT_HARVEST = 6;
+  /** Sort index for ammo */
+  protected static final int SORT_AMMO = 7;
   /** Sort index for ranged */
   protected static final int SORT_RANGED = 8;
   /** Index for large tools, add to either weapon or harvest */
   protected static final int SORT_LARGE = 6;
+  /** Index for armor */
+  protected static final int SORT_ARMOR = 15;
 
-  private final Map<ResourceLocation,StationSlotLayout.Builder> allLayouts = new HashMap<>();
+  private final Map<ResourceLocation,SerializeLayout> allLayouts = new HashMap<>();
 
   public AbstractStationSlotLayoutProvider(FabricDataOutput output) {
     super(output, PackType.SERVER_DATA, StationSlotLayoutLoader.FOLDER, StationSlotLayoutLoader.GSON);
@@ -44,7 +52,14 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
 
   /** Defines the given ID as a general layout */
   protected StationSlotLayout.Builder define(ResourceLocation id) {
-    return allLayouts.computeIfAbsent(id, i -> StationSlotLayout.builder());
+    return allLayouts.computeIfAbsent(id, i -> new SerializeLayout()).builder;
+  }
+
+  /** Defines the given ID as a general layout with conditions. */
+  protected StationSlotLayout.Builder define(ResourceLocation id, ICondition... conditions) {
+    SerializeLayout layout = allLayouts.computeIfAbsent(id, i -> new SerializeLayout());
+    Collections.addAll(layout.conditions, conditions);
+    return layout.builder;
   }
 
   /** Defines the given ID as a item layout */

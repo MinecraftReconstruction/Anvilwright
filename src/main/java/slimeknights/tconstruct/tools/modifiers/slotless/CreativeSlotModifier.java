@@ -5,28 +5,41 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.modifiers.Modifier;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
+import slimeknights.tconstruct.library.modifiers.hook.build.VolatileDataModifierHook;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.context.ToolRebuildContext;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Modifier that adds a variable number of slots to a tool. Could easily be done via Tag editing, but this makes it easier */
-public class CreativeSlotModifier extends NoLevelsModifier {
+public class CreativeSlotModifier extends NoLevelsModifier implements VolatileDataModifierHook, ModifierRemovalHook {
   /** Key representing the slots object in the modifier */
   public static final ResourceLocation KEY_SLOTS = TConstruct.getResource("creative");
 
   @Override
-  public void onRemoved(IToolStackView tool) {
-    tool.getPersistentData().remove(KEY_SLOTS);
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addHook(this, ModifierHooks.VOLATILE_DATA, ModifierHooks.REMOVE);
   }
 
   @Override
-  public void addVolatileData(ToolRebuildContext context, int level, ModDataNBT volatileData) {
+  public Component onRemoved(IToolStackView tool, Modifier modifier) {
+    tool.getPersistentData().remove(KEY_SLOTS);
+    return null;
+  }
+
+  @Override
+  public void addVolatileData(IToolContext context, ModifierEntry modifier, ToolDataNBT volatileData) {
     IModDataView persistentData = context.getPersistentData();
     if (persistentData.contains(KEY_SLOTS, Tag.TAG_COMPOUND)) {
       CompoundTag slots = persistentData.getCompound(KEY_SLOTS);
@@ -47,8 +60,8 @@ public class CreativeSlotModifier extends NoLevelsModifier {
   }
 
   @Override
-  public List<Component> getDescriptionList(IToolStackView tool, int level) {
-    List<Component> tooltip = getDescriptionList(level);
+  public List<Component> getDescriptionList(IToolStackView tool, ModifierEntry entry) {
+    List<Component> tooltip = getDescriptionList(entry.getLevel());
     IModDataView persistentData = tool.getPersistentData();
     if (persistentData.contains(KEY_SLOTS, Tag.TAG_COMPOUND)) {
       CompoundTag slots = persistentData.getCompound(KEY_SLOTS);

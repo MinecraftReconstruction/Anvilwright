@@ -43,16 +43,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import slimeknights.mantle.loot.function.SetFluidLootFunction;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
-import slimeknights.tconstruct.fluids.TinkerFluids;
-import slimeknights.tconstruct.library.json.AddToolDataFunction;
-import slimeknights.tconstruct.library.json.RandomMaterial;
-import slimeknights.tconstruct.library.recipe.FluidValues;
-import slimeknights.tconstruct.shared.block.SlimeType;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-import slimeknights.tconstruct.tools.TinkerTools;
-import slimeknights.tconstruct.tools.stats.ExtraMaterialStats;
-import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
-import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
+import slimeknights.tconstruct.world.logic.AncientToolItemListing;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -251,5 +242,14 @@ public class WorldEvents {
       }
     }
     return false;
+  }
+
+  @SubscribeEvent
+  static void wanderingTrades(WandererTradesEvent event) {
+    // add ancient tools to the wandering trader table
+    int weight = Config.COMMON.wandererAncientToolWeight.get();
+    if (weight > 0) {
+      event.getRareTrades().addAll(Collections.nCopies(weight, AncientToolItemListing.INSTANCE));
+    }
   }
 }

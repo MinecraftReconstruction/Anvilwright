@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.common.ClientEventBase;
+import slimeknights.tconstruct.library.client.model.FluidContainerModel;
 
 public class FluidClientEvents extends ClientEventBase {
 
@@ -15,7 +16,6 @@ public class FluidClientEvents extends ClientEventBase {
     setTranslucent(TinkerFluids.earthSlime);
     setTranslucent(TinkerFluids.skySlime);
     setTranslucent(TinkerFluids.enderSlime);
-    setTranslucent(TinkerFluids.blood);
     // molten
     setTranslucent(TinkerFluids.moltenDiamond);
     setTranslucent(TinkerFluids.moltenEmerald);

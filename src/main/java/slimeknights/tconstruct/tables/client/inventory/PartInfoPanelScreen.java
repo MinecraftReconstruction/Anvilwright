@@ -3,25 +3,24 @@ package slimeknights.tconstruct.tables.client.inventory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import slimeknights.mantle.client.screen.MultiModuleScreen;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.client.RenderUtils;
 import slimeknights.tconstruct.tables.client.inventory.module.InfoPanelScreen;
+import slimeknights.tconstruct.tables.menu.PartBuilderContainerMenu;
 
 import java.util.ListIterator;
 
-public class PartInfoPanelScreen extends InfoPanelScreen {
+public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartBuilderContainerMenu> {
   private static final String COST_KEY = TConstruct.makeTranslationKey("gui", "part_builder.cost");
   private static final String MATERIAL_VALUE_KEY = TConstruct.makeTranslationKey("gui", "part_builder.material_value");
 
   private Component patternCost;
   private Component materialValue;
 
-  public PartInfoPanelScreen(MultiModuleScreen parent, AbstractContainerMenu container, Inventory playerInventory, Component title) {
+  public PartInfoPanelScreen(PartBuilderScreen parent, PartBuilderContainerMenu container, Inventory playerInventory, Component title) {
     super(parent, container, playerInventory, title);
     this.patternCost = Component.empty();
     this.materialValue = Component.empty();
@@ -48,7 +47,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
 
   /** If true, has pattern cost text */
   private boolean hasPatternCost() {
-    return this.patternCost != null && this.patternCost != Component.empty();
+    return this.patternCost != null && this.patternCost.getContents() != ComponentContents.EMPTY;
   }
 
   /* Material value */
@@ -72,7 +71,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
 
   /** If true, has material value text */
   private boolean hasMaterialValue() {
-    return this.materialValue != null && this.materialValue != Component.empty();
+    return this.materialValue != null && this.materialValue.getContents() != ComponentContents.EMPTY;
   }
 
   @Override
@@ -116,10 +115,8 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
 
   @Override
   protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-    RenderUtils.setup(BACKGROUND_IMAGE);
-
-    this.border.draw(graphics, BACKGROUND_IMAGE);
-    BACKGROUND.drawScaled(graphics, BACKGROUND_IMAGE, this.leftPos + 4, this.topPos + 4, this.imageWidth - 8, this.imageHeight - 8);
+    this.border.draw(graphics);
+    BACKGROUND.drawScaled(graphics, this.leftPos + 4, this.topPos + 4, this.imageWidth - 8, this.imageHeight - 8);
 
     int y = 5 + this.topPos;
     int x = 5 + this.leftPos;
@@ -127,7 +124,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
 
     // info ? in the top right corner
     if (this.hasTooltips()) {
-      graphics.drawString(this.font, "?", guiRight() - this.border.w - this.font.width("?") / 2, this.topPos + 5, 0xff5f5f5f, false);
+      graphics.drawString(this.font, "?", guiRight() - this.border.w - this.font.width("?") / 2f, this.topPos + 5, 0xff5f5f5f, false);
     }
 
     int scaledFontHeight = this.getScaledFontHeight();
@@ -135,7 +132,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.caption) / 2;
 
-      graphics.drawString(this.font, this.caption.getVisualOrderText(), this.leftPos + x2, y, color);
+      graphics.drawString(this.font, this.caption.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -144,7 +141,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.patternCost) / 2;
 
-      graphics.drawString(this.font, this.patternCost.getVisualOrderText(), this.leftPos + x2, y, color);
+      graphics.drawString(this.font, this.patternCost.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -153,7 +150,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.materialValue) / 2;
 
-      graphics.drawString(this.font, this.materialValue.getVisualOrderText(), this.leftPos + x2, y, color);
+      graphics.drawString(this.font, this.materialValue.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -165,8 +162,9 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
     float textHeight = font.lineHeight + 0.5f;
     float lowerBound = (this.topPos + this.imageHeight - 5) / this.textScale;
     //RenderSystem.scalef(this.textScale, this.textScale, 1.0f);
-    graphics.pose().pushPose();
-    graphics.pose().scale(this.textScale, this.textScale, 1.0f);
+    PoseStack matrices = graphics.pose();
+    matrices.pushPose();
+    matrices.scale(this.textScale, this.textScale, 1.0f);
     x /= this.textScale;
     y /= this.textScale;
 
@@ -178,16 +176,13 @@ public class PartInfoPanelScreen extends InfoPanelScreen {
       }
 
       FormattedCharSequence line = iter.next();
-      graphics.drawString(this.font, line, x, y, color);
+      graphics.drawString(this.font, line, x, y, color, true);
       y += textHeight;
     }
 
     graphics.pose().popPose();
     //RenderSystem.scalef(1f / textScale, 1f / textScale, 1.0f);
-
-    //this.minecraft.getTextureManager().bind(BACKGROUND_IMAGE);
-    RenderUtils.setup(BACKGROUND_IMAGE);
     this.slider.update(mouseX, mouseY);
-    this.slider.draw(graphics, BACKGROUND_IMAGE);
+    this.slider.draw(graphics);
   }
 }

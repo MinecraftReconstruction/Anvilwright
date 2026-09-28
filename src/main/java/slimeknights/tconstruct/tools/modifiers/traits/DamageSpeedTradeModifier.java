@@ -15,9 +15,14 @@ import net.minecraft.world.item.TooltipFlag;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.behavior.AttributesModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.display.TooltipModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedModifierHook;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.library.utils.TooltipKey;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
@@ -26,16 +31,24 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 
 /**
- * Shared logic for jagged and stonebound. Trait boosts attack damage as it lowers mining speed.
+ * Use {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule} and {@link slimeknights.tconstruct.library.modifiers.modules.combat.ConditionalMeleeDamageModule}
+ * with {@link slimeknights.tconstruct.library.json.variable.tool.ToolVariable#CURRENT_DAMAGE} and {@link slimeknights.tconstruct.library.json.variable.tool.StatMultiplierVariable}
  */
-public class DamageSpeedTradeModifier extends Modifier {
-  private static final Component MINING_SPEED = TConstruct.makeTranslation("modifier", "fake_attribute.mining_speed");
+@Deprecated(forRemoval = true)
+public class DamageSpeedTradeModifier extends Modifier implements AttributesModifierHook, TooltipModifierHook, BreakSpeedModifierHook {
+  private static final Component MINING_SPEED = TConstruct.makeTranslation("armor_stat", "mining_speed");
   private final float multiplier;
   private final Lazy<UUID> uuid = Lazy.of(() -> UUID.nameUUIDFromBytes(getId().toString().getBytes()));
   private final Lazy<String> attributeName = Lazy.of(() -> {
     ResourceLocation id = getId();
     return id.getPath() + "." + id.getNamespace() + ".attack_damage";
   });
+
+  @Override
+  protected void registerHooks(Builder hookBuilder) {
+    super.registerHooks(hookBuilder);
+    hookBuilder.addHook(this, ModifierHooks.TOOLTIP, ModifierHooks.ATTRIBUTES, ModifierHooks.BREAK_SPEED);
+  }
 
   /**
    * Creates a new instance of
@@ -51,17 +64,17 @@ public class DamageSpeedTradeModifier extends Modifier {
   }
 
   @Override
-  public void addInformation(IToolStackView tool, int level, @Nullable Player player, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
-    double boost = getMultiplier(tool, level);
+  public void addTooltip(IToolStackView tool, ModifierEntry modifier, @Nullable Player player, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
+    double boost = getMultiplier(tool, modifier.getLevel());
     if (boost != 0 && tool.hasTag(TinkerTags.Items.HARVEST)) {
       tooltip.add(applyStyle(Component.literal(Util.PERCENT_BOOST_FORMAT.format(-boost)).append(" ").append(MINING_SPEED)));
     }
   }
 
   @Override
-  public void addAttributes(IToolStackView tool, int level, EquipmentSlot slot, BiConsumer<Attribute,AttributeModifier> consumer) {
+  public void addAttributes(IToolStackView tool, ModifierEntry modifier, EquipmentSlot slot, BiConsumer<Attribute,AttributeModifier> consumer) {
     if (slot == EquipmentSlot.MAINHAND) {
-      double boost = getMultiplier(tool, level);
+      double boost = getMultiplier(tool, modifier.getLevel());
       if (boost != 0) {
         // half boost for attack speed, its
         consumer.accept(Attributes.ATTACK_DAMAGE, new AttributeModifier(uuid.get(), attributeName.get(), boost / 2, Operation.MULTIPLY_TOTAL));
@@ -72,7 +85,7 @@ public class DamageSpeedTradeModifier extends Modifier {
   @Override
   public void onBreakSpeed(IToolStackView tool, int level, PlayerEvents.BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
     if (isEffective) {
-      event.setNewSpeed((float)(event.getNewSpeed() * (1 - getMultiplier(tool, level))));
+      event.setNewSpeed((float)(event.getNewSpeed() * (1 - getMultiplier(tool, modifier.getLevel()))));
     }
   }
 }

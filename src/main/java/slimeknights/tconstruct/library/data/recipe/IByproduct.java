@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.data.recipe;
 
-import net.minecraft.world.level.material.Fluid;
+import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.OreRateType;
 
 /** Interface for a byproduct for datagen, not required but makes parameters easier */
 public interface IByproduct {
@@ -11,8 +12,13 @@ public interface IByproduct {
   boolean isAlwaysPresent();
 
   /** Gets the fluid of this byproduct */
-  Fluid getFluid();
+  FluidOutput getFluid(float scale);
 
-  /** Gets the amount of byproduct produced before scaling */
-  long getAmount();
+  /** Gets the rate for the given byproduct */
+  OreRateType getOreRate();
+
+  /** Gets the scaling unit for the byproduct for damagable melting recipes */
+  default int getDamageUnit() {
+    return 1;
+  }
 }

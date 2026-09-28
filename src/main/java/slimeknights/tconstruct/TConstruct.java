@@ -25,18 +25,24 @@ import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.data.AdvancementsProvider;
 import slimeknights.tconstruct.common.data.TinkerRegistrySets;
 import slimeknights.tconstruct.common.data.loot.GlobalLootModifiersProvider;
+import slimeknights.tconstruct.common.data.loot.LootTableInjectionProvider;
 import slimeknights.tconstruct.common.data.loot.TConstructLootTableProvider;
 import slimeknights.tconstruct.common.data.tags.BiomeTagProvider;
 import slimeknights.tconstruct.common.data.tags.BlockEntityTypeTagProvider;
 import slimeknights.tconstruct.common.data.tags.BlockTagProvider;
+import slimeknights.tconstruct.common.data.tags.CreativeTabTagProvider;
+import slimeknights.tconstruct.common.data.tags.DamageTypeTagProvider;
 import slimeknights.tconstruct.common.data.tags.EnchantmentTagProvider;
 import slimeknights.tconstruct.common.data.tags.EntityTypeTagProvider;
 import slimeknights.tconstruct.common.data.tags.FluidTagProvider;
+import slimeknights.tconstruct.common.data.tags.InstrumentTagProvider;
 import slimeknights.tconstruct.common.data.tags.ItemTagProvider;
+import slimeknights.tconstruct.common.data.tags.MenuTypeTagProvider;
+import slimeknights.tconstruct.common.data.tags.PotionTagProvider;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
-import slimeknights.tconstruct.library.TinkerBookIDs;
+import slimeknights.tconstruct.library.TinkerItemDisplays;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.ComputableDataKey;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
@@ -44,12 +50,14 @@ import slimeknights.tconstruct.library.tools.definition.ToolDefinitionLoader;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.TinkerCommons;
+import slimeknights.tconstruct.shared.TinkerEffects;
 import slimeknights.tconstruct.shared.TinkerMaterials;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.TinkerToolParts;
 import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.data.material.TrimMaterialProvider;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.WorldEvents;
@@ -79,6 +87,8 @@ public class TConstruct implements ModInitializer {
     instance = this;
 
     Config.init();
+    TinkerItemDisplays.init();
+    MaterialRegistry.init();
 
     // initialize modules, done this way rather than with annotations to give us control over the order
     // base
@@ -209,7 +219,6 @@ public class TConstruct implements ModInitializer {
 //    });
 //  }
 
-
   /* Utils */
 
   /**
@@ -217,6 +226,7 @@ public class TConstruct implements ModInitializer {
    * @param name  Resource path
    * @return  Location for tinkers
    */
+  @SuppressWarnings("removal")
   public static ResourceLocation getResource(String name) {
     return new ResourceLocation(MOD_ID, name);
   }
@@ -245,7 +255,7 @@ public class TConstruct implements ModInitializer {
    * resource locations.
    */
   public static String resourceString(String res) {
-    return String.format("%s:%s", MOD_ID, res);
+    return MOD_ID + ':' + res;
   }
 
   /**
@@ -253,7 +263,12 @@ public class TConstruct implements ModInitializer {
    * namespace.
    */
   public static String prefix(String name) {
-    return String.format("%s.%s", MOD_ID, name.toLowerCase(Locale.US));
+    return MOD_ID + "." + name.toLowerCase(Locale.US);
+  }
+
+  /** Makes a Tinker's description ID */
+  public static String makeDescriptionId(String type, String name) {
+    return type + "." + MOD_ID + "." + name;
   }
 
   /**

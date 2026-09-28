@@ -4,14 +4,18 @@ import lombok.AllArgsConstructor;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorItem;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.json.MaterialStatJson;
 import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatType;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsManager;
+import slimeknights.tconstruct.tools.modules.ArmorModuleBuilder;
+import slimeknights.tconstruct.tools.modules.ArmorModuleBuilder.ArmorShieldModuleBuilder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 /** Base data generator for use in addons, depends on the regular material provider */
 public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvider {
   /** All material stats generated so far */
-  private final Map<MaterialId,List<IMaterialStats>> allMaterialStats = new HashMap<>();
+  private final Map<MaterialId, MaterialStats> allMaterialStats = new HashMap<>();
   /* Materials data provider for validation */
   private final AbstractMaterialDataProvider materials;
 
@@ -55,34 +59,82 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
 
   /* Helpers */
 
+  /** Gets the stats object for the given material */
+  private MaterialStats getStats(MaterialId material) {
+    return allMaterialStats.computeIfAbsent(material, id -> new MaterialStats(new ArrayList<>(), new ArrayList<>()));
+  }
+
   /**
    * Adds a set of material stats for the given material ID
    * @param location  Material ID
    * @param stats     Stats to add
    */
   protected void addMaterialStats(MaterialId location, IMaterialStats... stats) {
-    allMaterialStats.computeIfAbsent(location, materialId -> new ArrayList<>())
-                    .addAll(Arrays.asList(stats));
+    Collections.addAll(getStats(location).required, stats);
+  }
+
+  /**
+   * Adds a set of optional material stats for the given material ID. Optional stats will not error if the serializer is absent.
+   * @param location  Material ID
+   * @param stats     Stats to add
+   */
+  @SuppressWarnings("unused") // API
+  protected void addOptionalStats(MaterialId location, IMaterialStats... stats) {
+    Collections.addAll(getStats(location).optional, stats);
+  }
+
+  /**
+   * Adds material stats from the given armor builder
+   * @param location     Material ID
+   * @param statBuilder  Stat builder
+   * @param otherStats   Other stat types to add after the builder
+   */
+  protected void addArmorStats(MaterialId location, ArmorModuleBuilder<? extends IMaterialStats> statBuilder, IMaterialStats... otherStats) {
+    IMaterialStats[] stats = new IMaterialStats[4];
+    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+      stats[slotType.ordinal()] = statBuilder.build(slotType);
+    }
+    addMaterialStats(location, stats);
+    if (otherStats.length > 0) {
+      addMaterialStats(location, otherStats);
+    }
+  }
+
+  /**
+   * Adds material stats from the given armor and shield builder
+   * @param location     Material ID
+   * @param statBuilder  Stat builder
+   * @param otherStats   Other stat types to add after the builder
+   */
+  protected void addArmorShieldStats(MaterialId location, ArmorShieldModuleBuilder<? extends IMaterialStats> statBuilder, IMaterialStats... otherStats) {
+    addArmorStats(location, statBuilder, otherStats);
+    addMaterialStats(location, statBuilder.buildShield());
   }
 
   /* Internal */
 
-  /** Converts a material and stats list to a JSON */
-  private JsonWrapper convert(List<IMaterialStats> stats) {
-    Map<ResourceLocation,IMaterialStats> wrappedStats = stats.stream()
-      .collect(Collectors.toMap(
-        IMaterialStats::getIdentifier,
-        stat -> stat));
-    return new JsonWrapper(wrappedStats);
-  }
+  /** Handles a pair of required and optional stats */
+  private record MaterialStats(List<IMaterialStats> required, List<IMaterialStats> optional) {
+    /** Deals with generics for the stat encoder */
+    @SuppressWarnings("unchecked")
+    private static <T extends IMaterialStats> JsonObject encodeStats(IMaterialStats stats, MaterialStatType<T> type) {
+      JsonObject json = new JsonObject();
+      type.getLoadable().serialize((T)stats, json);
+      return json;
+    }
 
-  /**
-   * Separate json wrapper for serialization, since we know the types here.
-   * See {@link MaterialStatJson} for its deserialization counterpart.
-   */
-  @SuppressWarnings("unused")
-  @AllArgsConstructor
-  private static class JsonWrapper {
-    private final Map<ResourceLocation, IMaterialStats> stats;
+    /** Serializes this to JSON */
+    public MaterialStatJson serialize() {
+      Map<ResourceLocation,JsonElement> map = new HashMap<>();
+      for (IMaterialStats stat : required) {
+        map.put(stat.getIdentifier(), encodeStats(stat, stat.getType()));
+      }
+      for (IMaterialStats stat : optional) {
+        JsonObject encoded = encodeStats(stat, stat.getType());
+        encoded.addProperty("optional", true);
+        map.put(stat.getIdentifier(), encoded);
+      }
+      return new MaterialStatJson(map);
+    }
   }
 }

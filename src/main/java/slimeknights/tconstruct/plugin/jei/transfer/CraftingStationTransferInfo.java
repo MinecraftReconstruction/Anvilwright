@@ -3,10 +3,13 @@ package slimeknights.tconstruct.plugin.jei.transfer;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraftforge.common.crafting.IShapedRecipe;
+import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tables.menu.CraftingStationContainerMenu;
 
 import java.util.ArrayList;
@@ -16,17 +19,15 @@ import java.util.Optional;
 /**
  * Class to dynamically provide the right slot count to JEI
  */
-@SuppressWarnings("removal")
 public class CraftingStationTransferInfo implements IRecipeTransferInfo<CraftingStationContainerMenu, CraftingRecipe> {
-
   @Override
-  public Class<CraftingStationContainerMenu> getContainerClass() {
+  public Class<? extends CraftingStationContainerMenu> getContainerClass() {
     return CraftingStationContainerMenu.class;
   }
 
   @Override
   public Optional<MenuType<CraftingStationContainerMenu>> getMenuType() {
-    return Optional.empty();
+    return Optional.of(TinkerTables.craftingStationContainer.get());
   }
 
   @Override
@@ -49,8 +50,15 @@ public class CraftingStationTransferInfo implements IRecipeTransferInfo<Crafting
 
     // next, add side inventory. shouldn't be a problem due to the blacklist
     // 10 slots for the crafting table
-    for (int i = 10; i < sideInventoryEnd; i++) {
-      slots.add(container.getSlot(i));
+    Player player = SafeClientAccess.getPlayer();
+    if (player != null) {
+      for (int i = 10; i < sideInventoryEnd; i++) {
+        Slot slot = container.getSlot(i);
+        // skip slots with no item, we don't want JEI putting stuff in empty slots as that's confusing
+        if (slot.hasItem() && slot.allowModification(player)) {
+          slots.add(container.getSlot(i));
+        }
+      }
     }
     return slots;
   }
@@ -66,6 +74,9 @@ public class CraftingStationTransferInfo implements IRecipeTransferInfo<Crafting
 
   @Override
   public boolean canHandle(CraftingStationContainerMenu container, CraftingRecipe recipe) {
-    return true;
+    if (recipe instanceof IShapedRecipe<?> shaped) {
+      return shaped.getRecipeWidth() <= 3 && shaped.getRecipeHeight() <= 3;
+    }
+    return recipe.getIngredients().size() <= 9;
   }
 }

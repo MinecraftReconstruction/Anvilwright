@@ -5,25 +5,21 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import slimeknights.mantle.command.MantleCommand;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.Modifier;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.recipe.modifiers.ModifierRecipeLookup;
-import slimeknights.tconstruct.library.recipe.modifiers.ModifierRequirements;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ModifierRemovalHook;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.shared.command.HeldModifiableItemIterator;
+import slimeknights.tconstruct.shared.command.TConstructCommand;
 import slimeknights.tconstruct.shared.command.argument.ModifierArgument;
 
 import java.util.List;
@@ -34,7 +30,6 @@ public class ModifiersCommand {
   private static final String ADD_SUCCESS_MULTIPLE = TConstruct.makeTranslationKey("command", "modifiers.success.add.multiple");
   private static final String REMOVE_SUCCESS = TConstruct.makeTranslationKey("command", "modifiers.success.remove.single");
   private static final String REMOVE_SUCCESS_MULTIPLE = TConstruct.makeTranslationKey("command", "modifiers.success.remove.multiple");
-  private static final DynamicCommandExceptionType MODIFIER_ERROR = new DynamicCommandExceptionType(error -> (Component)error);
   private static final Dynamic2CommandExceptionType CANNOT_REMOVE = new Dynamic2CommandExceptionType((name, entity) -> TConstruct.makeTranslation("command", "modifiers.failure.too_few_levels", name, entity));
 
   /**
@@ -63,28 +58,17 @@ public class ModifiersCommand {
     Modifier modifier = ModifierArgument.getModifier(context, "modifier");
     List<LivingEntity> successes = HeldModifiableItemIterator.apply(context, (living, stack) -> {
       // add modifier
-      ToolStack tool = ToolStack.from(stack);
-
-      // first, see if we can add the modifier
-      int currentLevel = tool.getModifierLevel(modifier);
-      List<ModifierEntry> modifiers = tool.getModifierList();
-      for (ModifierRequirements requirements : ModifierRecipeLookup.getRequirements(modifier.getId())) {
-        ValidatedResult result = requirements.check(stack, level + currentLevel, modifiers);
-        if (result.hasError()) {
-          throw MODIFIER_ERROR.create(result.getMessage());
-        }
-      }
-      tool = tool.copy();
+      ToolStack tool = ToolStack.from(stack).copy();
+      // add the modifier
       tool.addModifier(modifier.getId(), level);
-
       // ensure no modifier problems after adding
-      ValidatedResult toolValidation = tool.validate();
-      if (toolValidation.hasError()) {
-        throw MODIFIER_ERROR.create(toolValidation.getMessage());
+      Component toolValidation = tool.tryValidate();
+      if (toolValidation != null) {
+        throw TConstructCommand.COMPONENT_ERROR.create(toolValidation);
       }
 
       // if successful, update held item
-      living.setItemInHand(InteractionHand.MAIN_HAND, tool.createStack(stack.getCount()));
+      living.setItemInHand(InteractionHand.MAIN_HAND, tool.copyStack(stack));
       return true;
     });
 
@@ -105,10 +89,10 @@ public class ModifiersCommand {
     MutableInt maxRemove = new MutableInt(1);
     List<LivingEntity> successes = HeldModifiableItemIterator.apply(context, (living, stack) -> {
       // add modifier
-      ToolStack tool = ToolStack.from(stack);
+      ToolStack original = ToolStack.from(stack);
 
       // first, see if the modifier exists
-      int currentLevel = tool.getUpgrades().getLevel(modifier.getId());
+      int currentLevel = original.getUpgrades().getLevel(modifier.getId());
       if (currentLevel == 0) {
         throw CANNOT_REMOVE.create(modifier.getDisplayName(level), living.getName());
       }
@@ -116,12 +100,12 @@ public class ModifiersCommand {
       if (removeLevel > maxRemove.intValue()) {
         maxRemove.setValue(removeLevel);
       }
-      tool = tool.copy();
+      ToolStack tool = original.copy();
 
       // first remove hook, primarily for removing raw NBT which is highly discouraged using
       int newLevel = currentLevel - removeLevel;
       if (newLevel <= 0) {
-        modifier.getHook(TinkerHooks.RAW_DATA).removeRawData(tool, modifier, tool.getRestrictedNBT());
+        modifier.getHook(ModifierHooks.RAW_DATA).removeRawData(tool, modifier, tool.getRestrictedNBT());
       }
 
       // remove the actual modifier
@@ -130,25 +114,17 @@ public class ModifiersCommand {
       // ensure the tool is still valid
       Component validated = tool.tryValidate();
       if (validated != null) {
-        throw MODIFIER_ERROR.create(validated);
+        throw TConstructCommand.COMPONENT_ERROR.create(validated);
       }
 
-      // if this was the last level, validate the tool is still valid without it
-      if (newLevel <= 0) {
-        validated = modifier.getHook(TinkerHooks.REMOVE).onRemoved(tool, modifier);
-        if (validated != null) {
-          throw MODIFIER_ERROR.create(validated);
-        }
-      }
-      // check the modifier requirements
-      ItemStack resultStack = tool.createStack(stack.getCount()); // creating a stack to make it as accurate as possible, though the old stack should be sufficient
-      ValidatedResult result = ModifierRecipeLookup.checkRequirements(resultStack, tool);
-      if (result.hasError()) {
-        throw MODIFIER_ERROR.create(result.getMessage());
+      // ask modifiers if it's okay to remove them
+      validated = ModifierRemovalHook.onRemoved(original, tool);
+      if (validated != null) {
+        throw TConstructCommand.COMPONENT_ERROR.create(validated);
       }
 
       // if successful, update held item
-      living.setItemInHand(InteractionHand.MAIN_HAND, tool.createStack(stack.getCount()));
+      living.setItemInHand(InteractionHand.MAIN_HAND, tool.copyStack(stack));
       return true;
     });
 

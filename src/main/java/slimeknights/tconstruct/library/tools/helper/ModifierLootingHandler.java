@@ -8,18 +8,21 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.LootingModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.combat.ArmorLootingModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.combat.LootingModifierHook;
 import slimeknights.tconstruct.library.tools.capability.EntityModifierCapability;
 import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
+import slimeknights.tconstruct.library.tools.context.LootingContext;
 import slimeknights.tconstruct.library.tools.nbt.DummyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.shared.TinkerEffects;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -69,12 +72,24 @@ public class ModifierLootingHandler {
     if (damageSource == null) {
       return 0;
     }
+    LivingEntity target = event.getEntity();
+
+    // bleeding kills use the level of the effect for looting
+    if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
+      event.setLootingLevel(Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get())));
+      return;
+    }
+
+    // otherwise, use the proper tool
     Entity source = damageSource.getEntity();
     if (source instanceof LivingEntity holder) {
       Entity direct = damageSource.getDirectEntity();
       if (direct instanceof AbstractArrow) {
         // need to build a context from the relevant capabilities to use the modifier
         ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(direct);
+        context = new LootingContext(holder, target, damageSource, null);
+        // no modifiers means its not a projectile we fired, so just defer to dumb vanilla behavior of whatever looting
+        // since we don't set the enchantment on our tools, our looting modifiers won't set anything here anyways
         if (!modifiers.isEmpty()) {
           ModDataNBT persistentData = PersistentDataCapability.CAPABILITY.maybeGet(direct).map(ModDataNBT::new).orElseGet(ModDataNBT::new);
           DummyToolStack tool = new DummyToolStack(Items.AIR, modifiers, persistentData);
@@ -83,12 +98,16 @@ public class ModifierLootingHandler {
       } else {
         // not an arrow? means the held tool is to blame
         EquipmentSlot slotType = getLootingSlot(holder);
+        context = new LootingContext(holder, target, damageSource, slotType);
         ItemStack held = holder.getItemBySlot(slotType);
+
+        // if its modifiable, let it increase the level
         if (held.is(TinkerTags.Items.MODIFIABLE)) {
           ToolStack tool = ToolStack.from(held);
           level = ModifierUtil.getLootingLevel(tool, holder, target, damageSource);
           // ignore default looting if we are looting from another slot
         } else if (slotType != EquipmentSlot.MAINHAND) {
+          // if it's not modifiable, yet we have a lot marked to blame for looting, ignore the event value
           level = 0;
         }
       }

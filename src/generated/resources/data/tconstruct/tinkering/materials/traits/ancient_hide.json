@@ -1,8 +1,16 @@
 {
   "default": [
     {
-      "name": "tconstruct:fortune",
-      "level": 1
+      "level": 1,
+      "name": "tconstruct:fortified"
     }
-  ]
+  ],
+  "perStat": {
+    "tconstruct:melee_harvest": [
+      {
+        "level": 1,
+        "name": "tconstruct:fortune"
+      }
+    ]
+  }
 }

@@ -7,7 +7,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.world.block.FoliageType;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ import java.io.IOException;
 public class SlimeColorReloadListener extends SimplePreparableReloadListener<int[]> implements IdentifiableResourceReloadListener {
   private final SlimeType color;
   private final ResourceLocation path;
-  public SlimeColorReloadListener(SlimeType color) {
+  public SlimeColorReloadListener(FoliageType color) {
     this.color = color;
     this.path = TConstruct.getResource("textures/colormap/" + color.getSerializedName() + "_grass_color.png");
   }

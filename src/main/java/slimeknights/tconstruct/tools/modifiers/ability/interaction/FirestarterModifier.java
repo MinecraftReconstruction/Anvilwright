@@ -3,8 +3,7 @@ package slimeknights.tconstruct.tools.modifiers.ability.interaction;
 import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,41 +27,27 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.EntityInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
-import slimeknights.tconstruct.library.modifiers.impl.InteractionModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
-import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
-import slimeknights.tconstruct.library.tools.definition.aoe.CircleAOEIterator;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
-import slimeknights.tconstruct.library.tools.definition.module.ToolModuleHooks;
-import slimeknights.tconstruct.library.tools.definition.module.interaction.DualOptionInteraction;
-import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
+import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.behavior.ShowOffhandModule;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.modules.interaction.PlaceFireModule;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 
-/**
- * Modifier that starts a fire at the given position
- */
+/** @deprecated use {@link PlaceFireModule} and {@link ShowOffhandModule} */
+@Deprecated(forRemoval = true)
 @RequiredArgsConstructor
-public class FirestarterModifier extends InteractionModifier.NoLevels implements EntityInteractionModifierHook, BlockInteractionModifierHook {
-  /** Generic action for the sake of people who want compat but do not want to request a specific action */
-  private static final ToolAction LIGHT_FIRE = ToolAction.get("light_fire");
-  /** Compat with mods adding custom campfires */
-  private static final ToolAction LIGHT_CAMPFIRE = ToolAction.get("light_campfire");
-
+public class FirestarterModifier extends NoLevelsModifier {
   @Getter
   private final int priority;
 
   @Override
   protected void registerHooks(Builder hookBuilder) {
     super.registerHooks(hookBuilder);
-    hookBuilder.addHook(this, TinkerHooks.ENTITY_INTERACT, TinkerHooks.BLOCK_INTERACT);
+    hookBuilder.addModule(ShowOffhandModule.DISALLOW_BROKEN);
+    hookBuilder.addModule(PlaceFireModule.INSTANCE);
   }
 
   @Override

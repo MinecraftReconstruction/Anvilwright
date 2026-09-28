@@ -14,27 +14,32 @@ import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.ConditionalStatModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.ProjectileLaunchModifierHook;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap.Builder;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.display.TooltipModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BlockBreakModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedContext;
+import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.special.sling.SlingLaunchModifierHook;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
+import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.stat.FloatToolStat;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.library.utils.TooltipKey;
 import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.stats.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class MomentumModifier extends Modifier implements ProjectileLaunchModifierHook, ConditionalStatModifierHook {
+public class MomentumModifier extends Modifier implements ProjectileLaunchModifierHook, ConditionalStatModifierHook, BlockBreakModifierHook, BreakSpeedModifierHook, SlingLaunchModifierHook, TooltipModifierHook {
   private static final Component SPEED = TConstruct.makeTranslation("modifier", "momentum.speed");
 
   @Override
   protected void registerHooks(Builder hookBuilder) {
-    hookBuilder.addHook(this, TinkerHooks.CONDITIONAL_STAT, TinkerHooks.PROJECTILE_LAUNCH);
+    hookBuilder.addHook(this, ModifierHooks.CONDITIONAL_STAT, ModifierHooks.PROJECTILE_LAUNCH, ModifierHooks.PROJECTILE_THROWN, ModifierHooks.BLOCK_BREAK, ModifierHooks.BREAK_SPEED, ModifierHooks.SLING_LAUNCH, ModifierHooks.TOOLTIP);
   }
 
   @Override
@@ -44,10 +49,14 @@ public class MomentumModifier extends Modifier implements ProjectileLaunchModifi
   }
 
   /** Gets the bonus for the modifier */
-  private static float getBonus(LivingEntity living, RegistryObject<? extends TinkerEffect> effect, int level, float scale) {
-    // 25% boost per level at max
-    int effectLevel = effect.get().getLevel(living) + 1;
-    return level * effectLevel / scale;
+  private static float getBonus(LivingEntity living, ToolType type, ModifierEntry modifier) {
+    return modifier.getEffectiveLevel() * (TinkerEffect.getLevel(living, TinkerModifiers.momentumEffect.get(type)));
+  }
+
+  /** Applies the effect to the target */
+  private static void applyEffect(LivingEntity living, ToolType type, int duration, int maxLevel) {
+    TinkerEffect effect = TinkerModifiers.momentumEffect.get(type);
+    effect.apply(living, duration, Math.min(maxLevel, TinkerEffect.getAmplifier(living, effect) + 1), true);
   }
 
   @Override
@@ -58,50 +67,59 @@ public class MomentumModifier extends Modifier implements ProjectileLaunchModifi
   }
 
   @Override
-  public void afterBlockBreak(IToolStackView tool, int level, ToolHarvestContext context) {
-    if (context.canHarvest() && context.isEffective() && !context.isAOE()) {
-      // 32 blocks gets you to max, effect is stronger at higher levels
-      LivingEntity living = context.getLiving();
-      int effectLevel = Math.min(31, TinkerModifiers.momentumEffect.get().getLevel(living) + 1);
-      // funny formula from 1.12, guess it makes faster tools have a slightly shorter effect
-      int duration = (int) ((10f / tool.getStats().get(ToolStats.MINING_SPEED)) * 1.5f * 20f);
-      TinkerModifiers.momentumEffect.get().apply(living, duration, effectLevel, true);
+  public float modifyBreakSpeed(IToolStackView tool, ModifierEntry modifier, BreakSpeedContext context, float speed) {
+    if (context.isEffective()) {
+      // 25% boost per level at max
+      speed *= 1 + getBonus(context.player(), ToolType.HARVEST, modifier) / 40f;
+    }
+    return speed;
+  }
+
+  @Override
+  public void afterBlockBreak(IToolStackView tool, ModifierEntry modifier, ToolHarvestContext context) {
+    if (context.canHarvest() && context.isEffective() && !context.isAOE() && tool.hasTag(TinkerTags.Items.HARVEST)) {
+      // grant the effect for 5 seconds, though grant a longer effect if the blocks hardness is particularly high compared to our mining speed
+      int duration = Math.max(5*20, (int) (2.5f * 20f * context.getState().getDestroySpeed(context.getWorld(), context.getPos()) / tool.getStats().get(ToolStats.MINING_SPEED)));
+      // 10 blocks gets you to max, effect is stronger at higher levels
+      applyEffect(context.getLiving(), ToolType.HARVEST, duration, 9);
     }
   }
 
   @Override
-  public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter, Projectile projectile, @Nullable AbstractArrow arrow, NamespacedNBT persistentData, boolean primary) {
+  public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter, Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData, boolean primary) {
     if (primary && (arrow == null || arrow.isCritArrow())) {
-      // 16 arrows gets you to max
-      int effectLevel = Math.min(15, TinkerModifiers.momentumRangedEffect.get().getLevel(shooter) + 1);
-      TinkerModifiers.momentumRangedEffect.get().apply(shooter, 5 * 20, effectLevel, true);
+      // 10 arrows gets you to max
+      applyEffect(shooter, ToolType.RANGED, 10*20, 9);
     }
+  }
+
+  @Override
+  public void afterSlingLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity holder, LivingEntity target, ModifierEntry slingSource, float force, float multiplier, Vec3 angle) {
+    applyEffect(holder, ToolType.RANGED, 10*20, 9);
   }
 
   @Override
   public float modifyStat(IToolStackView tool, ModifierEntry modifier, LivingEntity living, FloatToolStat stat, float baseValue, float multiplier) {
     if (stat == ToolStats.DRAW_SPEED) {
-      return baseValue * (1 + getBonus(living, TinkerModifiers.momentumRangedEffect, modifier.getLevel(), 64f));
+      // +25% at max level
+      return baseValue * (1 + getBonus(living, ToolType.RANGED, modifier) / 40f);
     }
     return baseValue;
   }
 
   @Override
-  public void addInformation(IToolStackView tool, int level, @Nullable Player player, List<Component> tooltip, TooltipKey key, TooltipFlag flag) {
-    boolean harvest = tool.hasTag(TinkerTags.Items.HARVEST);
-    if (harvest || tool.hasTag(TinkerTags.Items.RANGED)) {
+  public void addTooltip(IToolStackView tool, ModifierEntry modifier, @Nullable Player player, List<Component> tooltip, TooltipKey key, TooltipFlag tooltipFlag) {
+    ToolType type = ToolType.from(tool.getItem(), ToolType.HARVEST, ToolType.RANGED);
+    if (type != null) {
       float bonus;
       if (player != null && key == TooltipKey.SHIFT) {
-        if (harvest) {
-          bonus = getBonus(player, TinkerModifiers.momentumEffect, level, 128f);
-        } else {
-          bonus = getBonus(player, TinkerModifiers.momentumRangedEffect, level, 64f);
-        }
+        bonus = getBonus(player, type, modifier) / 40f;
       } else {
-        bonus = level * 0.25f;
+        // 25% per level for both of them
+        bonus = modifier.getEffectiveLevel() * 0.25f;
       }
       if (bonus > 0) {
-        addPercentTooltip(SPEED, bonus, tooltip);
+        TooltipModifierHook.addPercentBoost(this, SPEED, bonus, tooltip);
       }
     }
   }

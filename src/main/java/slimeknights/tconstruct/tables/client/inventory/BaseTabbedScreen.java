@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.tables.client.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -23,6 +22,7 @@ import slimeknights.tconstruct.tables.menu.module.SideInventoryContainer;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends TabbedContainerMenu<TILE>> extends MultiModuleScreen<CONTAINER> {
 
@@ -30,6 +30,7 @@ public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends Tabbed
   protected static final Component COMPONENT_ERROR = TConstruct.makeTranslation("gui", "error");
 
   public static final ResourceLocation BLANK_BACK = TConstruct.getResource("textures/gui/blank.png");
+  public static final ResourceLocation BLANK_BACK_PLUS_1 = TConstruct.getResource("textures/gui/blank_extra_row.png");
 
   @Nullable
   protected final TILE tile;
@@ -55,7 +56,8 @@ public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends Tabbed
   }
 
   protected void drawIcon(GuiGraphics graphics, Slot slot, ElementScreen element) {
-    element.draw(graphics, Icons.ICONS, slot.x + this.cornerX - 1, slot.y + this.cornerY - 1);
+    RenderSystem.setShaderTexture(0, Icons.ICONS);
+    element.draw(graphics, slot.x + this.cornerX - 1, slot.y + this.cornerY - 1);
   }
 
   protected void drawIconEmpty(GuiGraphics graphics, Slot slot, ElementScreen element) {
@@ -81,24 +83,31 @@ public class BaseTabbedScreen<TILE extends BlockEntity, CONTAINER extends Tabbed
   public void updateDisplay() {
   }
 
-  protected void addChestSideInventory(Inventory inventory) {
+  /** Adds the chest screen, returning true if it was added */
+  protected boolean addChestSideInventory(Inventory inventory) {
     SideInventoryContainer<?> sideInventoryContainer = getMenu().getSubContainer(SideInventoryContainer.class);
     if (sideInventoryContainer != null) {
       // no title if missing one
       Component sideInventoryName = Component.empty();
       BlockEntity te = sideInventoryContainer.getTile();
       if (te instanceof MenuProvider) {
-        sideInventoryName = ((MenuProvider) te).getDisplayName();
+        sideInventoryName = Objects.requireNonNullElse(((MenuProvider)te).getDisplayName(), Component.empty());
       }
 
       this.addModule(new SideInventoryScreen<>(this, sideInventoryContainer, inventory, sideInventoryName, sideInventoryContainer.getSlotCount(), sideInventoryContainer.getColumns()));
+      return true;
     }
+    return false;
   }
 
   @Override
   public List<Rect2i> getModuleAreas() {
     List<Rect2i> areas = super.getModuleAreas();
-    if (COMPAT_SHOW_TABS) areas.add(tabsScreen.getArea());
+    if (tabsScreen != null) {
+      areas.add(tabsScreen.getArea());
+    } else {
+      TConstruct.LOG.error("Someone is trying to access module areas before the screen is initialized. This usually indicates a recipe viewer badly implementing the JEI API. Report this issue to your recipe viewer.");
+    }
     return areas;
   }
 

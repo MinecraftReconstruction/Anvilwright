@@ -1,3 +1,9 @@
 {
-  "stats": {}
+  "stats": {
+    "tconstruct:arrow_head": {},
+    "tconstruct:slime": {
+      "durability": 175,
+      "overslime_capacity": 125
+    }
+  }
 }

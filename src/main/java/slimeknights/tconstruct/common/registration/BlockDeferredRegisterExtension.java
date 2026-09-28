@@ -2,7 +2,6 @@ package slimeknights.tconstruct.common.registration;
 
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerPotBlock;
@@ -11,13 +10,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import slimeknights.mantle.registration.deferred.BlockDeferredRegister;
-import slimeknights.mantle.registration.object.EnumObject;
-import slimeknights.mantle.registration.object.EnumObject.Builder;
-import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 /** Additional methods in deferred register extension */
 @SuppressWarnings("UnusedReturnValue")

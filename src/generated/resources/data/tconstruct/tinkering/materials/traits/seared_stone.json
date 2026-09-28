@@ -1,8 +1,16 @@
 {
   "default": [
     {
-      "name": "tconstruct:searing",
-      "level": 1
+      "level": 1,
+      "name": "tconstruct:searing"
     }
-  ]
+  ],
+  "perStat": {
+    "tconstruct:armor": [
+      {
+        "level": 1,
+        "name": "tconstruct:fire_protection"
+      }
+    ]
+  }
 }

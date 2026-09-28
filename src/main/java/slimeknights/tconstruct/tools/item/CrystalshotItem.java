@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tools.item;
 import io.github.fabricators_of_create.porting_lib.item.InfiniteArrowItem;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -13,9 +14,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.tools.TinkerTools;
@@ -37,7 +37,7 @@ public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
     RANDOM_VARIANTS.add("quartz");
   }
   /** NBT key for variants on the stack and entity */
-  private static final String TAG_VARIANT = "variant";
+  public static final String TAG_VARIANT = "variant";
   public CrystalshotItem(Properties props) {
     super(props);
   }
@@ -47,7 +47,7 @@ public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
     CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter);
     String variant = "random";
     CompoundTag tag = pStack.getTag();
-    if (tag != null) {
+    if (tag != null && tag.contains(TAG_VARIANT, Tag.TAG_STRING)) {
       variant = tag.getString(TAG_VARIANT);
     }
     if ("random".equals(variant)) {
@@ -59,13 +59,12 @@ public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
 
   @Override
   public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
-    return EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, bow) > 0;
+    return bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
   }
 
   /** Creates a crystal shot with the given variant */
   public static ItemStack withVariant(String variant, int size) {
-    ItemStack stack = new ItemStack(TinkerTools.crystalshotItem);
-    stack.setCount(size);
+    ItemStack stack = new ItemStack(TinkerTools.crystalshotItem, size);
     stack.getOrCreateTag().putString(TAG_VARIANT, variant);
     return stack;
   }
@@ -75,13 +74,11 @@ public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
 
     public CrystalshotEntity(EntityType<? extends CrystalshotEntity> type, Level level) {
       super(type, level);
-      pickup = Pickup.CREATIVE_ONLY;
       soundEvent = Sounds.CRYSTALSHOT.getSound();
     }
 
     public CrystalshotEntity(Level level, LivingEntity shooter) {
       super(TinkerTools.crystalshotEntity.get(), shooter, level);
-      pickup = Pickup.CREATIVE_ONLY;
       soundEvent = Sounds.CRYSTALSHOT.getSound();
     }
 

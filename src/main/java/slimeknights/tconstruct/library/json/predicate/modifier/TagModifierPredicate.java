@@ -1,21 +1,24 @@
 package slimeknights.tconstruct.library.json.predicate.modifier;
 
-import lombok.RequiredArgsConstructor;
 import net.minecraft.tags.TagKey;
-import slimeknights.mantle.data.GenericLoaderRegistry.IGenericLoader;
-import slimeknights.mantle.data.predicate.TagPredicateLoader;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.json.TinkerLoadables;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
 
 /**
- * Predicate matching an entity tag
+ * Predicate matching an entity tag.
+ * @deprecated use {@link ModifierPredicate#tag(TagKey)}
  */
-@RequiredArgsConstructor
-public class TagModifierPredicate implements ModifierPredicate {
-  public static final TagPredicateLoader<Modifier,TagModifierPredicate> LOADER = new TagPredicateLoader<>(ModifierManager.REGISTRY_KEY, TagModifierPredicate::new, c -> c.tag);
+@SuppressWarnings("DeprecatedIsStillUsed")
+@Deprecated
+public record TagModifierPredicate(TagKey<Modifier> tag) implements ModifierPredicate {
+  public static final RecordLoadable<TagModifierPredicate> LOADER = RecordLoadable.create(TinkerLoadables.MODIFIER_TAGS.requiredField("tag", TagModifierPredicate::tag), TagModifierPredicate::new);
 
-  private final TagKey<Modifier> tag;
+  /** @deprecated use {@link ModifierPredicate#tag(TagKey)} */
+  @Deprecated(forRemoval = true)
+  public TagModifierPredicate {}
 
   @Override
   public boolean matches(ModifierId modifier) {
@@ -23,7 +26,7 @@ public class TagModifierPredicate implements ModifierPredicate {
   }
 
   @Override
-  public IGenericLoader<? extends ModifierPredicate> getLoader() {
+  public RecordLoadable<TagModifierPredicate> getLoader() {
     return LOADER;
   }
 }

@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -22,7 +23,7 @@ import slimeknights.mantle.item.BlockTooltipItem;
 import slimeknights.mantle.item.TooltipItem;
 import slimeknights.mantle.registration.deferred.BlockEntityTypeDeferredRegister;
 import slimeknights.mantle.registration.deferred.EntityTypeDeferredRegister;
-import slimeknights.mantle.registration.deferred.FluidDeferredRegister;
+import slimeknights.mantle.registration.deferred.EnumDeferredRegister;
 import slimeknights.mantle.registration.deferred.MenuTypeDeferredRegister;
 import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
 import slimeknights.tconstruct.TConstruct;
@@ -30,6 +31,7 @@ import slimeknights.tconstruct.common.registration.BlockDeferredRegisterExtensio
 import slimeknights.tconstruct.common.registration.ItemDeferredRegisterExtension;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -95,7 +97,7 @@ public abstract class TinkerModule {
 
   /**
    * We use this builder to ensure that our blocks all have the most important properties set.
-   * This way it'll stick out if a block doesn't have a tooltype or sound set.
+   * This way it'll stick out if a block doesn't have a sound set.
    * It may be a bit less clear at first, since the actual builder methods tell you what each value means,
    * but as long as we don't statically import the enums it should be just as readable.
    */
@@ -125,12 +127,57 @@ public abstract class TinkerModule {
     return builder(color, SoundType.WOOD).requiresCorrectToolForDrops().strength(2.0F, 7.0F).ignitedByLava();
   }
 
-  /**
-   * Creates a Tinkers Construct resource location
-   * @param path  Resource path
-   * @return  Tinkers Construct resource location
-   */
-  protected static ResourceLocation resource(String path) {
-    return TConstruct.getResource(path);
+  /** Creates a new resource key for tinkers */
+  protected static <T> ResourceKey<T> key(ResourceKey<? extends Registry<T>> registry, String name) {
+    return ResourceKey.create(registry, TConstruct.getResource(name));
+  }
+
+
+  /* Creative tab helpers */
+
+  /** Adds an enum object to the given tab */
+  protected static void accept(CreativeModeTab.Output output, EnumObject<?,? extends ItemLike> items, TabVisibility visibility) {
+    items.forEach(item -> output.accept(item, visibility));
+  }
+
+  /** Adds an enum object to the given tab with default visbility */
+  protected static void accept(CreativeModeTab.Output output, EnumObject<?,? extends ItemLike> items) {
+    accept(output, items, TabVisibility.PARENT_AND_SEARCH_TABS);
+  }
+
+  /** Adds an building block object to the given tab with default visbility */
+  protected static void accept(CreativeModeTab.Output output, BuildingBlockObject object, TabVisibility visibility) {
+    object.forEach(item -> output.accept(item, visibility));
+  }
+
+  /** Adds an building block object to the given tab with default visbility */
+  protected static void accept(CreativeModeTab.Output output, BuildingBlockObject object) {
+    accept(output, object, TabVisibility.PARENT_AND_SEARCH_TABS);
+  }
+
+  /** Accepts the given item if the passed tag has items */
+  @SuppressWarnings({"deprecation", "SameParameterValue"})
+  protected static boolean acceptIfTag(CreativeModeTab.Output output, ItemLike item, TabVisibility visibility, TagKey<Item> tagCondition) {
+    Optional<Named<Item>> tag = BuiltInRegistries.ITEM.getTag(tagCondition);
+    if (tag.isPresent() && tag.get().size() > 0) {
+      output.accept(item, visibility);
+      return true;
+    }
+    return false;
+  }
+
+  /** Accepts the given item if the passed tag has items */
+  @SuppressWarnings("UnusedReturnValue")
+  protected static boolean acceptIfTag(CreativeModeTab.Output output, ItemLike item, TagKey<Item> tagCondition) {
+    return acceptIfTag(output, item, TabVisibility.PARENT_AND_SEARCH_TABS, tagCondition);
+  }
+
+  /** Accepts the given item if the given material is present */
+  protected static boolean acceptIfMaterial(CreativeModeTab.Output output, ItemLike item, MaterialId material) {
+    if (MaterialRegistry.getMaterial(material) != IMaterial.UNKNOWN) {
+      output.accept(item);
+      return true;
+    }
+    return false;
   }
 }

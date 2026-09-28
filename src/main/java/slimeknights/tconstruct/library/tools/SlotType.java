@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
@@ -12,8 +11,15 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import slimeknights.mantle.client.ResourceColorManager;
+import slimeknights.mantle.data.loadable.Loadable;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.primitive.StringLoadable;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.utils.JsonUtils;
+import slimeknights.tconstruct.library.tools.stat.IToolStat;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -22,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -29,10 +36,20 @@ import java.util.regex.Pattern;
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SlotType {
+  /** Loadable for a slot type */
+  public static final StringLoadable<SlotType> LOADABLE = StringLoadable.DEFAULT.comapFlatMap((name, error) -> {
+    if (!isValidName(name)) {
+      throw error.create("Invalid slot type name '" + name + '\'');
+    }
+    return SlotType.getOrCreate(name);
+  }, SlotType::getName);
+
   /** Key for uppercase slot name */
-  private static final String KEY_PREFIX = TConstruct.makeTranslationKey("stat", "slot.prefix.");
+  private static final String KEY_SLOT = TConstruct.makeTranslationKey("stat", "slot.");
+  /** Key for uppercase slot name */
+  private static final String KEY_PREFIX = KEY_SLOT + "prefix.";
   /** Key for lowercase slot name */
-  private static final String KEY_DISPLAY = TConstruct.makeTranslationKey("stat", "slot.display.");
+  public static final String KEY_DISPLAY = KEY_SLOT + "display.";
   /** Map of instances for each name */
   private static final Map<String,SlotType> SLOT_TYPES = new HashMap<>();
   /** List of all slots in the order they were added */
@@ -42,13 +59,13 @@ public final class SlotType {
   private static final Pattern VALIDATOR = Pattern.compile("^[a-z0-9_]*$");
 
   /** Common slot type for modifiers with many levels */
-  public static final SlotType UPGRADE = create("upgrades", 0xFFCCBA47);
+  public static final SlotType UPGRADE = getOrCreate("upgrades");
   /** Slot type for protection based modifiers on armor */
-  public static final SlotType DEFENSE = create("defense", 0xFFA8FFA0);
+  public static final SlotType DEFENSE = getOrCreate("defense");
   /** Rare slot type for powerful and rather exclusive modifiers */
-  public static final SlotType ABILITY = create("abilities", 0xFFB8A0FF);
+  public static final SlotType ABILITY = getOrCreate("abilities");
   /** Slot type used in the soul forge */
-  public static final SlotType SOUL = create("souls", -1);
+  public static final SlotType SOUL = getOrCreate("souls");
 
   /** Just makes sure static initialization is done early enough */
   public static void init() {}
@@ -60,30 +77,23 @@ public final class SlotType {
   }
 
   /**
-   * Registers the given slot type.
+   * Gets an existing slot type, or creates it if missing.
    * Note that you will also want to define a texture for the creative modifier and JEI using {@link slimeknights.mantle.client.model.NBTKeyModel#registerExtraTexture(ResourceLocation, String, ResourceLocation)}
    * @param name     Name of the slot type
-   * @param color    Color of the slot
    * @return  Slot type instance for the name, only once instance for each name
-   * @apiNote
    * @throws IllegalArgumentException  Error if a name is invalid
    */
-  public static SlotType create(String name, int color) {
+  public static SlotType getOrCreate(String name) {
     if (SLOT_TYPES.containsKey(name)) {
       return SLOT_TYPES.get(name);
     }
     if (!isValidName(name)) {
       throw new IllegalArgumentException("Non [a-z0-9_] character in slot name: " + name);
     }
-    SlotType type = new SlotType(name, TextColor.fromRgb(color));
+    SlotType type = new SlotType(name);
     SLOT_TYPES.put(name, type);
     ALL_SLOTS.add(type);
     return type;
-  }
-
-  /** Gets an existing slot type, or creates it if missing */
-  public static SlotType getOrCreate(String name) {
-    return create(name, -1);
   }
 
   /**
@@ -116,9 +126,8 @@ public final class SlotType {
   /** Name of this slot type, used for serialization */
   @Getter
   private final String name;
-  /** Gets the color of this slot type */
-  @Getter
-  private final TextColor color;
+  /** Cached color of this slot type */
+  private TextColor color = null;
 
   /** Cached text component display names */
   private Component displayName = null;
@@ -128,12 +137,25 @@ public final class SlotType {
     return KEY_PREFIX + name;
   }
 
+  /** Gets slot count formatted for showing in a tooltip. */
+  public Component format(int count) {
+    return IToolStat.formatNumber(getPrefix(), getColor(), count);
+  }
+
   /** Gets the display name for display in a sentence */
   public Component getDisplayName() {
     if (displayName == null) {
       displayName = Component.translatable(KEY_DISPLAY + name);
     }
     return displayName;
+  }
+
+  /** Gets the color of this slot type */
+  public TextColor getColor() {
+    if (color == null) {
+      color = ResourceColorManager.getTextColor(KEY_SLOT + name);
+    }
+    return color;
   }
 
   /** Writes this slot type to the packet buffer */
@@ -151,77 +173,104 @@ public final class SlotType {
     return "SlotType{" + name + '}';
   }
 
-  /** Data object representing a slot type and count
-   * TODO: make a record */
-  @Data
-  public static class SlotCount {
-    private final SlotType type;
-    private final int count;
-
-    /** Gets the type for the given slot count */
-    @Nullable
-    public static SlotType getType(@Nullable SlotCount count) {
-      if (count == null) {
-        return null;
+  /** Data object representing a slot type and count */
+  public record SlotCount(SlotType type, int count) {
+    public static final Loadable<SlotCount> LOADABLE = new Loadable<>() {
+      @Override
+      public SlotCount convert(JsonElement element, String key, TypedMap context) {
+        JsonObject json = GsonHelper.convertToJsonObject(element, key);
+        if (json.entrySet().size() != 1) {
+          throw new JsonSyntaxException("Cannot set multiple slot types");
+        }
+        Entry<String,JsonElement> entry = json.entrySet().iterator().next();
+        String typeString = entry.getKey();
+        if (!SlotType.isValidName(typeString)) {
+          throw new JsonSyntaxException("Invalid slot type name '" + typeString + "'");
+        }
+        SlotType slotType = SlotType.getOrCreate(typeString);
+        int slots = IntLoadable.FROM_ONE.convert(entry.getValue(), "count", context);
+        return new SlotCount(slotType, slots);
       }
-      return count.getType();
+
+      @Override
+      public JsonElement serialize(SlotCount slots) {
+        JsonObject json = new JsonObject();
+        json.addProperty(slots.type.getName(), slots.count);
+        return json;
+      }
+
+      @Override
+      public SlotCount decode(FriendlyByteBuf buffer, TypedMap context) {
+        return new SlotCount(SlotType.read(buffer), buffer.readVarInt());
+      }
+
+      @Override
+      public void encode(FriendlyByteBuf buffer, SlotCount slots) {
+        slots.type().write(buffer);
+        buffer.writeVarInt(slots.count());
+      }
+
+      @Override
+      public <P> LoadableField<SlotCount,P> nullableField(String key, Function<P,SlotCount> getter) {
+        return new NullableSlotCountField<>(key, getter);
+      }
+    };
+
+    /** Nullable field which compacts slot counts in the buffer */
+    private record NullableSlotCountField<P>(String key, Function<P,SlotCount> getter) implements LoadableField<SlotCount,P> {
+      @Nullable
+      @Override
+      public SlotCount get(JsonObject json, String key, TypedMap context) {
+        return LOADABLE.getOrDefault(json, key, null, context);
+      }
+
+      @Override
+      public void serialize(P parent, JsonObject json) {
+        SlotCount count = getter.apply(parent);
+        if (count != null) {
+          json.add(key, LOADABLE.serialize(count));
+        }
+      }
+
+      @Nullable
+      @Override
+      public SlotCount decode(FriendlyByteBuf buffer, TypedMap context) {
+        int count = buffer.readVarInt();
+        if (count == 0) {
+          return null;
+        }
+        return new SlotCount(SlotType.read(buffer), count);
+      }
+
+      @Override
+      public void encode(FriendlyByteBuf buffer, P parent) {
+        SlotCount slotCount = getter.apply(parent);
+        if (slotCount == null) {
+          buffer.writeVarInt(0);
+        } else {
+          buffer.writeVarInt(slotCount.count);
+          slotCount.type.write(buffer);
+        }
+      }
     }
 
     /**
-     * Parses the slot data from the given JSON
-     * @param json  JSON
-     * @return  Slot count data
+     * Gets the type for the given slot count
      */
-    public static SlotCount fromJson(JsonObject json) {
-      if (json.entrySet().size() != 1) {
-        throw new JsonSyntaxException("Cannot set multiple slot types");
-      }
-      Entry<String,JsonElement> entry = json.entrySet().iterator().next();
-      String typeString = entry.getKey();
-      if (!SlotType.isValidName(typeString)) {
-        throw new JsonSyntaxException("Invalid slot type name '" + typeString + "'");
-      }
-      SlotType slotType = SlotType.getOrCreate(typeString);
-      int slots = JsonUtils.getIntMin(entry.getValue(), "count", 1);
-      return new SlotCount(slotType, slots);
-    }
-
-    /** Reads a slot count from the packet buffer */
     @Nullable
-    public static SlotCount read(FriendlyByteBuf buffer) {
-      int count = buffer.readVarInt();
-      if (count > 0) {
-        SlotType type = SlotType.read(buffer);
-        return new SlotCount(type, count);
+    public static SlotType type(@Nullable SlotCount count) {
+      if (count == null || count.count <= 0) {
+        return null;
       }
-      return null;
+      return count.type();
     }
 
     /** Gets the given type of slots from the given slot count object */
     public static int get(@Nullable SlotCount slots, SlotType type) {
-      if (slots != null && slots.getType() == type) {
-        return slots.getCount();
+      if (slots != null && slots.type() == type) {
+        return slots.count();
       }
       return 0;
-    }
-
-    /** Writes this to the packet buffer */
-    public static void write(@Nullable SlotCount slots, FriendlyByteBuf buffer) {
-      if (slots == null) {
-        buffer.writeVarInt(0);
-      } else {
-        buffer.writeVarInt(slots.getCount());
-        slots.getType().write(buffer);
-      }
-    }
-
-    public static SlotCount read(CompoundTag tag) {
-      return new SlotCount(SlotType.read(tag), tag.getInt("count"));
-    }
-
-    public void write(CompoundTag tag) {
-      tag.putInt("count", getCount());
-      getType().write(tag);
     }
 
     @Override

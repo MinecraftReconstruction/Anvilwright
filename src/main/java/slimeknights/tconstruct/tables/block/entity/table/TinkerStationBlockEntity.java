@@ -5,6 +5,8 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelp
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -13,16 +15,22 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.StringUtils;
+import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.SoundUtils;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.shared.inventory.ConfigurableInvWrapperCapability;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tables.block.TinkerStationBlock;
@@ -33,6 +41,9 @@ import slimeknights.tconstruct.tables.menu.TinkerStationContainerMenu;
 import slimeknights.tconstruct.tables.network.UpdateTinkerStationRecipePacket;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
+
+import static slimeknights.tconstruct.library.tools.part.IMaterialItem.MATERIAL_TAG;
 
 public class TinkerStationBlockEntity extends RetexturedTableBlockEntity implements ILazyCrafter {
   /** Slot index of the tool slot */
@@ -51,11 +62,20 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   /** Crafting inventory for the recipe calls */
   private final TinkerStationContainerWrapper inventoryWrapper;
 
+  /** Current result, may be modified again later */
+  @Nullable
+  private LazyToolStack result = null;
+  /** Error from the last recipe */
+  @Nullable
   @Getter
-  private ValidatedResult currentError = ValidatedResult.PASS;
-
+  private Component currentError = null;
+  /** Current text in the text field */
   @Getter
   private String itemName = "";
+
+  /** Material variant texture, alterantive to {@link #getTexture()} in the model. */
+  @Getter
+  private MaterialVariantId material = MaterialId.UNKNOWN;
 
   public TinkerStationBlockEntity(BlockPos pos, BlockState state) {
     // if the block is the right type, use it for slot count
@@ -85,6 +105,28 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     return getContainerSize() - 1;
   }
 
+  /** Gets the tool contained in this block entity */
+  public LazyToolStack getTool() {
+    return inventoryWrapper.getTool();
+  }
+
+  /** Gets the recipe result */
+  @Nullable
+  public LazyToolStack getResult() {
+    // ensure the result has been resolved else we may be returning null when we shouldn't
+    // if we return null that means there is no result, not its not calculated.
+    craftingResult.getResult();
+    return result;
+  }
+
+  /** @deprecated use {@link #getResult()} */
+  @SuppressWarnings("unused")
+  @Deprecated(forRemoval = true)
+  @Nullable
+  public LazyToolStack getResult(@Nullable Player player) {
+    return getResult();
+  }
+
   @Override
   public void resize(int size) {
     super.resize(size);
@@ -106,8 +148,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     }
 
     // assume empty unless we learn otherwise
-    ItemStack result = ItemStack.EMPTY;
-    this.currentError = ValidatedResult.PASS;
+    result = null;
+    this.currentError = null;
 
     if (!this.level.isClientSide && this.level.getServer() != null) {
       RecipeManager manager = this.level.getServer().getRecipeManager();
@@ -134,12 +176,12 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
         if (validatedResult.isSuccess()) {
           result = validatedResult.getResult();
         } else if (validatedResult.hasError()) {
-          this.currentError = validatedResult;
+          this.currentError = validatedResult.getMessage();
         }
       }
       // recipe will sync screen, so only need to call it when not syncing the recipe
       if (needsSync) {
-        this.syncToRelevantPlayers(this::syncScreen);
+        syncScreenToRelevantPlayers();
       }
     }
     // client side only needs to update result, server syncs message elsewhere
@@ -148,21 +190,27 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       if (validatedResult.isSuccess()) {
         result = validatedResult.getResult();
       } else if (validatedResult.hasError()) {
-        this.currentError = validatedResult;
+        this.currentError = validatedResult.getMessage();
       }
     }
 
-    // set name if we have one
-    if (!result.isEmpty() && !itemName.isEmpty()) {
-      TooltipUtil.setDisplayName(result, itemName);
-    }
+    if (result != null) {
+      // set name if we have one
+      if (!itemName.isEmpty()) {
+        TooltipUtil.setDisplayName(result.getStack(), itemName);
+      }
 
-    return result;
+      return result.getStack();
+    } else {
+      return ItemStack.EMPTY;
+    }
   }
 
   @Override
-  public void onCraft(Player player, ItemStack result, int amount) {
-    if (amount == 0 || this.lastRecipe == null || this.level == null) {
+  public void onCraft(Player player, ItemStack resultItem, int amount) {
+    // the recipe should match if we got this far, but being null is a problem
+    LazyToolStack result = this.result;  // result is going to get cleared as we update things
+    if (amount == 0 || this.level == null || this.lastRecipe == null || result == null) {
       return;
     }
 
@@ -171,6 +219,10 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     ItemCraftedCallback.EVENT.invoker().onCraft(player, result, this.inventoryWrapper);
     this.playCraftSound(player);
 
+    // fetch this before updating inputs so they can do input sensitive shrinking
+    ItemStack tinkerable = this.getItem(TINKER_SLOT);
+    int shrinkToolSlot = tinkerable.isEmpty() ? 0 : lastRecipe.shrinkToolSlotBy(result, inventoryWrapper);
+
     // run the recipe, will shrink inputs
     // run both sides for the sake of shift clicking
     this.inventoryWrapper.setPlayer(player);
@@ -178,9 +230,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     this.inventoryWrapper.setPlayer(null);
 
     // remove the center slot item, just clear it entirely (if you want shrinking you should use the outer slots or ask nicely for a shrink amount hook)
-    ItemStack tinkerable = this.getItem(TINKER_SLOT);
-    if (!tinkerable.isEmpty()) {
-      int shrinkToolSlot = lastRecipe.shrinkToolSlotBy();
+    if (shrinkToolSlot > 0) {
       if (tinkerable.getCount() <= shrinkToolSlot) {
         this.setItem(TINKER_SLOT, ItemStack.EMPTY);
       } else {
@@ -247,5 +297,53 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   public void updateRecipe(ITinkerStationRecipe recipe) {
     this.lastRecipe = recipe;
     this.craftingResult.clearContent();
+  }
+
+
+  /* Texture */
+
+  @Override
+  public ModelData getModelData() {
+    // include material and texture, practically only one of the two should do anything
+    return RetexturedHelper.getModelDataBuilder(texture).with(ModelProperties.MATERIAL, material).build();
+  }
+
+  @Override
+  public void updateTexture(String name) {
+    // reset material
+    if (!name.isEmpty()) {
+      this.material = MaterialId.UNKNOWN;
+    }
+    super.updateTexture(name);
+  }
+
+  /** Called to update the material on the block. */
+  public void setMaterial(MaterialVariantId material) {
+    MaterialVariantId oldMaterial = this.material;
+    // TODO: resolve redirects?
+    this.material = material;
+    // reset other texture
+    this.texture = Blocks.AIR;
+    if (!oldMaterial.equals(material)) {
+      setChangedFast();
+      RetexturedHelper.onTextureUpdated(this);
+    }
+  }
+
+  @Override
+  public void saveSynced(CompoundTag tags) {
+    super.saveSynced(tags);
+    if (material != MaterialId.UNKNOWN) {
+      tags.putString(MATERIAL_TAG, material.toString());
+    }
+  }
+
+  @Override
+  public void load(CompoundTag tags) {
+    super.load(tags);
+    if (tags.contains(MATERIAL_TAG, Tag.TAG_STRING)) {
+      material = Objects.requireNonNullElse(MaterialVariantId.tryParse(tags.getString(MATERIAL_TAG)), MaterialId.UNKNOWN);
+      RetexturedHelper.onTextureUpdated(this);
+    }
   }
 }

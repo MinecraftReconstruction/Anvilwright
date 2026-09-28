@@ -12,16 +12,20 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import javax.annotation.Nullable;
 
 /** Item entity that will never die */
 public class IndestructibleItemEntity extends ItemEntity {
+  /** Modifier key to make a tool spawn an indestructable entity */
+  public static final ResourceLocation INDESTRUCTIBLE_ENTITY = TConstruct.getResource("indestructible");
+
   public IndestructibleItemEntity(EntityType<? extends IndestructibleItemEntity> entityType, Level world) {
     super(entityType, world);
-    this.setExtendedLifetime();
+    // using setUnlimitedLifetime() makes the item no longer spin, dumb design
+    // since age is a short, this value should never be reachable so the item will never despawn
+    this.lifespan = Integer.MAX_VALUE;
   }
 
   public IndestructibleItemEntity(Level worldIn, double x, double y, double z, ItemStack stack) {
@@ -39,20 +43,10 @@ public class IndestructibleItemEntity extends ItemEntity {
 
   /** Copies the pickup delay from another entity */
   public void setPickupDelayFrom(Entity reference) {
-    if (reference instanceof ItemEntity) {
-      short pickupDelay = this.getPickupDelay((ItemEntity) reference);
-      this.setPickUpDelay(pickupDelay);
+    if (reference instanceof ItemEntity itemEntity) {
+      this.setPickUpDelay(itemEntity.pickupDelay);
     }
     setDeltaMovement(reference.getDeltaMovement());
-  }
-
-  /**
-   * workaround for private access on pickup delay. We simply read it from the items NBT representation ;)
-   */
-  private short getPickupDelay(ItemEntity reference) {
-    CompoundTag tag = new CompoundTag();
-    reference.addAdditionalSaveData(tag);
-    return tag.getShort("PickupDelay");
   }
 
   @Override
@@ -61,14 +55,14 @@ public class IndestructibleItemEntity extends ItemEntity {
   }
 
   @Override
-  public boolean hurt(DamageSource source, float amount) {
+  public boolean isInvulnerableTo(DamageSource pSource) {
     // prevent any damage besides out of world
     return source.getMsgId().equals(damageSources().fellOutOfWorld().getMsgId());
   }
 
   /** Checks if the given stack has a custom entity */
   public static boolean hasCustomEntity(ItemStack stack) {
-    return ModifierUtil.checkVolatileFlag(stack, IModifiable.INDESTRUCTIBLE_ENTITY);
+    return ModifierUtil.checkVolatileFlag(stack, INDESTRUCTIBLE_ENTITY);
   }
 
   /**
@@ -80,7 +74,7 @@ public class IndestructibleItemEntity extends ItemEntity {
    */
   @Nullable
   public static Entity createFrom(Level world, Entity original, ItemStack stack) {
-    if (ModifierUtil.checkVolatileFlag(stack, IModifiable.INDESTRUCTIBLE_ENTITY)) {
+    if (ModifierUtil.checkVolatileFlag(stack, INDESTRUCTIBLE_ENTITY)) {
       IndestructibleItemEntity entity = new IndestructibleItemEntity(world, original.getX(), original.getY(), original.getZ(), stack);
       entity.setPickupDelayFrom(original);
       return entity;

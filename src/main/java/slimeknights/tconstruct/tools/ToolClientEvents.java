@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.client.ResourceColorManager;
 import slimeknights.mantle.client.SafeClientAccess;
@@ -29,38 +31,50 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
+import slimeknights.tconstruct.library.client.armor.AbstractArmorModel;
+import slimeknights.tconstruct.library.client.armor.ArmorModelManager;
+import slimeknights.tconstruct.library.client.armor.texture.TrimArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.book.content.AbstractMaterialContent;
 import slimeknights.tconstruct.library.client.materials.MaterialTooltipCache;
 import slimeknights.tconstruct.library.client.model.DynamicTextureLoader;
 import slimeknights.tconstruct.library.client.model.TinkerItemProperties;
+import slimeknights.tconstruct.library.client.model.tools.MaterialBlockModel;
 import slimeknights.tconstruct.library.client.model.tools.MaterialModel;
 import slimeknights.tconstruct.library.client.model.tools.ToolModel;
-import slimeknights.tconstruct.library.client.modifiers.BreakableDyedModifierModel;
-import slimeknights.tconstruct.library.client.modifiers.BreakableMaterialModifierModel;
-import slimeknights.tconstruct.library.client.modifiers.BreakableModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.FluidModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.MaterialModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.ModifierModelManager;
 import slimeknights.tconstruct.library.client.modifiers.ModifierModelManager.ModifierModelRegistrationEvent;
+import slimeknights.tconstruct.library.client.modifiers.ModifierModelMapManager;
 import slimeknights.tconstruct.library.client.modifiers.NormalModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.PotionModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.TankModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.TrimModifierModel;
+import slimeknights.tconstruct.library.client.particle.AttackParticle;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
-import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.modifiers.modules.technical.ArmorStatModule;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataKeys;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.utils.HarvestTiers;
 import slimeknights.tconstruct.library.utils.Util;
-import slimeknights.tconstruct.tools.client.ArmorModelHelper;
+import slimeknights.tconstruct.shared.TinkerAttributes;
+import slimeknights.tconstruct.shared.TinkerEffects;
 import slimeknights.tconstruct.tools.client.CrystalshotRenderer;
+import slimeknights.tconstruct.tools.client.FluidEffectProjectileRenderer;
 import slimeknights.tconstruct.tools.client.OverslimeModifierModel;
-import slimeknights.tconstruct.tools.client.PlateArmorModel;
-import slimeknights.tconstruct.tools.client.SlimelytraArmorModel;
+import slimeknights.tconstruct.tools.client.ShieldBannerModifierSpriteSource;
 import slimeknights.tconstruct.tools.client.SlimeskullArmorModel;
 import slimeknights.tconstruct.tools.client.ToolContainerScreen;
-import slimeknights.tconstruct.tools.client.particles.AxeAttackParticle;
-import slimeknights.tconstruct.tools.client.particles.HammerAttackParticle;
+import slimeknights.tconstruct.tools.client.material.CombatFishingHookRenderer;
+import slimeknights.tconstruct.tools.client.material.ThrownShurikenRenderer;
+import slimeknights.tconstruct.tools.client.material.ThrownToolRenderer;
 import slimeknights.tconstruct.tools.item.ModifierCrystalItem;
+import slimeknights.tconstruct.tools.logic.DoubleJumpHandler;
 import slimeknights.tconstruct.tools.logic.InteractionHandler;
-import slimeknights.tconstruct.tools.modifiers.ability.armor.DoubleJumpModifier;
+import slimeknights.tconstruct.tools.modules.ranged.ammo.SmashingModule;
 import slimeknights.tconstruct.tools.network.TinkerControlPacket;
 
 import java.util.Map;
@@ -99,13 +113,17 @@ public class ToolClientEvents extends ClientEventBase {
   }
 
   static void registerModifierModels(ModifierModelRegistrationEvent event) {
-    event.registerModel(TConstruct.getResource("normal"), NormalModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("breakable"), BreakableModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("overslime"), OverslimeModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("fluid"), FluidModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("tank"), TankModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("breakable_material"), BreakableMaterialModifierModel.UNBAKED_INSTANCE);
-    event.registerModel(TConstruct.getResource("breakable_dyed"), BreakableDyedModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("normal"), NormalModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("overslime"), OverslimeModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("fluid"), FluidModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("tank"), TankModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("material"), MaterialModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("dyed"), DyedModifierModel.UNBAKED_INSTANCE);
+    // trim shows up as valid on every tool, skip to reduce memory overhead on tools using the new system - add it using the new system if you want it
+    event.registerModel(getResource("trim"), TrimModifierModel.UNBAKED_INSTANCE);
+    ModifierModelMapManager.legacyBlacklist(TrimModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("potion"), PotionModifierModel.UNBAKED_INSTANCE);
+    event.registerModel(getResource("smashing_fluid"), new FluidModifierModel.Unbaked(SmashingModule.TANK_HELPER));
   }
 
   static void registerRenderers() {
@@ -170,7 +188,7 @@ public class ToolClientEvents extends ClientEventBase {
 
   static void itemColors() {
 
-    // tint tool textures for fallback
+    // tint modifiers
     // rock
     registerItemColors(TinkerTools.pickaxe);
     registerItemColors(TinkerTools.sledgeHammer);
@@ -199,7 +217,7 @@ public class ToolClientEvents extends ClientEventBase {
         return ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier));
       }
       return -1;
-    }, TinkerModifiers.modifierCrystal.asItem());
+    }, TinkerModifiers.modifierCrystal);
   }
 
   // values to check if a key was being pressed last tick, safe as a static value as we only care about a single player client side
@@ -261,6 +279,9 @@ public class ToolClientEvents extends ClientEventBase {
   private static void handleInput(Player player, Input input) {
     if (player.isUsingItem() && !player.isPassenger()) {
       ItemStack using = player.getUseItem();
+      // start with the attribute
+      double speed = player.getAttributeValue(TinkerAttributes.USE_ITEM_SPEED.get());
+      // start by calculating tool stat, not an attribute to ensure both hands get their say
       if (using.is(TinkerTags.Items.HELD)) {
         ToolStack tool = ToolStack.from(using);
         // multiply by 5 to cancel out the vanilla 20%
@@ -272,6 +293,13 @@ public class ToolClientEvents extends ClientEventBase {
         input.leftImpulse *= speed;
         input.forwardImpulse *= speed;
       }
+      // next, add in deprecated key bonus
+      speed = Mth.clamp(speed + ArmorStatModule.getStat(player, TinkerDataKeys.USE_ITEM_SPEED), 0, 1);
+      // update speed, note if the armor stat is 0 and the held tool is not tinkers this is a no-op effectively
+      Input input = event.getInput();
+      // multiply by 5 to cancel out the vanilla 20%
+      input.leftImpulse *= (float) (speed * 5);
+      input.forwardImpulse *= (float) (speed * 5);
     }
   }
 }

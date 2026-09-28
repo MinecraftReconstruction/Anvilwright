@@ -19,7 +19,6 @@ import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -242,7 +241,12 @@ public class StationSlotLayout {
 
     /** Adds an input as the given item */
     public Builder addInputItem(ItemLike item, int x, int y) {
-      return addInputItem(new Pattern(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item.asItem()))), item, x, y);
+      return addInputItem(Pattern.fromItem(item), item, x, y);
+    }
+
+    /** Adds an input slot with the given properties */
+    public Builder addInputPattern(Pattern icon, int x, int y, Ingredient ingredient) {
+      return addInputSlot(icon, icon.getTranslationKey(), x, y, ingredient);
     }
 
     /** Builds a station slot layout */

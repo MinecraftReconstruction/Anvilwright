@@ -3,53 +3,74 @@ package slimeknights.tconstruct.library.recipe.casting;
 import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.IMultiRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
-import slimeknights.mantle.util.JsonHelper;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
- * Recipe for casting a fluid onto an item, copying the fluid NBT to the item
+ * Recipe for casting a fluid onto an item, copying the fluid NBT to the item.
+ * TODO 1.21: move to {@link slimeknights.tconstruct.library.recipe.casting.potion}
  */
-@RequiredArgsConstructor
-public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<DisplayCastingRecipe> {
-  @Getter
-  private final RecipeType<?> type;
-  @Getter
-  private final RecipeSerializer<?> serializer;
-  @Getter
-  private final ResourceLocation id;
-  @Getter
-  private final String group;
-  /** Input on the casting table, always consumed */
-  private final Ingredient bottle;
-  /** Potion ingredient, typically just the potion tag */
-  private final FluidIngredient fluid;
-  /** Potion item result, will be given the proper NBT */
-  private final Item result;
-  /** Cooling time, used for arrows */
-  private final int coolingTime;
+public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<IDisplayableCastingRecipe> {
+  protected static final LoadableField<FluidIngredient, PotionCastingRecipe> FLUID_FIELD = FluidIngredient.LOADABLE.requiredField("fluid", r -> r.fluid);
+  protected static final LoadableField<Integer, PotionCastingRecipe> COOLING_TIME_FIELD = IntLoadable.FROM_ONE.defaultField("cooling_time", 5, r -> r.coolingTime);
+  public static final RecordLoadable<PotionCastingRecipe> LOADER = RecordLoadable.create(
+    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(), LoadableRecipeSerializer.RECIPE_GROUP,
+    IngredientLoadable.DISALLOW_EMPTY.requiredField("bottle", r -> r.bottle),
+    FLUID_FIELD,
+    Loadables.ITEM.requiredField("result", r -> r.result),
+    COOLING_TIME_FIELD,
+    PotionCastingRecipe::new);
 
-  private List<DisplayCastingRecipe> displayRecipes = null;
+  @Getter
+  protected final TypeAwareRecipeSerializer<?> serializer;
+  @Getter
+  protected final ResourceLocation id;
+  @Getter
+  protected final String group;
+  /** Input on the casting table, always consumed */
+  protected final Ingredient bottle;
+  /** Potion ingredient, typically just the potion tag */
+  protected final FluidIngredient fluid;
+  /** Potion item result, will be given the proper NBT */
+  protected final Item result;
+  /** Cooling time for this recipe, used for tipped arrows */
+  protected final int coolingTime;
+
+  public PotionCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, Ingredient bottle, FluidIngredient fluid, Item result, int coolingTime) {
+    this.serializer = serializer;
+    this.id = id;
+    this.group = group;
+    this.bottle = bottle;
+    this.fluid = fluid;
+    this.result = result;
+    this.coolingTime = coolingTime;
+    CastingRecipeLookup.registerCastable(result);
+  }
+
+  @Override
+  public RecipeType<?> getType() {
+    return serializer.getType();
+  }
 
   @Override
   public boolean matches(ICastingContainer inv, Level level) {
@@ -83,8 +104,13 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
     return result;
   }
 
+
+  /* JEI */
+  // TODO 1.21: consider making this a display recipe instead of a multirecipe
+  protected List<IDisplayableCastingRecipe> displayRecipes = null;
+
   @Override
-  public List<DisplayCastingRecipe> getRecipes() {
+  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
       // create a subrecipe for every potion variant
       List<ItemStack> bottles = List.of(bottle.getItems());
@@ -115,9 +141,6 @@ public class PotionCastingRecipe implements ICastingRecipe, IMultiRecipe<Display
     return new ItemStack(this.result);
   }
 
-  @RequiredArgsConstructor
-  public static class Serializer extends LoggingRecipeSerializer<PotionCastingRecipe> {
-    private final Supplier<RecipeType<ICastingRecipe>> type;
 
     @Override
     public PotionCastingRecipe fromJson(ResourceLocation id, JsonObject json) {

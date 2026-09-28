@@ -2,9 +2,18 @@
   "loader": "tconstruct:tool",
   "parent": "forge:item/default",
   "textures": {
-    "tool":   "tconstruct:item/tool/armor/plate/chestplate",
-    "broken": "tconstruct:item/tool/armor/plate/chestplate_broken"
+    "plating": "tconstruct:item/tool/armor/plate/chestplate/plating",
+    "maille":  "tconstruct:item/tool/armor/plate/chestplate/maille"
   },
-  "modifier_roots": [ "tconstruct:item/tool/armor/plate/chestplate_modifiers/" ],
-  "first_modifiers": [ "tconstruct:embellishment", "tconstruct:golden" ]
+  "modifier_maps": ["tconstruct:plate/chestplate", "tconstruct:armor/chestplate"],
+  "parts": [
+    { "name": "plating", "index": 0 },
+    { "name": "maille",  "index": 1 }
+  ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tconstruct:item/armor/plate/chestplate_broken"
+    }
+  ]
 }

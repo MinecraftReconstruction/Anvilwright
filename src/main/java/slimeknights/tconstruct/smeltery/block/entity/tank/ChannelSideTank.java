@@ -8,6 +8,8 @@ import net.minecraft.core.Direction.Axis;
 import slimeknights.tconstruct.library.fluid.FillOnlyFluidHandler;
 import slimeknights.tconstruct.smeltery.block.entity.ChannelBlockEntity;
 
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+
 /** Tank for each side connection, for the sake of rendering */
 @SuppressWarnings("UnstableApiUsage")
 public class ChannelSideTank extends FillOnlyFluidHandler {

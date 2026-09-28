@@ -3,14 +3,10 @@ package slimeknights.tconstruct.world.block;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -21,16 +17,14 @@ import net.minecraft.world.level.block.SnowyDirtBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LightEngine;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 
 public class SlimeGrassBlock extends SnowyDirtBlock implements BonemealableBlock {
   @Getter
-  private final SlimeType foliageType;
-  public SlimeGrassBlock(Properties properties, SlimeType foliageType) {
+  private final FoliageType foliageType;
+  public SlimeGrassBlock(Properties properties, FoliageType foliageType) {
     super(properties);
     this.foliageType = foliageType;
   }
@@ -57,7 +51,7 @@ public class SlimeGrassBlock extends SnowyDirtBlock implements BonemealableBlock
    * @param includeSapling   If true, sapling may be grown
    * @param spread           If true, spreads foliage to relevant dirt blocks
    */
-  public static void growGrass(ServerLevel world, RandomSource rand, BlockPos pos, TagKey<Block> validBase, SlimeType foliageType, boolean includeSapling, boolean spread) {
+  public static void growGrass(ServerLevel world, RandomSource rand, BlockPos pos, TagKey<Block> validBase, FoliageType foliageType, boolean includeSapling, boolean spread) {
     // based on vanilla logic, reimplemented to switch plant types
     BlockPos up = pos.above();
     mainLoop:
@@ -165,7 +159,7 @@ public class SlimeGrassBlock extends SnowyDirtBlock implements BonemealableBlock
    */
   public static BlockState getDirtState(BlockState grassState) {
     Block block = grassState.getBlock();
-    for (SlimeType type : SlimeType.values()) {
+    for (DirtType type : DirtType.values()) {
       if (TinkerWorld.slimeGrass.get(type).contains(block)) {
         return TinkerWorld.allDirt.get(type).defaultBlockState();
       }
@@ -180,9 +174,9 @@ public class SlimeGrassBlock extends SnowyDirtBlock implements BonemealableBlock
    * @return Grass state, null if cannot spread there
    */
   @Nullable
-  public static BlockState getStateFromDirt(BlockState dirtState, SlimeType foliageType) {
+  public static BlockState getStateFromDirt(BlockState dirtState, FoliageType foliageType) {
     Block block = dirtState.getBlock();
-    for (SlimeType type : SlimeType.values()) {
+    for (DirtType type : DirtType.values()) {
       if (TinkerWorld.allDirt.get(type) == block) {
         return TinkerWorld.slimeGrass.get(type).get(foliageType).defaultBlockState();
       }

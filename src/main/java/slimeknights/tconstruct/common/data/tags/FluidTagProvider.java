@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.core.HolderLookup;
 import slimeknights.mantle.datagen.MantleTags;
+import slimeknights.mantle.registration.object.FlowingFluidObject;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.fluids.TinkerFluids;
@@ -22,83 +23,96 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
   public void addTags(HolderLookup.Provider provider) {
     // first, register common tags
     // slime
-    tagLocal(TinkerFluids.blood);
-    tagAll(TinkerFluids.earthSlime);
-    tagLocal(TinkerFluids.skySlime);
-    tagLocal(TinkerFluids.enderSlime);
-    tagAll(TinkerFluids.magma);
-    tagLocal(TinkerFluids.venom);
+    fluidTag(TinkerFluids.earthSlime);
+    fluidTag(TinkerFluids.skySlime);
+    fluidTag(TinkerFluids.ichor);
+    fluidTag(TinkerFluids.enderSlime);
+    fluidTag(TinkerFluids.magma);
+    fluidTag(TinkerFluids.venom);
     // basic molten
-    tagLocal(TinkerFluids.searedStone);
-    tagLocal(TinkerFluids.scorchedStone);
-    tagLocal(TinkerFluids.moltenClay);
-    tagLocal(TinkerFluids.moltenGlass);
-    tagLocal(TinkerFluids.liquidSoul);
-    tagLocal(TinkerFluids.moltenPorcelain);
+    fluidTag(TinkerFluids.searedStone);
+    fluidTag(TinkerFluids.scorchedStone);
+    fluidTag(TinkerFluids.moltenClay);
+    fluidTag(TinkerFluids.moltenGlass);
+    fluidTag(TinkerFluids.liquidSoul);
+    fluidTag(TinkerFluids.moltenPorcelain);
     // fancy molten
-    tagLocal(TinkerFluids.moltenObsidian);
-    tagLocal(TinkerFluids.moltenEmerald);
-    tagLocal(TinkerFluids.moltenQuartz);
-    tagLocal(TinkerFluids.moltenDiamond);
-    tagLocal(TinkerFluids.moltenAmethyst);
-    tagAll(TinkerFluids.moltenEnder);
-    tagLocal(TinkerFluids.blazingBlood);
+    fluidTag(TinkerFluids.moltenObsidian);
+    fluidTag(TinkerFluids.moltenEmerald);
+    fluidTag(TinkerFluids.moltenQuartz);
+    fluidTag(TinkerFluids.moltenDiamond);
+    fluidTag(TinkerFluids.moltenAmethyst);
+    fluidTag(TinkerFluids.moltenEnder);
+    fluidTag(TinkerFluids.blazingBlood);
     // ores
-    tagAll(TinkerFluids.moltenIron);
-    tagAll(TinkerFluids.moltenGold);
-    tagAll(TinkerFluids.moltenCopper);
-    tagAll(TinkerFluids.moltenCobalt);
-    tagLocal(TinkerFluids.moltenDebris);
+    fluidTag(TinkerFluids.moltenIron);
+    fluidTag(TinkerFluids.moltenGold);
+    fluidTag(TinkerFluids.moltenCopper);
+    fluidTag(TinkerFluids.moltenCobalt);
+    fluidTag(TinkerFluids.moltenSteel);
+    fluidTag(TinkerFluids.moltenDebris);
     // alloys
-    tagLocal(TinkerFluids.moltenSlimesteel);
-    tagAll(TinkerFluids.moltenAmethystBronze);
-    tagAll(TinkerFluids.moltenRoseGold);
-    tagLocal(TinkerFluids.moltenPigIron);
+    fluidTag(TinkerFluids.moltenSlimesteel);
+    fluidTag(TinkerFluids.moltenAmethystBronze);
+    fluidTag(TinkerFluids.moltenRoseGold);
+    fluidTag(TinkerFluids.moltenPigIron);
     // nether alloys
-    tagAll(TinkerFluids.moltenManyullyn);
-    tagAll(TinkerFluids.moltenHepatizon);
-    tagLocal(TinkerFluids.moltenQueensSlime);
-    tagLocal(TinkerFluids.moltenSoulsteel);
-    tagAll(TinkerFluids.moltenNetherite);
+    fluidTag(TinkerFluids.moltenManyullyn);
+    fluidTag(TinkerFluids.moltenHepatizon);
+    fluidTag(TinkerFluids.moltenQueensSlime);
+    fluidTag(TinkerFluids.moltenCinderslime);
+    fluidTag(TinkerFluids.moltenSoulsteel);
+    fluidTag(TinkerFluids.moltenNetherite);
     // end alloys
-    tagLocal(TinkerFluids.moltenKnightslime);
+    fluidTag(TinkerFluids.moltenKnightmetal);
+    fluidTag(TinkerFluids.moltenKnightslime);
     // compat ores
-    tagAll(TinkerFluids.moltenTin);
-    tagAll(TinkerFluids.moltenAluminum);
-    tagAll(TinkerFluids.moltenLead);
-    tagAll(TinkerFluids.moltenSilver);
-    tagAll(TinkerFluids.moltenNickel);
-    tagAll(TinkerFluids.moltenZinc);
-    tagAll(TinkerFluids.moltenPlatinum);
-    tagAll(TinkerFluids.moltenTungsten);
-    tagAll(TinkerFluids.moltenOsmium);
-    tagAll(TinkerFluids.moltenUranium);
+    fluidTag(TinkerFluids.moltenTin);
+    fluidTag(TinkerFluids.moltenAluminum);
+    fluidTag(TinkerFluids.moltenLead);
+    fluidTag(TinkerFluids.moltenSilver);
+    fluidTag(TinkerFluids.moltenNickel);
+    fluidTag(TinkerFluids.moltenZinc);
+    fluidTag(TinkerFluids.moltenPlatinum);
+    fluidTag(TinkerFluids.moltenTungsten);
+    fluidTag(TinkerFluids.moltenOsmium);
+    fluidTag(TinkerFluids.moltenUranium);
+    fluidTag(TinkerFluids.moltenChromium);
+    fluidTag(TinkerFluids.moltenCadmium);
     // compat alloys
-    tagAll(TinkerFluids.moltenBronze);
-    tagAll(TinkerFluids.moltenBrass);
-    tagAll(TinkerFluids.moltenElectrum);
-    tagAll(TinkerFluids.moltenInvar);
-    tagAll(TinkerFluids.moltenConstantan);
-    tagAll(TinkerFluids.moltenPewter);
-    tagAll(TinkerFluids.moltenSteel);
+    fluidTag(TinkerFluids.moltenBronze);
+    fluidTag(TinkerFluids.moltenBrass);
+    fluidTag(TinkerFluids.moltenElectrum);
+    fluidTag(TinkerFluids.moltenInvar);
+    fluidTag(TinkerFluids.moltenConstantan);
+    fluidTag(TinkerFluids.moltenPewter);
     // thermal compat alloys
-    tagAll(TinkerFluids.moltenEnderium);
-    tagAll(TinkerFluids.moltenLumium);
-    tagAll(TinkerFluids.moltenSignalum);
+    fluidTag(TinkerFluids.moltenEnderium);
+    fluidTag(TinkerFluids.moltenLumium);
+    fluidTag(TinkerFluids.moltenSignalum);
     // mekanism compat alloys
-    tagAll(TinkerFluids.moltenRefinedGlowstone);
-    tagAll(TinkerFluids.moltenRefinedObsidian);
+    fluidTag(TinkerFluids.moltenRefinedGlowstone);
+    fluidTag(TinkerFluids.moltenRefinedObsidian);
+    // cosmere compat alloys
+    fluidTag(TinkerFluids.moltenNicrosil);
+    fluidTag(TinkerFluids.moltenDuralumin);
+    fluidTag(TinkerFluids.moltenBendalloy);
+    // twilight compat fluids
+    fluidTag(TinkerFluids.moltenSteeleaf);
+    fluidTag(TinkerFluids.fieryLiquid);
     // unplacable fluids
-    tagAll(TinkerFluids.honey);
-    tagAll(TinkerFluids.beetrootSoup);
-    tagAll(TinkerFluids.mushroomStew);
-    tagAll(TinkerFluids.rabbitStew);
+    fluidTag(TinkerFluids.honey);
+    fluidTag(TinkerFluids.beetrootSoup);
+    fluidTag(TinkerFluids.mushroomStew);
+    fluidTag(TinkerFluids.rabbitStew);
+    fluidTag(TinkerFluids.meatSoup);
 
     /* Normal tags */
     this.tag(TinkerTags.Fluids.SLIME)
-        .addTag(TinkerFluids.earthSlime.getForgeTag())
-        .addTag(TinkerFluids.skySlime.getLocalTag())
-        .addTag(TinkerFluids.enderSlime.getLocalTag());
+        .addTag(TinkerFluids.earthSlime.getTag())
+        .addTag(TinkerFluids.skySlime.getTag())
+        .addTags(TinkerFluids.ichor.getTag())
+        .addTag(TinkerFluids.enderSlime.getTag());
 
     this.getOrCreateTagBuilder(TinkerTags.Fluids.POTION).add(TinkerFluids.potion.get());
 
@@ -130,31 +144,10 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
     this.tag(TinkerTags.Fluids.SOUP_TOOLTIPS).addTags(TinkerFluids.beetrootSoup.getLocalTag(), TinkerFluids.mushroomStew.getLocalTag(), TinkerFluids.rabbitStew.getLocalTag());
     this.getOrCreateTagBuilder(TinkerTags.Fluids.WATER_TOOLTIPS).forceAddTag(MantleTags.Fluids.WATER);
 
-    // spilling tags - reduces the number of recipes generated //
-    this.tag(TinkerTags.Fluids.CLAY_SPILLING)
-        .addTag(TinkerFluids.moltenClay.getLocalTag())
-        .addTag(TinkerFluids.moltenPorcelain.getLocalTag())
-        .addTag(TinkerFluids.searedStone.getLocalTag())
-        .addTag(TinkerFluids.scorchedStone.getLocalTag());
-    this.tag(TinkerTags.Fluids.GLASS_SPILLING)
-        .addTag(TinkerFluids.moltenGlass.getLocalTag())
-        .addTag(TinkerFluids.moltenObsidian.getLocalTag());
-    this.tag(TinkerTags.Fluids.CHEAP_METAL_SPILLING)
-        .addTag(TinkerFluids.moltenPlatinum.getForgeTag())
-        .addTag(TinkerFluids.moltenTungsten.getForgeTag())
-        .addTag(TinkerFluids.moltenOsmium.getForgeTag())
-        .addTag(TinkerFluids.moltenAmethyst.getLocalTag());
-    this.tag(TinkerTags.Fluids.AVERAGE_METAL_SPILLING)
-        .addTag(TinkerFluids.moltenQuartz.getLocalTag())
-        .addTag(TinkerFluids.moltenEmerald.getLocalTag())
-        .addTag(TinkerFluids.moltenRefinedGlowstone.getForgeTag());
-    this.tag(TinkerTags.Fluids.EXPENSIVE_METAL_SPILLING)
-        .addTag(TinkerFluids.moltenDiamond.getLocalTag())
-        .addTag(TinkerFluids.moltenDebris.getLocalTag())
-        .addTag(TinkerFluids.moltenEnderium.getForgeTag())
-        .addTag(TinkerFluids.moltenLumium.getForgeTag())
-        .addTag(TinkerFluids.moltenSignalum.getForgeTag())
-        .addTag(TinkerFluids.moltenRefinedObsidian.getForgeTag());
+    // hide upcoming fluids
+    tag(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS).add(TinkerFluids.moltenSoulsteel.get());
+    // hide upcoming fluids that require NBT. Can expand this list if other mods report problems
+    tag(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS).add(TinkerFluids.potion.get()).addTag(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS);
   }
 
   @Override
@@ -167,9 +160,12 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
     getOrCreateTagBuilder(fluid.getLocalTag()).add(fluid.getStill(), fluid.getFlowing());
   }
 
-  /** Tags this fluid with local and forge tags */
-  private void tagAll(FluidObject<?> fluid) {
-    tagLocal(fluid);
-    tag(fluid.getForgeTag()).addTag(fluid.getLocalTag());
+  /** Adds tags for a placable fluid */
+  private void fluidTag(FlowingFluidObject<?> fluid) {
+    tag(fluid.getLocalTag()).add(fluid.getStill(), fluid.getFlowing());
+    TagKey<Fluid> tag = fluid.getCommonTag();
+    if (tag != null) {
+      tag(tag).addTag(fluid.getLocalTag());
+    }
   }
 }

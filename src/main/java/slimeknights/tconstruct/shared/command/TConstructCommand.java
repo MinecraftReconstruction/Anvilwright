@@ -10,11 +10,21 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.shared.command.argument.MaterialArgument;
+import slimeknights.tconstruct.shared.command.argument.MaterialStatsArgument;
+import slimeknights.tconstruct.shared.command.argument.MaterialVariantArgument;
 import slimeknights.tconstruct.shared.command.argument.ModifierArgument;
+import slimeknights.tconstruct.shared.command.argument.ModifierHookArgument;
+import slimeknights.tconstruct.shared.command.argument.ModifierTagSource;
 import slimeknights.tconstruct.shared.command.argument.SlotTypeArgument;
 import slimeknights.tconstruct.shared.command.argument.ToolStatArgument;
+import slimeknights.tconstruct.shared.command.subcommand.DurabilityCommand;
+import slimeknights.tconstruct.shared.command.subcommand.GenerateHiddenFluidsCommand;
+import slimeknights.tconstruct.shared.command.subcommand.GenerateMeltingRecipesCommand;
 import slimeknights.tconstruct.shared.command.subcommand.GeneratePartTexturesCommand;
+import slimeknights.tconstruct.shared.command.subcommand.MaterialsCommand;
+import slimeknights.tconstruct.shared.command.subcommand.ModifierPriorityCommand;
 import slimeknights.tconstruct.shared.command.subcommand.ModifierUsageCommand;
 import slimeknights.tconstruct.shared.command.subcommand.ModifiersCommand;
 import slimeknights.tconstruct.shared.command.subcommand.SlotsCommand;
@@ -23,6 +33,8 @@ import slimeknights.tconstruct.shared.command.subcommand.StatsCommand;
 import java.util.function.Consumer;
 
 public class TConstructCommand {
+  public static final DynamicCommandExceptionType COMPONENT_ERROR = new DynamicCommandExceptionType(error -> (Component)error);
+  private static final ArgumentTypeDeferredRegister ARGUMENT_TYPE = new ArgumentTypeDeferredRegister(TConstruct.MOD_ID);
 
   /** Registers all TConstruct command related content */
   public static void init() {
@@ -45,13 +57,23 @@ public class TConstructCommand {
   /** Event listener to register the Mantle command */
   private static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(TConstruct.MOD_ID);
+    CommandBuildContext context = event.getBuildContext();
 
     // sub commands
     register(builder, "modifiers", ModifiersCommand::register);
+    register(builder, "materials", MaterialsCommand::register);
     register(builder, "tool_stats", StatsCommand::register);
     register(builder, "slots", SlotsCommand::register);
-    register(builder, "modifier_usage", ModifierUsageCommand::register);
-    register(builder, "generate_part_textures", GeneratePartTexturesCommand::register);
+    register(builder, "durability", DurabilityCommand::register);
+    register(builder, "report", b -> {
+      register(b, "modifier_usage", ModifierUsageCommand::register);
+      register(b, "modifier_priority", ModifierPriorityCommand::register);
+    });
+    register(builder, "generate", b -> {
+      register(b, "part_textures", GeneratePartTexturesCommand::register);
+      register(b, "melting_recipes", bb -> GenerateMeltingRecipesCommand.register(bb, context));
+      register(b, "hidden_fluids_tag", GenerateHiddenFluidsCommand::register);
+    });
 
     // register final command
     dispatcher.register(builder);

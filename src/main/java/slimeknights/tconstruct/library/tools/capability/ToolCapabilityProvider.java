@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class ToolCapabilityProvider /*implements ICapabilityProvider*/ {
   private static final List<BiFunction<ContainerItemContext,Supplier<? extends IToolStackView>,IToolCapabilityProvider>> PROVIDER_CONSTRUCTORS = new ArrayList<>();
 
+  private final ItemStack stack;
   private final Lazy<ToolStack> tool;
   private final List<IToolCapabilityProvider> providers;
   public ToolCapabilityProvider(ContainerItemContext stack) {

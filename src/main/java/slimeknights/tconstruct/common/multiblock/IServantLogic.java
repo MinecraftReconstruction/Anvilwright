@@ -5,8 +5,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-// TODO: move back to Mantle after smeltery is updated
-public interface IServantLogic {
+public interface IServantLogic extends IForgeBlockEntity {
   /**
    * Gets the position of the master block
    * @return  Master position, null if none is set
@@ -33,6 +32,9 @@ public interface IServantLogic {
    * @param master  Master to set
    */
   void setPotentialMaster(IMasterLogic master);
+
+  /** Called when the master block entity loads into the world to clear caches. Should not altar the master state. */
+  default void onMasterLoad(IMasterLogic master) {}
 
   /**
    * Removes this master from the given servant

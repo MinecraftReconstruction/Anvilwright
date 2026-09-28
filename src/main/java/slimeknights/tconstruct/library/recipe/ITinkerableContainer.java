@@ -19,6 +19,11 @@ public interface ITinkerableContainer extends IRecipeContainer {
     return ToolStack.from(getTinkerableStack());
   }
 
+  /** Gets the size of the tinkerable stack, common operation */
+  default int getTinkerableSize() {
+    return getTinkerableStack().getCount();
+  }
+
   /**
    * Gets the stack in the given input slot
    * @param index  Slot index
@@ -117,7 +122,7 @@ public interface ITinkerableContainer extends IRecipeContainer {
     default void shrinkInput(int slot, int amount) {
       ItemStack stack = getInput(slot);
       if (!stack.isEmpty()) {
-        ItemStack container = stack.getRecipeRemainder();
+        ItemStack container = stack.getCraftingRemainingItem();
         if (container.isEmpty() && stack.getItem() == Items.POTION) {
           container = new ItemStack(Items.GLASS_BOTTLE);
         }

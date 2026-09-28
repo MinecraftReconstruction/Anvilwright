@@ -48,6 +48,12 @@ public final class FluidValues {
   public static final int SLIME_CONGEALED = SLIMEBALL * 4;
   /** Value of a block worth 9 slime */
   public static final int SLIME_BLOCK = SLIMEBALL * 9;
+  /** Minimum unit for a slime type */
+  public static final int SLIME_DROP = SLIMEBALL / 5;
+  /** Amount of ichor returned from melting 1 ball of ichor, needs to be less than {@link #SLIMEBALL} or you get dupes. */
+  public static final int ICHOR_BYPRODUCT = SLIME_DROP * 4;
+  /** Amount of blazing blood returned from melting 1 ball of ichor, makes a stack of ichor crystal blocks about 2 buckets */
+  public static final int ICHOR_BLAZING_BLOOD = FluidType.BUCKET_VOLUME / 100;
 
   // soup
   /** Value of a single bowl of soup */

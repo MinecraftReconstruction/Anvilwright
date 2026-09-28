@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -18,7 +19,9 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 
-public abstract class ShurikenEntityBase extends ThrowableItemProjectile implements IEntityAdditionalSpawnData {
+/** @deprecated use {@link ThrownShuriken} */
+@Deprecated
+public abstract class ShurikenEntityBase extends ThrowableItemProjectile implements IEntityAdditionalSpawnData, ToolProjectile {
 
   public ShurikenEntityBase(EntityType<? extends ShurikenEntityBase> type, Level worldIn) {
     super(type, worldIn);
@@ -73,6 +76,11 @@ public abstract class ShurikenEntityBase extends ThrowableItemProjectile impleme
       Vec3 motion = this.getDeltaMovement().normalize();
       ((LivingEntity) entity).knockback(this.getKnockback(), -motion.x, -motion.z);
     }
+  }
+
+  @Override
+  public ItemStack getDisplayTool() {
+    return getItem();
   }
 
   @Override

@@ -4,8 +4,10 @@ import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import slimeknights.tconstruct.common.ClientEventBase;
+import slimeknights.tconstruct.gadgets.client.FancyArmorStandRenderer;
 import slimeknights.tconstruct.gadgets.client.FancyItemFrameRenderer;
-import slimeknights.tconstruct.gadgets.client.RenderShuriken;
+import slimeknights.tconstruct.gadgets.entity.shuriken.ShurikenEntityBase;
+import slimeknights.tconstruct.tools.client.material.ThrownShurikenRenderer;
 
 @SuppressWarnings("unused")
 public class GadgetClientEvents extends ClientEventBase {

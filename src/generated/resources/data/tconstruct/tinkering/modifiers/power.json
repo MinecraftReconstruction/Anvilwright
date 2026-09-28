@@ -1,16 +1,12 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
-      "type": "tconstruct:incremental"
-    },
-    {
-      "type": "tconstruct:tool_stat",
-      "stat": "tconstruct:projectile_damage",
+      "type": "tconstruct:stat_boost",
+      "each_level": 0.5,
+      "flat": 0.5,
       "operation": "add",
-      "value": 0.5
+      "stat": "tconstruct:projectile_damage"
     }
   ]
 }

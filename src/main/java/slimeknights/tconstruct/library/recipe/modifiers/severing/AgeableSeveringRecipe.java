@@ -1,69 +1,47 @@
 package slimeknights.tconstruct.library.recipe.modifiers.severing;
 
-import com.google.gson.JsonObject;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
-import slimeknights.mantle.util.JsonHelper;
-
-import javax.annotation.Nullable;
+import slimeknights.tconstruct.tools.TinkerModifiers;
 
 public class AgeableSeveringRecipe extends SeveringRecipe {
-  @Nullable
+  /** Loader instance */
+  public static final RecordLoadable<AgeableSeveringRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(), ENTITY_FIELD,
+    ItemOutput.Loadable.REQUIRED_STACK.requiredField("adult_result", r -> r.output),
+    ItemOutput.Loadable.OPTIONAL_STACK.emptyField("child_result", r -> r.childOutput),
+    BASE_CHANCE_FIELD, LOOTING_BONUS_FIELD,
+    AgeableSeveringRecipe::new);
+
   private final ItemOutput childOutput;
-  public AgeableSeveringRecipe(ResourceLocation id, EntityIngredient ingredient, ItemOutput adultOutput, @Nullable ItemOutput childOutput) {
-    super(id, ingredient, adultOutput);
+  public AgeableSeveringRecipe(ResourceLocation id, EntityIngredient ingredient, ItemOutput adultOutput, ItemOutput childOutput, float baseChance, float lootingBonus) {
+    super(id, ingredient, adultOutput, baseChance, lootingBonus);
     this.childOutput = childOutput;
+  }
+
+  /** @deprecated use {@link #AgeableSeveringRecipe(ResourceLocation, EntityIngredient, ItemOutput, ItemOutput, float, float)} */
+  @Deprecated(forRemoval = true)
+  public AgeableSeveringRecipe(ResourceLocation id, EntityIngredient ingredient, ItemOutput adultOutput, ItemOutput childOutput) {
+    this(id, ingredient, adultOutput, childOutput, 0.05f, 0.01f);
   }
 
   @Override
   public ItemStack getOutput(Entity entity) {
     if (entity instanceof LivingEntity && ((LivingEntity) entity).isBaby()) {
-      return childOutput == null ? ItemStack.EMPTY : childOutput.get().copy();
+      return childOutput.get().copy();
     }
     return getOutput().copy();
   }
 
-  /** Serializer for this recipe */
-  public static class Serializer extends LoggingRecipeSerializer<AgeableSeveringRecipe> {
-    @Override
-    public AgeableSeveringRecipe fromJson(ResourceLocation id, JsonObject json) {
-      EntityIngredient ingredient = EntityIngredient.deserialize(JsonHelper.getElement(json, "entity"));
-      ItemOutput adult = ItemOutput.fromJson(JsonHelper.getElement(json, "adult_result"));
-      ItemOutput child = null;
-      if (json.has("child_result")) {
-        child = ItemOutput.fromJson(JsonHelper.getElement(json, "child_result"));
-      }
-      return new AgeableSeveringRecipe(id, ingredient, adult, child);
-    }
-
-    @Nullable
-    @Override
-    protected AgeableSeveringRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      EntityIngredient ingredient = EntityIngredient.read(buffer);
-      ItemOutput adult = ItemOutput.read(buffer);
-      ItemOutput child = null;
-      if (buffer.readBoolean()) {
-        child = ItemOutput.read(buffer);
-      }
-      return new AgeableSeveringRecipe(id, ingredient, adult, child);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, AgeableSeveringRecipe recipe) {
-      recipe.ingredient.write(buffer);
-      recipe.output.write(buffer);
-      if (recipe.childOutput == null) {
-        buffer.writeBoolean(false);
-      } else {
-        buffer.writeBoolean(true);
-        recipe.childOutput.write(buffer);
-      }
-    }
+  @Override
+  public RecipeSerializer<?> getSerializer() {
+    return TinkerModifiers.ageableSeveringSerializer.get();
   }
 }

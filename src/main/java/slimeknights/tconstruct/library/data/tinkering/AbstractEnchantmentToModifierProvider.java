@@ -6,10 +6,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import slimeknights.mantle.data.GenericDataProvider;
+import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 
@@ -41,22 +41,41 @@ public abstract class AbstractEnchantmentToModifierProvider extends GenericDataP
 
   /* Helpers */
 
+  /** Helper to append the ? for optional modifiers */
+  private static String optionalId(ResourceLocation modifierId, boolean optional) {
+    return optional ? modifierId.toString() + '?' : modifierId.toString();
+  }
+
   /** Adds the given enchantment */
   protected void add(Enchantment enchantment, ModifierId modifierId) {
     String key = Objects.requireNonNull(BuiltInRegistries.ENCHANTMENT.getKey(enchantment)).toString();
     if (enchantmentMap.has(key)) {
       throw new IllegalArgumentException("Duplicate enchantment " + key);
     }
-    enchantmentMap.addProperty(key, modifierId.toString());
+    enchantmentMap.addProperty(key, optionalId(modifierId, optionalModifier));
+  }
+
+  /** Adds the given optional enchantment, ignoring errors if missing */
+  protected void addOptional(ResourceLocation enchantment, ModifierId modifierId, boolean optionalModifier) {
+    String key = enchantment.toString();
+    if (enchantmentMap.has(key) || enchantmentMap.has(key + '?')) {
+      throw new IllegalArgumentException("Duplicate enchantment " + key);
+    }
+    enchantmentMap.addProperty(key + '?', optionalId(modifierId, optionalModifier));
   }
 
   /** Adds the given enchantment tag */
   protected void add(TagKey<Enchantment> tag, ModifierId modifierId) {
+    add(tag, modifierId, false);
+  }
+
+  /** Adds the given enchantment tag, allowing making the modifier optional */
+  protected void add(TagKey<Enchantment> tag, ModifierId modifierId, boolean optionalModifier) {
     String key = "#" + tag.location();
     if (enchantmentMap.has(key)) {
       throw new IllegalArgumentException("Duplicate enchantment tag " + tag.location());
     }
-    enchantmentMap.addProperty(key, modifierId.toString());
+    enchantmentMap.addProperty(key, optionalId(modifierId, optionalModifier));
   }
 
   /** Adds the given enchantment tag */

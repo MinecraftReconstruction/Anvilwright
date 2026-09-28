@@ -1,15 +1,13 @@
 package slimeknights.tconstruct.plugin.jei.partbuilder;
 
 import lombok.NoArgsConstructor;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.TooltipFlag;
-import slimeknights.tconstruct.library.client.RenderUtils;
+import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 
 import javax.annotation.Nullable;
@@ -22,20 +20,32 @@ public class PatternIngredientRenderer implements IIngredientRenderer<Pattern> {
   public static final PatternIngredientRenderer INSTANCE = new PatternIngredientRenderer();
 
   @Override
-  public void render(GuiGraphics graphics, @Nullable Pattern pattern) {
+  public void render(GuiGraphics graphics, Pattern ingredient) {
+    render(graphics, ingredient, 0, 0);
+  }
+
+  @Override
+  public void render(GuiGraphics graphics, @Nullable Pattern pattern, int posX, int posY) {
     if (pattern != null) {
-      TextureAtlasSprite sprite = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(pattern.getTexture());
-      RenderUtils.setup(InventoryMenu.BLOCK_ATLAS);
-      graphics.blit(0, 0, 100, 16, 16, sprite);
+      GuiUtil.renderPattern(graphics, pattern, posX, posY);
     }
   }
 
+  @SuppressWarnings("removal")
   @Override
   public List<Component> getTooltip(Pattern pattern, TooltipFlag flag) {
     if (flag.isAdvanced()) {
       return Arrays.asList(pattern.getDisplayName(), Component.literal(pattern.toString()).withStyle(ChatFormatting.DARK_GRAY));
     } else {
       return Collections.singletonList(pattern.getDisplayName());
+    }
+  }
+
+  @Override
+  public void getTooltip(ITooltipBuilder tooltip, Pattern pattern, TooltipFlag flag) {
+    tooltip.add(pattern.getDisplayName());
+    if (flag.isAdvanced()) {
+      tooltip.add(Component.literal(pattern.toString()).withStyle(ChatFormatting.DARK_GRAY));
     }
   }
 }

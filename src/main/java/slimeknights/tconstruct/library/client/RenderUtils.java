@@ -42,7 +42,7 @@ public final class RenderUtils {
   }
 
   /**
-   * Sets up the shader for rendering
+   * Sets up the shader for rendering.
    * @param texture  Texture
    */
   public static void setup(ResourceLocation texture) {

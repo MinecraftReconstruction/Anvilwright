@@ -5,44 +5,80 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
-import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.recipe.casting.DisplayCastingRecipe;
 import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.library.recipe.casting.ICastingRecipe;
 import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
+import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
-import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Casting recipe taking a part of a material and a fluid and outputting the part with a new material
  */
-public abstract class CompositeCastingRecipe extends MaterialCastingRecipe {
-  public CompositeCastingRecipe(RecipeType<?> type, ResourceLocation id, String group, IMaterialItem result, int itemCost) {
-    super(type, id, group, Ingredient.of(result), itemCost, result, true, false);
+public class CompositeCastingRecipe extends MaterialCastingRecipe implements IMultiRecipe<IDisplayableCastingRecipe> {
+  public static final RecordLoadable<CompositeCastingRecipe> LOADER = RecordLoadable.create(
+    LoadableRecipeSerializer.TYPED_SERIALIZER.requiredField(), ContextKey.ID.requiredField(),
+    LoadableRecipeSerializer.RECIPE_GROUP, ITEM_COST_FIELD, RESULT_FIELD, MATERIALS_FIELD,
+    MaterialStatsId.PARSER.nullableField("casting_stat_conflict", r -> r.castingStatConflict),
+    CompositeCastingRecipe::new);
+
+  @Nullable
+  private final MaterialStatsId castingStatConflict;
+
+  public CompositeCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, int itemCost, IMaterialItem result, IJsonPredicate<MaterialVariantId> materials, @Nullable MaterialStatsId castingStatConflict) {
+    super(serializer, id, group, Ingredient.of(result), itemCost, result, materials, true, false);
+    this.castingStatConflict = castingStatConflict;
+  }
+
+  /** @deprecated use {@link #CompositeCastingRecipe(TypeAwareRecipeSerializer, ResourceLocation, String, int, IMaterialItem, IJsonPredicate, MaterialStatsId)} */
+  @Deprecated(forRemoval = true)
+  public CompositeCastingRecipe(TypeAwareRecipeSerializer<?> serializer, ResourceLocation id, String group, IMaterialItem result, int itemCost, @Nullable MaterialStatsId castingStatConflict) {
+    this(serializer, id, group, itemCost, result, MaterialPredicate.ANY, castingStatConflict);
   }
 
   @Override
-  protected Optional<MaterialFluidRecipe> getMaterialFluid(ICastingContainer inv) {
-    return MaterialCastingLookup.getCompositeFluid(inv);
+  protected MaterialFluidRecipe getFluidRecipe(ICastingContainer inv) {
+    Fluid fluid = inv.getFluid();
+    if (castingStatConflict != null) {
+      // if we have casting recipe that matches our fluid and is valid for the result, return no match
+      // used to prevent conflicts between tool casting and composite part casting
+      MaterialFluidRecipe recipe = MaterialCastingLookup.getCastingFluid(fluid); // TODO: does this need a filter?
+      if (recipe != MaterialFluidRecipe.EMPTY && castingStatConflict.canUseMaterial(recipe.getOutput().getId())) {
+        return MaterialFluidRecipe.EMPTY;
+      }
+    }
+    // find a composite match, requires fetching the material ID but not a huge deal as we already validated the cast (won't be calling this for multiple fluids)
+    return MaterialCastingLookup.getCompositeFluid(fluid, IMaterialItem.getMaterialFromStack(inv.getStack()), materials);
   }
 
-  /* JEI display */
+  /* JEI */
+
+  /** Grows the given list to the new size by repeating elements modulo */
+  private static <T> List<T> growList(List<T> list, int newSize) {
+    List<T> newList = new ArrayList<>(newSize);
+    newList.addAll(list);
+    int oldSize = list.size();
+    for (int i = oldSize; i < newSize; i++) {
+      newList.add(list.get(i % oldSize));
+    }
+    return newList;
+  }
+
   @Override
-  public List<IDisplayableCastingRecipe> getRecipes() {
+  public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (multiRecipes == null) {
       RecipeType<?> type = getType();
       multiRecipes = MaterialCastingLookup
@@ -62,67 +98,5 @@ public abstract class CompositeCastingRecipe extends MaterialCastingRecipe {
         .collect(Collectors.toList());
     }
     return multiRecipes;
-  }
-
-  /** Basin implementation */
-  public static class Basin extends CompositeCastingRecipe {
-    public Basin(ResourceLocation id, String group, IMaterialItem result, int itemCost) {
-      super(TinkerRecipeTypes.CASTING_BASIN.get(), id, group, result, itemCost);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.basinCompositeSerializer.get();
-    }
-  }
-
-  /** Table implementation */
-  public static class Table extends CompositeCastingRecipe {
-    public Table(ResourceLocation id, String group, IMaterialItem result, int itemCost) {
-      super(TinkerRecipeTypes.CASTING_TABLE.get(), id, group, result, itemCost);
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-      return TinkerSmeltery.tableCompositeSerializer.get();
-    }
-  }
-
-  /**
-   * Interface representing a composite casting recipe constructor
-   * @param <T>  Recipe class type
-   */
-  public interface IFactory<T extends CompositeCastingRecipe> {
-    T create(ResourceLocation id, String group, IMaterialItem result, int itemCost);
-  }
-
-  /** Shared serializer logic */
-  @RequiredArgsConstructor
-  public static class Serializer<T extends CompositeCastingRecipe> extends LoggingRecipeSerializer<T> {
-    private final IFactory<T> factory;
-
-    @Override
-    public T fromJson(ResourceLocation id, JsonObject json) {
-      String group = GsonHelper.getAsString(json, "group", "");
-      IMaterialItem result = RecipeHelper.deserializeItem(GsonHelper.getAsString(json, "result"), "result", IMaterialItem.class);
-      int itemCost = GsonHelper.getAsInt(json, "item_cost");
-      return factory.create(id, group, result, itemCost);
-    }
-
-    @Nullable
-    @Override
-    protected T fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      String group = buffer.readUtf(Short.MAX_VALUE);
-      IMaterialItem result = RecipeHelper.readItem(buffer, IMaterialItem.class);
-      int itemCost = buffer.readVarInt();
-      return factory.create(id, group, result, itemCost);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, T recipe) {
-      buffer.writeUtf(recipe.group);
-      RecipeHelper.writeItem(buffer, recipe.result);
-      buffer.writeVarInt(recipe.itemCost);
-    }
   }
 }

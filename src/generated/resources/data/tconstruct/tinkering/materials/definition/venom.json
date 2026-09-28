@@ -1,7 +1,6 @@
 {
-  "redirect": [
-    {
-      "id": "tconstruct:darkthread"
-    }
-  ]
+  "craftable": false,
+  "hidden": false,
+  "sortOrder": 30,
+  "tier": 2
 }

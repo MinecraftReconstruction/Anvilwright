@@ -3,42 +3,54 @@ package slimeknights.tconstruct.library.recipe.melting;
 import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.IMultiRecipe;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
-import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.recipe.casting.material.MaterialCastingLookup;
-import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
+import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Recipe to melt all castable tool parts of a given material
  */
-public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<MeltingRecipe> {
+public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<IDisplayableMeltingRecipe> {
+  public static final RecordLoadable<MaterialMeltingRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    MaterialVariantId.LOADABLE.requiredField("input", r -> r.input.getVariant()),
+    IntLoadable.FROM_ONE.requiredField("temperature", r -> r.temperature),
+    FluidOutput.Loadable.REQUIRED.requiredField("result", r -> r.result),
+    FluidOutput.Loadable.REQUIRED.list(0).defaultField("byproducts", List.of(), false, r -> r.byproducts),
+    MaterialMeltingRecipe::new);
+
   @Getter
   private final ResourceLocation id;
   private final MaterialVariant input;
   private final int temperature;
-  private final FluidStack result;
+  private final FluidOutput result;
+  private final List<FluidOutput> byproducts;
 
-  public MaterialMeltingRecipe(ResourceLocation id, MaterialVariantId input, int temperature, FluidStack result) {
+  public MaterialMeltingRecipe(ResourceLocation id, MaterialVariantId input, int temperature, FluidOutput result, List<FluidOutput> byproducts) {
     this.id = id;
     this.input = MaterialVariant.of(input);
     this.temperature = temperature;
     this.result = result;
+    this.byproducts = byproducts;
+  }
+
+  /** @deprecated use {@link #MaterialMeltingRecipe(ResourceLocation,MaterialVariantId,int,FluidOutput,List)} */
+  @Deprecated(forRemoval = true)
+  public MaterialMeltingRecipe(ResourceLocation id, MaterialVariantId input, int temperature, FluidOutput result) {
+    this(id, input, temperature, result, List.of());
   }
 
   @Override
@@ -67,7 +79,17 @@ public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<Melti
   @Override
   public FluidStack getOutput(IMeltingContainer inv) {
     int cost = MaterialCastingLookup.getItemCost(inv.getStack().getItem());
-    return new FluidStack(result, result.getAmount() * cost);
+    return new FluidStack(result.get(), result.getAmount() * cost);
+  }
+
+  @Override
+  public void handleByproducts(IMeltingContainer inv, IFluidHandler handler) {
+    if (!byproducts.isEmpty()) {
+      int cost = MaterialCastingLookup.getItemCost(inv.getStack().getItem());
+      for (FluidOutput byproduct : byproducts) {
+        handler.fill(new FluidStack(byproduct.get(), byproduct.getAmount() * cost), FluidAction.EXECUTE);
+      }
+    }
   }
 
   @Override
@@ -77,55 +99,42 @@ public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<Melti
 
 
   /* JEI display */
-  private List<MeltingRecipe> multiRecipes = null;
+  private List<IDisplayableMeltingRecipe> multiRecipes = null;
 
   @Override
-  public List<MeltingRecipe> getRecipes() {
+  public List<IDisplayableMeltingRecipe> getRecipes(RegistryAccess access) {
     if (multiRecipes == null) {
       if (input.get().isHidden()) {
-        multiRecipes = Collections.emptyList();
+        multiRecipes = List.of();
       } else {
-        // 1 recipe for each part
-        MaterialId inputId = input.getId();
-        multiRecipes = MaterialCastingLookup
+        // grab and sort all parts that work
+        MaterialVariantId inputId = input.getVariant();
+        List<Entry<IMaterialItem>> entries = MaterialCastingLookup
           .getAllItemCosts().stream()
-          .filter(entry -> entry.getKey().canUseMaterial(inputId))
-          .map(entry -> {
-            FluidStack output = this.result;
-            if (entry.getIntValue() != 1) {
-              output = new FluidStack(output, output.getAmount() * entry.getIntValue());
-            }
-            return new MeltingRecipe(id, "", MaterialIngredient.fromItem(entry.getKey(), inputId), output, temperature,
-                                     IMeltingRecipe.calcTimeForAmount(temperature, output.getAmount()), Collections.emptyList());
-          }).collect(Collectors.toList());
+          .filter(entry -> entry.getKey().canUseMaterial(inputId.getId()))
+          .sorted(Comparator.<Entry<IMaterialItem>,Integer>comparing(Entry::getIntValue).thenComparing(entry -> Loadables.ITEM.getKey(entry.getKey().asItem())))
+          .toList();
+        // if we found nothing, do nothing. Should never happen so error
+        if (entries.isEmpty()) {
+          TConstruct.LOG.warn("Failed to create display recipe for {}: found no tool parts that support {}", id, inputId);
+          multiRecipes = List.of();
+        } else {
+          // start building the recipe
+          DisplayMeltingRecipe.Builder recipe = DisplayMeltingRecipe.id(id).temperature(temperature).timeDynamic();
+          // input items just use the material
+          recipe.inputs(entries.stream().map(entry -> entry.getKey().withMaterialForDisplay(inputId)).toList());
+          // fluids
+          FluidStack output = this.result.get();
+          recipe.outputs(entries.stream().map(entry -> new FluidStack(output, output.getAmount() * entry.getIntValue())).toList());
+          // if we have byproducts, scale those too
+          for (FluidOutput byproduct : this.byproducts) {
+            FluidStack fluid = byproduct.get();
+            recipe.byproduct(entries.stream().map(entry -> new FluidStack(fluid, fluid.getAmount() * entry.getIntValue())).toList());
+          }
+          this.multiRecipes = List.of(recipe.build());
+        }
       }
     }
     return multiRecipes;
-  }
-
-  public static class Serializer extends LoggingRecipeSerializer<MaterialMeltingRecipe> {
-    @Override
-    public MaterialMeltingRecipe fromJson(ResourceLocation id, JsonObject json) {
-      MaterialVariantId inputId = MaterialVariantId.fromJson(json, "input");
-      int temperature = GsonHelper.getAsInt(json, "temperature");
-      FluidStack output = RecipeHelper.deserializeFluidStack(GsonHelper.getAsJsonObject(json, "result"));
-      return new MaterialMeltingRecipe(id, inputId, temperature, output);
-    }
-
-    @Nullable
-    @Override
-    protected MaterialMeltingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      MaterialVariantId inputId = MaterialVariantId.parse(buffer.readUtf(Short.MAX_VALUE));
-      int temperature = buffer.readInt();
-      FluidStack output = FluidStack.readFromPacket(buffer);
-      return new MaterialMeltingRecipe(id, inputId, temperature, output);
-    }
-
-    @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, MaterialMeltingRecipe recipe) {
-      buffer.writeUtf(recipe.input.getVariant().toString());
-      buffer.writeInt(recipe.temperature);
-      recipe.result.writeToPacket(buffer);
-    }
   }
 }

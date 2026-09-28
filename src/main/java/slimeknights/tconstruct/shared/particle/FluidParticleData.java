@@ -25,6 +25,7 @@ import net.minecraft.world.level.material.Fluid;
 public class FluidParticleData implements ParticleOptions {
   private static final DynamicCommandExceptionType UNKNOWN_FLUID = new DynamicCommandExceptionType(arg -> Component.translatable("command.tconstruct.fluid.not_found", arg));
   private static final ParticleOptions.Deserializer<FluidParticleData> DESERIALIZER = new ParticleOptions.Deserializer<>() {
+    @SuppressWarnings("deprecation")
     @Override
     public FluidParticleData fromCommand(ParticleType<FluidParticleData> type, StringReader reader) throws CommandSyntaxException {
       reader.expect(' ');
@@ -57,6 +58,7 @@ public class FluidParticleData implements ParticleOptions {
     fluid.writeToPacket(buffer);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public String writeToString() {
     StringBuilder builder = new StringBuilder();

@@ -6,7 +6,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.ICommonRecipe;
+import slimeknights.tconstruct.library.recipe.ITinkerableContainer;
+import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 /**
  * Main interface for all recipes in the Tinker Station
@@ -27,41 +31,28 @@ public interface ITinkerStationRecipe extends ICommonRecipe<ITinkerStationContai
   boolean matches(ITinkerStationContainer inv, Level world);
 
   /**
-   * Gets the recipe result. Return {@link ItemStack#EMPTY) to represent {@link ValidatedResult#PASS}, or a non-empty stack to represent success.
-   * For more complex recipes, override {@link #getValidatedResult(ITinkerStationContainer)} instead.
-   *
-   * Do not call this method directly, but it is okay to override it.
-   * @return  Recipe result, may be empty.
-   */
-  @Override
-  default ItemStack assemble(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    return getResultItem(registryAccess).copy();
-  }
-
-  /**
    * Gets the recipe result, or an object containing an error message if the recipe matches but cannot be applied.
    * @return Validated result
    */
-  default ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack result = assemble(inv, registryAccess);
-    if (result.isEmpty()) {
-      return ValidatedResult.PASS;
-    }
-    return ValidatedResult.success(result);
-  }
+  RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access);
 
   /** Gets the number to shrink the tool slot by, perfectly valid for this to be higher than the contained number of tools */
   default int shrinkToolSlotBy() {
     return DEFAULT_TOOL_STACK_SIZE;
   }
 
+  /** Gets the number to shrink the tool slot by, perfectly valid for this to be higher than the contained number of tools */
+  default int shrinkToolSlotBy(LazyToolStack result, ITinkerStationContainer inv) {
+    return shrinkToolSlotBy();
+  }
+
   /**
    * Updates the input stacks upon crafting this recipe
-   * @param result  Result from {@link #assemble(ITinkerStationContainer, RegistryAccess)}. Generally should not be modified
+   * @param result  Result from {@link #assemble(ITinkerStationContainer, RegistryAccess)}. Generally should not be modified.
    * @param inv     Inventory instance to modify inputs
    * @param isServer  If true, this is on the serverside. Use to handle randomness, {@link IMutableTinkerStationContainer#giveItem(ItemStack)} should handle being called serverside only
    */
-  default void updateInputs(ItemStack result, IMutableTinkerStationContainer inv, boolean isServer) {
+  default void updateInputs(LazyToolStack result, IMutableTinkerStationContainer inv, boolean isServer) {
     // shrink all stacks by 1
     for (int index = 0; index < inv.getInputCount(); index++) {
       inv.shrinkInput(index, 1);
@@ -71,10 +62,36 @@ public interface ITinkerStationRecipe extends ICommonRecipe<ITinkerStationContai
 
   /* Deprecated */
 
-  /** @deprecated use {@link #updateInputs(ItemStack, IMutableTinkerStationContainer, boolean)} */
+  /** @deprecated use {@link #getValidatedResult(ITinkerStationContainer, RegistryAccess)}*/
+  @Deprecated
+  @Override
+  default ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+    return ItemStack.EMPTY;
+  }
+
+  /** @deprecated use {@link #getValidatedResult(ITinkerStationContainer, RegistryAccess)}*/
+  @Deprecated
+  @Override
+  default ItemStack assemble(ITinkerStationContainer inv, RegistryAccess access) {
+    return getResultItem(access).copy();
+  }
+
+  /** @deprecated use {@link #updateInputs(LazyToolStack, IMutableTinkerStationContainer, boolean)} */
   @Override
   @Deprecated
   default NonNullList<ItemStack> getRemainingItems(ITinkerStationContainer inv) {
     return NonNullList.of(ItemStack.EMPTY);
+  }
+
+
+  /* Helpers */
+
+  /**
+   * Creates a success result for the given container with {@link #DEFAULT_TOOL_STACK_SIZE} as the max.
+   * In most cases, it's better to use {@link slimeknights.tconstruct.library.recipe.modifiers.adding.AbstractModifierRecipe}{@code #success()} as it responds to your specific {@link #shrinkToolSlotBy()}.
+   */
+  static RecipeResult<LazyToolStack> success(ToolStack tool, ITinkerableContainer inv) {
+    ItemStack original = inv.getTinkerableStack();
+    return LazyToolStack.successCopy(tool, Math.min(original.getCount(), DEFAULT_TOOL_STACK_SIZE), original);
   }
 }

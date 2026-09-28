@@ -8,6 +8,8 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -30,6 +32,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
@@ -282,11 +285,29 @@ public class ChannelBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {		// if the player is holding a channel, skip unless we clicked the top
-		// they can shift click to place one on the top
+	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
 		Direction hitFace = hit.getDirection();
-		if (player.getItemInHand(hand).getItem() == this.asItem() && world.isEmptyBlock(pos.relative(hitFace))) {
-			return InteractionResult.PASS;
+		if (world.getBlockState(pos.relative(hitFace)).canBeReplaced()) {
+			// if the player is holding a channel, skip unless we clicked the top
+			// they can shift click to place one on the top
+			ItemStack stack = player.getItemInHand(hand);
+			if (stack.getItem() == this.asItem()) {
+				return InteractionResult.PASS;
+			}
+			// if they are holding a gauge, set the side to in to make it easier to place a gauge on it
+			if (hitFace != Direction.DOWN && stack.getItem() instanceof BlockItem blockItem && RegistryHelper.contains(MantleTags.Blocks.ATTACHED_GAUGES, blockItem.getBlock())) {
+				// for sides, need to toggle the property on
+				if (hitFace != Direction.UP) {
+					EnumProperty<ChannelConnection> prop = DIRECTION_MAP.get(hitFace);
+					ChannelConnection connection = state.getValue(prop);
+					if (connection == ChannelConnection.NONE) {
+						BlockState newState = state.setValue(prop, ChannelConnection.IN);
+						world.setBlockAndUpdate(pos, newState);
+					}
+				}
+				// pass to let them place it
+				return InteractionResult.PASS;
+			}
 		}
 
 		// default to using the clicked side, though null (is that valid?) and up act as down
@@ -313,9 +334,8 @@ public class ChannelBlock extends Block implements EntityBlock {
 
 		// if we have changes, apply them and return success
 		if (newState != null) {
-			Direction finalSide = side;
-			if (!world.isClientSide) {
-				BlockEntityHelper.get(ChannelBlockEntity.class, world, pos).ifPresent(te -> te.refreshNeighbor(newState, finalSide));
+			if (!world.isClientSide && world.getBlockEntity(pos) instanceof ChannelBlockEntity te) {
+				te.refreshNeighbor(newState, side);
 			}
 			world.setBlockAndUpdate(pos, newState);
 			return InteractionResult.SUCCESS;
@@ -327,18 +347,19 @@ public class ChannelBlock extends Block implements EntityBlock {
 	@SuppressWarnings("deprecation")
 	@Override
 	@Deprecated
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
-		if (!worldIn.isClientSide) {
-			boolean isPowered = worldIn.hasNeighborSignal(pos);
-			if (isPowered != state.getValue(POWERED)) {
-				state = state.setValue(POWERED, isPowered).setValue(DOWN, isPowered && canConnect(worldIn, pos, Direction.DOWN));
-				worldIn.setBlock(pos, state, Block.UPDATE_CLIENTS);
-			}
-      BlockEntityHelper.get(ChannelBlockEntity.class, worldIn, pos)
-                      .ifPresent(te -> te.removeCachedNeighbor(Util.directionFromOffset(pos, fromPos)));
-		}
-	}
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
+    if (!world.isClientSide) {
+      boolean isPowered = world.hasNeighborSignal(pos);
+      if (isPowered != state.getValue(POWERED)) {
+        state = state.setValue(POWERED, isPowered).setValue(DOWN, isPowered && canConnect(world, pos, Direction.DOWN));
+        world.setBlock(pos, state, Block.UPDATE_CLIENTS);
+      }
+      if (world.getBlockEntity(pos) instanceof ChannelBlockEntity te) {
+        te.removeCachedNeighbor(Util.directionFromOffset(pos, fromPos));
+      }
+    }
+  }
 
 	@Override
 	@Deprecated

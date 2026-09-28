@@ -27,8 +27,8 @@ import slimeknights.mantle.client.model.data.ModelDataMap;
 import slimeknights.mantle.client.model.data.SinglePropertyData;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.mantle.util.WeakConsumerWrapper;
+import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
-import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler;
 
 import javax.annotation.Nonnull;
@@ -51,8 +51,6 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
   private Storage<T> capabilityHolder = null;
 
   /* Retexturing */
-  @Getter
-  private final IModelData modelData = getRetexturedModelData();
   @Nonnull
   @Getter
   private Block texture = Blocks.AIR;
@@ -72,6 +70,11 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
   @Override
   public void invalidateCaps() {
     super.invalidateCaps();
+    clearHandler();
+  }
+
+  @Override
+  public void onMasterLoad(IMasterLogic master) {
     clearHandler();
   }
 
@@ -132,8 +135,9 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
   /* Retexturing */
 
   @Override
-  public IModelData getRetexturedModelData() {
-    return new SinglePropertyData<>(RetexturedHelper.BLOCK_PROPERTY);
+  @Nonnull
+  public ModelData getModelData() {
+    return RetexturedHelper.getModelData(getTexture());
   }
 
   @Override

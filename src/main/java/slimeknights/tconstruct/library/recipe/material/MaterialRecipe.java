@@ -12,28 +12,33 @@ import net.minecraft.world.level.Level;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.container.ISingleStackContainer;
 import slimeknights.mantle.recipe.helper.ItemOutput;
-import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.library.materials.stats.IMaterialStats;
-import slimeknights.tconstruct.library.materials.stats.IRepairableMaterialStats;
-import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
-import slimeknights.tconstruct.library.tools.definition.ToolDefinitionData;
-import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.tables.TinkerTables;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Recipe to get the material from an ingredient
  */
-public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer>, IMaterialValue {
+public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer>, IMaterialValue, IDisplayMaterialRecipe {
+  /** Empty material instance for the cache */
+  @SuppressWarnings("removal")
+  public static final MaterialRecipe EMPTY = new MaterialRecipe(new ResourceLocation("missingno"), "", Ingredient.EMPTY, 0, 0, MaterialId.UNKNOWN, ItemOutput.EMPTY);
+  public static final RecordLoadable<MaterialRecipe> LOADER = RecordLoadable.create(
+    ContextKey.ID.requiredField(),
+    LoadableRecipeSerializer.RECIPE_GROUP,
+    IngredientLoadable.DISALLOW_EMPTY.requiredField("ingredient", MaterialRecipe::getIngredient),
+    IMaterialValue.VALUE_FIELD,
+    IMaterialValue.NEEDED_FIELD,
+    MaterialVariantId.LOADABLE.requiredField("material", r -> r.getMaterial().getVariant()),
+    ItemOutput.Loadable.OPTIONAL_STACK.emptyField("leftover", r -> r.leftover),
+    MaterialRecipe::new);
+
   /** Vanilla requires 4 ingots for full repair, we drop it down to 3 to mesh better with nuggets and blocks and to fit small head costs better */
   public static final float INGOTS_PER_REPAIR = 3f;
 
@@ -55,10 +60,6 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   /** Leftover stack of value 1, used if the value is more than 1 */
   protected final ItemOutput leftover;
 
-  /** Durability restored per item input, lazy loaded */
-  @Nullable
-  private Float repairPerItem;
-
   /**
    * Creates a new material recipe
    */
@@ -70,7 +71,11 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
     this.value = value;
     this.needed = needed;
     this.material = MaterialVariant.of(materialId);
-    this.leftover = leftover;
+    // ignore leftover if the value is 1, its useless to us
+    this.leftover = value > 1 ? leftover : ItemOutput.EMPTY;
+
+    // save recipe into the cache
+    MaterialRecipeCache.registerRecipe(this);
   }
 
   /* Basic */
@@ -91,7 +96,13 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   }
 
   @Override
+  public boolean hasLeftover() {
+    return !this.leftover.isEmpty();
+  }
+
+  @Override
   public ItemStack getLeftover() {
+    // TODO: would be nice to not copy for the recipe display
     return this.leftover.get().copy();
   }
 
@@ -111,14 +122,13 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   private List<ItemStack> displayItems = null;
 
   /** Gets a list of stacks for display in the recipe */
+  @Override
   public List<ItemStack> getDisplayItems() {
     if (displayItems == null) {
       if (needed > 1) {
-        displayItems = Arrays.stream(ingredient.getItems())
-                             .map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed))
-                             .collect(Collectors.toList());
+        displayItems = Arrays.stream(ingredient.getItems()).map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed)).toList();
       } else {
-        displayItems = Arrays.asList(ingredient.getItems());
+        displayItems = List.of(ingredient.getItems());
       }
     }
     return displayItems;
@@ -126,34 +136,19 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
 
   /**
    * Gets the amount to repair per item for tool repair
-   * @param data     Tool defintion data for fallback
-   * @param statsId  Preferred stats ID, if null no preference
+   * @param amount  Base material amount, typically the head durability stat
    * @return  Float amount per item to repair
    */
-  public float getRepairPerItem(ToolDefinitionData data, @Nullable MaterialStatsId statsId) {
-    if (repairPerItem == null) {
-      // multiply by recipe value (iron block is 9x), divide by needed (nuggets need 9), divide again by ingots per repair
-      repairPerItem = this.getValue() * getRepairDurability(data, material.getId(), statsId) / INGOTS_PER_REPAIR / this.getNeeded();
-    }
-    return repairPerItem;
+  public float scaleRepair(float amount) {
+    // not cached as it may vary per stat type
+    return this.getValue() * amount / INGOTS_PER_REPAIR / this.getNeeded();
   }
 
-  /**
-   * Gets the head durability for the given material
-   * @param toolData      Stats fallback for missing tool materials
-   * @param materialId    Material
-   * @param statsId       Stats to use for repair, if null uses the first found stats with durability
-   * @return  Head durability
-   */
-  public static int getRepairDurability(ToolDefinitionData toolData, MaterialId materialId, @Nullable MaterialStatsId statsId) {
-    Optional<IMaterialStats> optional;
-    if (statsId != null) {
-      // if given an ID, use that stat type
-      optional = MaterialRegistry.getInstance().getMaterialStats(materialId, statsId).filter(stats -> stats instanceof IRepairableMaterialStats);
-    } else {
-      // if no ID given, just find the first repairable stats
-      optional = MaterialRegistry.getInstance().getAllStats(materialId).stream().filter(stats -> stats instanceof IRepairableMaterialStats).findFirst();
-    }
-    return optional.map(stats -> ((IRepairableMaterialStats)stats).getDurability()).orElseGet(() -> toolData.getBaseStat(ToolStats.DURABILITY).intValue());
+
+  /* JEI */
+
+  @Override
+  public ResourceLocation getRecipeId() {
+    return getId();
   }
 }

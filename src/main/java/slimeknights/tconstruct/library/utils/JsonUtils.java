@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.utils;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
@@ -15,11 +14,8 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.network.packet.ISimplePacket;
 import slimeknights.mantle.util.JsonHelper;
+import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
 
 /** Helpers for a few JSON related tasks */
 public class JsonUtils {
@@ -106,24 +102,19 @@ public class JsonUtils {
     return json;
   }
 
-  /** Creates a JSON object with the given type set, makes using {@link slimeknights.mantle.data.GenericRegisteredSerializer} eaiser */
+  /** Creates a JSON object with the given type set, makes using {@link slimeknights.mantle.data.gson.GenericRegisteredSerializer} easier */
   public static JsonObject withType(ResourceLocation type) {
     return withLocation("type", type);
   }
 
-  /**
-   * Reads the result from the given JSON
-   * @param element  element to parse
-   * @param name    Tag name
-   * @return  Item stack result
-   * @throws com.google.gson.JsonSyntaxException If the syntax is invalid
-   */
-  public static ItemStack convertToItemStack(JsonElement element, String name) {
-    if (element.isJsonPrimitive()) {
-      return new ItemStack(GsonHelper.convertToItem(element, name));
-    } else {
-      return CraftingHelper.getItemStack(GsonHelper.convertToJsonObject(element, name), true);
-    }
+
+  private static boolean allowDebugLogging;
+
+  /** Forces the debug logging to be disabled. Used during testing since config is not loaded */
+  @Internal
+  @VisibleForTesting
+  public static void forceDisableDebugLog() {
+    allowDebugLogging = false;
   }
 
   /**

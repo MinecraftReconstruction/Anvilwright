@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.exception;
 
 // todo: make private, use static factory methods and move this to exception package
+// TODO 1.19: reevaluate whether this is actually needed
 public class TinkerAPIException extends RuntimeException {
   protected TinkerAPIException(String message) {
     super("[TCon API] " + message);
