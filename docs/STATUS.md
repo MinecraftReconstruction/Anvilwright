@@ -67,14 +67,18 @@ MinecraftReconstruction/Mantle             ← 上游 Forge 版 Mantle（仅作 
 `MinecraftReconstruction/Mantle-Fabric` 的 `1.20.1-update` 分支是 **Mantle 1.11 的 Fabric 移植 WIP**，
 提交信息本身记录了进度：`87 errors left` → `43 errors left` → **`6 errors left (I'm lazy ok)`**（2026-01-12）。
 
-本机复现结果（JDK 21，`./gradlew compileJava`，耗时约 9 分钟首次含依赖下载）：
+⚠️ **但 `6 errors left` 是假象。** javac 默认 `-Xmaxerrs 100` 截断输出，且在符号无法解析时会抑制依赖它的后续错误。
+本机复现（JDK 21，`./gradlew compileJava`，首次约 9 分钟含依赖下载）首轮确实只报：
 
 ```
-5 errors，全部集中在
-src/main/java/slimeknights/mantle/client/model/util/MantleItemLayerModel.java
+5 errors，全部集中在同一个文件 src/main/java/slimeknights/mantle/client/model/util/MantleItemLayerModel.java
   cannot find symbol: IGeometryBakingContext   (x2)
   cannot find symbol: RenderTypeGroup          (x3)
 ```
+
+这 5 个已在 Mantle 侧修复（提交 `756dad64`，Porting Lib 2.3.16 移除了 Forge geometry API）。
+**修完之后用 `-Xmaxerrs 100000` 重跑，真实剩余错误是 `158 errors / 55 files`** —— 与 Tinkers 侧同一教训：
+流体 API（49/158）是最大的一块，其次是 Capability 与注册表迁移。
 
 详见 [Mantle-Fabric/docs/STATUS.md](https://github.com/MinecraftReconstruction/Mantle-Fabric/blob/1.20.1/docs/STATUS.md)。
 
@@ -84,12 +88,14 @@ src/main/java/slimeknights/mantle/client/model/util/MantleItemLayerModel.java
 - [x] 三个 remote 配置、全量历史拉取
 - [x] 量化上游差距、重叠面、真实合并冲突
 - [x] 定位 Mantle 依赖来源（`mvn.devos.one/snapshots`）与 Fabric Mantle 源码仓库
-- [x] 复现 Mantle `1.20.1-update` 的编译错误并定位根因
+- [x] 复现 Mantle `1.20.1-update` 的编译错误并定位根因（Porting Lib geometry API 移除）
+- [x] Mantle 首批 5 个编译阻断已修复；并揭穿 `6 errors left` 假象（真实 158 errors / 55 files）
 - [x] 归属声明与本文档
 
 ## 未完成 / 下一步
 
-1. **修掉 Mantle 的 5 个编译错误**（诊断已完成，见 Mantle 的 STATUS）
+1. **继续修 Mantle 的编译错误（还剩 158 个）**：流体(49) → Capability → 注册表 → datagen 类型 → 零散项
+   （详见 Mantle 的 STATUS，含按文件/按符号的完整清单）
 2. **把 Mantle 1.11 Fabric 构建出来并发布**（`publishToMavenLocal` 或自有 maven）
 3. 用新 Mantle 编译现有 TCon 端口，确认基线不回归
 4. 执行 TCon 合并：`git merge v3.12.1.231` → 先啃 696 个 Java 冲突

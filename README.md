@@ -3,6 +3,28 @@
 > 代码来源与署名请见 [ATTRIBUTION.md](ATTRIBUTION.md)；当前进度与下一步见 [docs/STATUS.md](docs/STATUS.md) 与 [docs/PLAN.md](docs/PLAN.md)。
 > 想要稳定可用的版本，请使用 [官方 Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) 或 [Hephaestus](https://github.com/Alpha-s-Stuff/TinkersConstruct)。
 
+## About this fork / 关于本仓库
+
+`MinecraftReconstruction/TinkersConstruct` is a fork of [Alpha-s-Stuff/TinkersConstruct](https://github.com/Alpha-s-Stuff/TinkersConstruct)
+(*Hephaestus*), the Fabric port of [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct).
+
+**Goal:** bring the Fabric port from Tinkers' Construct **3.6.4** up to **3.12.1** (current upstream) and keep it in sync.
+The port's own Fabric adaptation layer — everything in the tables below — is AlphaMode's work, not ours; see [ATTRIBUTION.md](ATTRIBUTION.md).
+
+| | |
+|---|---|
+| Base | Tinkers' Construct 3.6.4 + 328 port commits (port's last commit: 2026-01-08) |
+| Target | Tinkers' Construct 3.12.1, Minecraft 1.20.1, Fabric |
+| Upstream gap | **2469 commits** since the merge base; 1924 changed files, +119,995 / −49,844 lines (src/main/java) |
+| Merge experiment | `git merge v3.12.1.231` → **4048 conflicts** = 3343 generated JSON (regenerate via datagen) + **696 Java** + 9 build files |
+| Hard blocker | upstream 3.12.1 requires **Mantle `[1.11.113,)`**, but Fabric Mantle is only published up to `1.20.1-1.9.296` → see [Mantle-Fabric](https://github.com/MinecraftReconstruction/Mantle-Fabric) |
+| Status / plan | [docs/STATUS.md](docs/STATUS.md) · [docs/PLAN.md](docs/PLAN.md) |
+| For AI agents | [AGENTS.md](AGENTS.md) |
+
+**Nothing here is playable yet.** The branch `1.20.1` currently corresponds to Tinkers' Construct 3.6.4 on Fabric;
+the upstream sync has not been started. Contributions and corrections welcome — the whole point of this repo is to
+see how far an AI-driven reconstruction can get, in the open.
+
 # [Hephaestus](https://modrinth.com/mod/hephaestus)
 
 Modify all the things, then do it again!   
