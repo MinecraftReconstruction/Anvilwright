@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **本仓库是非官方、由 AI 大幅生成（largely vibed）的试验性移植工程，与原作者无任何隶属或背书关系。**
+> 代码来源与署名请见 [ATTRIBUTION.md](ATTRIBUTION.md)；当前进度与下一步见 [docs/STATUS.md](docs/STATUS.md) 与 [docs/PLAN.md](docs/PLAN.md)。
+> 想要稳定可用的版本，请使用 [官方 Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) 或 [Hephaestus](https://github.com/Alpha-s-Stuff/TinkersConstruct)。
+
 # [Hephaestus](https://modrinth.com/mod/hephaestus)
 
 Modify all the things, then do it again!   
