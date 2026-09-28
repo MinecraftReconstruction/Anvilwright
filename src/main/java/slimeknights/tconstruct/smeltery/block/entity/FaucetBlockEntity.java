@@ -234,16 +234,15 @@ public class FaucetBlockEntity extends MantleBlockEntity implements CustomRender
               tx.commit();
             }
 
-              // sync to clients if we have changes
-              if (faucetState == FaucetState.OFF || !renderFluid.isFluidEqual(drained)) {
-                syncToClient(this.drained, true);
-              }
-              faucetState = FaucetState.POURING;
-              // pour after initial packet, in case we end up resetting later
-              pour();
+            // sync to clients if we have changes
+            if (faucetState == FaucetState.OFF || !renderFluid.isFluidEqual(drained)) {
+              syncToClient(this.drained, true);
             }
-            return true;
+            faucetState = FaucetState.POURING;
+            // pour after initial packet, in case we end up resetting later
+            pour();
           }
+          return true;
         }
       }
 
