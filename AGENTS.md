@@ -26,6 +26,15 @@ upstream    = SlimeKnights/TinkersConstruct              （原版 mod）
 同组织的配套仓库：`MinecraftReconstruction/Mantle-Fabric`（Fabric 版 Mantle，**当前卡点**）、
 `MinecraftReconstruction/Mantle`（上游 Forge 版，仅作 diff 基准）。
 
+## 分支约定
+
+| 分支 | 归属 | 规则 |
+|---|---|---|
+| `1.20.1`（默认）、`1.20.1-dev`、以及继承自上游的 `1.x` 分支 | **原作者 AlphaMode / SlimeKnights** | **不放代码改动**。默认分支上只允许新增文档（如本文件、`ATTRIBUTION.md`、`docs/`），以保证仓库首页能看到归属与 "largely vibed" 声明 |
+| **`mcr/*`**（`mcr` = MinecraftReconstruction） | **本组织** | 我们的全部**代码**工作都在这里。上游同步计划使用 `mcr/upstream-3.12.1`（见 [docs/PLAN.md](docs/PLAN.md)） |
+
+原则：`git diff` 一次就能回答"哪些是原作者的、哪些是我们的"。不要往上游分支提交代码。
+
 ## 环境
 
 - 构建需 **JDK 21**：`JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home`
