@@ -24,6 +24,55 @@
 
 **完成标准**：`Mantle-Fabric` 的 `1.11` 分支能编译出 jar，且 1.20.1 下能启动。
 
+#### Phase 1 实际结果（2026-09-29 更新）
+
+Phase 1 已完成，但**结论和当初设想的"先拆依赖再改 Tinkers"不一样**，两条实测记录如下。
+
+**1. Mantle 侧已完成**（canonical 仓库 `MinecraftReconstruction/Mantle-Fabric`，分支 `mcr/mantle-1.11`）：
+
+- 编译错误 158 → 0；`./gradlew build` 通过（含 datagen 与 access widener 校验）
+- `runServer` `Done (28.575s)`、`runClient` 启动到主菜单，服务器/客户端日志 ERROR+FATAL **都是 0**
+- 发布方式已验证：`./gradlew publishToMavenLocal` 现在产出的是 **remap（intermediary）** jar。
+  注意**之前是错的**：`publishing` 里写的是 `artifact jar`，而 Loom 的 `jar` 是 dev（named）jar，
+  发布的文件名带 `-dev` 分类器、类引用是 `net/minecraft/commands/...`。
+  下游若 `include()` 这种东西，玩家侧必然崩。已改成 `artifact remapJar` 并核实：
+  `Mantle-1.20.1-1.11.DEV.<sha>.jar` 里是 `net/minecraft/class_1268`。
+
+**2. "直接拆掉 jar-in-jar、换成 Mantle 1.11" —— 实测不可行（差 4540 个错误）**
+
+做法：TCon 的 `gradle.properties` 改 `mantle_version=1.11.DEV.<sha>`，
+`build.gradle` 里把 `modImplementation(include("slimeknights.mantle:Mantle:..."))` 去掉 `include`，
+并加 `mavenLocal()`。然后 `./gradlew compileJava`。
+
+结果：**4,540 errors / 100 warnings**（javac 完整跑完并给出了这个计数；之后 Gradle daemon 因为
+GC thrashing 被自己的看门狗杀掉，所以这数字是完整的、不是被截断的）。
+
+错误分布（按源码目录）与根因：
+
+| 目录 | 错误数 |
+|---|---|
+| `library/` | 2014 |
+| `tools/` | 934 |
+| `smeltery/` | 698 |
+| `tables/` | 293 |
+| `plugin/` | 190 |
+| `fluids/` | 156 |
+
+典型根因（都是 Mantle 1.9 → 1.11 的 API 换代，不是 Fabric 适配问题）：
+
+- `slimeknights.mantle.data.GenericLoaderRegistry` **整个包不存在了**（80 处）—— 1.11 换成了
+  `slimeknights.mantle.data.loadable.*`；TCon 3.6.4 里 `IGenericLoader` 到处都是
+- `mantle.client.model.data` / `client.model.inventory` / `client.model.fluid` / `data.fabric` 等包消失
+- `FluidAttributes.Builder` 的注册签名变了（55 处）
+- `ElementScreen` / `ScalableElementScreen` 构造函数签名变化（83 处）
+- 材料统计类的构造函数（`LimbMaterialStats`/`GripMaterialStats`/`SkullStats`，共 77 处）
+- `method does not override` 397 处（接口签名变更）
+
+**结论**：Mantle 1.11 的 API 就是 TCon 3.12 时代的 API。所以顺序必须是
+**先把 TCon 合到 3.12.1（Phase 2），而不是先把 Mantle 换成 1.11**。
+`1.9 → 1.11` 这一步本身等价于 Phase 2 的一大半工作量，先拆依赖只会得到 4540 个错误。
+jar-in-jar 的拆分应该放在 Phase 2 末尾（届时 TCon 已改到 1.11 API，只需改 build.gradle 两行 + 发布 Mantle）。
+
 ### Phase 2 — Tinkers' Construct 合并
 
 1. 基线确认：用新 Mantle 编译**现有**端口（`1.20.1` 分支），先确保不引入新错误。
