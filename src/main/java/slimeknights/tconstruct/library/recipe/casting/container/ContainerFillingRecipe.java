@@ -31,6 +31,7 @@ import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
 
 import java.util.List;
 import java.util.Optional;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /**
  * Casting recipe that takes an arbitrary fluid for a given amount and fills a container

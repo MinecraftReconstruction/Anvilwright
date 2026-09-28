@@ -14,6 +14,7 @@ import slimeknights.tconstruct.smeltery.block.entity.module.MeltingModuleInvento
 
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
+import slimeknights.mantle.client.screen.ElementScreen;
 
 @AllArgsConstructor
 public class GuiMeltingModule {

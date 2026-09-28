@@ -10,6 +10,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.tools.modules.combat.SeveringModule;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 /** @deprecated use {@link SeveringModule} */
 @Deprecated(forRemoval = true)

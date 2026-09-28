@@ -18,6 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
+import slimeknights.tconstruct.tools.entity.ToolProjectile;
 
 /** @deprecated use {@link ThrownShuriken} */
 @Deprecated

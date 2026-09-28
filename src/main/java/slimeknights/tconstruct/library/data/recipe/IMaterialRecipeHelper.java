@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 import static slimeknights.mantle.Mantle.COMMON;
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+import slimeknights.mantle.recipe.data.IRecipeHelper;
 
 /**
  * Interface for adding recipes for tool materials

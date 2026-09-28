@@ -111,6 +111,9 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import slimeknights.tconstruct.world.block.DirtType;
+import slimeknights.tconstruct.world.block.FoliageType;
+import slimeknights.tconstruct.world.entity.EarthSlimeEntity;
 
 /**
  * Contains blocks and items relevant to structures and world gen

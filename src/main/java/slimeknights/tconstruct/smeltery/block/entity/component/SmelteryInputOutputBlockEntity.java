@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static slimeknights.mantle.util.RetexturedHelper.TAG_TEXTURE;
+import slimeknights.mantle.client.model.ModelData;
 
 /**
  * Shared logic between drains and ducts

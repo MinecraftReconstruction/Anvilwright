@@ -13,6 +13,7 @@ import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.tools.data.material.MaterialIds;
 import slimeknights.tconstruct.world.TinkerWorld;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
 
 public class SkySlimeEntity extends TravelersPlateSlimeEntity {
   private double bounceAmount = 0f;

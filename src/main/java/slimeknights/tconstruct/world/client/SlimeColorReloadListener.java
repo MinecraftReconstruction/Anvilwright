@@ -10,6 +10,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import java.io.IOException;
+import slimeknights.tconstruct.shared.block.SlimeType;
 
 /**
  * Color reload listener for all slime foliage types

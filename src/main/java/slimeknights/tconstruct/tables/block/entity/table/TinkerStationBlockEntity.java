@@ -44,6 +44,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static slimeknights.tconstruct.library.tools.part.IMaterialItem.MATERIAL_TAG;
+import slimeknights.mantle.client.model.ModelData;
+import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 
 public class TinkerStationBlockEntity extends RetexturedTableBlockEntity implements ILazyCrafter {
   /** Slot index of the tool slot */

@@ -166,6 +166,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static slimeknights.mantle.util.RetexturedHelper.addTagVariants;
+import slimeknights.tconstruct.common.registration.CastItemObject;
+import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank;
 
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {

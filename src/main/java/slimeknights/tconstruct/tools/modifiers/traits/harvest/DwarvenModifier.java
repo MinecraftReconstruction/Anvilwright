@@ -25,6 +25,7 @@ import slimeknights.tconstruct.tools.stats.ToolType;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import slimeknights.mantle.client.TooltipKey;
 
 // TODO: convert into a module
 public class DwarvenModifier extends Modifier implements ConditionalStatModifierHook, BreakSpeedModifierHook, TooltipModifierHook {

@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import slimeknights.mantle.client.TooltipKey;
 
 /**
  * Use {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule} and {@link slimeknights.tconstruct.library.modifiers.modules.combat.ConditionalMeleeDamageModule}

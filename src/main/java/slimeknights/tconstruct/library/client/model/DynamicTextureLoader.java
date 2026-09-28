@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import slimeknights.mantle.data.listener.ResourceValidator;
 
 /**
  * Logic to handle dynamic texture scans. Really just logging missing textures at this point.

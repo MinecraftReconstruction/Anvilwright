@@ -35,6 +35,7 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
+import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
 
 /**
  * Alloy recipe category for JEI display

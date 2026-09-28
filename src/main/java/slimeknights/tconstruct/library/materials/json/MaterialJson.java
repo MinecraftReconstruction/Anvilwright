@@ -7,6 +7,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 
 import javax.annotation.Nullable;
+import slimeknights.tconstruct.library.json.JsonCondition;
 
 @SuppressWarnings("ClassCanBeRecord") // GSON does not support records
 @Data

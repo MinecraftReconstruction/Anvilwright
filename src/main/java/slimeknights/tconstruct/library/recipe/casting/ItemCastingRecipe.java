@@ -17,6 +17,8 @@ import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
 import java.util.Arrays;
 import java.util.List;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /** Casting recipe that takes a fluid and optional cast and outputs an item. */
 @Getter

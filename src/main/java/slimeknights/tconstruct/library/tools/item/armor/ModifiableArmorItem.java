@@ -76,6 +76,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 
 public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay, DamageableItem, PiglinsNeutralItem, FabricElytraItem, CustomEnchantingBehaviorItem, WalkOnSnowItem, ToolActionItem, RepairableItem {
   /** Volatile modifier tag to make piglins neutal when worn */

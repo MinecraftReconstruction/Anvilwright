@@ -21,6 +21,7 @@ import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.util.Arrays;
 import java.util.List;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /**
  * Recipe to get the material from an ingredient

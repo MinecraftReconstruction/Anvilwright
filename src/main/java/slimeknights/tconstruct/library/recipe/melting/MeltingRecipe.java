@@ -25,6 +25,9 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 
 /**
  * Recipe to melt an ingredient into a specific fuel.

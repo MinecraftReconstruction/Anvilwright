@@ -14,6 +14,8 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.List;
 import java.util.function.Function;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 
 /** Melting recipe that scale output based on input damage */
 public class DamageableMeltingRecipe extends MeltingRecipe {

@@ -18,6 +18,8 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 
 /**
  * Extension of melting recipe to boost results of ores

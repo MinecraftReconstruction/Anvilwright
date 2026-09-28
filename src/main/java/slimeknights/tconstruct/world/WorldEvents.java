@@ -48,6 +48,7 @@ import slimeknights.tconstruct.world.logic.AncientToolItemListing;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Predicate;
+import slimeknights.tconstruct.shared.block.SlimeType;
 
 @SuppressWarnings("unused")
 public class WorldEvents {

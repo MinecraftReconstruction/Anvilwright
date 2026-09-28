@@ -15,6 +15,7 @@ import slimeknights.mantle.util.JsonHelper;
 
 import java.util.Objects;
 import java.util.Set;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
 
 /**
  * Modifier matching a block

@@ -24,6 +24,7 @@ import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 
 import java.util.Optional;
+import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
 
 /**
  * Capability to store persistent NBT data on an entity. For players, this is automatically synced to the client on load, but not during gameplay.
