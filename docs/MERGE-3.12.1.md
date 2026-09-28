@@ -126,6 +126,24 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 错误数与人工成本，再决定是否整体翻转那 299 个文件的规则。`git diff <base> 1.20.1 -- <file>` 就是该文件的
 "移植配方"，可以照着在新版本上重做一遍。
 
+### ✅ 这个实验已经做过了（2026-09-29 08:35）—— 结论是**不要翻转**
+
+做法：建 `mcr/flip-experiment` 分支，把那 299 个文件**全部换成上游 3.12.1 版本**（不重新套转换），
+然后编译：
+
+| 方案 | 结果 |
+|---|---|
+| 当前分支（保留我们的 Fabric 适配） | **2223 errors，编译跑完** |
+| 全量翻转成上游版本 | **≥3472 errors**，而且 javac 在 6G 堆下 OOM，**编译都没跑完** |
+
+原因很清楚：上游版本是 **Forge** 代码，换过去等于把 Forge API 全部请回来（`FluidAction`、`IFluidHandler`、
+`SubscribeEvent`、`Capability` …），而我们的版本虽然用的是旧 API，但至少是 **Fabric** API。
+
+**采纳的结论**：保持当前策略 —— 保留我们的 Fabric 适配，逐文件把上游 3.12 的新逻辑补进来。
+遇到"上游把整个类重写了"的文件（例如 `library/data/material/AbstractMaterialDataProvider`），
+才按那次的做法单独重新套转换（那是本次唯一一个这样做成功并验证的例子）。
+`mcr/flip-experiment` 分支已删除，实验数据记在这里备查。
+
 ## 已知会误导人的检查
 
 - `git diff` 的 rename detection 在 15987 个文件规模下会**自动跳过**（git 会打印 warning），
