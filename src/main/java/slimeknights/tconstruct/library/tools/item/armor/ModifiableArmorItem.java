@@ -423,7 +423,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   @Override
-  public List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, slimeknights.tconstruct.library.utils.TooltipKey key, TooltipFlag tooltipFlag) {
+  public List<Component> getStatInformation(IToolStackView tool, @Nullable Player player, List<Component> tooltips, slimeknights.mantle.client.TooltipKey key, TooltipFlag tooltipFlag) {
     tooltips = TooltipUtil.getArmorStats(tool, player, tooltips, key.asMantle(), tooltipFlag);
     TooltipUtil.addAttributes(this, tool, player, tooltips, TooltipUtil.SHOW_ARMOR_ATTRIBUTES, getEquipmentSlot());
     return tooltips;

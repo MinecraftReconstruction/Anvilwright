@@ -301,7 +301,7 @@ public abstract class RandomMaterial implements IHaveLoader {
   private static class Conditional extends RandomMaterial implements ConditionalObject<RandomMaterial> {
     private final RandomMaterial ifTrue;
     private final RandomMaterial ifFalse;
-    private final ICondition[] conditions;
+    private final ConditionJsonProvider[] conditions;
 
     @Override
     public MaterialVariantId getMaterial(MaterialStatsId statType, RandomSource random) {

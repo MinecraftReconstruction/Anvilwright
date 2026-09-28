@@ -28,7 +28,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
-import slimeknights.tconstruct.library.utils.TooltipKey;
+import slimeknights.mantle.client.TooltipKey;
 
 import javax.annotation.Nullable;
 import java.util.List;

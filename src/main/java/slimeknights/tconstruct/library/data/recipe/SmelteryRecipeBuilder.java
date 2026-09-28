@@ -199,7 +199,7 @@ public class SmelteryRecipeBuilder {
   @CheckReturnValue
   private Consumer<FinishedRecipe> withCondition(ICondition... conditions) {
     ConsumerWrapperBuilder builder = ConsumerWrapperBuilder.wrap();
-    for (ICondition condition : conditions) {
+    for (ConditionJsonProvider condition : conditions) {
       builder.addCondition(condition);
     }
     return builder.build(consumer);
@@ -207,13 +207,13 @@ public class SmelteryRecipeBuilder {
 
   /** Creates a condition for a tag being empty */
   @CheckReturnValue
-  public static ICondition tagCondition(ResourceLocation tag) {
+  public static ConditionJsonProvider tagCondition(ResourceLocation tag) {
     return new TagFilledCondition<>(ItemTags.create(tag));
   }
 
   /** Creates a condition for a tag being empty */
   @CheckReturnValue
-  public static ICondition tagCondition(String name) {
+  public static ConditionJsonProvider tagCondition(String name) {
     return tagCondition(commonResource(name));
   }
 

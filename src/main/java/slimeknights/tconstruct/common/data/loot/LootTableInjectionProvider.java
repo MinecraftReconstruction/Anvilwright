@@ -195,7 +195,7 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
 
     // twilight forest - minotaur axe
     String tf = "twilightforest";
-    ICondition tfLoaded = new ModLoadedCondition(tf);
+    ConditionJsonProvider tfLoaded = new ModLoadedCondition(tf);
     LootPoolEntryContainer minotaurAxe = LootItem.lootTableItem(FakeRegistryEntry.item(TinkerTools.minotaurAxe.getId()))
       .setWeight(1) // TF tends to use 1 for its weight
       .apply(ancientToolData3)

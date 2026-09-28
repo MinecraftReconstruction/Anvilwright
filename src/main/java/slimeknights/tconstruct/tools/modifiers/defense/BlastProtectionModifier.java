@@ -20,7 +20,7 @@ import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.utils.TooltipKey;
+import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.tools.modifiers.defense.BlastProtectionModifier.BlastData;
 
 import javax.annotation.Nullable;

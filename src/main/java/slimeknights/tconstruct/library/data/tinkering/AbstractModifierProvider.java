@@ -91,7 +91,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   /* Redirect helpers */
 
   /** Adds a redirect with no modifier modules */
-  protected void addRedirect(ModifierId id, @Nullable ICondition condition, JsonRedirect... redirects) {
+  protected void addRedirect(ModifierId id, @Nullable ConditionJsonProvider condition, JsonRedirect... redirects) {
     addBuilder(id, null, condition, redirects);
   }
 

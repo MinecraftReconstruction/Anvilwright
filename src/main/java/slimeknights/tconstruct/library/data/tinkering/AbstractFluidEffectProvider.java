@@ -201,7 +201,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   @RequiredArgsConstructor
   @CanIgnoreReturnValue
   protected static class Builder {
-    private final List<ICondition> conditions = new ArrayList<>();
+    private final List<ConditionJsonProvider> conditions = new ArrayList<>();
     private final FluidIngredient ingredient;
     private final List<FluidEffect<? super FluidEffectContext.Block>> blockEffects = new ArrayList<>();
     private final List<FluidEffect<? super FluidEffectContext.Entity>> entityEffects = new ArrayList<>();
@@ -214,14 +214,14 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
     }
 
     /** Adds a condition to the builder */
-    public Builder addCondition(ICondition condition) {
+    public Builder addCondition(ConditionJsonProvider condition) {
       this.conditions.add(condition);
       return this;
     }
 
     /** Adds conditions for a metal fluid based on any of the given list of ingots being present */
     public Builder metalCondition(String... names) {
-      ICondition[] conditions = new ICondition[names.length + 1];
+      ConditionJsonProvider[] conditions = new ConditionJsonProvider[names.length + 1];
       conditions[0] = ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS;
       for (int i = 0; i < names.length; i++) {
         conditions[i+1] = new TagFilledCondition<>(ItemTags.create(commonResource("ingots/" + names[i])));
@@ -336,7 +336,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
     private JsonObject build(ResourceLocation id) {
       JsonObject json = new JsonObject();
       if (!conditions.isEmpty()) {
-        json.add("conditions", CraftingHelper.serialize(conditions.toArray(new ICondition[0])));
+        json.add("conditions", CraftingHelper.serialize(conditions.toArray(new ConditionJsonProvider[0])));
       }
       if (blockEffects.isEmpty() && entityEffects.isEmpty()) {
         throw new IllegalStateException("Must have at least 1 effect");

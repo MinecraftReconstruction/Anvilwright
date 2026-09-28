@@ -22,7 +22,7 @@ import slimeknights.tconstruct.shared.TinkerCommons;
 /** @deprecated use {@link slimeknights.mantle.recipe.condition.TagFilledCondition} */
 @Deprecated(forRemoval = true)
 @RequiredArgsConstructor
-public class TagNotEmptyCondition<T> implements LootItemCondition, ICondition {
+public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJsonProvider {
   private static final ResourceLocation NAME = TConstruct.getResource("tag_not_empty");
   private final TagKey<T> tag;
 
