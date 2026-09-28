@@ -27,7 +27,7 @@
 ### Phase 2 — Tinkers' Construct 合并
 
 1. 基线确认：用新 Mantle 编译**现有**端口（`1.20.1` 分支），先确保不引入新错误。
-2. `git checkout -b sync/upstream-3.12.1 && git merge v3.12.1.231`。
+2. `git checkout -b MinecraftReconstruction/upstream-3.12.1 && git merge v3.12.1.231`。
 3. 先处理 9 个非 Java/JSON 冲突（build.gradle、gradle.properties 等）。
 4. 处理 696 个 Java 冲突，建议按依赖顺序：
    注册表/事件 → Capability → 流体 → 工具 → 冶炼炉 → 客户端/渲染。
