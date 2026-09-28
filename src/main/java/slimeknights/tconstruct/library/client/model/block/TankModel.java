@@ -140,7 +140,6 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       wrapped.getTransforms().getTransform(cameraTransformType).apply(leftHanded, mat);
       return wrapped;
     }
-    return new Baked(owner, transform, baked, bakedGui, this);
   }
 
   /**
@@ -308,8 +307,5 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       boolean forceModelFluid = GsonHelper.getAsBoolean(modelContents, "render_fluid_in_model", false);
       return new TankModel(model, gui, fluid, forceModelFluid);
     }
-    IncrementalFluidCuboid fluid = IncrementalFluidCuboid.fromJson(GsonHelper.getAsJsonObject(json, "fluid"));
-    boolean forceModelFluid = GsonHelper.getAsBoolean(json, "render_fluid_in_model", false);
-    return new TankModel(model, gui, fluid, forceModelFluid);
   }
 }

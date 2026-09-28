@@ -156,19 +156,14 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     for (AlloyIngredient ingredient : inputs) {
       // care about size, if too small just skip the recipe
       int index = findMatch(ingredient, inv, used, true);
-      if (index != -1 && drainFluids[index] == null) {
-        fluid = inv.getFluidInTank(index);
-        long amount = ingredient.getAmount(fluid.getFluid());
-        drainAmount += amount;
-        drainFluids[index] = new FluidStack(fluid, amount);
-      } else {
+      if (index == -1) {
         // no fluid matched this ingredient, match failed
         return;
-      } else if (!ingredient.catalyst) {
+      } else if (!ingredient.catalyst()) {
         // practically the drained fluid at the index should always be null as we don't reuse indexes
         assert drainFluids[index] == null;
         fluid = inv.getFluidInTank(index);
-        int amount = ingredient.fluid.getAmount(fluid.getFluid());
+        long amount = ingredient.getAmount(fluid.getFluid());
         drainAmount += amount;
         drainFluids[index] = new FluidStack(fluid, amount);
       }
