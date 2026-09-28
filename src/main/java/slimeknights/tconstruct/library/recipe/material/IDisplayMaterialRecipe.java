@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.recipe.material;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 
 import javax.annotation.Nullable;
