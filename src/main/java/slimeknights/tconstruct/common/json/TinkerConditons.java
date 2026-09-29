@@ -3,8 +3,8 @@ package slimeknights.tconstruct.common.json;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.util.GsonHelper;
-import slimeknights.tconstruct.library.json.TagDifferencePresentCondition;
-import slimeknights.tconstruct.library.json.TagIntersectionPresentCondition;
+import slimeknights.tconstruct.library.json.condition.TagDifferencePresentCondition;
+import slimeknights.tconstruct.library.json.condition.TagIntersectionPresentCondition;
 
 import java.util.Locale;
 import java.util.function.BooleanSupplier;
