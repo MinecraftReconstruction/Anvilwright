@@ -3,7 +3,12 @@ package slimeknights.tconstruct.library.client.model;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.fabricators_of_create.porting_lib.models.TransformTypeDependentItemBakedModel;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
 import lombok.RequiredArgsConstructor;
+import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -14,15 +19,17 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import slimeknights.mantle.client.model.util.SimpleBlockModel;
 
 import java.util.function.Function;
 
-/** Model providing a variant for the GUI */
+/**
+ * Model providing a variant for the GUI
+ * <p>
+ * Ported from Forge's model API: the baking context is a vanilla {@link BlockModel} and the transform hook is
+ * Porting Lib's {@link TransformTypeDependentItemBakedModel} rather than Forge's {@code BakedModelWrapper}.
+ * Same shape as this port's {@code TankModel.BakedGuiUniqueModel}, which solved the same problem earlier.
+ */
 @RequiredArgsConstructor
 public class UniqueGuiModel implements IUnbakedGeometry<UniqueGuiModel> {
   /** Shared loader instance */
@@ -32,36 +39,38 @@ public class UniqueGuiModel implements IUnbakedGeometry<UniqueGuiModel> {
   protected final SimpleBlockModel gui;
 
   @Override
-  public void resolveParents(Function<ResourceLocation,UnbakedModel> modelGetter, IGeometryBakingContext context) {
-    model.resolveParents(modelGetter, context);
-    gui.resolveParents(modelGetter, context);
+  public void resolveParents(Function<ResourceLocation,UnbakedModel> modelGetter, BlockModel owner) {
+    model.resolveParents(modelGetter, owner);
+    gui.resolveParents(modelGetter, owner);
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
+  public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location, boolean isGui3d) {
     return new Baked(
-      model.bake(owner, baker, spriteGetter, transform, overrides, location),
-      gui.bake(owner, baker, spriteGetter, transform, overrides, location)
+      model.bake(owner, baker, spriteGetter, transform, overrides, location, isGui3d),
+      gui.bake(owner, baker, spriteGetter, transform, overrides, location, isGui3d)
     );
   }
 
   /**
    * Wrapper that swaps the model for the GUI
    */
-  public static class Baked extends BakedModelWrapper<BakedModel> {
+  public static class Baked extends ForwardingBakedModel implements TransformTypeDependentItemBakedModel {
     private final BakedModel gui;
 
     public Baked(BakedModel base, BakedModel gui) {
-      super(base);
+      wrapped = base;
       this.gui = gui;
     }
 
     @Override
-    public BakedModel applyTransform(ItemDisplayContext itemDisplay, PoseStack mat, boolean applyLeftHandTransform) {
-      if (itemDisplay == ItemDisplayContext.GUI) {
-        return gui.applyTransform(itemDisplay, mat, applyLeftHandTransform);
+    public BakedModel applyTransform(ItemDisplayContext cameraTransformType, PoseStack mat, boolean leftHanded, DefaultTransform defaultTransform) {
+      BakedModel model = cameraTransformType == ItemDisplayContext.GUI ? gui : wrapped;
+      if (model instanceof TransformTypeDependentItemBakedModel dependent) {
+        return dependent.applyTransform(cameraTransformType, mat, leftHanded, defaultTransform);
       }
-      return originalModel.applyTransform(itemDisplay, mat, applyLeftHandTransform);
+      model.getTransforms().getTransform(cameraTransformType).apply(leftHanded, mat);
+      return model;
     }
   }
 
