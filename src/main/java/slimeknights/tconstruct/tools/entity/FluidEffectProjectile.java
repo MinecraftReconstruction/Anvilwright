@@ -26,13 +26,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
+import io.github.fabricators_of_create.porting_lib.entity.events.ProjectileImpactEvent;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.library.fluid.FluidAction;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import slimeknights.mantle.inventory.EmptyItemHandler;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.modifiers.entity.ProjectileWithKnockback;
 import slimeknights.tconstruct.library.modifiers.entity.ProjectileWithPower;
@@ -139,13 +138,10 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
 
   /** Gets the cannon tank */
   @Nullable
-  private IItemHandlerModifiable getCannonInventory() {
+  private SlottedStackStorage getCannonInventory() {
     Level level = level();
     if (this.cannon != null && level.isLoaded(this.cannon)) {
-      BlockEntity cannonBE = level.getBlockEntity(this.cannon);
-      if (cannonBE != null && cannonBE.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(EmptyItemHandler.INSTANCE) instanceof IItemHandlerModifiable modifiable) {
-        return modifiable;
-      }
+      return ItemStorage.SIDED.find(level, this.cannon, null) instanceof SlottedStackStorage slotted ? slotted : null;
     }
     return null;
   }
@@ -159,7 +155,7 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
       builder.user(owner);
     }
     if (this.cannon != null) {
-      IItemHandler handler = getCannonInventory();
+      SlottedStackStorage handler = getCannonInventory();
       if (handler != null) {
         builder.stack(handler.getStackInSlot(0).copy());
       }
@@ -182,8 +178,13 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
     super.tick();
     HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
     HitResult.Type hitType = hitResult.getType();
-    if (hitType != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitResult)) {
-      this.onHit(hitResult);
+    if (hitType != HitResult.Type.MISS) {
+      // Forge cancelled the hit when a listener returned true; Porting Lib reports it as an impact result instead
+      ProjectileImpactEvent impactEvent = new ProjectileImpactEvent(this, hitResult);
+      EntityEvents.PROJECTILE_IMPACT.invoker().onProjectileImpact(impactEvent);
+      if (impactEvent.getImpactResult() == ProjectileImpactEvent.ImpactResult.DEFAULT) {
+        this.onHit(hitResult);
+      }
     }
     if (!this.isRemoved()) {
       this.updateRotation();

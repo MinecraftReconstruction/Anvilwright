@@ -9,9 +9,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import slimeknights.tconstruct.library.fluid.FluidAction;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.fluid.FluidTransferHelper;
@@ -62,7 +65,7 @@ public record TankInteractionModule(@Nullable InteractionSource source) implemen
       return InteractionResult.PASS;
     }
     Direction face = context.getClickedFace();
-    IFluidHandler cap = LogicHelper.orElseNull(te.getCapability(ForgeCapabilities.FLUID_HANDLER, face));
+    Storage<FluidVariant> cap = FluidStorage.SIDED.find(world, target, face);
     if (cap == null) {
       return InteractionResult.PASS;
     }
@@ -77,7 +80,13 @@ public record TankInteractionModule(@Nullable InteractionSource source) implemen
       if (sneaking) {
         // must have something to fill
         if (!fluidStack.isEmpty()) {
-          int added = cap.fill(fluidStack, FluidAction.EXECUTE);
+          long added;
+          try (Transaction tx = Transaction.openOuter()) {
+            added = cap.insert(fluidStack.getType(), fluidStack.getAmount(), tx);
+            if (added > 0) {
+              tx.commit();
+            }
+          }
           if (added > 0) {
             sound = FluidTransferHelper.getEmptySound(fluidStack);
             fluidStack.shrink(added);
@@ -86,14 +95,14 @@ public record TankInteractionModule(@Nullable InteractionSource source) implemen
         }
         // if nothing currently, will drain whatever
       } else if (fluidStack.isEmpty()) {
-        FluidStack drained = cap.drain(TANK_HELPER.getCapacity(tool), FluidAction.EXECUTE);
+        FluidStack drained = drainAny(cap, TANK_HELPER.getCapacity(tool));
         if (!drained.isEmpty()) {
           TANK_HELPER.setFluid(tool, drained);
           sound = FluidTransferHelper.getFillSound(fluidStack);
         }
       } else {
         // filter drained to be the same as the current fluid
-        FluidStack drained = cap.drain(new FluidStack(fluidStack, TANK_HELPER.getCapacity(tool) - fluidStack.getAmount()), FluidAction.EXECUTE);
+        FluidStack drained = drainFiltered(cap, fluidStack.getType(), TANK_HELPER.getCapacity(tool) - fluidStack.getAmount());
         if (!drained.isEmpty() && drained.isFluidEqual(fluidStack)) {
           fluidStack.grow(drained.getAmount());
           TANK_HELPER.setFluid(tool, fluidStack);
@@ -105,5 +114,29 @@ public record TankInteractionModule(@Nullable InteractionSource source) implemen
       }
     }
     return InteractionResult.sidedSuccess(world.isClientSide);
+  }
+
+  /** Drains any fluid from the given storage, committing only what was extracted */
+  private static FluidStack drainAny(Storage<FluidVariant> storage, long maxDrain) {
+    FluidStack drained = FluidStack.EMPTY;
+    try (Transaction tx = Transaction.openOuter()) {
+      drained = TransferUtil.extractAnyFluid(storage, maxDrain, tx);
+      if (!drained.isEmpty()) {
+        tx.commit();
+      }
+    }
+    return drained;
+  }
+
+  /** Drains a specific fluid from the given storage, committing only what was extracted */
+  private static FluidStack drainFiltered(Storage<FluidVariant> storage, FluidVariant resource, long maxDrain) {
+    long extracted;
+    try (Transaction tx = Transaction.openOuter()) {
+      extracted = storage.extract(resource, maxDrain, tx);
+      if (extracted > 0) {
+        tx.commit();
+      }
+    }
+    return extracted <= 0 ? FluidStack.EMPTY : new FluidStack(resource, extracted);
   }
 }

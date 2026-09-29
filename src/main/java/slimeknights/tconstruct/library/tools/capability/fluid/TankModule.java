@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.library.fluid.FluidAction;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
