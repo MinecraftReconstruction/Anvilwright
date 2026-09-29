@@ -179,6 +179,16 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 
 **建议顺序**：B（映射表已备齐）→ D（35 个文件，其中 `ModifierEvents` 最大）→ C（loader API）→ A（流体语义）→ E。
 
+### B 类的后续批次（同一晚继续）
+
+| 批次 | 内容 | 结果 |
+|---|---|---|
+| Mantle 发布 POM 带依赖 + TCon 显式声明 CCA | Mantle 的 publication 之前**不带任何依赖**，导致 TCon 从 mavenLocal 取到 Mantle 后丢失 CCA（36 个错误）。Mantle 改成 `from components.java`（产出 remap jar + 31 个依赖 + `.module`）；TCon 也显式声明 CCA | 1226 → **1190** |
+| `BlockItemProviderCapability` | Forge capability → 直接 `instanceof BlockItem` 判断（Fabric 无 per-stack capability；上游只有一个默认实现） | 1190 → **1176** |
+| 世界生成整块 | `WorldgenProvider` 去掉 Forge 生物群系修改器（Fabric 用 `WorldEvents` 的 `BiomeModifications` 覆盖）并接进 `TConstructData.buildRegistry`；`TinkerWorld`/`TinkerStructures` 跟随上游改名（`configuredEarthGeodeKey`→`configuredEarthGeode` 等）、`DeferredRegister`→Porting Lib `LazyRegistrar`、补 `enderSlimeTreeTall`；`TinkerStructures` 整体取上游 + 管线替换 | 1176 → **1121**（当前） |
+
+同时新建了本仓库的 [BEHAVIOUR-DIFFERENCES.md](BEHAVIOUR-DIFFERENCES.md)（4 条：渲染层、capability 扩展点、删掉的三个 Forge 独占集成、`FluidAction` 垫片的 simulate 语义待核对）。
+
 ## ⏩ 接手点（B/D 进行中，2026-09-29 晚）
 
 当前 **1291 errors**。已经做完的 B 类零散项：`BreakSpeed` 的 import（24 个文件）、
