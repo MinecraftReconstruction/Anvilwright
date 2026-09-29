@@ -12,6 +12,8 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.common.TinkerDamageTypes;
+import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.library.modifiers.hook.combat.ArmorLootingModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.combat.LootingModifierHook;
 import slimeknights.tconstruct.library.tools.capability.EntityModifierCapability;
@@ -67,24 +69,23 @@ public class ModifierLootingHandler {
 
   /** Applies the looting bonus for modifiers */
   private static int onLooting(DamageSource damageSource, LivingEntity target, int level, boolean recentlyHit) {
-    // must be an attacker with our tool
-//    DamageSource damageSource = event.getDamageSource();
     if (damageSource == null) {
       return 0;
     }
-    LivingEntity target = event.getEntity();
 
     // bleeding kills use the level of the effect for looting
     if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
-      event.setLootingLevel(Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get())));
-      return;
+      return Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get()));
     }
 
     // otherwise, use the proper tool
     Entity source = damageSource.getEntity();
     if (source instanceof LivingEntity holder) {
       Entity direct = damageSource.getDirectEntity();
-      if (direct instanceof AbstractArrow) {
+      // determine who is in charge of the looting
+      LootingContext context;
+      IToolStackView tool = null;
+      if (direct instanceof Projectile) {
         // need to build a context from the relevant capabilities to use the modifier
         ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(direct);
         context = new LootingContext(holder, target, damageSource, null);
@@ -92,8 +93,8 @@ public class ModifierLootingHandler {
         // since we don't set the enchantment on our tools, our looting modifiers won't set anything here anyways
         if (!modifiers.isEmpty()) {
           ModDataNBT persistentData = PersistentDataCapability.CAPABILITY.maybeGet(direct).map(ModDataNBT::new).orElseGet(ModDataNBT::new);
-          DummyToolStack tool = new DummyToolStack(Items.AIR, modifiers, persistentData);
-          level = LootingModifierHook.getLootingValue(TinkerHooks.PROJECTILE_LOOTING, tool, holder, target, damageSource, 0);
+          tool = new DummyToolStack(Items.AIR, modifiers, persistentData);
+          level = LootingModifierHook.getLooting(tool, context, 0);
         }
       } else {
         // not an arrow? means the held tool is to blame
@@ -103,19 +104,20 @@ public class ModifierLootingHandler {
 
         // if its modifiable, let it increase the level
         if (held.is(TinkerTags.Items.MODIFIABLE)) {
-          ToolStack tool = ToolStack.from(held);
-          level = ModifierUtil.getLootingLevel(tool, holder, target, damageSource);
+          tool = ToolStack.from(held);
+          level = LootingModifierHook.getLooting(tool, context, level);
           // ignore default looting if we are looting from another slot
         } else if (slotType != EquipmentSlot.MAINHAND) {
           // if it's not modifiable, yet we have a lot marked to blame for looting, ignore the event value
           level = 0;
         }
       }
-      // boost looting with pants regardless, hopefully you did not switch your pants mid arrow firing
-      level = ModifierUtil.getLeggingsLootingLevel(holder, target, damageSource, level);
-      return level;
+      // boost looting with armor regardless, hopefully you did not switch your pants mid arrow firing
+      level = ArmorLootingModifierHook.getLooting(tool, context, level);
+      // we allow the hook to return negatives to cancel out looting, so ensure its at least 0
+      return Math.max(level, 0);
     }
-    return 0;
+    return level;
   }
 
   /** Called when a player leaves the server to clear the face */

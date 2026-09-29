@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -93,7 +93,7 @@ public class ToolHarvestLogic {
     Boolean removed = null;
     if (!tool.isBroken()) {
       for (ModifierEntry entry : tool.getModifierList()) {
-        removed = entry.getHook(TinkerHooks.REMOVE_BLOCK).removeBlock(tool, entry, context);
+        removed = entry.getHook(ModifierHooks.REMOVE_BLOCK).removeBlock(tool, entry, context);
         if (removed != null) {
           break;
         }
@@ -166,7 +166,7 @@ public class ToolHarvestLogic {
     // broken means we are using "empty hand"
     if (!tool.isBroken() && removed) {
       for (ModifierEntry entry : tool.getModifierList()) {
-        entry.getHook(TinkerHooks.BLOCK_BREAK).afterBlockBreak(tool, entry, context);
+        entry.getHook(ModifierHooks.BLOCK_BREAK).afterBlockBreak(tool, entry, context);
       }
       ToolDamageUtil.damageAnimated(tool, damage, player);
     }
@@ -253,7 +253,9 @@ public class ToolHarvestLogic {
       Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getDefinition().getData().getAOE().getBlocks(tool, stack, player, state, world, pos, sideHit, IAreaOfEffectIterator.AOEMatchType.BREAKING) : Collections.emptyList();
 
       // actually break the block, run AOE if successful
+      int harvested = 0;
       if (breakBlock(tool, stack, context)) {
+        harvested = 1;
         for (BlockPos extraPos : extraBlocks) {
           BlockState extraState = world.getBlockState(extraPos);
           // prevent calling that stuff for air blocks, could lead to unexpected behaviour since it fires events
@@ -261,10 +263,11 @@ public class ToolHarvestLogic {
           if (!extraState.isAir()) {
             // prevent mutable position leak, breakBlock has a few places wanting immutable
             breakExtraBlock(tool, stack, context.forPosition(extraPos.immutable(), extraState));
+            harvested += 1;
           }
         }
         for (ModifierEntry entry : tool.getModifierList()) {
-          entry.getHook(TinkerHooks.FINISH_HARVEST).finishHarvest(tool, entry, context);
+          entry.getHook(ModifierHooks.BLOCK_HARVEST).finishHarvest(tool, entry, context, harvested);
         }
       }
 
@@ -288,7 +291,7 @@ public class ToolHarvestLogic {
       boolean isEffective = ToolHarvestLogic.isEffective(tool, state);
       ToolHarvestContext context = new ToolHarvestContext((ServerLevel) worldIn, entityLiving, state, pos, Direction.UP, true, isEffective);
       for (ModifierEntry entry : tool.getModifierList()) {
-        entry.getHook(TinkerHooks.BLOCK_BREAK).afterBlockBreak(tool, entry, context);
+        entry.getHook(ModifierHooks.BLOCK_BREAK).afterBlockBreak(tool, entry, context);
       }
       ToolDamageUtil.damageAnimated(tool, ToolHarvestLogic.getDamage(tool, worldIn, pos, state), entityLiving);
     }
