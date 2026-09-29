@@ -160,6 +160,30 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 | 按移植历史推断并套用 Forge→Porting Lib import 映射（182 文件）+ 补 errorprone 注解依赖 | **2223** | `FluidStack`→`porting_lib.fluids.FluidStack` 等 10 组 |
 | 自动补齐合并丢掉的 import（135 处 / 76 文件） | **2037** | `RecordLoadable`、`LoadableField`、`ModelData`、`TooltipKey`、`IJsonPredicate`… |
 | 符号改名：`TooltipKey` 路径搬迁、`SimpleFlowableFluid`→`SimpleFlowingFluid`、`ICondition` 用法改名 | **1920**（当前） | 见提交历史 |
+| 用 Porting Lib 垫片顶掉 `FluidAction`（46 文件） | **1639** | 见提交历史 |
+| 删除只有 Forge 版的可选集成（jsonthings 21 文件 + diet + IE） | **1594** | 见提交历史 |
+| **合并上游 Mantle 1.20**（Mantle 侧，见下） | **1539** | `mantle_version` 切到 `1.11.DEV.ad2e7db0` |
+| hook/module 体系第一波：257 个「上游版本不含 Forge API」的文件直接取上游 | **1494**（当前） | 358 个相关文件里的 257 个 |
+
+## hook 体系迁移的分批实测（358 个文件）
+
+358 个文件引用被上游替换掉的 hook API。按「上游版本是否依赖 Forge API」分成三组，
+并对前两组做了对照测量：
+
+| 组 | 文件数 | 处理 | 实测结果 |
+|---|---|---|---|
+| 上游版本**不含** Forge API | 257 | **取上游版本**（其中只有 10 个我们这边有 Fabric 专有代码，逐个补回） | 1539 → **1494**（-45）✅ 采纳 |
+| 上游版本**含** Forge API | 79 | 试过整体取上游 | 1494 → **1617**（**+123**）❌ 已回滚；这 79 个必须逐文件把 Forge 用法（事件、capability、`IClientItemExtensions`）换成移植侧写法 |
+| 移植独有、上游没有 | 22 | 尚未处理 | — |
+
+**结论**：hook 体系可以按「上游是否 Forge-clean」这个判据分批推进 —— 干净的整批取，含 Forge 的
+必须逐个移植。这也解释了为什么之前"整体翻转 299 个文件"的对照实验会失败（把大量含 Forge 的文件一起翻了）。
+
+顺带记录一个容易踩的坑：`ModifierCrystalItem` 属于第一组，但我们的**调用方**（尚未迁移的
+`EnchantmentConvertingRecipe` / `ExtractModifierRecipe` / `ModifierIngredientHelper`）依赖它的
+`withModifier`，而我们的版本还带着 Fabric 的创造标签页注册（`ItemGroupEvents`）。最终解法是
+**取上游实现 + 把标签页注册按 Fabric 方式接回去**（用上游自己的 `addVariants()` 喂
+`FabricItemGroupEntries`），而不是保留旧类。
 
 ## 下一步：hook 系统的迁移（最大的一块人工工作）
 
