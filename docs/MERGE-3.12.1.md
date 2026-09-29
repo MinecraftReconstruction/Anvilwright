@@ -164,6 +164,20 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 | 删除只有 Forge 版的可选集成（jsonthings 21 文件 + diet + IE） | **1594** | 见提交历史 |
 | **合并上游 Mantle 1.20**（Mantle 侧，见下） | **1539** | `mantle_version` 切到 `1.11.DEV.ad2e7db0` |
 | hook/module 体系第一波：257 个「上游版本不含 Forge API」的文件直接取上游 | **1494**（当前） | 358 个相关文件里的 257 个 |
+| 「管线类」文件按套路迁移：`TinkerModifiers` → `TinkerTables`/`DisplayCastingRecipe`/`PartRecipe` → datagen provider（+ 补 `model_generators` 模块）→ `ToolActions` 残留 → `TinkerModule` → `TinkerStationBlockEntity` | **1302**（当前） | 每批都 commit |
+
+## 当前剩余 1302 个错误的分类（2026-09-29）
+
+| 类别 | 错误 | 文件 | 说明 |
+|---|---|---|---|
+| **F. 其它 / 级联** | 797 | 292 | 绝大多数是下面几类的级联：某个类型解析失败后同文件的后续错误都会归到这里。**按类别清掉下面几类，F 会跟着塌** |
+| **B. Forge 事件 / capability / datagen** | 314 | 122 | 事件映射表见下节；capability 需要换成 Fabric 的 lookup API 或 Porting Lib |
+| **A. Forge 流体 API** | 63 | 32 | `IFluidHandler` 的语义（`Transaction`/`StorageUtil`），`FluidAction` 已用垫片顶掉 |
+| **D. hook / module 体系** | 57 | 35 | 剩余的是「上游版本含 Forge API」的那 79 个文件里的 |
+| **C. Mantle API** | 49 | 24 | 主要是 `IGenericLoader` → Mantle 1.11 的 `RecordLoadable`/`IHaveLoader` 体系 |
+| **E. 可选兼容** | 22 | 15 | JEI 的 `api.forge`、`IClientItemExtensions` 之类 |
+
+**建议顺序**：B（映射表已备齐）→ D（35 个文件，其中 `ModifierEvents` 最大）→ C（loader API）→ A（流体语义）→ E。
 
 ## hook 体系迁移的分批实测（358 个文件）
 
