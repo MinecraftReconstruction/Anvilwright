@@ -45,9 +45,6 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
   /** Tool definitions registered to be loaded */
   private final Map<ResourceLocation,ToolDefinition> definitions = new HashMap<>();
 
-  /** Condition context */
-  private IContext conditionContext = IContext.EMPTY;
-
   private ToolDefinitionLoader() {
     super(JsonHelper.DEFAULT_GSON, FOLDER);
   }
@@ -102,7 +99,9 @@ public class ToolDefinitionLoader extends SimpleJsonResourceReloadListener imple
       }
       try {
         // TODO: do we want to allow load conditions for tool definitions? might make merging harder should we go that route instead
-        ToolDefinitionData data = ToolDefinitionData.LOADABLE.convert(element, key.toString(), contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
+        // Fabric applies the JSON resource conditions before this loader runs, so there is no condition context
+        // to pass along (Mantle 1.11 dropped ContextKey.CONDITION_CONTEXT)
+        ToolDefinitionData data = ToolDefinitionData.LOADABLE.convert(element, key.toString(), contextBuilder(key).build());
         builder.put(key, data);
         definition.setData(data);
       } catch (Exception e) {

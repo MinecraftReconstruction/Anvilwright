@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.library.fluid.FluidAction;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -50,10 +50,11 @@ public enum EntityInteractFluidEffect implements FluidEffect<FluidEffectContext.
         // unfortunately, our projectiles always are considered hitting the entity's position making this 0
         Vec3 hit = context.getLocation().subtract(target.position());
 
-        // check if forge wants to override
-        InteractionResult result = ForgeHooks.onInteractEntityAt(player, target, hit, hand);
+        // check if another mod wants to override. Forge's onInteractEntityAt returned null when nothing handled it;
+        // Fabric's UseEntityCallback reports that as PASS (see docs/BEHAVIOUR-DIFFERENCES.md #19)
+        InteractionResult result = UseEntityCallback.EVENT.invoker().interact(player, context.getLevel(), hand, target, null);
         // skipped: never spectator mode if we made it this far
-        if (result == null) {
+        if (result == InteractionResult.PASS) {
           // no forge override, so find first success from vanilla hooks
           result = target.interactAt(player, hit, hand);
           if (!result.consumesAction()) {
