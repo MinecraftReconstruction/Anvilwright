@@ -1,13 +1,11 @@
 package slimeknights.tconstruct.library.events.teleport;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.eventbus.api.Cancelable;
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
 import slimeknights.tconstruct.library.utils.TeleportHelper.ITeleportEventFactory;
 
 /** Event fired when an entity teleports via the fluid effect */
-@Cancelable
-public class FluidEffectTeleportEvent extends EntityTeleportEvent {
+public class FluidEffectTeleportEvent extends EntityEvents.Teleport.EntityTeleportEvent {
   public static final ITeleportEventFactory TELEPORT_FACTORY = FluidEffectTeleportEvent::new;
 
   public FluidEffectTeleportEvent(Entity entity, double targetX, double targetY, double targetZ) {
