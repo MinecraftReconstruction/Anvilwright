@@ -42,6 +42,10 @@ import java.util.function.ToIntFunction;
 public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBlock, BlockPickInteractionAware, LightEmissiveBlock {
   @Getter
   private final long capacity;
+  /** Block state property for the light level of the contained fluid */
+  public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
+  /** Gets the light level from a block state */
+  public static final ToIntFunction<BlockState> LIGHT_GETTER = state -> state.getValue(SearedTankBlock.LIGHT);
   public SearedTankBlock(Properties properties, long capacity) {
     super(properties);
     this.capacity = capacity;

@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import slimeknights.tconstruct.shared.command.subcommand.DurabilityCommand.Operation;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import java.util.function.Supplier;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 

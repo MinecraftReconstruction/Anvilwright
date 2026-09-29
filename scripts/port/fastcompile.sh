@@ -31,6 +31,17 @@ if [[ ! -s .port/compile-cp.txt || ! -s .port/ap-cp.txt ]]; then
   echo "run first: ./gradlew -I scripts/port/printcp.gradle printCompileCp" >&2
   exit 1
 fi
+
+# The classpath file becomes STALE whenever Loom re-remaps the Minecraft jar (e.g. after changing
+# mantle.accesswidener / tinkers.accesswidener, or after swapping the Mantle artifact). A stale file
+# makes a large set of symbols unresolvable, which then makes Lombok-generated members invisible and
+# inflates the error count by 4-5x. Always regenerate it after touching those inputs.
+if [[ -n "$(find build.gradle gradle.properties src/main/resources/*.accesswidener \
+              -newer .port/compile-cp.txt 2>/dev/null)" ]]; then
+  echo "!! .port/compile-cp.txt is older than the build/access-widener inputs" >&2
+  echo "   regenerate first: ./gradlew -I scripts/port/printcp.gradle printCompileCp" >&2
+  exit 2
+fi
 find src/main/java -name '*.java' > .port/sources.txt
 
 # shellcheck disable=SC2086

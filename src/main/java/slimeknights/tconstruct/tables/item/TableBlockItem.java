@@ -5,7 +5,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import slimeknights.mantle.item.RetexturedBlockItem;
+import slimeknights.tconstruct.common.item.RetexturedBlockItem;
 
 import java.util.function.BooleanSupplier;
 import net.minecraft.world.item.Item.Properties;

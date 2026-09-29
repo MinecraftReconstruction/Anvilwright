@@ -6,6 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.RelativeMovement;
 import slimeknights.tconstruct.common.Sounds;
 
 import java.util.EnumSet;
@@ -66,8 +67,8 @@ public class TeleportHelper {
   }
 
   /** Fires the teleport event, then teleports the player if it works */
-  public static boolean tryTeleport(EntityTeleportEvent event) {
-    MinecraftForge.EVENT_BUS.post(event);
+  public static boolean tryTeleport(EntityEvents.Teleport.EntityTeleportEvent event) {
+    EntityEvents.TELEPORT.invoker().onTeleport(event);
     if (!event.isCanceled()) {
       // spawn particles at old location
       Entity entity = event.getEntity();

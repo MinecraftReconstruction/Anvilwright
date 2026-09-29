@@ -5,6 +5,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -80,11 +81,9 @@ import java.util.function.Predicate;
 public final class TinkerTables extends TinkerModule {
   /** Creative tab for general items, or those that lack another tab */
   public static final RegistryObject<CreativeModeTab> tabTables = CREATIVE_TABS.register(
-    "tables", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "tables"))
+    "tables", () -> FabricItemGroup.builder().title(TConstruct.makeTranslation("itemGroup", "tables"))
       .icon(() -> new ItemStack(TinkerTables.tinkersAnvil))
       .displayItems(TinkerTables::addTableVariants)
-      .withTabsBefore(TinkerWorld.tabWorld.getId())
-      .withSearchBar()
       .build());
   /*
    * Blocks
