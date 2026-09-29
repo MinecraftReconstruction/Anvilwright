@@ -61,11 +61,11 @@ public class FluidTooltipProvider extends AbstractFluidTooltipProvider {
       .addUnit("kilobucket", "mantle", FluidConstants.BUCKET * 1000)
       .addUnit("bucket",     "mantle", FluidConstants.BUCKET)
       .addUnit("bottle", FluidValues.BOTTLE);
-    add("venom", TinkerFluids.venom.getLocalTag())
+    add("venom", TinkerFluids.venom.getTag())
       .addUnit("kilobucket", "mantle", FluidConstants.BUCKET * 1000)
       .addUnit("bucket",     "mantle", FluidConstants.BUCKET)
       .addUnit("bottle", FluidValues.BOTTLE);
-    add("honey", TinkerFluids.honey.getForgeTag())
+    add("honey", TinkerFluids.honey.getTag())
       .addUnit("block", FluidValues.BOTTLE * 4)
       .addUnit("bottle", FluidValues.BOTTLE);
     add("soup", SOUP_TOOLTIPS)

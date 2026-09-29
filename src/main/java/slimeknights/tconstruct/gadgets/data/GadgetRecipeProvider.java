@@ -48,7 +48,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
     // slime
     String folder = "gadgets/slimesling/";
     for (SlimeType slime : SlimeType.TRUE_SLIME) {
-      ResourceLocation name = modResource(folder + slime.getSerializedName());
+      ResourceLocation name = commonResource(folder + slime.getSerializedName());
       ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerGadgets.slimeSling.get(slime))
                          .group("tconstruct:slimesling")
                          .define('#', Items.STRING)
@@ -123,7 +123,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                        .pattern(" e ")
                        .unlockedBy("has_item", has(Tags.Items.GEMS_DIAMOND))
                        .group(modPrefix("fancy_item_frame"))
-                       .save(consumer, modResource("gadgets/frame/" + FrameType.DIAMOND.getSerializedName()));
+                       .save(consumer, commonResource("gadgets/frame/" + FrameType.DIAMOND.getSerializedName()));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerGadgets.itemFrame.get(FrameType.CLEAR))
                        .define('e', Tags.Items.GLASS_PANES_COLORLESS)
                        .define('M', Tags.Items.GLASS_COLORLESS)
@@ -140,7 +140,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                           .requires(Items.REDSTONE_TORCH)
                           .unlockedBy("has_item", has(goldFrame))
                           .group(modPrefix("reverse_fancy_item_frame"))
-                          .save(consumer, modResource(folder + FrameType.REVERSED_GOLD.getSerializedName()));
+                          .save(consumer, commonResource(folder + FrameType.REVERSED_GOLD.getSerializedName()));
     ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, goldFrame)
                           .requires(reversedFrame)
                           .requires(Items.REDSTONE_TORCH)
@@ -158,7 +158,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                          .define('W', TinkerWorld.slimeTallGrass.get(slime))
                          .pattern("MMM").pattern("SES").pattern("WWW")
                          .unlockedBy("has_slime", has(bucket))
-                         .save(consumer, modResource(cakeFolder + slime.getSerializedName()));
+                         .save(consumer, commonResource(cakeFolder + slime.getSerializedName()));
     });
     ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, TinkerGadgets.cake.get(FoliageType.ICHOR))
       .define('M', TinkerFluids.ichor)

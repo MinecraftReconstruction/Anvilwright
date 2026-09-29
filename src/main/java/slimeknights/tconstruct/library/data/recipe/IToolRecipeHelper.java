@@ -36,7 +36,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    */
   default void toolBuilding(Consumer<FinishedRecipe> consumer, IModifiable tool, String folder) {
     ToolBuildingRecipeBuilder.toolBuildingRecipe(tool)
-                             .save(consumer, modResource(folder + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(tool.asItem())).getPath()));
+                             .save(consumer, commonResource(folder + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(tool.asItem())).getPath()));
   }
 
   /**
@@ -143,23 +143,23 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
 
     // Part Builder
     PartRecipeBuilder.partRecipe(part)
-                     .setPattern(modResource(name))
+                     .setPattern(commonResource(name))
                      .setPatternItem(DefaultCustomIngredients.any(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
                      .setCost(cost)
-                     .save(consumer, modResource(partFolder + "builder/" + name));
+                     .save(consumer, commonResource(partFolder + "builder/" + name));
 
     // Material Casting
     String castingFolder = partFolder + "casting/";
     MaterialCastingRecipeBuilder.tableRecipe(part)
                                 .setItemCost(cost)
                                 .setCast(cast.getMultiUseTag(), false)
-                                .save(consumer, modResource(castingFolder + name + "_gold_cast"));
+                                .save(consumer, commonResource(castingFolder + name + "_gold_cast"));
     MaterialCastingRecipeBuilder.tableRecipe(part)
                                 .setItemCost(cost)
                                 .setCast(cast.getSingleUseTag(), true)
-                                .save(consumer, modResource(castingFolder + name + "_sand_cast"));
+                                .save(consumer, commonResource(castingFolder + name + "_sand_cast"));
     CompositeCastingRecipeBuilder.table(part, cost)
-                                 .save(consumer, modResource(castingFolder + name + "_composite"));
+                                 .save(consumer, commonResource(castingFolder + name + "_composite"));
 
     // Cast Casting
     MaterialIngredient ingredient = MaterialIngredient.fromItem(part);

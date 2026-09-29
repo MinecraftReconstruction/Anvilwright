@@ -74,7 +74,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                        .pattern("###")
                        .pattern("###")
                        .unlockedBy("has_ingot", has(Tags.Items.INGOTS_GOLD))
-                       .save(consumer, modResource("common/gold_bars"));
+                       .save(consumer, commonResource("common/gold_bars"));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerCommons.goldPlatform, 4)
                        .define('#', Tags.Items.INGOTS_GOLD)
                        .define('.', Tags.Items.NUGGETS_GOLD)
@@ -82,7 +82,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                        .pattern(". .")
                        .pattern("#.#")
                        .unlockedBy("has_gold", has(Tags.Items.INGOTS_GOLD))
-                       .save(consumer, modResource("common/gold_platform"));
+                       .save(consumer, commonResource("common/gold_platform"));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerCommons.ironPlatform, 4)
                        .define('#', Tags.Items.INGOTS_IRON)
                        .define('.', Tags.Items.NUGGETS_IRON)
@@ -90,7 +90,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                        .pattern(". .")
                        .pattern("#.#")
                        .unlockedBy("has_bars", has(Tags.Items.INGOTS_IRON))
-                       .save(consumer, modResource("common/iron_platform"));
+                       .save(consumer, commonResource("common/iron_platform"));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerCommons.copperPlatform.get(WeatherState.UNAFFECTED), 4)
                        .define('#', Tags.Items.INGOTS_COPPER)
                        .define('.', TinkerTags.Items.NUGGETS_COPPER)
@@ -98,7 +98,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                        .pattern(". .")
                        .pattern("#.#")
                        .unlockedBy("has_bars", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, modResource("common/copper_platform"));
+                       .save(consumer, commonResource("common/copper_platform"));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerCommons.cobaltPlatform, 4)
                        .define('#', TinkerMaterials.cobalt.getIngotTag())
                        .define('.', TinkerMaterials.cobalt.getNuggetTag())
