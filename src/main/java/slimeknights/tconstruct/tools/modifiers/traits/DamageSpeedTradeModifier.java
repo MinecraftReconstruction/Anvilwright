@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import slimeknights.mantle.client.TooltipKey;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /**
  * Use {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule} and {@link slimeknights.tconstruct.library.modifiers.modules.combat.ConditionalMeleeDamageModule}

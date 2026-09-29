@@ -12,6 +12,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Variable providing a different value based on whether the modifier is effective or not */
 public record EffectiveMiningSpeedVariable(MiningSpeedVariable ifTrue, MiningSpeedVariable ifFalse) implements MiningSpeedVariable {

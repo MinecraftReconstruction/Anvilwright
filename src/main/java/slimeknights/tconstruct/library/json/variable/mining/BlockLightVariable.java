@@ -14,6 +14,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /**
  * Gets the targeted block light level. Will use the targeted position if possible, otherwise the players position

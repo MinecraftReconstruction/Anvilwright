@@ -11,6 +11,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Gets the biome temperature at the targeted block */
 public record BlockTemperatureVariable(float fallback) implements MiningSpeedVariable {

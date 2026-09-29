@@ -88,6 +88,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Collection of all hooks implemented by the mod natively */
 public class ModifierHooks {
