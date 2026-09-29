@@ -163,6 +163,25 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 
 ## 下一步：hook 系统的迁移（最大的一块人工工作）
 
+## ✅ Mantle 侧的上游合并已完成（2026-09-29）
+
+这一项原本列在"下一步"里：TCon 3.12.1 用了一些**我们 Mantle 1.11 里根本没有**的类
+（最典型的是 `slimeknights.mantle.util.html`）。已经解决 ——
+`Mantle-Fabric` 的 `mcr/mantle-1.11` 合并了上游 `SlimeKnights/Mantle` 的 **`1.20` 分支**
+（commit `ad2e7db0`，78 个上游提交，22 个冲突，全部解决；`./gradlew build` 通过、
+`runServer` 0 ERROR/FATAL、开发自检仍然 9 passed / 0 failed）。
+
+这次合并给 TCon 端**直接补上了缺的东西**：
+
+| TCon 报错的符号 | 现在来自 |
+|---|---|
+| `slimeknights.mantle.util.html.*`（22 处报错） | 上游新增的 `util/html/{HtmlElement,HtmlGroup,HtmlString,RawHtml,HtmlSerializable}` |
+| `slimeknights.mantle.data.predicate.fluid.FluidPredicate` | 上游新增的流体 predicate（已按 Porting Lib 的 `FluidType` 移植） |
+| `slimeknights.mantle.network.packet.BlockEntityPacket` | 上游新增，已移植到 Mantle 自己的 `ISimplePacket.Context` |
+| 顺手还拿到 | `client/book/{IHTML,HTMLUtils}`、`command/HungerCommand`、`MantleEvents`（灵魂绑定）、`BaseRegistryLoadable`/`LazyRegistryLoadable`、`HasLootContextSetCondition` |
+
+**TCon 侧错误：1594 → 1539**（`mantle_version` 已切到 `1.11.DEV.ad2e7db0`）。
+
 上游 3.12 把 modifier hook 体系重构了，这是当前错误里最集中的结构性变化：
 
 | 我们代码里的旧名字 | 上游 3.12.1 的新家 |
