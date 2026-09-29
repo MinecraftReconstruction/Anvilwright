@@ -4,9 +4,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.fabricmc.api.EnvType;
+import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * This class contains various methods that are safe to call on both sides, which internally call client only code.
@@ -20,7 +20,7 @@ public class SafeClient {
    * @param newAmount   New fluid amount
    */
   public static void updateFluidModel(BlockEntity be, FluidTank tank, int oldAmount, int newAmount) {
-    if (FMLEnvironment.dist == Dist.CLIENT) {
+    if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
       ClientOnly.updateFluidModel(be, tank, oldAmount, newAmount);
     }
   }
