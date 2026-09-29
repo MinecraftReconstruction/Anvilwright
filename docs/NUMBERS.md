@@ -43,6 +43,41 @@
 
 datagen 相关包合计约占一半，与整树口径（1706/3572）一致。
 
+### 之后的一轮：先用 `blame.py` 分出"元凶 / 受害者"
+
+`scripts/port/blame.py` 会对每个报错文件做"整树计数 vs 该文件所在包的分块计数"对比，**自身有错的是元凶，
+自身 0 错的是被级联污染的受害者**。对当时 top12 的结果：
+
+| 文件 | 整树报告 | 自身 | 判定 |
+|---|---|---|---|
+| `SmelteryRecipeProvider` | 367 | **380** | 元凶 |
+| `BlockTagProvider` | 105 | **115** | 元凶 |
+| `TinkerFluids` | 102 | **102** | 元凶 |
+| `TableRecipeProvider` | 60 | **60** | 元凶 |
+| `BlockLootTableProvider` | 57 | **57** | 元凶 |
+| `TinkerCommons` | 55 | **55** | 元凶 |
+| `MaterialRecipeProvider` | 46 | **49** | 元凶 |
+| `FluidTagProvider` / `ModifierRecipeProvider` / `ToolsRecipeProvider` / `ItemTagProvider` / `ModifierProvider` | 54–145 | **0** | 受害者（会自己好） |
+
+**这解释了为什么"按文件错误数排序"一直误导人**：一半的大文件根本没错，是级联。
+
+### 对元凶执行"取上游文件"（`upstreamtake --apply`）
+
+| 文件 | 结果 |
+|---|---|
+| `SmelteryRecipeProvider` | **380 → 10，已保留**（只差 10 条 import 映射） |
+| `BlockTagProvider` / `TableRecipeProvider` / `BlockLootTableProvider` | 回滚（当时的分块基线又测到 0，保守回滚） |
+
+回滚后整树报告数从 **3576 → 10**——`SmelteryRecipeProvider` 是最大的级联源。这 10 条是它自己的
+Forge import：`Tags`、`CompoundIngredient`、`ConditionalRecipe`、`DifferenceIngredient`、
+`AndCondition`/`ICondition`/`ItemExistsCondition`。其中
+`Tags` → Porting Lib `Tags`、`ConditionalRecipe` → Porting Lib `data.ConditionalRecipe` 是直接映射；
+`ICondition` 系 → Fabric 的 `ConditionJsonProvider`/`DefaultResourceConditions`；
+`CompoundIngredient`/`DifferenceIngredient` → `DefaultCustomIngredients.all/any/difference`（**要改调用写法，不是改名**）。
+
+⚠️ 但**别把"整树 10"当成进度**：这个数字的边界随时会回涨（本轮已经出现过 3 ↔ 3572 ↔ 10）。
+下次继续前先跑一次 `truecount.sh` 拿真值。
+
 1. **别用单次整树数字当进度条**，用 `truecount.sh`；日常迭代用"逐文件 A/B + 回滚"。
 2. **对破损的树做 A/B 不可靠**：`ModifierRecipeProvider` 同一次会话里报过 117、也报过 0，
    两次都是"整树 + 分块"双口径 ⇒ 那些多是**级联**，不是它自己的错。
