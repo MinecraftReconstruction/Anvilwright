@@ -155,3 +155,6 @@ accessible method net/minecraft/world/level/levelgen/feature/HugeFungusFeature p
 accessible method net/minecraft/client/gui/GuiGraphics flushIfUnmanaged ()V
 
 accessible method net/minecraft/world/level/block/TntBlock explode (Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)V
+
+# Datagen helpers need the tag appender type used by vanilla tag providers
+transitive-accessible class net/minecraft/data/tags/IntrinsicHolderTagsProvider$IntrinsicTagAppender
