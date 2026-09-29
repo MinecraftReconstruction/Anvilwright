@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.fluids;
 
+import net.minecraft.network.syncher.EntityDataSerializers;
 import io.github.fabricators_of_create.porting_lib.brewing.BrewingRecipe;
 import io.github.fabricators_of_create.porting_lib.brewing.BrewingRecipeRegistry;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -236,7 +237,10 @@ public final class TinkerFluids extends TinkerModule {
 
   // fluid data serializer
   public static final FluidDataSerializer FLUID_DATA_SERIALIZER = new FluidDataSerializer();
-  public static final RegistryObject<EntityDataSerializer<?>> FLUID_DATA_SERIALIZER_REGISTRY = DATA_SERIALIZERS.register("fluid", () -> FLUID_DATA_SERIALIZER);
+  // Forge put entity data serializers in a registry; vanilla keeps a static list, so register directly
+  public static void registerSerializers() {
+    EntityDataSerializers.registerSerializer(FLUID_DATA_SERIALIZER);
+  }
 
   /** Creates a builder for a cool fluid with sounds */
   private static FluidType.Properties cool() {
