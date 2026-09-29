@@ -12,8 +12,15 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import io.github.fabricators_of_create.porting_lib.client.armor.ArmorRenderer;
+import io.github.fabricators_of_create.porting_lib.client.armor.ArmorRendererRegistry;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.item.Item;
+import com.mojang.blaze3d.vertex.PoseStack;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -47,13 +54,28 @@ public class ArmorModelManager extends SimpleJsonResourceReloadListener {
   private Map<ResourceLocation,ArmorModel> models = Collections.emptyMap();
 
   private static final List<ArmorModelDispatcher> DISPATCHERS = new ArrayList<>();
+  /** Items waiting for the client to register their armor renderer */
+  private static final Map<Item,ArmorModelDispatcher> PENDING_RENDERERS = new LinkedHashMap<>();
 
   /**
    * Initializes this manager, registering it with the resource manager
-   * @param manager  Manager
    */
-  public static void init(RegisterClientReloadListenersEvent manager) {
-    manager.registerReloadListener(INSTANCE);
+  public static void init() {
+    // Forge handed us its RegisterClientReloadListenersEvent; Fabric registers reload listeners directly
+    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(INSTANCE);
+    // register armor renderers collected while the items were constructed
+    for (Map.Entry<Item,ArmorModelDispatcher> entry : PENDING_RENDERERS.entrySet()) {
+      ArmorRendererRegistry.register(entry.getValue(), entry.getKey());
+    }
+    PENDING_RENDERERS.clear();
+  }
+
+  /**
+   * Queues the given armor renderer for the given item. Called from item constructors, which run before the client
+   * is set up, so the actual registration happens in {@link #init()}.
+   */
+  public static void registerArmorRenderer(Item item, ArmorModelDispatcher dispatcher) {
+    PENDING_RENDERERS.put(item, dispatcher);
   }
 
   private ArmorModelManager() {
@@ -103,7 +125,7 @@ public class ArmorModelManager extends SimpleJsonResourceReloadListener {
   }
 
   /** Helper to cache armor models in the item */
-  public abstract static class ArmorModelDispatcher implements IClientItemExtensions {
+  public abstract static class ArmorModelDispatcher implements ArmorRenderer {
     private ArmorModel model;
 
     public ArmorModelDispatcher() {
@@ -128,9 +150,17 @@ public class ArmorModelManager extends SimpleJsonResourceReloadListener {
     }
 
     @Nonnull
-    @Override
     public Model getGenericArmorModel(LivingEntity living, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
       return MultilayerArmorModel.INSTANCE.setup(living, stack, slot, original, getModel(stack));
+    }
+
+    @Override
+    public void render(PoseStack matrices, MultiBufferSource buffers, ItemStack stack, LivingEntity living, EquipmentSlot slot, int light, HumanoidModel<LivingEntity> contextModel, HumanoidModel<LivingEntity> innerModel) {
+      // Forge called getGenericArmorModel on the client extension and rendered the result from its armor layer.
+      // Porting Lib's ArmorRenderer is that layer, so render here; the model pulls its own textures and uses the
+      // render buffer captured from LivingEntityRenderEvents (see AbstractArmorModel#buffer).
+      Model model = getGenericArmorModel(living, stack, slot, contextModel);
+      model.renderToBuffer(matrices, buffers.getBuffer(net.minecraft.client.renderer.RenderType.armorCutoutNoCull(slimeknights.tconstruct.library.tools.helper.ArmorUtil.getDummyArmorTexture(slot))), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
     }
   }
 }

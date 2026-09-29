@@ -6,8 +6,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
+import slimeknights.tconstruct.library.client.armor.ArmorModelManager;
 import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
@@ -25,6 +25,7 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
   public MultilayerArmorItem(ModifiableArmorMaterial material, ArmorItem.Type slot, Properties properties, ResourceLocation name) {
     super(material, slot, properties);
     this.name = name;
+    ArmorModelManager.registerArmorRenderer(this, armorModel);
   }
 
   @SuppressWarnings("removal")
@@ -35,6 +36,20 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
   public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
     super(material, slot, properties, toolDefinition);
     this.name = name;
+    ArmorModelManager.registerArmorRenderer(this, armorModel);
+  }
+
+  /** The armor model dispatcher for this item, registered with the client in {@link ArmorModelManager#init()} */
+  private final ArmorModelDispatcher armorModel = new ArmorModelDispatcher() {
+    @Override
+    protected ResourceLocation getName() {
+      return name;
+    }
+  };
+
+  /** Gets the armor model dispatcher, used by the client setup to register the renderer */
+  public ArmorModelDispatcher getArmorModel() {
+    return armorModel;
   }
 
   @Nullable
@@ -43,13 +58,7 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
     return ArmorUtil.getDummyArmorTexture(slot);
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(new ArmorModelDispatcher() {
-      @Override
-      protected ResourceLocation getName() {
-        return name;
-      }
-    });
-  }
+// TODO: PORT - Forge's initializeClient(Consumer<IClientItemExtensions>) has no Fabric equivalent. The dispatcher is
+//  created as a field instead and registered through ArmorRendererRegistry when ArmorModelManager.init() runs on the
+//  client. See docs/BEHAVIOUR-DIFFERENCES.md #23.
 }
