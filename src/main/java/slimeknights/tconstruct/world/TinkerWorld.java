@@ -85,6 +85,7 @@ import slimeknights.tconstruct.common.registration.GeodeItemObject;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.block.BloodSlimeBlock;
+import slimeknights.tconstruct.world.block.CrystalClusterBlock;
 import slimeknights.tconstruct.world.block.CongealedSlimeBlock;
 import slimeknights.tconstruct.world.block.PiglinWallHeadBlock;
 import slimeknights.tconstruct.world.block.SlimeDirtBlock;
@@ -92,6 +93,7 @@ import slimeknights.tconstruct.world.block.SlimeFungusBlock;
 import slimeknights.tconstruct.world.block.SlimeGrassBlock;
 import slimeknights.tconstruct.world.block.SlimeLeavesBlock;
 import slimeknights.tconstruct.world.block.SlimeNyliumBlock;
+import slimeknights.tconstruct.world.block.SlimeRootsBlock;
 import slimeknights.tconstruct.world.block.SlimeSaplingBlock;
 import slimeknights.tconstruct.world.block.SlimeTallGrassBlock;
 import slimeknights.tconstruct.world.block.SlimeVineBlock;
@@ -138,12 +140,19 @@ public final class TinkerWorld extends TinkerModule {
   public static final ItemObject<Block> cobaltOre = BLOCKS.register("cobalt_ore", () -> new Block(builder(MapColor.NETHER, SoundType.NETHER_ORE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(10.0F)), DEFAULT_BLOCK_ITEM);
   public static final ItemObject<Block> rawCobaltBlock = BLOCKS.register("raw_cobalt_block", () -> new Block(builder(MapColor.COLOR_BLUE, SoundType.NETHER_ORE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(6.0f, 7.0f)), DEFAULT_BLOCK_ITEM);
   public static final ItemObject<Item> rawCobalt = ITEMS.register("raw_cobalt", WORLD_PROPS);
+  // metal shards and clusters, added with the ancient tools in 3.11
+  public static final ItemObject<Item> steelShard = ITEMS.register("steel_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Item> cobaltShard = ITEMS.register("cobalt_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Item> knightmetalShard = ITEMS.register("knightmetal_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Block> steelCluster = BLOCKS.register("steel_cluster", () -> new CrystalClusterBlock(Sounds.SKY_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.STONE).lightLevel(state -> 5).sound(SoundType.METAL)), TOOLTIP_BLOCK_ITEM);
+  public static final ItemObject<Block> cobaltCluster = BLOCKS.register("cobalt_cluster", () -> new CrystalClusterBlock(Sounds.ICHOR_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.COLOR_BLUE).lightLevel(state -> 8).sound(SoundType.NETHERITE_BLOCK)), TOOLTIP_BLOCK_ITEM);
+  public static final ItemObject<Block> knightmetalCluster = BLOCKS.register("knightmetal_cluster", () -> new CrystalClusterBlock(Sounds.ENDER_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.GRASS).lightLevel(state -> 12).sound(SoundType.NETHERITE_BLOCK)), TOOLTIP_BLOCK_ITEM);
 
   // slime
   public static final EnumObject<SlimeType, SlimeBlock> slime = Util.make(() -> {
     Function<SlimeType,BlockBehaviour.Properties> slimeProps = type -> builder(type.getMapColor(), SoundType.SLIME_BLOCK).friction(0.8F).sound(SoundType.SLIME_BLOCK).noOcclusion();
     return new EnumObject.Builder<SlimeType, SlimeBlock>(SlimeType.class)
-      .putDelegate(SlimeType.EARTH, (SlimeBlock) Blocks.SLIME_BLOCK)
+      .put(SlimeType.EARTH, (SlimeBlock) Blocks.SLIME_BLOCK)
       // sky slime: sticks to anything, but will not pull back
       .put(SlimeType.SKY,   BLOCKS.register("sky_slime", () -> new StickySlimeBlock(slimeProps.apply(SlimeType.SKY), (state, other) -> true), TOOLTIP_BLOCK_ITEM))
       // ichor: does not stick to self, but sticks to anything else
@@ -204,6 +213,10 @@ public final class TinkerWorld extends TinkerModule {
   public static final WoodBlockObject greenheart  = BLOCKS.registerWood("greenheart",  createSlimewood(MapColor.COLOR_LIGHT_GREEN, MapColor.COLOR_GREEN),     false);
   public static final WoodBlockObject skyroot     = BLOCKS.registerWood("skyroot",     createSlimewood(MapColor.COLOR_CYAN,        MapColor.TERRACOTTA_CYAN), false);
   public static final WoodBlockObject bloodshroom = BLOCKS.registerWood("bloodshroom", createSlimewood(MapColor.COLOR_RED,         MapColor.COLOR_ORANGE),    false);
+  // end wood, added in the 3.11 update
+  public static final WoodBlockObject enderbark   = BLOCKS.registerWood("enderbark",   createSlimewood(MapColor.COLOR_BLACK,       MapColor.COLOR_BLACK),     false);
+  public static final ItemObject<Block> enderbarkRoots = BLOCKS.register("enderbark_roots", () -> new SlimeRootsBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).instrument(NoteBlockInstrument.BASS).strength(0.7F).randomTicks().sound(SoundType.MANGROVE_ROOTS).noOcclusion().isSuffocating(Blocks::never).isViewBlocking(Blocks::never).noOcclusion()), DEFAULT_BLOCK_ITEM);
+  public static final EnumObject<SlimeType,Block> slimyEnderbarkRoots = BLOCKS.registerEnum(SlimeType.values(), "enderbark_roots", type -> new SlimeDirtBlock(BlockBehaviour.Properties.of().mapColor(type.getMapColor()).strength(0.7F).sound(SoundType.MUDDY_MANGROVE_ROOTS).lightLevel(s -> type.getLightLevel())), DEFAULT_BLOCK_ITEM);
 
   // plants
   public static final EnumObject<SlimeType, SlimeTallGrassBlock> slimeFern, slimeTallGrass;
@@ -476,5 +489,10 @@ public final class TinkerWorld extends TinkerModule {
       return new PiglinWallHeadBlock(type, props);
     }
     return new WallSkullBlock(type, props);
+  }
+
+  /** Properties shared by the metal crystal clusters */
+  private static BlockBehaviour.Properties clusterProps() {
+    return BlockBehaviour.Properties.of().forceSolidOn().noOcclusion().randomTicks().strength(2.5f).requiresCorrectToolForDrops().pushReaction(PushReaction.DESTROY);
   }
 }
