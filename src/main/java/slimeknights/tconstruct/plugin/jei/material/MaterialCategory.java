@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.material;
 
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -144,7 +144,7 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     // draw fluids
     if (!fluids.isEmpty()) {
       builder.addInputSlot(4, 2)
-        .addIngredients(ForgeTypes.FLUID_STACK, fluids)
+        .addIngredients(FabricTypes.FLUID_STACK, fluids)
         .setFluidRenderer(100, false, 12, fluidHeight)
         .setSlotName(FLUID_SLOT);
     }
@@ -207,7 +207,7 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
 
     @Override
     public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-      FluidStack fluid = fluidSlot.getDisplayedIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fluidSlot.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         Component string = Component.translatable(KEY_AMOUNT, fluid.getAmount());
         graphics.drawString(font, string, 0, 0, Color.GRAY.getRGB(), false);
