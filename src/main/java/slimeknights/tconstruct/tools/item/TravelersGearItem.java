@@ -27,7 +27,6 @@ import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 import slimeknights.tconstruct.tools.TinkerModifiers;
-import slimeknights.tconstruct.tools.client.TravelersGearModel;
 
 import javax.annotation.Nullable;
 
@@ -62,9 +61,11 @@ public class TravelersGearItem extends ModifiableArmorItem implements ArmorTextu
     public void render(PoseStack matrices, MultiBufferSource vertexConsumers, ItemStack itemStack, LivingEntity entity, EquipmentSlot armorSlot, int light, HumanoidModel<LivingEntity> playerModel, HumanoidModel<LivingEntity> baseArmorModel) {
       playerModel.copyPropertiesTo(baseArmorModel);
       ClientHooks.setPartVisibility(baseArmorModel, armorSlot);
-      Model armorModel = TravelersGearModel.getModel(itemStack, armorSlot, baseArmorModel);
+      // TODO: PORT - the fork had its own TravelersGearModel here (with per-slot geometry); upstream 3.12 renders
+      //  armor through the JSON armor model system, so this renders the vanilla armor shape with the Tinkers texture
+      //  for now. See docs/BEHAVIOUR-DIFFERENCES.md #25.
       VertexConsumer vertexconsumer = ItemRenderer.getArmorFoilBuffer(vertexConsumers, RenderType.armorCutoutNoCull(ClientHooks.getArmorResource(entity, itemStack, armorSlot, null)), false, itemStack.hasFoil());
-      armorModel.renderToBuffer(matrices, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+      baseArmorModel.renderToBuffer(matrices, vertexconsumer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
     }
   }
 }
