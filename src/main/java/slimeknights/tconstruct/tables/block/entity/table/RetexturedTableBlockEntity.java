@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import slimeknights.mantle.block.entity.IRetexturedBlockEntity;
-import slimeknights.mantle.client.model.data.IModelData;
+import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 
@@ -36,10 +36,15 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
 
   /* Textures */
 
+  /** Model data for the current texture, override to add extra properties */
+  public ModelData getModelData() {
+    return RetexturedHelper.getModelData(texture);
+  }
+
   @Nonnull
   @Override
-  public IModelData getRenderData() {
-    return this.data.get();
+  public ModelData getRenderData() {
+    return getModelData();
   }
 
   @Override
@@ -52,16 +57,7 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
 
   private void textureUpdated() {
     // update the texture in BE data
-    if (level != null && level.isClientSide) {
-      Block normalizedTexture = texture == Blocks.AIR ? null : texture;
-      IModelData data = getRenderData();
-      if (data.getData(RetexturedHelper.BLOCK_PROPERTY) != normalizedTexture) {
-        data.setData(RetexturedHelper.BLOCK_PROPERTY, normalizedTexture);
-//        requestModelDataUpdate();
-        BlockState state = getBlockState();
-        level.sendBlockUpdated(worldPosition, state, state, 0);
-      }
-    }
+    RetexturedHelper.onTextureUpdated(this);
   }
 
   @Override

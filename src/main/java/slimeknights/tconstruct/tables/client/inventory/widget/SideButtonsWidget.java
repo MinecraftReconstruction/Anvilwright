@@ -120,12 +120,4 @@ public class SideButtonsWidget<T extends Button> implements Renderable, GuiEvent
     return buttonSize * buttonCount + SPACING * (buttonCount - 1);
   }
 
-  // TODO: do I need to use these?
-  @Override
-  public void setFocused(boolean pFocused) {}
-
-  @Override
-  public boolean isFocused() {
-    return false;
-  }
 }

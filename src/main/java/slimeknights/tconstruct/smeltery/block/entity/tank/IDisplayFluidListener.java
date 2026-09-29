@@ -10,6 +10,9 @@ import slimeknights.mantle.client.model.ModelProperty;
  */
 @SuppressWarnings("removal")
 public interface IDisplayFluidListener {
+  /** Model property holding the fluid to display, see {@link slimeknights.tconstruct.library.client.model.ModelProperties} */
+  ModelProperty<FluidStack> PROPERTY = new ModelProperty<>();
+
   /**
    * Called when the display fluid changes0
    * @param fluid New display fluid, is safe to store (will not be modified)

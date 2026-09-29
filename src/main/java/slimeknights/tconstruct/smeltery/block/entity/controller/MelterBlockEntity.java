@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
+import slimeknights.mantle.client.model.ModelData;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
@@ -56,7 +57,7 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankBlock
   protected final FluidTankAnimated tank = new FluidTankAnimated(TANK_CAPACITY, this);
   /** Tank data for the model */
   @Getter
-  private final SinglePropertyData<FluidTank> modelData = new SinglePropertyData<>(ModelProperties.FLUID_TANK, tank);
+  private final ModelData modelData = ModelData.builder().with(ModelProperties.FLUID_TANK, tank).build();
   /** Last comparator strength to reduce block updates */
   @Getter @Setter
   private int lastStrength = -1;

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import slimeknights.mantle.client.model.data.SinglePropertyData;
+import slimeknights.mantle.client.model.ModelData;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.utils.NBTTags;
@@ -62,7 +62,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   @Getter
   protected final FluidTankAnimated tank;
   /** Tank data for the model */
-  private final SinglePropertyData<FluidTank> modelData;
+  private final ModelData modelData;
   /** Last comparator strength to reduce block updates */
   @Getter @Setter
   private int lastStrength = -1;
@@ -83,7 +83,7 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   protected TankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, ITankBlock block) {
     super(type, pos, state);
     tank = new FluidTankAnimated(block.getCapacity(), this);
-    modelData = new SinglePropertyData<>(ModelProperties.FLUID_TANK, tank);
+    modelData = ModelData.builder().with(ModelProperties.FLUID_TANK, tank).build();
   }
 
 

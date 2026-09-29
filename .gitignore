@@ -60,3 +60,6 @@ src/generated/resources/.cache/*
 # local build/port scratch output (scripts/port)
 .port/
 __pycache__/
+
+# javac drops these in the CWD when a compile fails and the report is large
+javac.*.args

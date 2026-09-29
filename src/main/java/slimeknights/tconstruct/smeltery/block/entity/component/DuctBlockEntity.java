@@ -85,8 +85,6 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider, Si
 
   /** Updates the fluid in model data */
   public void updateFluid() {
-    getModelData().setData(IDisplayFluidListener.PROPERTY, IDisplayFluidListener.normalizeFluid(itemHandler.getFluid()));
-//    requestModelDataUpdate(); TODO: PORT?
     assert level != null;
     BlockState state = getBlockState();
     level.sendBlockUpdated(worldPosition, state, state, 48);
