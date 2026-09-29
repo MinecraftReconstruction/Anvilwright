@@ -18,9 +18,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.library.fluid.FluidAction;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -100,13 +98,13 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // try the event
-      Result useItem = Result.DEFAULT;
-      Result useBlock = Result.DEFAULT;
+      // Forge fires RightClickBlock here and reads its separate useItem/useBlock results. Fabric replaces that with
+      // a single UseBlockCallback returning an InteractionResult, so the split no longer exists: a non-PASS result
+      // means another mod took the interaction (see docs/BEHAVIOUR-DIFFERENCES.md #19).
       if (player != null) {
-        PlayerInteractEvent.RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, pos, hitResult);
-        if (event.isCanceled()) {
-          // if successful, swing hand
-          if (event.getCancellationResult().consumesAction()) {
+        InteractionResult eventResult = UseBlockCallback.EVENT.invoker().interact(player, world, hand, hitResult);
+        if (eventResult != InteractionResult.PASS) {
+          if (eventResult.consumesAction()) {
             if (entity != null) {
               entity.swing(hand, true);
             }
@@ -114,14 +112,12 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
           }
           return 0;
         }
-        useItem = event.getUseItem();
-        useBlock = event.getUseBlock();
       }
       // skipped: never spectator mode if we made it this far
 
       // use the item
       UseOnContext useContext = new UseOnContext(world, player, hand, heldItem, hitResult);
-      if (useItem != Result.DENY && !heldItem.isEmpty()) {
+      if (!heldItem.isEmpty()) {
         InteractionResult result = heldItem.onItemUseFirst(useContext);
         if (result != InteractionResult.PASS) {
           if (result.consumesAction()) {
@@ -137,7 +133,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // click the block
       ItemStack original = heldItem.copy();
-      if (player != null && (useBlock == Result.ALLOW || (useItem == Result.DEFAULT && !skipBlock))) {
+      if (player != null && !skipBlock) {
         InteractionResult result = state.use(world, player, hand, hitResult);
         if (result.consumesAction()) {
           if (player instanceof ServerPlayer serverPlayer) {
@@ -149,7 +145,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       }
 
       // post block item usage
-      if (useItem == Result.ALLOW || (useItem == Result.DEFAULT && !heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem())))) {
+      if (!heldItem.isEmpty() && (player == null || !player.getCooldowns().isOnCooldown(heldItem.getItem()))) {
         InteractionResult result;
         if (player != null && player.isCreative()) {
           int oldCount = heldItem.getCount();

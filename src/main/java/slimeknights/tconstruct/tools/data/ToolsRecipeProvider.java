@@ -395,7 +395,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .part(TinkerToolParts.smallAxeHead)
       .part(TinkerToolParts.repairKit)
       .part(TinkerToolParts.toolHandle)
-      .save(withCondition(consumer, new ModLoadedCondition("twilightforest")), location(folder + "minotaur_axe"));
+      .save(withCondition(consumer, DefaultResourceConditions.allModsLoaded("twilightforest")), location(folder + "minotaur_axe"));
   }
 
   private void addPartRecipes(Consumer<FinishedRecipe> consumer) {

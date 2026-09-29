@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
@@ -338,7 +338,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     String create = "create";
     addFluid("potion_create", FluidNameIngredient.of(new ResourceLocation(create, "potion"), FluidValues.SIP))
       .hidden() // we have the regular potion type showing, the create one in addition is a bit confusing
-      .addCondition(new ModLoadedCondition(create))
+      .addCondition(DefaultResourceConditions.allModsLoaded(create))
       .addEntityEffect(new PotionFluidEffect(0.25f, createBottle.apply("REGULAR")))
       .addEntityEffect(new PotionFluidEffect(0.5f, createBottle.apply("SPLASH")))
       .addEntityEffect(new PotionFluidEffect(0.75f, createBottle.apply("LINGERING")))
