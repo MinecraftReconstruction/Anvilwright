@@ -28,39 +28,80 @@ import slimeknights.tconstruct.library.client.data.TinkerSpriteSourceGenerator;
 import slimeknights.tconstruct.library.client.data.material.GeneratorPartTextureJsonGenerator;
 import slimeknights.tconstruct.library.client.data.material.MaterialPartTextureGenerator;
 import slimeknights.tconstruct.library.json.loot.AddToolDataFunction;
+import slimeknights.tconstruct.library.json.predicate.tool.HasMaterialPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.HasModifierPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.HasStatTypePredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.HasToolHookPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.PersistentDataPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.StatInRangePredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.StatInSetPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolActionPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolContextPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolStackItemPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolStackPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolVariableRangePredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.VolatileDataPredicate;
 import slimeknights.tconstruct.library.materials.RandomMaterial;
+import slimeknights.tconstruct.library.modifiers.modules.capacity.OverslimeModule;
+import slimeknights.tconstruct.library.modifiers.modules.interaction.edible.EdibleModule;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.ToolPredicate;
 import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+import slimeknights.tconstruct.library.tools.capability.ToolEnergyCapability;
 import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapability;
+import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
 import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
+import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.AreaOfEffectIterator;
 import slimeknights.tconstruct.library.tools.definition.module.aoe.BoxAOEIterator;
 import slimeknights.tconstruct.library.tools.definition.module.aoe.CircleAOEIterator;
-import slimeknights.tconstruct.library.tools.definition.aoe.FallbackAOEIterator;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
+import slimeknights.tconstruct.library.tools.definition.module.aoe.ConditionalAOEIterator;
 import slimeknights.tconstruct.library.tools.definition.module.aoe.TreeAOEIterator;
 import slimeknights.tconstruct.library.tools.definition.module.aoe.VeiningAOEIterator;
-import slimeknights.tconstruct.library.tools.definition.harvest.FixedTierHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.harvest.IHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.harvest.ModifiedHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.harvest.TagHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.module.IToolModule;
-import slimeknights.tconstruct.library.tools.definition.module.ToolModuleHooks;
+import slimeknights.tconstruct.library.tools.definition.module.build.MultiplyStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.SetStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolActionsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolSlotsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.ToolTraitsModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.VolatileFlagModule;
+import slimeknights.tconstruct.library.tools.definition.module.build.VolatileIntModule;
+import slimeknights.tconstruct.library.tools.definition.module.display.CustomMaterialName;
+import slimeknights.tconstruct.library.tools.definition.module.display.FixedMaterialToolName;
+import slimeknights.tconstruct.library.tools.definition.module.display.MaterialToolNameModule;
+import slimeknights.tconstruct.library.tools.definition.module.display.SimpleToolName;
+import slimeknights.tconstruct.library.tools.definition.module.display.StatTypesToolNameModule;
+import slimeknights.tconstruct.library.tools.definition.module.display.UniqueMaterialToolName;
+import slimeknights.tconstruct.library.tools.definition.module.interaction.AttackInteraction;
+import slimeknights.tconstruct.library.tools.definition.module.interaction.ToggleableSetInteraction;
+import slimeknights.tconstruct.library.tools.definition.module.material.DefaultMaterialsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.MaterialRepairModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.MaterialStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.MaterialTraitsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.PartStatsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.PartsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.RemappingMaterialsModule;
+import slimeknights.tconstruct.library.tools.definition.module.material.StatlessPartRepairModule;
+import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveModule;
+import slimeknights.tconstruct.library.tools.definition.module.mining.MaxTierModule;
+import slimeknights.tconstruct.library.tools.definition.module.mining.MiningSpeedModifierModule;
+import slimeknights.tconstruct.library.tools.definition.module.mining.OneClickBreakModule;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
 import slimeknights.tconstruct.library.tools.definition.module.interaction.DualOptionInteraction;
 import slimeknights.tconstruct.library.tools.definition.module.interaction.PreferenceSetInteraction;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.CircleWeaponAttack;
-import slimeknights.tconstruct.library.tools.definition.weapon.IWeaponAttack;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.ParticleWeaponAttack;
 import slimeknights.tconstruct.library.tools.definition.module.weapon.SweepWeaponAttack;
 import slimeknights.tconstruct.library.tools.helper.ModifierLootingHandler;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 import slimeknights.tconstruct.library.tools.item.ModifiableStaffItem;
 import slimeknights.tconstruct.library.utils.BlockSideHitListener;
 import slimeknights.tconstruct.tools.data.StationSlotLayoutProvider;
+import slimeknights.tconstruct.tools.modules.MeltingFluidEffectiveModule;
 import slimeknights.tconstruct.tools.data.ToolDefinitionDataProvider;
 import slimeknights.tconstruct.tools.data.ToolsRecipeProvider;
 import slimeknights.tconstruct.tools.data.material.MaterialDataProvider;
@@ -179,30 +220,85 @@ public final class TinkerTools extends TinkerModule {
       action.run();
     }
     ModifierHooks.init();
-    ToolModuleHooks.init();
+    ToolHooks.init();
   }
 
   void registerRecipeSerializers() {
     ItemPredicateRegistry.register(ToolPredicate.ID, ToolPredicate::deserialize);
+    ItemPredicateRegistry.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
+    // TODO: PORT - the tconstruct:tool_hook ingredient (ToolHookIngredient.Serializer) is registered through Forge's
+    //  CraftingHelper. Fabric has no ingredient-type registry, so the two recipes using it do not resolve yet.
 
+    // register tool stats that are not defined directly in the class; safer than static init registration
+    ToolStats.register(OverslimeModule.OVERSLIME_STAT);
+    ToolStats.register(ToolTankHelper.CAPACITY_STAT);
+    ToolStats.register(ToolEnergyCapability.MAX_STAT);
+    ToolStats.registerConditional(EdibleModule.HUNGER);
+    ToolStats.registerConditional(EdibleModule.SATURATION);
+    ToolStats.register(EdibleModule.EAT_DURATION);
+    ToolStats.registerConditional(EdibleModule.COUNTER_CHANCE);
+
+    ToolModule.LOADER.register(TConstruct.getResource("empty"), ToolModule.EMPTY.getLoader());
     // tool definition components
+    ToolModule.LOADER.register(TConstruct.getResource("base_stats"), SetStatsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("multiply_stats"), MultiplyStatsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("tool_actions"), ToolActionsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("traits"), ToolTraitsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("modifier_slots"), ToolSlotsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("volatile_flag"), VolatileFlagModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("volatile_int"), VolatileIntModule.LOADER);
     // harvest
-    IHarvestLogic.LOADER.register(TConstruct.getResource("effective_tag"), TagHarvestLogic.LOADER);
-    IHarvestLogic.LOADER.register(TConstruct.getResource("modified_tag"), ModifiedHarvestLogic.LOADER);
-    IHarvestLogic.LOADER.register(TConstruct.getResource("fixed_tier"), FixedTierHarvestLogic.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("is_effective"), IsEffectiveModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("mining_speed_modifier"), MiningSpeedModifierModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("max_tier"), MaxTierModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("one_click_break"), OneClickBreakModule.LOADER);
+    // material
+    ToolModule.LOADER.register(TConstruct.getResource("material_stats"), MaterialStatsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("part_stats"), PartStatsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("material_traits"), MaterialTraitsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("tool_parts"), PartsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("material_repair"), MaterialRepairModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("default_materials"), DefaultMaterialsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("remapping_materials"), RemappingMaterialsModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("statless_part_repair"), StatlessPartRepairModule.LOADER);
     // aoe
-    IAreaOfEffectIterator.LOADER.register(TConstruct.getResource("box"), BoxAOEIterator.LOADER);
-    IAreaOfEffectIterator.LOADER.register(TConstruct.getResource("circle"), CircleAOEIterator.LOADER);
-    IAreaOfEffectIterator.LOADER.register(TConstruct.getResource("tree"), TreeAOEIterator.LOADER);
-    IAreaOfEffectIterator.LOADER.register(TConstruct.getResource("vein"), VeiningAOEIterator.LOADER);
-    IAreaOfEffectIterator.LOADER.register(TConstruct.getResource("fallback"), FallbackAOEIterator.LOADER);
+    AreaOfEffectIterator.LOADER.register(TConstruct.getResource("empty"), AreaOfEffectIterator.EMPTY.getLoader());
+    AreaOfEffectIterator.register(TConstruct.getResource("box_aoe"), BoxAOEIterator.LOADER);
+    AreaOfEffectIterator.register(TConstruct.getResource("circle_aoe"), CircleAOEIterator.LOADER);
+    AreaOfEffectIterator.register(TConstruct.getResource("tree_aoe"), TreeAOEIterator.LOADER);
+    AreaOfEffectIterator.register(TConstruct.getResource("vein_aoe"), VeiningAOEIterator.LOADER);
+    AreaOfEffectIterator.register(TConstruct.getResource("conditional_aoe"), ConditionalAOEIterator.LOADER);
     // attack
-    IWeaponAttack.LOADER.register(TConstruct.getResource("sweep"), SweepWeaponAttack.LOADER);
-    IWeaponAttack.LOADER.register(TConstruct.getResource("circle"), CircleWeaponAttack.LOADER);
-    IWeaponAttack.LOADER.register(TConstruct.getResource("particle"), ParticleWeaponAttack.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("sweep_melee"), SweepWeaponAttack.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("circle_melee"), CircleWeaponAttack.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("melee_particle"), ParticleWeaponAttack.LOADER);
     // generic tool modules
-    IToolModule.LOADER.register(TConstruct.getResource("dual_option_interaction"), DualOptionInteraction.LOADER);
-    IToolModule.LOADER.register(TConstruct.getResource("preference_set_interaction"), PreferenceSetInteraction.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("attack_interaction"), AttackInteraction.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("dual_option_interaction"), DualOptionInteraction.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("preference_set_interaction"), PreferenceSetInteraction.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("toggleable_set_interaction"), ToggleableSetInteraction.LOADER);
+    // special tool modules
+    ToolModule.LOADER.register(TConstruct.getResource("melting_fluid_effective"), MeltingFluidEffectiveModule.LOADER);
+    // display name
+    ToolModule.LOADER.register(TConstruct.getResource("item_name"), SimpleToolName.ITEM.getLoader());
+    ToolModule.LOADER.register(TConstruct.getResource("material_name"), MaterialToolNameModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("stat_types_name"), StatTypesToolNameModule.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("fixed_material_name"), FixedMaterialToolName.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("unique_material_name"), UniqueMaterialToolName.LOADER);
+    ToolModule.LOADER.register(TConstruct.getResource("custom_material_name"), CustomMaterialName.LOADER);
+    // tool predicates
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_upgrades"), ToolContextPredicate.HAS_UPGRADES.getLoader());
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_modifier"), HasModifierPredicate.LOADER);
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_material"), HasMaterialPredicate.LOADER);
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_stat_type"), HasStatTypePredicate.LOADER);
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_persistent_key"), PersistentDataPredicate.LOADER);
+    ToolContextPredicate.LOADER.register(TConstruct.getResource("has_hook"), HasToolHookPredicate.LOADER);
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("not_broken"), ToolStackPredicate.NOT_BROKEN.getLoader());
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("stat_in_range"), StatInRangePredicate.LOADER);
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("stat_in_set"), StatInSetPredicate.LOADER);
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("has_volatile_key"), VolatileDataPredicate.LOADER);
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("variable_range"), ToolVariableRangePredicate.LOADER);
+    ToolStackPredicate.LOADER.register(TConstruct.getResource("tool_action"), ToolActionPredicate.LOADER);
   }
 
   public static void gatherData(FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
