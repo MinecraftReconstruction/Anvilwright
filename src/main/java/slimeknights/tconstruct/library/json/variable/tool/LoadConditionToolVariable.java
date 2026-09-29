@@ -13,7 +13,7 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionToolVariable(ToolVariable ifTrue, ToolVariable ifFalse, ICondition... conditions) implements ToolVariable, ConditionalObject<ToolVariable> {
+public record LoadConditionToolVariable(ToolVariable ifTrue, ToolVariable ifFalse, ConditionJsonProvider... conditions) implements ToolVariable, ConditionalObject<ToolVariable> {
   @Override
   public float getValue(IToolStackView tool) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(tool);

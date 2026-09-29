@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionProtectionVariable(ProtectionVariable ifTrue, ProtectionVariable ifFalse, ICondition... conditions) implements ProtectionVariable, ConditionalObject<ProtectionVariable> {
+public record LoadConditionProtectionVariable(ProtectionVariable ifTrue, ProtectionVariable ifFalse, ConditionJsonProvider... conditions) implements ProtectionVariable, ConditionalObject<ProtectionVariable> {
   @Override
   public float getValue(IToolStackView tool, @Nullable EquipmentContext context, @Nullable LivingEntity target, @Nullable DamageSource source, @Nullable EquipmentSlot slotType) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(tool, context, target, source, slotType);

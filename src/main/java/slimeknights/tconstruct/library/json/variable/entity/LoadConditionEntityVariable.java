@@ -15,7 +15,7 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionEntityVariable(EntityVariable ifTrue, EntityVariable ifFalse, ICondition... conditions) implements EntityVariable, ConditionalObject<EntityVariable> {
+public record LoadConditionEntityVariable(EntityVariable ifTrue, EntityVariable ifFalse, ConditionJsonProvider... conditions) implements EntityVariable, ConditionalObject<EntityVariable> {
   @Override
   public float getValue(LivingEntity entity) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(entity);

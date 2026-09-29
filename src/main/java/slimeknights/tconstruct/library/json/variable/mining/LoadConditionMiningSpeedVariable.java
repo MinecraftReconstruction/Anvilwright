@@ -20,7 +20,7 @@ import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.Br
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionMiningSpeedVariable(MiningSpeedVariable ifTrue, MiningSpeedVariable ifFalse, ICondition... conditions) implements MiningSpeedVariable, ConditionalObject<MiningSpeedVariable> {
+public record LoadConditionMiningSpeedVariable(MiningSpeedVariable ifTrue, MiningSpeedVariable ifFalse, ConditionJsonProvider... conditions) implements MiningSpeedVariable, ConditionalObject<MiningSpeedVariable> {
   @Deprecated
   @Override
   public float getValue(IToolStackView tool, @Nullable BreakSpeed event, @Nullable Player player, @Nullable Direction sideHit) {

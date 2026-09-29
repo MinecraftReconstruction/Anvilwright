@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -53,12 +52,12 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   /* Single entity */
 
   /** Creates a builder for the given entity */
-  public MobEquipment.Builder equip(String name, EntityType<?> entity, ICondition... conditions) {
+  public MobEquipment.Builder equip(String name, EntityType<?> entity, ConditionJsonProvider... conditions) {
     return equip(name, conditions, Loadables.ENTITY_TYPE.getString(entity));
   }
 
   /** Creates a builder for the given entity, using it as the JSON location */
-  public MobEquipment.Builder equip(EntityType<?> entity, ICondition... conditions) {
+  public MobEquipment.Builder equip(EntityType<?> entity, ConditionJsonProvider... conditions) {
     return equip(Loadables.ENTITY_TYPE.getKey(entity).getPath(), entity, conditions);
   }
 
@@ -66,7 +65,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   /* Compat entity */
 
   /** Creates a builder for the given entity ID, used for optional compat */
-  public MobEquipment.Builder equip(String name, ResourceLocation entity, ICondition... conditions) {
+  public MobEquipment.Builder equip(String name, ResourceLocation entity, ConditionJsonProvider... conditions) {
     return equip(name, conditions, entity.toString());
   }
 
@@ -79,12 +78,12 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   /* Tag */
 
   /** Creates a builder for the given entity tag, using it as the JSON location */
-  public MobEquipment.Builder equip(String name, TagKey<EntityType<?>> tag, ICondition... conditions) {
+  public MobEquipment.Builder equip(String name, TagKey<EntityType<?>> tag, ConditionJsonProvider... conditions) {
     return equip(name, conditions, '#' + tag.location().toString());
   }
 
   /** Creates a builder for the given entity tag, using it as the JSON location */
-  public MobEquipment.Builder equip(TagKey<EntityType<?>> tag, ICondition... conditions) {
+  public MobEquipment.Builder equip(TagKey<EntityType<?>> tag, ConditionJsonProvider... conditions) {
     return equip(tag.location().getPath(), tag, conditions);
   }
 
@@ -92,7 +91,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   /* List */
 
   /** Creates a builder for the given entity tag, using it as the JSON location */
-  public MobEquipment.Builder equip(String name, List<EntityType<?>> entities, ICondition... conditions) {
+  public MobEquipment.Builder equip(String name, List<EntityType<?>> entities, ConditionJsonProvider... conditions) {
     return equip(name, conditions, entities.stream().map(Loadables.ENTITY_TYPE::getString).toArray(String[]::new));
   }
   

@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionMeleeVariable(MeleeVariable ifTrue, MeleeVariable ifFalse, ICondition... conditions) implements MeleeVariable, ConditionalObject<MeleeVariable> {
+public record LoadConditionMeleeVariable(MeleeVariable ifTrue, MeleeVariable ifFalse, ConditionJsonProvider... conditions) implements MeleeVariable, ConditionalObject<MeleeVariable> {
   @Override
   public float getValue(IToolStackView tool, @Nullable ToolAttackContext context, @Nullable LivingEntity attacker) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(tool, context, attacker);

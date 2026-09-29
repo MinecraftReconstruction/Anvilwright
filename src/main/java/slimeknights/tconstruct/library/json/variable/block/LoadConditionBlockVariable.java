@@ -13,7 +13,7 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionBlockVariable(BlockVariable ifTrue, BlockVariable ifFalse, ICondition... conditions) implements BlockVariable, ConditionalObject<BlockVariable> {
+public record LoadConditionBlockVariable(BlockVariable ifTrue, BlockVariable ifFalse, ConditionJsonProvider... conditions) implements BlockVariable, ConditionalObject<BlockVariable> {
   @Override
   public float getValue(BlockState block) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(block);

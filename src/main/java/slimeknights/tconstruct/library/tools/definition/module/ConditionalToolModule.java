@@ -15,7 +15,7 @@ import java.util.List;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record ConditionalToolModule(ToolModule ifTrue, ToolModule ifFalse, ICondition... conditions) implements ToolModule, ConditionalObject<ToolModule> {
+public record ConditionalToolModule(ToolModule ifTrue, ToolModule ifFalse, ConditionJsonProvider... conditions) implements ToolModule, ConditionalObject<ToolModule> {
   @Override
   public List<ModuleHook<?>> getDefaultHooks() {
     return List.of();

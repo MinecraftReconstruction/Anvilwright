@@ -15,8 +15,8 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record ConditionalArmorTextureSupplier(ArmorTextureSupplier ifTrue, ArmorTextureSupplier ifFalse, ICondition... conditions) implements ArmorTextureSupplier, ConditionalObject<ArmorTextureSupplier> {
-  public ConditionalArmorTextureSupplier(ArmorTextureSupplier ifTrue, ICondition... conditions) {
+public record ConditionalArmorTextureSupplier(ArmorTextureSupplier ifTrue, ArmorTextureSupplier ifFalse, ConditionJsonProvider... conditions) implements ArmorTextureSupplier, ConditionalObject<ArmorTextureSupplier> {
+  public ConditionalArmorTextureSupplier(ArmorTextureSupplier ifTrue, ConditionJsonProvider... conditions) {
     this(ifTrue, ArmorTextureSupplier.EMPTY, conditions);
   }
 

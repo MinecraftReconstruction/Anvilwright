@@ -14,8 +14,8 @@ import java.util.List;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record ConditionalModifierModule(ModifierModule ifTrue, ModifierModule ifFalse, ICondition... conditions) implements ModifierModule, ConditionalObject<ModifierModule> {
-  public ConditionalModifierModule(ModifierModule ifTrue, ICondition... conditions) {
+public record ConditionalModifierModule(ModifierModule ifTrue, ModifierModule ifFalse, ConditionJsonProvider... conditions) implements ModifierModule, ConditionalObject<ModifierModule> {
+  public ConditionalModifierModule(ModifierModule ifTrue, ConditionJsonProvider... conditions) {
     this(ifTrue, ModifierModule.EMPTY, conditions);
   }
 

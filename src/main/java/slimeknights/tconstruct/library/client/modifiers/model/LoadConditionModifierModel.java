@@ -22,8 +22,8 @@ import java.util.function.Function;
  * @param ifFalse     Variable to use if any condition is false.
  * @param conditions  Conditions to evaluate.
  */
-public record LoadConditionModifierModel(ModifierModel ifTrue, ModifierModel ifFalse, ICondition... conditions) implements ModifierModel, ConditionalObject<ModifierModel> {
-  public LoadConditionModifierModel(ModifierModel ifTrue, ICondition... conditions) {
+public record LoadConditionModifierModel(ModifierModel ifTrue, ModifierModel ifFalse, ConditionJsonProvider... conditions) implements ModifierModel, ConditionalObject<ModifierModel> {
+  public LoadConditionModifierModel(ModifierModel ifTrue, ConditionJsonProvider... conditions) {
     this(ifTrue, ModifierModel.EMPTY, conditions);
   }
 

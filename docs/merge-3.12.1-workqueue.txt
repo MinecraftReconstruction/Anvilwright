@@ -1,6 +1,7 @@
 # 3.12.1 Fabric port — error work queue
-# generated from compileJava with -Xmaxerrs 100000; total errors: 827 across 299 files
+# generated from compileJava with -Xmaxerrs 100000; total errors: 789 across 280 files
 # origin: divergent = we changed it vs upstream; upstream-identical = upstream file still using Forge APIs; not-in-upstream = our own Fabric-only file
+# NOTE: some of these are cascades / bogus (see docs/MERGE-3.12.1.md); do not treat the total as real remaining work
 # format: errors <tab> origin <tab> path
 
 14	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/partbuilder/PartRecipe.java
@@ -18,13 +19,12 @@
 8	divergent	src/main/java/slimeknights/tconstruct/library/utils/JsonUtils.java
 8	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/MaterialValueSwappingRecipe.java
 8	not-in-upstream	src/main/java/slimeknights/tconstruct/library/client/model/block/CastingModel.java
-7	divergent	src/main/java/slimeknights/tconstruct/tools/recipe/ModifierRemovalRecipe.java
 7	divergent	src/main/java/slimeknights/tconstruct/tools/menu/ToolContainerMenu.java
 7	divergent	src/main/java/slimeknights/tconstruct/tables/block/entity/table/RetexturedTableBlockEntity.java
 7	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/CastingTankBlockEntity.java
 7	not-in-upstream	src/main/java/slimeknights/tconstruct/library/tools/definition/aoe/FallbackAOEIterator.java
-7	divergent	src/main/java/slimeknights/tconstruct/library/recipe/entitymelting/EntityMeltingRecipe.java
 7	divergent	src/main/java/slimeknights/tconstruct/library/json/loot/equipment/MobEquipmentManager.java
+6	divergent	src/main/java/slimeknights/tconstruct/tools/recipe/ModifierRemovalRecipe.java
 6	divergent	src/main/java/slimeknights/tconstruct/tools/TinkerModifiers.java
 6	upstream-identical	src/main/java/slimeknights/tconstruct/tables/recipe/TinkerStationRepairRecipe.java
 6	divergent	src/main/java/slimeknights/tconstruct/smeltery/menu/HeatingStructureContainerMenu.java
@@ -32,9 +32,8 @@
 6	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/ToolEnergyCapability.java
 6	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/MaterialSwappingRecipe.java
 6	divergent	src/main/java/slimeknights/tconstruct/library/recipe/material/MaterialRecipe.java
+6	divergent	src/main/java/slimeknights/tconstruct/library/recipe/entitymelting/EntityMeltingRecipe.java
 6	divergent	src/main/java/slimeknights/tconstruct/library/modifiers/fluid/FluidEffectManager.java
-6	divergent	src/main/java/slimeknights/tconstruct/library/data/tinkering/AbstractMobEquipmentProvider.java
-6	divergent	src/main/java/slimeknights/tconstruct/library/data/recipe/SmelteryRecipeBuilder.java
 6	upstream-identical	src/main/java/slimeknights/tconstruct/library/data/recipe/CostTagAppender.java
 6	divergent	src/main/java/slimeknights/tconstruct/library/client/model/tools/MaterialModel.java
 5	divergent	src/main/java/slimeknights/tconstruct/tools/entity/FluidEffectProjectile.java
@@ -49,12 +48,10 @@
 5	not-in-upstream	src/main/java/slimeknights/tconstruct/library/tools/definition/harvest/FixedTierHarvestLogic.java
 5	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/ToolMaterialSwappingRecipe.java
 5	divergent	src/main/java/slimeknights/tconstruct/library/recipe/ingredient/MaterialIngredient.java
-5	divergent	src/main/java/slimeknights/tconstruct/library/recipe/alloying/AlloyRecipe.java
-5	divergent	src/main/java/slimeknights/tconstruct/library/modifiers/fluid/general/LoadConditionFluidEffect.java
+5	divergent	src/main/java/slimeknights/tconstruct/library/data/recipe/SmelteryRecipeBuilder.java
 5	divergent	src/main/java/slimeknights/tconstruct/gadgets/TinkerGadgets.java
 5	upstream-identical	src/main/java/slimeknights/tconstruct/fluids/fluids/SlimeFluid.java
 5	divergent	src/main/java/slimeknights/tconstruct/common/registration/BlockDeferredRegisterExtension.java
-4	divergent	src/main/java/slimeknights/tconstruct/tools/recipe/ArmorDyeingRecipe.java
 4	divergent	src/main/java/slimeknights/tconstruct/smeltery/network/FaucetActivationPacket.java
 4	divergent	src/main/java/slimeknights/tconstruct/smeltery/item/TankItem.java
 4	upstream-identical	src/main/java/slimeknights/tconstruct/shared/effect/AntigravityEffect.java
@@ -65,6 +62,7 @@
 4	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/inventory/ToolInventoryCapability.java
 4	not-in-upstream	src/main/java/slimeknights/tconstruct/library/tools/ToolPredicate.java
 4	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/material/ShapedMaterialRecipe.java
+4	divergent	src/main/java/slimeknights/tconstruct/library/recipe/alloying/AlloyRecipe.java
 4	divergent	src/main/java/slimeknights/tconstruct/library/modifiers/hook/mining/BreakSpeedContext.java
 4	not-in-upstream	src/main/java/slimeknights/tconstruct/library/json/predicate/entity/TagEntityPredicate.java
 4	not-in-upstream	src/main/java/slimeknights/tconstruct/library/json/predicate/block/TagBlockPredicate.java
@@ -84,6 +82,7 @@
 4	upstream-identical	src/main/java/slimeknights/tconstruct/common/data/FakeRegistryEntry.java
 4	divergent	src/main/java/slimeknights/tconstruct/common/TinkerModule.java
 4	divergent	src/main/java/slimeknights/tconstruct/common/TinkerEffect.java
+3	divergent	src/main/java/slimeknights/tconstruct/tools/recipe/ArmorDyeingRecipe.java
 3	not-in-upstream	src/main/java/slimeknights/tconstruct/tools/modifiers/traits/harvest/MaintainedModifier.java
 3	not-in-upstream	src/main/java/slimeknights/tconstruct/tools/modifiers/traits/harvest/AirborneModifier.java
 3	divergent	src/main/java/slimeknights/tconstruct/tools/modifiers/ability/interaction/FirestarterModifier.java
@@ -109,7 +108,6 @@
 3	not-in-upstream	src/main/java/slimeknights/tconstruct/library/json/serializer/GenericRegistryEntrySerializer.java
 3	not-in-upstream	src/main/java/slimeknights/tconstruct/library/json/predicate/block/SetBlockPredicate.java
 3	divergent	src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java
-3	divergent	src/main/java/slimeknights/tconstruct/library/data/tinkering/AbstractStationSlotLayoutProvider.java
 3	divergent	src/main/java/slimeknights/tconstruct/library/data/tinkering/AbstractModifierProvider.java
 3	divergent	src/main/java/slimeknights/tconstruct/library/data/tinkering/AbstractFluidEffectProvider.java
 3	divergent	src/main/java/slimeknights/tconstruct/library/client/modifiers/NormalModifierModel.java
@@ -161,7 +159,6 @@
 2	divergent	src/main/java/slimeknights/tconstruct/library/tools/helper/ToolHarvestLogic.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/tools/context/ToolHarvestContext.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/TankModule.java
-2	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/TinkerDataCapability.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/BlockItemProviderModifierHook.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/recipe/modifiers/severing/SeveringRecipe.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/material/ShapelessMaterialsRecipe.java
@@ -169,18 +166,16 @@
 2	divergent	src/main/java/slimeknights/tconstruct/library/recipe/fuel/MeltingFuelBuilder.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/recipe/alloying/AlloyRecipeBuilder.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/modifiers/modules/armor/ReplaceBlockWalkerModule.java
-2	divergent	src/main/java/slimeknights/tconstruct/library/modifiers/modules/ConditionalModifierModule.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/materials/MaterialRegistry.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/json/loot/equipment/MobEquipment.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/json/TinkerLoadables.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/events/teleport/SlingModifierTeleportEvent.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/events/teleport/EnderclearanceTeleportEvent.java
+2	divergent	src/main/java/slimeknights/tconstruct/library/data/tinkering/AbstractStationSlotLayoutProvider.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/data/material/AbstractMaterialTraitDataProvider.java
-2	divergent	src/main/java/slimeknights/tconstruct/library/client/modifiers/model/LoadConditionModifierModel.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/client/modifiers/ModifierModelManager.java
 2	divergent	src/main/java/slimeknights/tconstruct/library/client/materials/MaterialTooltipCache.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/library/client/item/ModifiableItemClientExtension.java
-2	divergent	src/main/java/slimeknights/tconstruct/library/client/armor/texture/ConditionalArmorTextureSupplier.java
 2	divergent	src/main/java/slimeknights/tconstruct/fluids/item/MagmaBottleItem.java
 2	upstream-identical	src/main/java/slimeknights/tconstruct/common/registration/FluidDeferredRegisterExtension.java
 2	divergent	src/main/java/slimeknights/tconstruct/common/data/model/TinkerSpriteSourceProvider.java
@@ -255,11 +250,8 @@
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/tools/nbt/MultiplierNBT.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/tools/layout/StationSlotLayoutLoader.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/tools/definition/module/mining/IsEffectiveModule.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/tools/definition/module/aoe/LoadConditionAOEIterator.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/tools/definition/module/ConditionalToolModule.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/tools/context/EquipmentContext.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/tools/IndestructibleItemEntity.java
-1	not-in-upstream	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/ToolBuildingRecipeSerializer.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/PartSwappingOverrideRecipe.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/tinkerstation/building/MaterialIndexSwappingRecipe.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/partbuilder/IDisplayPartBuilderRecipe.java
@@ -269,7 +261,6 @@
 1	divergent	src/main/java/slimeknights/tconstruct/library/recipe/melting/MaterialMeltingRecipe.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/recipe/melting/IMeltingRecipe.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/recipe/casting/material/CompositeCastingRecipe.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/recipe/casting/PotionCastingRecipe.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/recipe/casting/IDisplayableCastingRecipe.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/recipe/ITinkerableContainer.java
 1	not-in-upstream	src/main/java/slimeknights/tconstruct/library/modifiers/spilling/effects/DamageSpillingEffect.java
@@ -278,15 +269,6 @@
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/modifiers/fluid/FluidEffectContext.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/materials/stats/UpdateMaterialStatsPacket.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/materials/definition/UpdateMaterialsPacket.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/materials/RandomMaterial.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/tool/LoadConditionToolVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/stat/LoadConditionStatVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/protection/LoadConditionProtectionVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/power/LoadConditionPowerVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/mining/LoadConditionMiningSpeedVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/melee/LoadConditionMeleeVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/entity/LoadConditionEntityVariable.java
-1	divergent	src/main/java/slimeknights/tconstruct/library/json/variable/block/LoadConditionBlockVariable.java
 1	upstream-identical	src/main/java/slimeknights/tconstruct/library/json/predicate/HarvestTierPredicate.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/fluid/FluidTankBase.java
 1	divergent	src/main/java/slimeknights/tconstruct/library/data/recipe/IToolRecipeHelper.java
