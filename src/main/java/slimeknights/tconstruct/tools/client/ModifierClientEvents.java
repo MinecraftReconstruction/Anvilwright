@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.client;
 
+import io.github.fabricators_of_create.porting_lib.entity.extensions.MobEffectExtensions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.fabricators_of_create.porting_lib.event.client.FieldOfViewEvents;
 import io.github.fabricators_of_create.porting_lib.event.client.RenderHandCallback;
@@ -203,7 +204,8 @@ public class ModifierClientEvents {
   private static int getEffectOffset(Player player) {
     boolean hasBeneficial = false;
     for (MobEffectInstance instance : player.getActiveEffects()) {
-      if (instance.showIcon() && IClientMobEffectExtensions.of(instance).isVisibleInGui(instance)) {
+      // Forge's IClientMobEffectExtensions was a client extension lookup; Porting Lib puts the renderer on the effect
+      if (instance.showIcon() && ((MobEffectExtensions)(Object)instance.getEffect()).getRenderer().isVisibleInGui(instance)) {
         if (instance.getEffect().isBeneficial()) {
           hasBeneficial = true;
         } else {
