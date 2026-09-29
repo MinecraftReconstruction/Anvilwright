@@ -19,16 +19,18 @@ public enum SlimeType implements StringRepresentable {
   EARTH(0x01cd4e, MapColor.GRASS, false),
   SKY  (0x01cbcd, MapColor.DIAMOND, false),
   ICHOR(0xff970d, MapColor.COLOR_ORANGE, true, 10),
-  ENDER(0xaf4cf6, MapColor.COLOR_PURPLE, false);
+  ENDER(0xaf4cf6, MapColor.COLOR_PURPLE, false),
+  // our port keeps the blood slime type, which upstream 3.12.1 dropped (see BEHAVIOUR-DIFFERENCES)
+  BLOOD(0xb50101, MapColor.COLOR_RED, true);
 
   /** Slime types added by the mod */
-  public static final SlimeType[] TINKER = {SKY, ICHOR, ENDER};
+  public static final SlimeType[] TINKER = {SKY, ENDER, BLOOD, ICHOR};
   /** Slime types that flow downwards, ichor flows up */
-  public static final SlimeType[] LIQUID = {EARTH, SKY, ENDER};
+  public static final SlimeType[] LIQUID = {EARTH, SKY, BLOOD, ENDER};
   /** Slime types that use overworld foliage */
   public static final SlimeType[] OVERWORLD = {EARTH, SKY, ENDER};
   /** Slime types that use nether foliage */
-  public static final SlimeType[] NETHER = {ICHOR};
+  public static final SlimeType[] NETHER = {ICHOR, BLOOD};
 
   /* Block color for this slime type */
   private final int color;

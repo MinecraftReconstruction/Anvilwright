@@ -228,7 +228,7 @@ public final class TinkerWorld extends TinkerModule {
     return new EnumObject.Builder<SlimeType,Block>(SlimeType.class)
       .putAll(BLOCKS.registerEnum(SlimeType.OVERWORLD, "slime_sapling", (type) -> new SlimeSaplingBlock(new SlimeTree(type), type, props.apply(type).randomTicks()), TOOLTIP_BLOCK_ITEM))
       .put(SlimeType.BLOOD, BLOCKS.register("blood_slime_sapling", () -> new SlimeFungusBlock(props.apply(SlimeType.BLOOD), ResourceKey.create(Registries.CONFIGURED_FEATURE, TConstruct.getResource("blood_slime_fungus"))), TOOLTIP_BLOCK_ITEM))
-      .put(SlimeType.ICHOR, BLOCKS.register("ichor_slime_sapling", () -> new SlimeFungusBlock(props.apply(SlimeType.ICHOR), ResourceKey.create(Registries.CONFIGURED_FEATURE, TConstruct.getResource("ichor_slime_fungus"))), HIDDEN_BLOCK_ITEM))
+      .put(SlimeType.ICHOR, BLOCKS.register("ichor_slime_sapling", () -> new SlimeFungusBlock(props.apply(SlimeType.ICHOR), ResourceKey.create(Registries.CONFIGURED_FEATURE, TConstruct.getResource("ichor_slime_fungus"))), DEFAULT_BLOCK_ITEM))
       .build();
   });
   public static final EnumObject<SlimeType,FlowerPotBlock> pottedSlimeSapling = BLOCKS.registerPottedEnum(SlimeType.values(), "slime_sapling", slimeSapling);

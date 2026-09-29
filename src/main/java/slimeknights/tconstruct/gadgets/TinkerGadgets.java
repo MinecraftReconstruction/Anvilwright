@@ -27,6 +27,8 @@ import slimeknights.tconstruct.gadgets.block.InvertedCakeBlock;
 import slimeknights.tconstruct.gadgets.block.PunjiBlock;
 import slimeknights.tconstruct.gadgets.data.GadgetRecipeProvider;
 import slimeknights.tconstruct.gadgets.entity.DispenseFancyArmorStand;
+import slimeknights.tconstruct.common.registration.BlockDeferredRegisterExtension;
+import slimeknights.tconstruct.common.registration.ItemDeferredRegisterExtension;
 import slimeknights.tconstruct.gadgets.entity.EFLNEntity;
 import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity;
 import slimeknights.tconstruct.gadgets.entity.FancyArmorStandEntity.StandType;
@@ -65,6 +67,9 @@ public final class TinkerGadgets extends TinkerModule {
    */
   private static final Item.Properties GADGET_PROPS = new Item.Properties();
   private static final Item.Properties UNSTACKABLE_PROPS = new Item.Properties().stacksTo(1);
+  /** Aliases for the shared deferred registers, matching the names this module has always used */
+  private static final ItemDeferredRegisterExtension ITEMS_DEFFERED = ITEMS;
+  private static final BlockDeferredRegisterExtension BLOCKS_DEFFERED = BLOCKS;
   private static final Function<Block,? extends BlockItem> DEFAULT_BLOCK_ITEM = (b) -> new BlockItem(b, GADGET_PROPS);
   private static final Function<Block,? extends BlockItem> TOOLTIP_BLOCK_ITEM = (b) -> new BlockTooltipItem(b, GADGET_PROPS);
   private static final Function<Block,? extends BlockItem> UNSTACKABLE_BLOCK_ITEM = (b) -> new BlockTooltipItem(b, UNSTACKABLE_PROPS);
@@ -79,6 +84,7 @@ public final class TinkerGadgets extends TinkerModule {
    */
   public static final ItemObject<PiggyBackPackItem> piggyBackpack = ITEMS_DEFFERED.register("piggy_backpack", () -> new PiggyBackPackItem(new Properties().stacksTo(16)));
   public static final EnumObject<FrameType,FancyItemFrameItem> itemFrame = ITEMS_DEFFERED.registerEnum(FrameType.values(), "item_frame", (type) -> new FancyItemFrameItem(GADGET_PROPS, (world, pos, dir) -> new FancyItemFrameEntity(world, pos, dir, type)));
+  public static final EnumObject<FancyArmorStandEntity.StandType,FancyArmorStandItem> armorStand = ITEMS_DEFFERED.registerEnum(FancyArmorStandEntity.StandType.values(), "armor_stand", type -> new FancyArmorStandItem(new Item.Properties().stacksTo(16), type));
   // slime tools
   private static final Item.Properties SLING_PROPS = new Item.Properties().stacksTo(1).durability(250);
   public static final EnumObject<SlimeType, BaseSlimeSlingItem> slimeSling = new EnumObject.Builder<SlimeType, BaseSlimeSlingItem>(SlimeType.class)

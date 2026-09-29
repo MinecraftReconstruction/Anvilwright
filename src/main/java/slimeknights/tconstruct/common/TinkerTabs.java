@@ -73,9 +73,9 @@ public class TinkerTabs {
     output.accept(TinkerCommons.lavawood);
     output.accept(TinkerCommons.lavawood.getSlab());
     output.accept(TinkerCommons.lavawood.getStairs());
-    output.accept(TinkerCommons.blazewood);
-    output.accept(TinkerCommons.blazewood.getSlab());
-    output.accept(TinkerCommons.blazewood.getStairs());
+    output.accept(TinkerMaterials.blazewood);
+    output.accept(TinkerMaterials.blazewood.getSlab());
+    output.accept(TinkerMaterials.blazewood.getStairs());
     output.accept(TinkerCommons.goldBars);
     output.accept(TinkerCommons.obsidianPane);
     output.accept(TinkerCommons.goldPlatform);
