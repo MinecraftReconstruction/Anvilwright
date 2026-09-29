@@ -29,7 +29,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -112,11 +111,8 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
     return true;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(ModifiableCrossbowClientExtension.INSTANCE);
-  }
-
+// TODO: PORT - the crossbow's arm pose came from the same Forge client extension; see
+//  docs/BEHAVIOUR-DIFFERENCES.md #24
 
   /* Arrow launching */
 

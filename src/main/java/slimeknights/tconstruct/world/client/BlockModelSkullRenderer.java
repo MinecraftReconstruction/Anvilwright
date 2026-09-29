@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraft.client.Minecraft;
 import org.joml.Quaternionf;
 import slimeknights.tconstruct.smeltery.client.util.TintedVertexBuilder;
 
@@ -45,7 +45,10 @@ public class BlockModelSkullRenderer extends SkullModelBase {
     poseStack.scale(0.5F, -0.5F, -0.5F);
 
     // simplified from ItemRender#render
-    BakedModel model = ForgeHooksClient.handleCameraTransforms(poseStack, this.model, ItemDisplayContext.HEAD, false);
+    // Forge's handleCameraTransforms applied the model's HEAD transform and returned the model; vanilla exposes the
+    // transforms directly, so apply the same one here
+    this.model.getTransforms().getTransform(ItemDisplayContext.HEAD).apply(false, poseStack);
+    BakedModel model = this.model;
     poseStack.translate(-0.5F, -0.5F, -0.5F);
     // we don't really use rotation, but just in case
     if (yRot != 0 || xRot != 0) {

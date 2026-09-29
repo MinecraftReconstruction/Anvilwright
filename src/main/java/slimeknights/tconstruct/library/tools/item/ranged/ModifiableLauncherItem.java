@@ -397,11 +397,7 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     return toolForRendering;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(ModifiableItemClientExtension.INSTANCE);
-  }
-
+// TODO: PORT - see docs/BEHAVIOUR-DIFFERENCES.md #24 (first person hand animation)
 
   /* Misc */
 

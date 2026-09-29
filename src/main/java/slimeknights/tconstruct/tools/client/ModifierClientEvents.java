@@ -76,13 +76,17 @@ public class ModifierClientEvents {
       return;
     }
     // when firing your melee weapon with ballista, don't render it in the other hand; makes it look like you duplicated your weapon
-    InteractionHand hand = event.getHand();
     ItemStack held = player.getItemInHand(hand);
     ItemStack opposite = player.getItemInHand(Util.getOpposite(hand));
     if (!held.isEmpty() && !opposite.isEmpty() && opposite.is(TinkerTags.Items.BALLISTAS) && ModifierUtil.getPersistentInt(opposite, ModifiableBowItem.KEY_BALLISTA, 0) == ModifiableBowItem.FLAG_BALLISTA_HELD) {
       event.setCanceled(true);
       return;
     }
+
+    // TODO: PORT - modifiable items have custom first person hand animations (ModifiableItemClientExtension).
+    //  Forge installed them per item and called applyForgeHandTransform *instead of* its own transform; Porting Lib's
+    //  RenderHandCallback cancels the whole hand render, so wiring this up means re-rendering the item here first.
+    //  See docs/BEHAVIOUR-DIFFERENCES.md #24.
 
     // if the data is set, render the empty offhand
     if (offhand.isEmpty()) {

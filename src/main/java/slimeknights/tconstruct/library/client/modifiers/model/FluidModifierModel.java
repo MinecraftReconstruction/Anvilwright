@@ -9,7 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import io.github.fabricators_of_create.porting_lib.models.QuadTransformers;
 import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
 import io.github.fabricators_of_create.porting_lib.models.UnbakedGeometryHelper;
@@ -86,8 +87,8 @@ public record FluidModifierModel(@Nullable Material small, @Nullable Material la
   public static void addQuads(FluidStack fluid, Material template, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, Consumer<Collection<BakedQuad>> quadConsumer) {
     // must have texture for the proper state
     // fluid properties
-    IClientFluidTypeExtensions attributes = IClientFluidTypeExtensions.of(fluid.getFluid());
-    TextureAtlasSprite fluidSprite = spriteGetter.apply(new Material(InventoryMenu.BLOCK_ATLAS, attributes.getStillTexture(fluid)));
+    // Forge asked the fluid type's client extensions for the texture; Fabric renders fluids through the variant
+    TextureAtlasSprite fluidSprite = FluidVariantRendering.getSprite(fluid.getType());
 
     // build fluid like the forge dynamic container model
     List<BlockElement> unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(-1, spriteGetter.apply(template).contents()); // Use template as mask
@@ -95,7 +96,7 @@ public record FluidModifierModel(@Nullable Material small, @Nullable Material la
     List<BakedQuad> fluidQuads = UnbakedGeometryHelper.bakeElements(unbaked, mat -> fluidSprite, new SimpleModelState(transforms.applyOrigin(ORIGIN).compose(FluidContainerModel.FLUID_TRANSFORM), false), BAKE_LOCATION); // Bake with fluid texture
 
     // apply brightness and color
-    int luminosity = fluid.getFluid().getFluidType().getLightLevel(fluid);
+    int luminosity = FluidVariantAttributes.getLuminance(fluid.getType());
     if (luminosity > 0) {
       QuadTransformers.settingEmissivity(luminosity).processInPlace(fluidQuads);
     }
