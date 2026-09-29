@@ -1,43 +1,47 @@
 package slimeknights.tconstruct.tools.logic;
 
+import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents.Fall.FallEvent;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.shared.TinkerAttributes;
 
-/** Logic to run the double jump attribute */
-@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = Bus.FORGE)
+/**
+ * Logic to run the double jump attribute
+ * <p>
+ * <b>Porting note:</b> upstream registers these through Forge's {@code @EventBusSubscriber}/{@code @SubscribeEvent}; on Fabric
+ * they are registered explicitly from {@link #init()}, which is called by {@link slimeknights.tconstruct.FabricEvents}.
+ */
 public class DoubleJumpHandler {
   private static final ResourceLocation JUMPS = TConstruct.getResource("jumps");
 
   private DoubleJumpHandler() {}
 
+  /** Registers the jump listeners. Call this once during common setup. */
+  public static void init() {
+    LivingEntityEvents.JUMP.register(DoubleJumpHandler::onJump);
+    LivingEntityEvents.FALL.register(DoubleJumpHandler::onLand);
+  }
+
   /** Event handler to reset the number of times we have jumped in mid-air */
-  @SubscribeEvent
-  static void onJump(LivingJumpEvent event) {
-    LivingEntity living = event.getEntity();
-    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()) < 0)) {
-      living.getCapability(PersistentDataCapability.CAPABILITY).ifPresent(data -> data.remove(JUMPS));
+  static void onJump(LivingEntity living) {
+    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(PortingLibAttributes.ENTITY_GRAVITY) < 0)) {
+      PersistentDataCapability.CAPABILITY.maybeGet(living).ifPresent(data -> data.remove(JUMPS));
     }
   }
 
   /** Event handler to reset the number of times we have jumped in mid air */
-  @SubscribeEvent
-  static void onLand(LivingFallEvent event) {
-    event.getEntity().getCapability(PersistentDataCapability.CAPABILITY).ifPresent(data -> data.remove(JUMPS));
+  static void onLand(FallEvent event) {
+    PersistentDataCapability.CAPABILITY.maybeGet(event.getEntity()).ifPresent(data -> data.remove(JUMPS));
   }
 
   /**

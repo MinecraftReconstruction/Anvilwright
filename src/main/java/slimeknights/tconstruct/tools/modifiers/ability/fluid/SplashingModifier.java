@@ -2,7 +2,7 @@ package slimeknights.tconstruct.tools.modifiers.ability.fluid;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fluids.FluidType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -23,7 +23,7 @@ public class SplashingModifier extends Modifier {
   protected void registerHooks(Builder hookBuilder) {
     hookBuilder.addModule(new SplashingModule(LevelingValue.eachLevel(1)));
     hookBuilder.addModule(ToolTankHelper.TANK_HANDLER);
-    hookBuilder.addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME));
+    hookBuilder.addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET));
     hookBuilder.addModule(ShowOffhandModule.DISALLOW_BROKEN);
   }
 

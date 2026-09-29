@@ -8,7 +8,6 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -16,6 +15,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.special.sling.SlingAngleModifierHook;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
+import slimeknights.tconstruct.library.events.KnockbackEvent;
 import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -79,7 +79,7 @@ public enum RestrictAngleModule implements ModifierModule, ProjectileLaunchModif
   }
 
   /** Called during the living knockback event to apply our effect */
-  public static void onKnockback(LivingKnockBackEvent event, int level) {
+  public static void onKnockback(KnockbackEvent event, int level) {
     // start at 4 directions at level 1, then 32, 16, 8, and 4 by level 4, don't go below 4 directions
     Vec3 direction = clampDirection(new Vec3(event.getRatioX(), 0, event.getRatioZ()), level, null);
     event.setRatioX(direction.x);

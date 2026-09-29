@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.ForgeEventFactory;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -112,11 +111,8 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     // if we have ballista capabilities, use the broader predicate
     boolean isBallista = isBallista(tool);
     ItemStack ammo = BowAmmoModifierHook.getAmmo(tool, bow, player, isBallista ? getSupportedBallistaAmmo() : getSupportedHeldProjectiles());
-    // ask forge if it has any different opinions
-    InteractionResultHolder<ItemStack> override = ForgeEventFactory.onArrowNock(bow, level, player, hand, !ammo.isEmpty());
-    if (override != null) {
-      return override;
-    }
+    // NOTE(porting): upstream asks Forge's ArrowNockEvent here for a third-party veto. Fabric has no equivalent event,
+    //  so that extension point is dropped. Disclosed in docs/BEHAVIOUR-DIFFERENCES.md.
     // if no ammo, cannot fire
     // however, we can use a modifier if enabled
     if (!player.getAbilities().instabuild && ammo.isEmpty() && !tool.getModifiers().has(TinkerTags.Modifiers.CHARGE_EMPTY_BOW_WITH_DRAWTIME)) {
@@ -182,11 +178,9 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     ItemStack foundAmmo = BowAmmoModifierHook.getAmmo(tool, bow, living, ammoPredicate);
     boolean hasAmmo = !foundAmmo.isEmpty() || creative && !tool.getVolatileData().getBoolean(BowAmmoModifierHook.SKIP_INVENTORY_AMMO);
 
-    // ask forge its thoughts on shooting
+    // NOTE(porting): upstream clamps this through Forge's ArrowLooseEvent (ForgeEventFactory.onArrowLoose). Fabric has no
+    //  equivalent event, so the third-party extension point is dropped. Disclosed in docs/BEHAVIOUR-DIFFERENCES.md.
     int chargeTime = duration - timeLeft;
-    if (player != null) {
-      chargeTime = ForgeEventFactory.onArrowLoose(bow, level, player, chargeTime, hasAmmo);
-    }
 
     // no ammo? no charge? nothing to do
     if (!hasAmmo || chargeTime < 0) {

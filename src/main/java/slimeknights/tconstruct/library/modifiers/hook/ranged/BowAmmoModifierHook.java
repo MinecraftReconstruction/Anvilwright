@@ -7,11 +7,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeHooks;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
+import net.minecraft.tags.ItemTags;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.item.ranged.ModifiableBowItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
@@ -75,7 +78,7 @@ public interface BowAmmoModifierHook {
     // if no predicate, means we want the event result, used for ballista
     // TODO: this is a little bit janky in retrospective, probably just handle in the caller?
     if (predicate == null) {
-      return ForgeHooks.getProjectile(living, bow, ItemStack.EMPTY);
+      return getBallistaAmmo(bow, living);
     }
     // locate standard ammo
     ItemStack standardAmmo;
@@ -94,6 +97,39 @@ public interface BowAmmoModifierHook {
       }
     }
     return standardAmmo;
+  }
+
+  /**
+   * Resolves the ammo for a ballista that is being fired from the main or offhand.
+   * <p>
+   * <b>Porting note:</b> upstream gets this through Forge's {@code ForgeHooks.getProjectile}, which fires
+   * {@code LivingGetProjectileEvent}. Fabric has no equivalent event, so the listener Tinkers registered for it
+   * (previously {@code ModifierEvents#onProjectile}) is folded into this method instead.
+   */
+  static ItemStack getBallistaAmmo(ItemStack bow, LivingEntity living) {
+    ItemStack ammo = living.getProjectile(bow);
+    // if the bow supports it, and we currently have arrows or nothing, we have a chance to swap the ammo
+    if (bow.is(TinkerTags.Items.BALLISTAS) && ModifierUtil.checkVolatileFlag(bow, ModifiableBowItem.KEY_BALLISTA) && (ammo.isEmpty() || ammo.is(ItemTags.ARROWS))) {
+      // check active flag
+      int flag = ModifierUtil.getPersistentInt(bow, ModifiableBowItem.KEY_BALLISTA, 0);
+
+      // if requesting a held ballista or haven't decided, find it in either hand
+      if (flag <= ModifiableBowItem.FLAG_BALLISTA_HELD) {
+        // try both hands, but don't return the bow itself
+        ItemStack check = living.getOffhandItem();
+        if (check != bow && check.is(TinkerTags.Items.BALLISTA_AMMO)) {
+          return check;
+        }
+        check = living.getMainHandItem();
+        if (check != bow && check.is(TinkerTags.Items.BALLISTA_AMMO)) {
+          return check;
+        }
+      // if requesting a ballista from the quiver, don't fall back to the inventory ammo
+      } else if (flag == ModifiableBowItem.FLAG_BALLISTA_QUIVER) {
+        return ItemStack.EMPTY;
+      }
+    }
+    return ammo;
   }
 
   /**
