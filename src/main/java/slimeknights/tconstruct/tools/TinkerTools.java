@@ -2,10 +2,12 @@ package slimeknights.tconstruct.tools;
 
 import io.github.fabricators_of_create.porting_lib.util.ItemPredicateRegistry;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -97,6 +99,8 @@ import slimeknights.tconstruct.library.tools.helper.ModifierLootingHandler;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 import slimeknights.tconstruct.library.tools.item.ModifiableItem;
+import slimeknights.tconstruct.library.tools.item.ModifiableArrowItem;
+import slimeknights.tconstruct.library.tools.item.ModifiableShurikenItem;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
 import slimeknights.tconstruct.library.tools.item.ModifiableStaffItem;
 import slimeknights.tconstruct.library.utils.BlockSideHitListener;
@@ -125,6 +129,12 @@ import slimeknights.tconstruct.tools.item.SlimesuitItem;
 import slimeknights.tconstruct.tools.item.TravelersGearItem;
 import slimeknights.tconstruct.tools.logic.EquipmentChangeWatcher;
 import slimeknights.tconstruct.tools.menu.ToolContainerMenu;
+import slimeknights.tconstruct.tools.entity.CombatFishingHook;
+import slimeknights.tconstruct.tools.entity.ModifiableArrow;
+import slimeknights.tconstruct.tools.entity.ThrownShuriken;
+import slimeknights.tconstruct.tools.entity.ThrownTool;
+
+import static slimeknights.tconstruct.TConstruct.getResource;
 
 /**
  * Contains all complete tool items
@@ -167,18 +177,41 @@ public final class TinkerTools extends TinkerModule {
 
   public static final ItemObject<ModifiableLauncherItem> crossbow = ITEMS.register("crossbow", () -> new ModifiableCrossbowItem(TOOL, ToolDefinitions.CROSSBOW, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableLauncherItem> longbow = ITEMS.register("longbow", () -> new ModifiableBowItem(TOOL, ToolDefinitions.LONGBOW, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableItem> fishingRod = ITEMS.register("fishing_rod", () -> new ModifiableItem(TOOL, ToolDefinitions.FISHING_ROD, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableItem> javelin = ITEMS.register("javelin", () -> new ModifiableItem(TOOL, ToolDefinitions.JAVELIN, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableArrowItem> arrow = ITEMS.register("arrow", () -> new ModifiableArrowItem(TOOL, ToolDefinitions.ARROW));
+  public static final ItemObject<ModifiableShurikenItem> shuriken = ITEMS.register("shuriken", () -> new ModifiableShurikenItem(new Item.Properties().stacksTo(16), ToolDefinitions.SHURIKEN));
+  public static final ItemObject<ModifiableShurikenItem> throwingAxe = ITEMS.register("throwing_axe", () -> new ModifiableShurikenItem(new Item.Properties().stacksTo(16), ToolDefinitions.THROWING_AXE));
 
   public static final ItemObject<ModifiableItem> flintAndBrick = ITEMS.register("flint_and_brick", () -> new ModifiableItem(TOOL, ToolDefinitions.FLINT_AND_BRICK, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableItem> skyStaff = ITEMS.register("sky_staff", () -> new ModifiableStaffItem(TOOL, ToolDefinitions.SKY_STAFF, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableItem> earthStaff = ITEMS.register("earth_staff", () -> new ModifiableStaffItem(TOOL, ToolDefinitions.EARTH_STAFF, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableItem> ichorStaff = ITEMS.register("ichor_staff", () -> new ModifiableStaffItem(TOOL, ToolDefinitions.ICHOR_STAFF, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableItem> enderStaff = ITEMS.register("ender_staff", () -> new ModifiableStaffItem(TOOL, ToolDefinitions.ENDER_STAFF, TinkerTabs.TAB_TOOLS));
+
+  // ancient tools, added in the 3.11 update
+  public static final ItemObject<ModifiableItem> meltingPan = ITEMS.register("melting_pan", () -> new ModifiableItem(TOOL, ToolDefinitions.MELTING_PAN, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableCrossbowItem> warPick = ITEMS.register("war_pick", () -> new ModifiableCrossbowItem(TOOL, ToolDefinitions.WAR_PICK));
+  public static final ItemObject<ModifiableItem> battlesign = ITEMS.register("battlesign", () -> new ModifiableItem(TOOL, ToolDefinitions.BATTLESIGN, TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<ModifiableItem> swasher = ITEMS.register("swasher", () -> new ModifiableItem(TOOL, ToolDefinitions.SWASHER, TinkerTabs.TAB_TOOLS));
+  /** Registered only when Twilight Forest is present, which also keeps it out of JEI */
+  public static final ItemObject<ModifiableItem> minotaurAxe;
+  static {
+    if (FabricLoader.getInstance().isModLoaded("twilightforest")) {
+      minotaurAxe = ITEMS.register("minotaur_axe", () -> new ModifiableItem(TOOL, ToolDefinitions.MINOTAUR_AXE, TinkerTabs.TAB_TOOLS));
+    } else {
+      minotaurAxe = new ItemObject<>(RegistryObject.create(getResource("minotaur_axe"), BuiltInRegistries.ITEM));
+    }
+  }
 
   // armor
   public static final EnumObject<ArmorSlotType,ModifiableArmorItem> travelersGear = ITEMS.registerEnum("travelers", ArmorSlotType.values(), type -> new TravelersGearItem(ArmorDefinitions.TRAVELERS, type, TOOL, TinkerTabs.TAB_TOOLS));
   public static final EnumObject<ArmorSlotType,ModifiableArmorItem> plateArmor = ITEMS.registerEnum("plate", ArmorSlotType.values(), type -> new PlateArmorItem(ArmorDefinitions.PLATE, type, TOOL, TinkerTabs.TAB_TOOLS));
+  /** Slime chestplate: doubles as the slime wings. Upstream 3.12.1 splits this into a plain `slimy_chestplate` and `slime_wings`, this port keeps the single elytra capable chestplate */
+  public static final ItemObject<SlimelytraItem> slimeWings = ITEMS.register("slime_wings", () -> new SlimelytraItem(ArmorDefinitions.SLIMESUIT, TOOL, TinkerTabs.TAB_TOOLS));
   public static final EnumObject<ArmorSlotType,ModifiableArmorItem> slimesuit = new EnumObject.Builder<ArmorSlotType,ModifiableArmorItem>(ArmorSlotType.class)
     .putAll(ITEMS.registerEnum("slime", new ArmorSlotType[] {ArmorSlotType.BOOTS, ArmorSlotType.LEGGINGS}, type -> new SlimesuitItem(ArmorDefinitions.SLIMESUIT, type, TOOL, TinkerTabs.TAB_TOOLS)))
-    .put(ArmorSlotType.CHESTPLATE, ITEMS.register("slime_chestplate", () -> new SlimelytraItem(ArmorDefinitions.SLIMESUIT, TOOL, TinkerTabs.TAB_TOOLS)))
+    .put(ArmorSlotType.CHESTPLATE, slimeWings)
     .put(ArmorSlotType.HELMET, ITEMS.register("slime_helmet", () -> new SlimeskullItem(ArmorDefinitions.SLIMESUIT, TOOL, TinkerTabs.TAB_TOOLS)))
     .build();
 
@@ -192,6 +225,7 @@ public final class TinkerTools extends TinkerModule {
   /* Particles */
   public static final RegistryObject<SimpleParticleType> hammerAttackParticle = PARTICLE_TYPES.register("hammer_attack", () -> FabricParticleTypes.simple(true));
   public static final RegistryObject<SimpleParticleType> axeAttackParticle = PARTICLE_TYPES.register("axe_attack", () -> FabricParticleTypes.simple(true));
+  public static final RegistryObject<SimpleParticleType> bonkAttackParticle = PARTICLE_TYPES.register("bonk", () -> FabricParticleTypes.simple(true));
 
   /* Entities */
   public static final RegistryObject<EntityType<IndestructibleItemEntity>> indestructibleItem = ENTITIES.register("indestructible_item", () ->
@@ -200,6 +234,28 @@ public final class TinkerTools extends TinkerModule {
                       .fireImmune());
   public static final RegistryObject<EntityType<CrystalshotEntity>> crystalshotEntity = ENTITIES.register("crystalshot", () ->
     FabricEntityTypeBuilder.<CrystalshotEntity>create(MobCategory.MISC, CrystalshotEntity::new)
+                      .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
+                      .trackRangeChunks(4)
+                      .trackedUpdateRate(20));
+  public static final RegistryObject<EntityType<CombatFishingHook>> fishingHook = ENTITIES.register("fishing_bobber", () ->
+    FabricEntityTypeBuilder.<CombatFishingHook>create(MobCategory.MISC, CombatFishingHook::new)
+                      .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
+                      .disableSaving()
+                      .disableSummon()
+                      .trackRangeChunks(4)
+                      .trackedUpdateRate(5));
+  public static final RegistryObject<EntityType<ModifiableArrow>> materialArrow = ENTITIES.register("arrow", () ->
+    FabricEntityTypeBuilder.<ModifiableArrow>create(MobCategory.MISC, ModifiableArrow::new)
+                      .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
+                      .trackRangeChunks(4)
+                      .trackedUpdateRate(20));
+  public static final RegistryObject<EntityType<ThrownShuriken>> thrownShuriken = ENTITIES.register("thrown_shuriken", () ->
+    FabricEntityTypeBuilder.<ThrownShuriken>create(MobCategory.MISC, ThrownShuriken::new)
+                      .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
+                      .trackRangeChunks(4)
+                      .trackedUpdateRate(10));
+  public static final RegistryObject<EntityType<ThrownTool>> thrownTool = ENTITIES.register("thrown_tool", () ->
+    FabricEntityTypeBuilder.<ThrownTool>create(MobCategory.MISC, ThrownTool::new)
                       .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
                       .trackRangeChunks(4)
                       .trackedUpdateRate(20));
