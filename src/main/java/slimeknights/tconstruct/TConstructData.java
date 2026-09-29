@@ -15,6 +15,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.TinkerWorld;
+import slimeknights.tconstruct.world.data.WorldgenProvider;
 
 public class TConstructData implements DataGeneratorEntrypoint {
 
@@ -37,5 +38,8 @@ public class TConstructData implements DataGeneratorEntrypoint {
   @Override
   public void buildRegistry(RegistrySetBuilder registryBuilder) {
     registryBuilder.add(Registries.DAMAGE_TYPE, TinkerDamageTypes::bootstrap);
+    // NOTE(porting): upstream also drives biome modifiers from here; Fabric covers those in code in WorldEvents,
+    // and WorldgenProvider only emits the vanilla-worldgen registries.
+    WorldgenProvider.register(registryBuilder);
   }
 }
