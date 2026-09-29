@@ -1,32 +1,58 @@
 package slimeknights.tconstruct.library.fluid;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 
 /**
- * Simple implementation of {@link IFluidTank} and {@link IFluidHandler} for a single tank.
- *
- * Similar to {@link net.minecraftforge.fluids.capability.templates.FluidTank} except with more control over the fluid storage.
+ * Stand-in for Forge's {@code IFluidTank} + {@code IFluidHandler} pair, for a single tank.
+ * <p>
+ * Fabric has no equivalent types: the Transfer API models the same concept as a
+ * {@code Storage<FluidVariant>}, which has a different shape (variants + transactions instead of
+ * "one fluid stack"). Tinkers' code, its screens and its JSON all want the Forge shape, so this
+ * interface keeps it and {@link FluidTankBase} implements it on top of Porting Lib's {@code FluidTank}.
+ * <p>
+ * Amounts are {@code long} throughout, matching Porting Lib's {@code FluidStack}/{@code FluidTank}.
+ * The default {@link #fill}/{@link #drain} bodies mirror Forge's {@code FluidTank} semantics, including
+ * honouring {@link FluidAction}.
  */
-public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
-  @Override
+public interface SimpleFluidTank {
+  @Nonnull
+  FluidStack getFluid();
+
+  /** Maximum amount of fluid this tank can hold */
+  long getCapacity();
+
+  /** Called to set the fluid, used by the default fill/drain logic */
+  void setFluid(FluidStack fluid);
+
+  /** Amount of fluid currently held */
+  default long getFluidAmount() {
+    return getFluid().getAmount();
+  }
+
+  /** If true, this tank is empty */
+  default boolean isEmpty() {
+    return getFluid().isEmpty();
+  }
+
+  /** If true, this tank accepts the given fluid */
+  default boolean isFluidValid(FluidStack stack) {
+    return true;
+  }
+
+  /** The tank count, always 1 */
   default int getTanks() {
     return 1;
   }
 
-  /** Called to set the fluid after it has changed */
-  void setFluid(FluidStack fluid);
-
   /**
-   * Used by {@link #fill(FluidStack, FluidAction)}, {@link #drain(int, FluidAction)}, and {@link #drain(FluidStack, FluidAction)} to update the fluid result.
+   * Used by {@link #fill(FluidStack, FluidAction)}, {@link #drain(long, FluidAction)}, and {@link #drain(FluidStack, FluidAction)} to update the fluid result.
    * Allows updating the fluid without needing to call {@link #getFluid()} again, in case it has a cost.
    * @param updated  New fluid stack
    * @param change   Amount the fluid grew or shrunk by.
    */
-  default void updateFluid(FluidStack updated, int change) {
+  default void updateFluid(FluidStack updated, long change) {
     if (change != 0) {
       setFluid(updated);
     }
@@ -35,28 +61,15 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
 
   /* Redirect duplicate methods */
 
-  @Override
-  default int getFluidAmount() {
-    return getFluid().getAmount();
-  }
-
   @Nonnull
-  @Override
   default FluidStack getFluidInTank(int tank) {
     return getFluid();
   }
 
-  @Override
-  default int getTankCapacity(int tank) {
+  default long getTankCapacity(int tank) {
     return getCapacity();
   }
 
-  @Override
-  default boolean isFluidValid(FluidStack stack) {
-    return true;
-  }
-
-  @Override
   default boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
     return isFluidValid(stack);
   }
@@ -64,8 +77,7 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
 
   /* Filling and draining */
 
-  @Override
-  default int fill(FluidStack resource, FluidAction action) {
+  default long fill(FluidStack resource, FluidAction action) {
     // if nothing to fill, do nothing
     if (resource.isEmpty() || !isFluidValid(resource)) {
       return 0;
@@ -74,7 +86,7 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
 
     // if we have nothing, fill as much as possible
     if (fluid.isEmpty()) {
-      int amount = Math.min(getCapacity(), resource.getAmount());
+      long amount = Math.min(getCapacity(), resource.getAmount());
       if (action.execute()) {
         updateFluid(new FluidStack(resource, amount), amount);
       }
@@ -86,8 +98,8 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
       return 0;
     }
 
-    int capacity = getCapacity();
-    int filled = Math.min(capacity - fluid.getAmount(), resource.getAmount());
+    long capacity = getCapacity();
+    long filled = Math.min(capacity - fluid.getAmount(), resource.getAmount());
     if (action.execute()) {
       fluid.grow(filled);
       updateFluid(fluid, filled);
@@ -96,10 +108,10 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
   }
 
   /** Common logic between both drain methods */
-  private FluidStack drain(FluidStack fluid, int maxDrain, FluidAction action) {
+  private FluidStack drain(FluidStack fluid, long maxDrain, FluidAction action) {
     // preconditions: fluid is not empty, maxDrain > 0
     // limit max drain to current fluid
-    int drained = maxDrain;
+    long drained = maxDrain;
     if (fluid.getAmount() < drained) {
       drained = fluid.getAmount();
     }
@@ -113,7 +125,6 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
   }
 
   @Nonnull
-  @Override
   default FluidStack drain(FluidStack resource, FluidAction action) {
     if (resource.isEmpty()) {
       return FluidStack.EMPTY;
@@ -126,8 +137,7 @@ public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
   }
 
   @Nonnull
-  @Override
-  default FluidStack drain(int maxDrain, FluidAction action) {
+  default FluidStack drain(long maxDrain, FluidAction action) {
     if (maxDrain <= 0) {
       return FluidStack.EMPTY;
     }
