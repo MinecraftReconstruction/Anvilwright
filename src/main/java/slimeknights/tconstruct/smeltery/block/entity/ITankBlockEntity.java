@@ -2,6 +2,7 @@ package slimeknights.tconstruct.smeltery.block.entity;
 
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import net.fabricmc.api.EnvType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -147,6 +148,6 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
   /** Represents a  tank block entity with an inventory */
   interface ITankInventoryBlockEntity extends ITankBlockEntity {
     /** Gets the associated item handler for this tank with an inventory */
-    IItemHandler getItemHandler();
+    SlottedStackStorage getItemHandler();
   }
 }

@@ -1,26 +1,36 @@
 package slimeknights.tconstruct.smeltery.block.entity.tank;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.inventory.SingleItemHandler;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
-import slimeknights.tconstruct.library.fluid.EmptyFluidHandlerItem;
 import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
-import slimeknights.tconstruct.library.fluid.FluidAction;
 
-/** Fluid handler that proxies to an item stack tank */
-public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> implements IFluidHandler {
-  private IFluidHandlerItem itemTank;
+import javax.annotation.Nullable;
+
+/**
+ * Fluid storage that proxies to the tank inside the stored item stack (a bucket, a tank item, ...).
+ * <p>
+ * Upstream implements Forge's {@code IFluidHandlerItem} on the item stack's capability; Fabric models the same
+ * thing as a {@code Storage<FluidVariant>} looked up with a {@link ContainerItemContext}. The context is created
+ * per operation because filling can replace the item (bucket to empty bucket) and the new stack has to be written
+ * back into the slot - that write-back is what the upstream {@code getContainer()} call did.
+ */
+public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> implements Storage<FluidVariant> {
   public ProxyItemTank(T parent) {
     super(parent, 1);
   }
@@ -34,7 +44,7 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     Item craftRemainingItem = stack.getItem().getCraftingRemainingItem();
     return !stack.is(TinkerTags.Items.PROXY_TANK_BLACKLIST)
       && (craftRemainingItem == null || !RegistryHelper.contains(TinkerTags.Items.PROXY_TANK_BLACKLIST, craftRemainingItem))
-      && (stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent());
+      && FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack)) != null;
   }
 
   /** Used by the fluid handler logic to sync changes as we directly mutate the internal stack */
@@ -53,7 +63,6 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     boolean needsUpdate = world != null && !world.isClientSide;
     if (oldStack != newStack) {
       // if the stack instance changed, discard cached cap and sync
-      itemTank = null;
       if (needsUpdate) {
         // both stacks being empty means our stack shrunk by 1 and is being replaced with ItemStack.EMPTY
         needsUpdate = (oldStack.isEmpty() && newStack.isEmpty()) || !ItemStack.isSameItemSameTags(oldStack, newStack);
@@ -74,64 +83,71 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     setStack(newStack, false);
   }
 
-  /** Gets the fluid handler for the item */
-  private IFluidHandlerItem getItemTank() {
-    if (itemTank == null) {
-      ItemStack stack = getStack();
-      itemTank = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseGet(() -> new EmptyFluidHandlerItem(stack));
+  /** Gets the fluid storage of the stored item, or null if the item has no tank */
+  @Nullable
+  private Storage<FluidVariant> findItemTank(ContainerItemContext context) {
+    ItemStack stack = getStack();
+    if (stack.isEmpty()) {
+      return null;
     }
-    return itemTank;
+    return FluidStorage.ITEM.find(stack, context);
+  }
+
+  /** Copies the (possibly replaced) container stack from the context back into the slot */
+  private void syncContainer(ContainerItemContext context) {
+    setStack(context.getItemVariant().toStack((int)context.getAmount()), true);
+  }
+
+  /** The fluid currently held by the item, for rendering and tooltips */
+  public FluidStack getFluid() {
+    Storage<FluidVariant> tank = findItemTank(ContainerItemContext.withConstant(getStack()));
+    return tank == null ? FluidStack.EMPTY : TransferUtil.firstCopyOrEmpty(tank);
+  }
+
+  /** The capacity of the item's tank, for rendering and tooltips */
+  public long getCapacity() {
+    Storage<FluidVariant> tank = findItemTank(ContainerItemContext.withConstant(getStack()));
+    return tank == null ? 0 : TransferUtil.firstCapacity(tank);
   }
 
   @Override
-  public int getTanks() {
-    return getItemTank().getTanks();
-  }
-
-  @Override
-  public FluidStack getFluidInTank(int tank) {
-    return getItemTank().getFluidInTank(tank);
-  }
-
-  @Override
-  public int getTankCapacity(int tank) {
-    return getItemTank().getTankCapacity(tank);
-  }
-
-  @Override
-  public boolean isFluidValid(int tank, FluidStack stack) {
-    return getItemTank().isFluidValid(tank, stack);
-  }
-
-  @Override
-  public int fill(FluidStack resource, FluidAction action) {
-    IFluidHandlerItem tank = getItemTank();
-    int filled = tank.fill(resource, action);
-    // if something happened, force a sync of the item stack
-    // hopefully it's the same instance, but we still need a client sync likely
-    if (filled > 0 && action.execute()) {
-      setStack(tank.getContainer(), true);
+  public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+    ContainerItemContext context = ContainerItemContext.withInitial(getStack());
+    Storage<FluidVariant> tank = findItemTank(context);
+    if (tank == null) {
+      return 0;
     }
-    return filled;
+    long inserted;
+    try (Transaction nested = Transaction.openNested(transaction)) {
+      inserted = tank.insert(resource, maxAmount, nested);
+      if (inserted > 0) {
+        nested.commit();
+      }
+    }
+    // force a sync of the item stack; the container may have been replaced (bucket to empty bucket)
+    if (inserted > 0) {
+      syncContainer(context);
+    }
+    return inserted;
   }
 
   @Override
-  public FluidStack drain(FluidStack resource, FluidAction action) {
-    IFluidHandlerItem tank = getItemTank();
-    FluidStack drained = tank.drain(resource, action);
-    if (!drained.isEmpty() && action.execute()) {
-      setStack(tank.getContainer(), true);
+  public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+    ContainerItemContext context = ContainerItemContext.withInitial(getStack());
+    Storage<FluidVariant> tank = findItemTank(context);
+    if (tank == null) {
+      return 0;
     }
-    return drained;
-  }
-
-  @Override
-  public FluidStack drain(int maxDrain, FluidAction action) {
-    IFluidHandlerItem tank = getItemTank();
-    FluidStack drained = tank.drain(maxDrain, action);
-    if (!drained.isEmpty() && action.execute()) {
-      setStack(tank.getContainer(), true);
+    long extracted;
+    try (Transaction nested = Transaction.openNested(transaction)) {
+      extracted = tank.extract(resource, maxAmount, nested);
+      if (extracted > 0) {
+        nested.commit();
+      }
     }
-    return drained;
+    if (extracted > 0) {
+      syncContainer(context);
+    }
+    return extracted;
   }
 }

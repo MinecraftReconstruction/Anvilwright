@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.ModelData;
+import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.utils.NBTTags;
@@ -108,7 +109,8 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
     ITankBlockEntity.super.onTankContentsChanged();
     if (this.level != null) {
       updateLight(this, tank);
-      this.requestModelDataUpdate();
+      // refresh the render data; Forge's requestModelDataUpdate() does not exist on Fabric
+      RetexturedHelper.onTextureUpdated(this);
     }
   }
 

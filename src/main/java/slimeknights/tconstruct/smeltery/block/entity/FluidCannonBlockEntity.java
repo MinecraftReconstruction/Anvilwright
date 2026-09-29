@@ -19,12 +19,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import slimeknights.tconstruct.library.fluid.FluidAction;
-import net.minecraftforge.items.IItemHandler;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.inventory.SingleItemHandler;
 import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
@@ -47,11 +47,10 @@ import javax.annotation.Nullable;
 import static net.minecraft.world.level.block.DirectionalBlock.FACING;
 
 /** Tank block entity which also shoots a fluid */
-public class FluidCannonBlockEntity extends TankBlockEntity implements ITankInventoryBlockEntity {
+public class FluidCannonBlockEntity extends TankBlockEntity implements ITankInventoryBlockEntity, SidedStorageBlockEntity {
   private final IFluidCannon block;
   @Getter
   private final FluidCannonItemHandler itemHandler = new FluidCannonItemHandler();
-  private final LazyOptional<IItemHandler> itemCapability = LazyOptional.of(() -> itemHandler);
 
   public FluidCannonBlockEntity(BlockPos pos, BlockState state) {
     this(pos, state, state.getBlock() instanceof IFluidCannon tank
@@ -166,19 +165,10 @@ public class FluidCannonBlockEntity extends TankBlockEntity implements ITankInve
   /* Inventory */
   private static final String TAG_ITEM = "item";
 
-  @Nonnull
+  @Nullable
   @Override
-  public <C> LazyOptional<C> getCapability(Capability<C> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.ITEM_HANDLER) {
-      return itemCapability.cast();
-    }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    itemCapability.invalidate();
+  public Storage<ItemVariant> getItemStorage(@Nullable Direction direction) {
+    return itemHandler;
   }
 
   @Override
