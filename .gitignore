@@ -56,3 +56,7 @@ options.txt
 /ops.json
 /whitelist.json
 src/generated/resources/.cache/*
+
+# local build/port scratch output (scripts/port)
+.port/
+__pycache__/
