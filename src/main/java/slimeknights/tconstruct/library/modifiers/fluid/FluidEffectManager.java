@@ -10,12 +10,11 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.MinecraftForge;
 import io.github.fabricators_of_create.porting_lib.util.CraftingHelper;
 import slimeknights.mantle.util.DataLoadedConditionContext;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
@@ -58,14 +57,15 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
 
   /** For internal use only */
   public void init() {
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, AddReloadListenerEvent.class, this::addDataPackListeners);
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, OnDatapackSyncEvent.class, e -> JsonUtils.syncPackets(e, new UpdateFluidEffectsPacket(this.fluids)));
+    addDataPackListeners();
+    ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> JsonUtils.syncPackets(player, joined, new UpdateFluidEffectsPacket(this.fluids)));
   }
 
   /** Adds the managers as datapack listeners */
-  private void addDataPackListeners(final AddReloadListenerEvent event) {
-    event.addListener(this);
-    conditionContext = event.getConditionContext();
+  private void addDataPackListeners() {
+    ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
+    // Forge got the condition context from AddReloadListenerEvent; Mantle's DataLoadedConditionContext is the
+    // Fabric side equivalent and is already the default, so nothing to assign here
   }
 
   /** Creates context for modifier parsing */

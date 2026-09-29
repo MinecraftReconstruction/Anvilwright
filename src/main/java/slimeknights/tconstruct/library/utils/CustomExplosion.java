@@ -19,7 +19,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
+import io.github.fabricators_of_create.porting_lib.event.common.ExplosionEvents;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
 
 import javax.annotation.Nullable;
@@ -142,7 +142,7 @@ public class CustomExplosion extends Explosion {
                Math.floor(this.y + diameter + 1),
                Math.floor(this.z + diameter + 1)),
       entityPredicate);
-    ForgeEventFactory.onExplosionDetonate(this.level, this, list, diameter);
+    ExplosionEvents.DETONATE.invoker().onDetonate(this.level, this, list, diameter);
 
     // start pushing entities
     // this logic is for the most part identical to vanilla, except taking better advantage of vec3

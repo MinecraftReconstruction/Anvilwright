@@ -7,12 +7,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import io.github.fabricators_of_create.porting_lib.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
+import io.github.fabricators_of_create.porting_lib.event.common.BlockEvents;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.common.BlockStateLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -71,7 +76,7 @@ public record ReplaceBlockWalkerModule(List<BlockReplacement> replacements, Leve
           BlockState state = replacement.state;
           if (replacement.target.matches(world.getBlockState(mutable))
               && state.canSurvive(world, mutable) && world.isUnobstructed(state, mutable, CollisionContext.empty())
-              && !ForgeEventFactory.onBlockPlace(living, BlockSnapshot.create(world.dimension(), world, mutable), Direction.UP)) {
+              && beforePlace(living, world, mutable, state)) {
             world.setBlockAndUpdate(mutable, state);
             world.scheduleTick(mutable, state.getBlock(), Mth.nextInt(living.getRandom(), 60, 120));
 
@@ -148,5 +153,17 @@ public record ReplaceBlockWalkerModule(List<BlockReplacement> replacements, Leve
       }
       return new ReplaceBlockWalkerModule(replacements, new LevelingValue(flat, eachLevel), tool);
     }
+  }
+
+  /**
+   * Fires the block placement check for the replacement. Forge's {@code onBlockPlace} took the entity plus a block
+   * snapshot and returned true to cancel; Porting Lib's {@code BlockEvents.BeforePlace} takes a placement context
+   * and returns an {@code InteractionResult}, where anything but PASS means the placement was handled and must not
+   * go through (see docs/BEHAVIOUR-DIFFERENCES.md #20).
+   */
+  private static boolean beforePlace(LivingEntity living, Level world, BlockPos pos, BlockState state) {
+    BlockPlaceContext context = new BlockPlaceContext(world, living, InteractionHand.MAIN_HAND, ItemStack.EMPTY,
+      new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+    return BlockEvents.BEFORE_PLACE.invoker().beforePlace(context) == InteractionResult.PASS;
   }
 }
