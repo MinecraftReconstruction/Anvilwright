@@ -27,7 +27,7 @@ import slimeknights.tconstruct.library.modifiers.spilling.effects.DamageSpilling
 import slimeknights.tconstruct.library.modifiers.spilling.effects.DamageSpillingEffect.DamageType;
 import slimeknights.tconstruct.library.modifiers.spilling.effects.EffectSpillingEffect;
 import slimeknights.tconstruct.library.modifiers.spilling.effects.ExtinguishSpillingEffect;
-import slimeknights.tconstruct.library.modifiers.spilling.effects.PotionFluidEffect;
+import slimeknights.tconstruct.library.modifiers.fluid.entity.PotionFluidEffect;
 import slimeknights.tconstruct.library.modifiers.spilling.effects.RemoveEffectSpillingEffect;
 import slimeknights.tconstruct.library.modifiers.spilling.effects.RestoreHungerSpillingEffect;
 import slimeknights.tconstruct.library.modifiers.spilling.effects.SetFireSpillingEffect;
