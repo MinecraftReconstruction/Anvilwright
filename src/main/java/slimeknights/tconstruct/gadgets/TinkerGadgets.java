@@ -89,7 +89,7 @@ public final class TinkerGadgets extends TinkerModule {
     .build();
   // throwballs
   public static final ItemObject<GlowBallItem> glowBall = ITEMS_DEFFERED.register("glow_ball", GlowBallItem::new);
-  public static final ItemObject<EflnBallItem> efln = ITEMS_DEFFERED.register("efln_ball", EflnBallItem::new);
+  public static final ItemObject<EFLNItem> efln = ITEMS_DEFFERED.register("efln_ball", EFLNItem::new);
 
   // foods
   private static final BlockBehaviour.Properties CAKE = builder(SoundType.WOOL).pushReaction(PushReaction.DESTROY).strength(0.5F);
@@ -125,12 +125,12 @@ public final class TinkerGadgets extends TinkerModule {
       .entityFactory((spawnEntity, world) -> new GlowballEntity(TinkerGadgets.glowBallEntity.get(), world))
       .forceTrackedVelocityUpdates(true)
   );
-  public static final RegistryObject<EntityType<EflnBallEntity>> eflnEntity = ENTITIES.register("efln_ball", () ->
-    FabricEntityTypeBuilder.<EflnBallEntity>create(MobCategory.MISC, EflnBallEntity::new)
+  public static final RegistryObject<EntityType<EFLNEntity>> eflnEntity = ENTITIES.register("efln_ball", () ->
+    FabricEntityTypeBuilder.<EFLNEntity>create(MobCategory.MISC, EFLNEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
       .trackRangeChunks(4)
       .trackedUpdateRate(10)
-      .entityFactory((spawnEntity, world) -> new EflnBallEntity(TinkerGadgets.eflnEntity.get(), world))
+      .entityFactory((spawnEntity, world) -> new EFLNEntity(TinkerGadgets.eflnEntity.get(), world))
       .forceTrackedVelocityUpdates(true)
   );
   public static final RegistryObject<EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.register("quartz_shuriken", () ->
