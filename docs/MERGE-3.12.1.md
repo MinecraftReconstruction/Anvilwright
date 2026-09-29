@@ -6,6 +6,39 @@
 
 ---
 
+## 2026-09-29（第二轮）· 按"真错误"口径推进 —— 报告 462 → 362 / 真错误 319 → 224
+
+这一轮先定案了第 7 节的 Lombok 问题（结论见下一节），然后按家族推进，四个 checkpoint 都已 push：
+
+| commit | 内容 | 数字 |
+|---|---|---|
+| `ef51374b38` | Mantle 模型数据家族 + 14 处重复方法 + 新工具 | 462 → 426 |
+| `5cedfca395` | 删上游已删的死模型（`Casting/Melter/TableModel`）、`GenericRegistryEntrySerializer`；`AlloyRecipe` 补回 `record AlloyIngredient` | 426 → 401 |
+| `34ef2b472a` | `TinkerTools` 注册表按上游重写（工具定义模块/工具属性/谓词），删 4 个旧 harvest/aoe 类 | 401 → 375 |
+| `3b45a0462e` | 单罐流体抽象层改到 Fabric 形状（`SimpleFluidTank`/`FluidTankBase`/`EmptyFluidHandlerItem`/`ScaledFluidTank`） | 375 → 361 |
+
+**方法论更新（照这个来）**：
+
+1. **先分清真假**：默认日志和 `--gen` 日志取交集 = 真错误；差集 = 假错误。`python3 scripts/port/workqueue.py` 一次算完。
+2. **"上游已删 + 没有资源引用"就直接删**，这轮删掉 4 个类（模型 3 + 注册块 1）后又确认了 4 个（`harvest`/`aoe` 旧实现）。
+   判据：`git cat-file -e v3.12.1.231:<path>` 判"上游删没删"；`rg '"loader": *"[^"]+"' src/main/resources` 判"资源还用不用这个 loader"；
+   `rg -o '"type": *"tconstruct:[a-z_]+' src/generated/resources/...` 判"数据还用不用这个注册 id"。
+3. **合并留下的"文件尾部被截断"有一批**：`AlloyRecipe` 少了嵌套 record、`ToolInventoryCapability` 少了 `CraftingType` 枚举、
+   `ModifiableArmorItem`/`ToolAttackUtil` 尾部多了一整份重复实现。查法：`wc -l` 对比上游 + `git diff v3.12.1.231 -- <file>` 看尾部。
+4. **"运行时注册"仍然是最危险的一类**：`TinkerTools` 少了整块注册（工具定义/谓词），编译上只体现为几条 import 报错，
+   但运行时会变成"所有工具都是空定义"。改注册相关代码时，一定拿上游同名方法逐行对。
+
+### 顺带修掉的真 bug
+
+| 位置 | 问题 | 处理 |
+|---|---|---|
+| `HeatingStructureBlockEntity.updateDisplayFluid` | 合并时把 `this.displayFluid = ...` 换成了 `modelData.setData(...)`，而 `modelData` 字段已经不存在 ⇒ 冶炼炉显示的流体永远停在初始值 | 恢复上游赋值（`ModelData` 不可变，改走字段 + block update） |
+| `TinkerTools.registerRecipeSerializers` | 只剩旧 fork 的 5 条注册，上游 ~60 条全丢 ⇒ 工具定义/谓词在运行时找不到 loader | 按上游重写该段，并补上此前也漏掉的 `tconstruct:tool_stack` |
+| `RetexturedTableBlockEntity.textureUpdated` | 拿不可变的 `ModelData` 去 `setData`（还调了不存在的 `requestModelDataUpdate`） | 改成 Mantle 自己的 `RetexturedHelper.onTextureUpdated(this)`，与 `DefaultRetexturedBlockEntity` 一致 |
+| 6 个文件 14 处 | 重复的方法/字段声明（两版代码都在） | 删除后一半，并与上游对齐 |
+
+---
+
 ## 2026-09-29 · 度量口径被推翻："Lombok 假错误"比想象的大得多，而且总数是**下界**
 
 这一轮把前面几轮一直没解开的"Lombok 假错误"查清楚了，结论**改变了统计口径**，先看这段再干活。
