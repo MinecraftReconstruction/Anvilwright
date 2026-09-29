@@ -9,15 +9,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import slimeknights.mantle.fluid.texture.ClientTextureFluidType;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class PotionFluidType extends FluidType {
   public PotionFluidType(Properties properties) {
@@ -36,27 +33,10 @@ public class PotionFluidType extends FluidType {
     return itemStack;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-    consumer.accept(new ClientTextureFluidType(this) {
-      /**
-       * Gets the color, based on {@link PotionUtils#getColor(ItemStack)}
-       * @param stack  Fluid stack instance
-       * @return  Color for the fluid
-       */
-      @Override
-      public int getTintColor(FluidStack stack) {
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("CustomPotionColor", Tag.TAG_ANY_NUMERIC)) {
-          return tag.getInt("CustomPotionColor") | 0xFF000000;
-        }
-        if (PotionUtils.getPotion(tag) == Potions.EMPTY) {
-          return getTintColor();
-        }
-        return PotionUtils.getColor(PotionUtils.getAllEffects(tag)) | 0xFF000000;
-      }
-    });
-  }
+  // NOTE(porting): upstream supplies the potion fluid's client texture and tint through Forge's
+  //  IClientFluidTypeExtensions here. Fabric has no such extension hook, so this port keeps its own
+  //  PotionFluidAttributes + ClientFluidAttributeRegistry pair for the client side (see TinkerFluids), which
+  //  implements the same CustomPotionColor/potion-colour logic. See docs/BEHAVIOUR-DIFFERENCES.md.
 
   /** Creates the potion tag */
   private static CompoundTag potionTag(ResourceLocation location) {
