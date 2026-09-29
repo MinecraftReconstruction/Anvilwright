@@ -150,3 +150,38 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
   所以"上游删除/移动了多少文件"这类统计需要用 `git diff --no-renames` 或直接比对 tree。
 - 冲突标记有两种写法：普通冲突是 **7 个** `<`，`rename` 类冲突是 **8 个** `<` **且带文件路径**。
   只按 7 个字符检测会漏掉 22~535 个文件（本次就踩了这个坑）。
+
+## 错误数收敛过程（`mcr/upstream-3.12.1`）
+
+| 阶段 | 错误数 | 做了什么 |
+|---|---|---|
+| 合并后首次编译 | **4540** | 那时还没解决冲突（OOM 截断前） |
+| 解决完冲突 + 修 17 个结构损坏 | **2734** | 见上文 |
+| 按移植历史推断并套用 Forge→Porting Lib import 映射（182 文件）+ 补 errorprone 注解依赖 | **2223** | `FluidStack`→`porting_lib.fluids.FluidStack` 等 10 组 |
+| 自动补齐合并丢掉的 import（135 处 / 76 文件） | **2037** | `RecordLoadable`、`LoadableField`、`ModelData`、`TooltipKey`、`IJsonPredicate`… |
+| 符号改名：`TooltipKey` 路径搬迁、`SimpleFlowableFluid`→`SimpleFlowingFluid`、`ICondition` 用法改名 | **1920**（当前） | 见提交历史 |
+
+## 下一步：hook 系统的迁移（最大的一块人工工作）
+
+上游 3.12 把 modifier hook 体系重构了，这是当前错误里最集中的结构性变化：
+
+| 我们代码里的旧名字 | 上游 3.12.1 的新家 |
+|---|---|
+| `slimeknights.tconstruct.library.modifiers.ModifierHook` | `slimeknights.tconstruct.library.modifiers.ModifierHooks`（复数，hook 定义容器）+ 各 hook 接口挪到 `library/modifiers/hook/<类别>/` 下（例如 `hook/armor/DamageBlockModifierHook`） |
+| `slimeknights.tconstruct.library.modifiers.TinkerHooks` | 上游已**删除**（并入 `ModifierHooks`） |
+| `IncrementalModifier` | `IncrementalModifierEntry`（`library/modifiers/`） |
+| `IGenericLoader`（Mantle 1.9 的 `GenericLoaderRegistry`） | Mantle 1.11 的 `GenericLoaderRegistry<T extends IHaveLoader>` + `RecordLoadable`（`mantle.data.registry`） |
+
+**建议做法**：这些文件基本都在"保留我们"的 299 个里。逐文件用
+`git diff <merge-base> v3.12.1.231 -- <file>` 看上游怎么改的，再把我们的 Fabric 适配套上去。
+先做 `library/modifiers/`（hook 定义与 Modifier 基类），因为 `tools/`、`smeltery/` 都依赖它，
+顺序反了会反复返工。
+
+### 还剩下的三类
+
+1. **Forge 流体 API**：`FluidAction`(61)、`IFluidHandler`(15)、`FluidAttributes` —— 需要用 Fabric 的
+   `Transaction` / `StorageUtil.simulateInsert` / `Storage` 语义重写（`net.minecraftforge.fluids.FluidStack`
+   那一层已经用 Porting Lib 顶掉了，剩下的是动作语义）
+2. **Forge 事件**：`SubscribeEvent`(28)、`BreakSpeed`(15) —— 需要换成 Fabric 的事件注册
+3. **可选兼容**：JEI 的 `api.forge`、jsonthings、diet、Immersive Engineering 在 Fabric 上没有对等物，
+   建议直接把这几处集成**移除**并在 CHANGELOG 里写明（而不是硬凑）
