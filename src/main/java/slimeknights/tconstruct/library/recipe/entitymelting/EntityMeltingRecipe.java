@@ -119,7 +119,7 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
   }
 
   /** Serializer for this recipe */
-  public static class Serializer extends LoggingRecipeSerializer<EntityMeltingRecipe> {
+  public static class Serializer implements LoggingRecipeSerializer<EntityMeltingRecipe> {
     @Override
     public EntityMeltingRecipe fromJson(ResourceLocation id, JsonObject json) {
       EntityIngredient ingredient = EntityIngredient.deserialize(JsonHelper.getElement(json, "entity"));
@@ -130,7 +130,7 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
 
     @Nullable
     @Override
-    protected EntityMeltingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
+    public EntityMeltingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
       EntityIngredient ingredient = EntityIngredient.read(buffer);
       FluidStack output = FluidStack.readFromPacket(buffer);
       int damage = buffer.readVarInt();
@@ -138,7 +138,7 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
     }
 
     @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, EntityMeltingRecipe recipe) {
+    public void toNetworkSafe(FriendlyByteBuf buffer, EntityMeltingRecipe recipe) {
       recipe.ingredient.write(buffer);
       recipe.output.writeToPacket(buffer);
       buffer.writeVarInt(recipe.damage);

@@ -204,7 +204,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     return TinkerSmeltery.alloyingSerializer.get();
   }
 
-  public static class Serializer extends LoggingRecipeSerializer<AlloyRecipe> {
+  public static class Serializer implements LoggingRecipeSerializer<AlloyRecipe> {
     @Override
     public AlloyRecipe fromJson(ResourceLocation id, JsonObject json) {
       FluidStack result = RecipeHelper.deserializeFluidStack(GsonHelper.getAsJsonObject(json, "result"));
@@ -224,7 +224,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     }
 
     @Override
-    protected void toNetworkSafe(FriendlyByteBuf buffer, AlloyRecipe recipe) {
+    public void toNetworkSafe(FriendlyByteBuf buffer, AlloyRecipe recipe) {
       recipe.output.writeToPacket(buffer);
       buffer.writeVarInt(recipe.inputs.size());
       for (FluidIngredient input : recipe.inputs) {
@@ -235,7 +235,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
 
     @Nullable
     @Override
-    protected AlloyRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
+    public AlloyRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
       FluidStack output = FluidStack.readFromPacket(buffer);
       int inputCount = buffer.readVarInt();
       ImmutableList.Builder<FluidIngredient> builder = ImmutableList.builder();

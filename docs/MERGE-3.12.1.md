@@ -414,3 +414,48 @@ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home \
   要看总数 + 逐文件 diff。
 - **注意事项**：`ModifierEvents` 和各个 modifier 类必须**同时**迁移 —— 3.12 之前这些行为散在各 modifier 里，
   两边都留着会**重复触发**。
+
+### 2026-09-29 · 探查「Lombok 生成物看不见」的假错误（未结案，已记录复现步骤）
+
+**现象**：822 条错误里有一批看起来"不可能"的错误，例如
+
+- `PartRecipe.java:43: PartRecipe is not abstract and does not override abstract method getCost() in IPartBuilderRecipe`
+  —— 但 `@Getter protected final int cost;` 明明会生成 `getCost()`；
+- `PartRecipe.java:166: cannot find symbol: method getVariant() / location: var material of type MaterialVariant`
+  —— 但 `MaterialVariant` 与上游 **逐字节相同**，且它在**同一个 javac 进程**里从另一个文件调用时能正常解析。
+
+**已排除的可能**（都实测过）：
+
+| 猜想 | 结论 |
+|---|---|
+| Lombok 没跑 | 否。`-XprintProcessorInfo` 显示 `AnnotationProcessorHider$ClaimingProcessor matches [@Getter, @RequiredArgsConstructor, @Accessors]` |
+| Lombok 版本太旧 | 否。1.18.22 与 1.18.30 结果一致（1.18.22 不能在 JDK 21 下跑，已顺手升到 1.18.30） |
+| `lombok.config` 的 `config.stopBubbling` | 否 |
+| 有文件重复注解把 Lombok 整轮带崩 | 否。修掉 `TinkerDataCapability` 的重复 `@SuppressWarnings` 只减少 2 条，`PartRecipe` 不变 |
+| Gradle 增量编译/缓存 | 否。直接手写 javac（2094 个源文件、`--release 17`、`-proc:full`、`-Xmaxerrs 100000`）得到同样的 821 条 |
+| `-XDshould-stop.ifNoError=ATTR` 提前停 | 同样 821 条 |
+| 依赖 jar 里有多余的同名类 | 否。compileClasspath 里没有 TConstruct/Hephaestus jar |
+| Lombok 对 `@RequiredArgsConstructor` + 显式委托构造器的组合失效 | 单独最小复现**不能**稳定复现；`delombok` 输出里 `getCost()` 和 8 参构造器**都生成了** |
+
+**已确认的两个真实 bug（已修）**：
+
+1. Mantle 1.11 的 `LoggingRecipeSerializer` 是 **interface**（上游 Mantle `1.20` 分支也是 interface），
+   但 6 个 1.20.1 时代的类写的是 `extends`，导致 6 条 `no interface expected here`。
+   已改成 `implements` 并把 `fromNetworkSafe`/`toNetworkSafe` 提为 `public`。
+2. `TinkerDataCapability` 被合并弄出了**重复的 `@SuppressWarnings` 和重复的 `computeIfAbsent`**，已去重。
+
+**复现方式**（给下一个接手的人）：
+
+```bash
+JAVA_HOME=... ./gradlew -I /tmp/printcp.gradle printCompileCp   # 导出 compileClasspath / annotationProcessor
+# 只编译 PartRecipe 及其隐式依赖：
+$JDK17/bin/javac -encoding UTF-8 -proc:full -processorpath "$AP" -cp "src/main/java:$CP" \
+  -d /tmp/out src/main/java/slimeknights/tconstruct/library/recipe/partbuilder/PartRecipe.java
+# 把 PartRecipe 复制成 PartRecipeProbe.java（类名一起改）放同目录，仍然复现
+# 但裁到只剩「imports + 字段 + 构造器 + getSerializer」时 getCost() 又存在了
+```
+
+**判断**：这批错误里**有一部分是级联/假错误**（依赖类型解析失败后 javac 的二次诊断），
+所以**当前 820 这个数字不能当作"真实剩余工作量"**。策略上：
+先把 `cannot find symbol: package net.minecraftforge.*` 这类**根因**清掉，
+每清一批就重新看 `PartRecipe` / `MaterialVariant` 这批文件是否自己好了，不要单独去"修"它们。

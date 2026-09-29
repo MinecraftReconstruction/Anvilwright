@@ -208,7 +208,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   }
 
   @RequiredArgsConstructor
-  public static class Serializer extends LoggingRecipeSerializer<ModifierRemovalRecipe> {
+  public static class Serializer implements LoggingRecipeSerializer<ModifierRemovalRecipe> {
     private final Factory factory;
 
     /** @deprecated use {@link #Serializer(Factory)} */
