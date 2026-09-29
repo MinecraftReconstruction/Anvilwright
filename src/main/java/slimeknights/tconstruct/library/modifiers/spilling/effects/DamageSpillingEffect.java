@@ -15,7 +15,7 @@ import slimeknights.tconstruct.library.modifiers.spilling.ISpillingEffect;
 import slimeknights.tconstruct.library.tools.context.ToolAttackContext;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
 import slimeknights.tconstruct.library.utils.JsonUtils;
-import slimeknights.tconstruct.shared.TinkerDamageTypes;
+import slimeknights.tconstruct.common.TinkerDamageTypes;
 
 import javax.annotation.Nullable;
 import java.util.Locale;

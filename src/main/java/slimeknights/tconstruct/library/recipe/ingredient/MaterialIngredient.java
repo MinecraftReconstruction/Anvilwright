@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
-import net.minecraft.world.item.ItemLike;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.crafting.Ingredient.Value;
 
 /**

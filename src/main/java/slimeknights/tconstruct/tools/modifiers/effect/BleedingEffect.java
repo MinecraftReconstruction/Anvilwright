@@ -9,7 +9,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.library.tools.helper.ToolAttackUtil;
-import slimeknights.tconstruct.shared.TinkerDamageTypes;
+import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.tools.modifiers.traits.melee.LaceratingModifier;
 
 /**
