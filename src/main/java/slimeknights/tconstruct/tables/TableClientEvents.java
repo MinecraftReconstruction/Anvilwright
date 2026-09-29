@@ -29,15 +29,10 @@ import java.util.Map;
 public class TableClientEvents extends ClientEventBase {
 
   public static void init() {
-    RegisterGeometryLoadersCallback.EVENT.register(TableClientEvents::registerModelLoader);
     registerRenderers();
     setupClient();
     TableClientEvents.registerBlockColors();
     TableClientEvents.registerItemColors();
-  }
-
-  static void registerModelLoader(Map<ResourceLocation, IGeometryLoader<?>> loaders) {
-    loaders.put(TConstruct.getResource("table"), TableModel.LOADER);
   }
 
   static void registerRenderers() {

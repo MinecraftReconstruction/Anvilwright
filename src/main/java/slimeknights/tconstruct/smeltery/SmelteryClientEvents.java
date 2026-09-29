@@ -98,8 +98,6 @@ public class SmelteryClientEvents extends ClientEventBase {
 
   static void registerModelLoaders(Map<ResourceLocation, IGeometryLoader<?>> loaders) {
     loaders.put(TConstruct.getResource("tank"), TankModel.LOADER);
-    loaders.put(TConstruct.getResource("casting"), CastingModel.LOADER);
-    loaders.put(TConstruct.getResource("melter"), MelterModel.LOADER);
     loaders.put(TConstruct.getResource("channel"), ChannelModel.LOADER);
     loaders.put(TConstruct.getResource("fluid_texture"), FluidTextureModel.LOADER);
     loaders.put(TConstruct.getResource("copper_can"), CopperCanModel.LOADER);

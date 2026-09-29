@@ -1,8 +1,5 @@
 package slimeknights.tconstruct.library.recipe.alloying;
 
-import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.ICustomOutputRecipe;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
@@ -19,11 +20,6 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.BitSet;
 import java.util.List;
-import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import javax.annotation.Nullable;
-import net.minecraft.network.FriendlyByteBuf;
-import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe.AlloyIngredient;
 
 /**
  * Base class for alloying recipes
@@ -160,7 +156,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     FluidStack fluid;
     for (AlloyIngredient ingredient : inputs) {
       // care about size, if too small just skip the recipe
-      int index = findMatch(ingredient, inv, used, true);
+      int index = findMatch(ingredient.fluid, inv, used, true);
       if (index == -1) {
         // no fluid matched this ingredient, match failed
         return;
@@ -168,7 +164,7 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
         // practically the drained fluid at the index should always be null as we don't reuse indexes
         assert drainFluids[index] == null;
         fluid = inv.getFluidInTank(index);
-        long amount = ingredient.getAmount(fluid.getFluid());
+        long amount = ingredient.fluid.getAmount(fluid.getFluid());
         drainAmount += amount;
         drainFluids[index] = new FluidStack(fluid, amount);
       }
@@ -207,46 +203,11 @@ public class AlloyRecipe implements ICustomOutputRecipe<IAlloyTank> {
     return TinkerSmeltery.alloyingSerializer.get();
   }
 
-  public static class Serializer implements LoggingRecipeSerializer<AlloyRecipe> {
-    @Override
-    public AlloyRecipe fromJson(ResourceLocation id, JsonObject json) {
-      FluidStack result = RecipeHelper.deserializeFluidStack(GsonHelper.getAsJsonObject(json, "result"));
-      List<FluidIngredient> inputs = JsonHelper.parseList(json, "inputs", FluidIngredient::deserialize);
-
-      // ensure result is not part of any inputs, that would be bad and not clear to the user whats happening
-      if (inputs.size() < 2) {
-        throw new JsonSyntaxException("Too few inputs to alloy recipe " + id);
-      }
-      for (FluidIngredient input : inputs) {
-        if (input.test(result)) {
-          throw new JsonSyntaxException("Result fluid contained in input in alloy recipe " + id);
-        }
-      }
-      int temperature = GsonHelper.getAsInt(json, "temperature");
-      return new AlloyRecipe(id, inputs, result, temperature);
-    }
-
-    @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, AlloyRecipe recipe) {
-      recipe.output.writeToPacket(buffer);
-      buffer.writeVarInt(recipe.inputs.size());
-      for (FluidIngredient input : recipe.inputs) {
-        input.write(buffer);
-      }
-      buffer.writeVarInt(recipe.temperature);
-    }
-
-    @Nullable
-    @Override
-    public AlloyRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      FluidStack output = FluidStack.readFromPacket(buffer);
-      int inputCount = buffer.readVarInt();
-      ImmutableList.Builder<FluidIngredient> builder = ImmutableList.builder();
-      for (int i = 0; i < inputCount; i++) {
-        builder.add(FluidIngredient.read(buffer));
-      }
-      int temperature = buffer.readVarInt();
-      return new AlloyRecipe(id, builder.build(), output, temperature);
-    }
+  public record AlloyIngredient(FluidIngredient fluid, boolean catalyst) {
+    public static final RecordLoadable<AlloyIngredient> LOADABLE = RecordLoadable.create(
+      FluidIngredient.LOADABLE.tryDirectField("match", AlloyIngredient::fluid),
+      BooleanLoadable.INSTANCE.defaultField("catalyst", false, false, AlloyIngredient::catalyst),
+      AlloyIngredient::new
+    ).compact(FluidIngredient.LOADABLE.flatXmap(fluid -> new AlloyIngredient(fluid, false), AlloyIngredient::fluid), alloy -> !alloy.catalyst());
   }
 }
