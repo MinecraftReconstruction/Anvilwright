@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.lang3.text.WordUtils;
-import slimeknights.mantle.data.fabric.IdentifiableISafeManagerReloadListener;
+import slimeknights.tconstruct.library.utils.IdentifiableISafeManagerReloadListener;
 import slimeknights.tconstruct.TConstruct;
 
 import java.util.HashMap;

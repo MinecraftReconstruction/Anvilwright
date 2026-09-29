@@ -9,7 +9,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
 import slimeknights.mantle.client.ResourceColorManager;
-import slimeknights.mantle.data.fabric.IdentifiableISafeManagerReloadListener;
+import slimeknights.tconstruct.library.utils.IdentifiableISafeManagerReloadListener;
 import slimeknights.tconstruct.TConstruct;
 
 import java.util.List;

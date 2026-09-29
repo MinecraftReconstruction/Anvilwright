@@ -22,6 +22,7 @@
 | 12 | 弩炮（ballista）找弹药 | `ModifierEvents` 监听 Forge 的 `LivingGetProjectileEvent`，在弩取弹药时把手持的弩炮弹药换进去 / 从箭袋取时不回落到背包 | Fabric 没有该事件，改成在 `BowAmmoModifierHook.getBallistaAmmo` 里复现同一段逻辑，由 `releaseUsing`/`use` 调用 | 语义等价（换了个挂点） | 手持弩炮与箭袋两条路径都已覆盖；行为应与上游一致，但**没有事件时序差异需要实测** | ⚠️ 未验证 |
 | 13 | 砂轮保护 | 上游 3.12 **没有**这个功能（语言文件里明确写着"A tool cannot be recycled if it is enchanted, use the grindstone to remove them first"） | 本移植此前的 1.20.1 代码在 `ToolEvents` 里注册 `GrindstoneEvents.ON_PLACE_ITEM` 禁止砂轮处理 TCon 工具；对齐上游后**已删除** | 功能回退到上游 | 现在可以像上游一样用砂轮去掉 TCon 工具上的原版附魔 | — |
 | 14 | 修饰符事件集中化 | 上游 3.12 把经验/掉落/暴击/药水/摔落/传送等处理集中到 `ModifierEvents`，各 modifier 类不再自己注册 | 本移植此前沿用 1.20.1 的分散写法（`ExperiencedModifier`、`LeapingModifier`、`DragonbornModifier`、`SoulboundModifier`、`MagicProtectionModifier`、`BlastProtectionModifier`、`RicochetModifier`、`AchievementEvents` 等各自注册）。现已对齐上游：这些类**已删除**，行为统一由 `ModifierEvents` 提供 | 对齐上游（消除重复触发） | 修复了"同一个行为被两处注册"的重复触发隐患；这些 modifier 的数值定义现在完全来自 datagen JSON | 未验证（需实测经验/掉落/暴击） |
+| 15 | `IdentifiableISafeManagerReloadListener` 的归属 | 不是上游概念：上游用 Forge 的 `ModLoader.isLoadingStateValid()` 包一层安全判断 | Fabric 端口原本把它放在 Mantle 的 `slimeknights.mantle.data.fabric` 包，该包在 Mantle 自己的 1.20 合并里没了，所以这个适配器现在住在 TCon 的 `library/utils`。语义不变：固定 ID（Fabric 资源管理器要求）+ Mantle 的 `onReloadSafe` 钩子 | 位置变化（无语义差异） | 只影响 6 个客户端缓存监听器（`HarvestTiers`、`DomainDisplayName`、`MaterialTooltipCache`、`ToolClientEvents`、`PlateArmorModel`、`SlimelytraArmorModel`）的注册方式 | 未验证（需实测客户端缓存刷新） |
 
 ## 如何更新本文件
 
