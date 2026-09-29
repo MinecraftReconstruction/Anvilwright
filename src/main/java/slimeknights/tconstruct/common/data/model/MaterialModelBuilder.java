@@ -2,8 +2,8 @@ package slimeknights.tconstruct.common.data.model;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraftforge.client.model.generators.CustomLoaderBuilder;
-import net.minecraftforge.client.model.generators.ModelBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.CustomLoaderBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.ModelBuilder;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.TConstruct;
 

@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 import java.util.function.Function;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
-import static net.minecraftforge.client.model.generators.ModelProvider.BLOCK_FOLDER;
+import static io.github.fabricators_of_create.porting_lib.models.generators.ModelProvider.BLOCK_FOLDER;
 import static slimeknights.tconstruct.TConstruct.getResource;
 
 @SuppressWarnings({"UnusedReturnValue", "SameParameterValue", "removal"})

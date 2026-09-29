@@ -167,6 +167,32 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 
 ## hook 体系迁移的分批实测（358 个文件）
 
+## ✅ 已验证有效的推进套路（按这个顺序做最省力）
+
+1. **先看上游版本的 Forge 用法是「管线」还是「逻辑」**：
+   - **管线**（注册表、`RegistryObject`、datagen 生成器、事件总线注册、`ExistingFileHelper`）→
+     **直接取上游版本，再把这几行换成 Porting Lib / Fabric 对应物**。这一步的收益/成本比最高：
+
+     | 批次 | 结果 |
+     |---|---|
+     | `TinkerModifiers`（629→1141 行，换新 modifier 集合） | 1494 → **1443** |
+     | `TinkerTables` + `DisplayCastingRecipe` + `PartRecipe` | 1443 → **1397** |
+     | datagen 模型 provider 两个新文件 | 1397 → **1356** |
+     | 残留的 generator/`ExistingFileHelper` import | 1356 → **1350**（当前） |
+
+   - **逻辑**（Forge 事件、capability、`IClientItemExtensions`）→ 只能逐文件移植（实测整体翻转 +123 个错误，见下）。
+2. **缺类时先查 Porting Lib 的模块清单**：`TinkerBlockStateProvider` 报
+   `porting_lib.models.generators.block does not exist`，原因是 TCon 的
+   `port_lib_modules` 里没有 `model_generators`。同一个类在 Porting Lib 里有、且包名/类名与 Forge 一一对应时，
+   加模块 + 改 import 就能一次解决一批。
+3. **Forge → Porting Lib 的固定映射**（已多次验证）：
+   `RegistryObject`/`LazyOptional`/`ToolAction(s)`/`Tags`/`ItemHandlerHelper`/`ExistingFileHelper`/
+   `FluidStack` → `io.github.fabricators_of_create.porting_lib.{util,tool,tags,transfer.item,data,fluids}.*`；
+   `client.model.generators.{ModelFile,ModelBuilder,ModelProvider,CustomLoaderBuilder}` 与
+   `{block,item}` 子包 → `porting_lib.models.generators.*`（包结构完全一致）；
+   `IFluidHandler.FluidAction` → 我们的 `tconstruct.library.fluid.FluidAction` 垫片。
+4. **Loom 的 `jar` 是 dev jar**：发布/被依赖必须用 `remapJar`（Mantle 侧已修，见其 STATUS.md）。
+
 358 个文件引用被上游替换掉的 hook API。按「上游版本是否依赖 Forge API」分成三组，
 并对前两组做了对照测量：
 
