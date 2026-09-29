@@ -10,7 +10,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.ingredient.AbstractIngredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.tconstruct.TConstruct;
@@ -121,7 +121,7 @@ public class MaterialValueIngredient extends AbstractIngredient {
   @Override
   public JsonElement toJson() {
     JsonObject json = new JsonObject();
-    json.addProperty("type", Serializer.ID.toString());
+    json.addProperty("fabric:type", Serializer.ID.toString());
     Serializer.MATERIAL_FIELD.serialize(this, json);
     if (minValue == maxValue) {
       json.addProperty("value", minValue);
@@ -139,19 +139,19 @@ public class MaterialValueIngredient extends AbstractIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
+  public CustomIngredientSerializer<?> getSerializer() {
     return Serializer.INSTANCE;
   }
 
 
   /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<MaterialValueIngredient> {
+  public enum Serializer implements CustomIngredientSerializer<MaterialValueIngredient> {
     INSTANCE;
     public static final ResourceLocation ID = TConstruct.getResource("material_value");
     private static final LoadableField<IJsonPredicate<MaterialVariantId>, MaterialValueIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
 
     @Override
-    public MaterialValueIngredient parse(JsonObject json) {
+    public MaterialValueIngredient read(JsonObject json) {
       float minValue, maxValue;
       JsonElement value = json.get("value");
       if (value.isJsonPrimitive()) {
@@ -165,7 +165,7 @@ public class MaterialValueIngredient extends AbstractIngredient {
     }
 
     @Override
-    public MaterialValueIngredient parse(FriendlyByteBuf buffer) {
+    public MaterialValueIngredient read(FriendlyByteBuf buffer) {
       return new MaterialValueIngredient(
         MATERIAL_FIELD.decode(buffer),
         buffer.readFloat(),

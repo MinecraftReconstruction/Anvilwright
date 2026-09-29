@@ -27,6 +27,10 @@ import slimeknights.tconstruct.tools.data.material.MaterialIds;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
+import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
+import slimeknights.tconstruct.library.recipe.ingredient.ToolHookIngredient;
 
 /**
  * Contains bommon blocks and items used in crafting materials
@@ -63,6 +67,13 @@ public final class TinkerMaterials extends TinkerModule {
    */
   void registerSerializers() {
     CustomIngredientSerializer.register(MaterialIngredient.Serializer.INSTANCE);
+    // Upstream splits these across TinkerCommons/TinkerMaterials/TinkerTools (one CraftingHelper.register each);
+    // Fabric's API is a single registry, so they are all registered here instead.
+    CustomIngredientSerializer.register(MaterialValueIngredient.Serializer.INSTANCE);
+    CustomIngredientSerializer.register(NoContainerIngredient.Serializer.INSTANCE);
+    CustomIngredientSerializer.register(BlockTagIngredient.Serializer.INSTANCE);
+    CustomIngredientSerializer.register(InstrumentIngredient.SERIALIZER);
+    CustomIngredientSerializer.register(ToolHookIngredient.Serializer.INSTANCE);
   }
 
   public TinkerMaterials() {

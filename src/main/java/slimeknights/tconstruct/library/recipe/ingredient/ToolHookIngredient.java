@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import slimeknights.mantle.recipe.ingredient.AbstractIngredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import net.minecraft.world.item.crafting.Ingredient.Value;
 
 /** Ingredient that only matches tools with a specific hook */
 public class ToolHookIngredient extends AbstractIngredient {
@@ -57,14 +58,14 @@ public class ToolHookIngredient extends AbstractIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
+  public CustomIngredientSerializer<?> getSerializer() {
     return Serializer.INSTANCE;
   }
 
   @Override
   public JsonObject toJson() {
     JsonObject json = new JsonObject();
-    json.addProperty("type", Serializer.ID.toString());
+    json.addProperty("fabric:type", Serializer.ID.toString());
     json.addProperty("tag", tag.location().toString());
     json.addProperty("hook", hook.getId().toString());
     return json;
@@ -103,13 +104,13 @@ public class ToolHookIngredient extends AbstractIngredient {
   }
 
   /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<ToolHookIngredient> {
+  public enum Serializer implements CustomIngredientSerializer<ToolHookIngredient> {
     INSTANCE;
 
     public static final ResourceLocation ID = TConstruct.getResource("tool_hook");
 
     @Override
-    public ToolHookIngredient parse(JsonObject json) {
+    public ToolHookIngredient read(JsonObject json) {
       return new ToolHookIngredient(
         Loadables.ITEM_TAG.getOrDefault(json, "tag", TinkerTags.Items.MODIFIABLE),
         ToolHooks.LOADER.getIfPresent(json, "hook")
@@ -117,7 +118,7 @@ public class ToolHookIngredient extends AbstractIngredient {
     }
 
     @Override
-    public ToolHookIngredient parse(FriendlyByteBuf buffer) {
+    public ToolHookIngredient read(FriendlyByteBuf buffer) {
       return new ToolHookIngredient(
         Loadables.ITEM_TAG.decode(buffer),
         ToolHooks.LOADER.decode(buffer)

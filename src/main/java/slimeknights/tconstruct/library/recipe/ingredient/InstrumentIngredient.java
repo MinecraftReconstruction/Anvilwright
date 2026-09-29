@@ -18,7 +18,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.recipe.ingredient.AbstractIngredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import net.minecraft.world.item.crafting.Ingredient.Value;
 
 /** Ingredient matching an {@link net.minecraft.world.item.InstrumentItem} with a particular instrument. */
 public class InstrumentIngredient extends AbstractIngredient {
@@ -86,14 +87,14 @@ public class InstrumentIngredient extends AbstractIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
+  public CustomIngredientSerializer<?> getSerializer() {
     return SERIALIZER;
   }
 
   @Override
   public JsonElement toJson() {
     JsonObject json = new JsonObject();
-    json.addProperty("type", ID.toString());
+    json.addProperty("fabric:type", ID.toString());
     json.addProperty("item", Loadables.ITEM.getString(item));
     if (instrument != null) {
       json.addProperty("instrument", instrument.location().toString());
@@ -127,9 +128,25 @@ public class InstrumentIngredient extends AbstractIngredient {
   }
 
   /** Serializer instance */
-  public static final IIngredientSerializer<InstrumentIngredient> SERIALIZER = new IIngredientSerializer<>() {
+  public static final CustomIngredientSerializer<InstrumentIngredient> SERIALIZER = new CustomIngredientSerializer<>() {
     @Override
-    public InstrumentIngredient parse(JsonObject json) {
+    public ResourceLocation getIdentifier() {
+      return ID;
+    }
+
+    @Override
+    public void write(JsonObject json, InstrumentIngredient ingredient) {
+      json.addProperty("fabric:type", ID.toString());
+      json.addProperty("item", BuiltInRegistries.ITEM.getKey(ingredient.item).toString());
+      if (ingredient.instrument != null) {
+        json.addProperty("instrument", ingredient.instrument.location().toString());
+      } else if (ingredient.ignore != null) {
+        json.addProperty("ignore", "#" + ingredient.ignore.location());
+      }
+    }
+
+    @Override
+    public InstrumentIngredient read(JsonObject json) {
       Item item = Loadables.ITEM.getIfPresent(json, "item");
       ResourceKey<Instrument> instrument = null;
       TagKey<Instrument> ignore = null;
@@ -159,7 +176,7 @@ public class InstrumentIngredient extends AbstractIngredient {
 
     @SuppressWarnings("deprecation")
     @Override
-    public InstrumentIngredient parse(FriendlyByteBuf buffer) {
+    public InstrumentIngredient read(FriendlyByteBuf buffer) {
       Item item = buffer.readById(BuiltInRegistries.ITEM);
       // swap missing items for barriers
       if (item == null) {
