@@ -21,6 +21,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import slimeknights.mantle.block.InventoryBlock;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Inventory block with directions and waterlogging

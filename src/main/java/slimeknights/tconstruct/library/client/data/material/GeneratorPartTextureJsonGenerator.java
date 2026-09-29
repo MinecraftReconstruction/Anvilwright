@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.Map;
+import java.util.Set;
+import net.minecraft.data.PackOutput;
 
 /** Generates the file that tells the part generator command which parts are needed for your tools */
 public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {

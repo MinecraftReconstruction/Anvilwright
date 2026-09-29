@@ -83,6 +83,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
+import net.minecraft.world.item.CreativeModeTab;
 
 /**
  * Contains items and blocks and stuff that is shared by multiple modules, but might be required individually

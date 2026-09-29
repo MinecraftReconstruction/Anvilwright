@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 /**
  * Module handling the melter tank UI display

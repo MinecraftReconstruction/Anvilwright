@@ -10,6 +10,7 @@ import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import net.minecraft.world.level.material.Fluid;
 
 /**
  * Common interface for all melting recipes

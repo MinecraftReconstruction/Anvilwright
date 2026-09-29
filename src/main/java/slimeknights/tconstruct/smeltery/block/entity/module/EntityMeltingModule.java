@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.world.damagesource.DamageSource;
 
 /**
  * Module to handle fetching items from the bounds and interacting with entities in the structure

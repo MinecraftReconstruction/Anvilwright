@@ -22,6 +22,10 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.util.Collection;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
+import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Recipe to melt an entity into a fluid

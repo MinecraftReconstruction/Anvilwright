@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
+import lombok.Getter;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * Logic to keep track of the side of the block that was last hit

@@ -6,6 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.FaucetBlockEntity;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import slimeknights.mantle.network.packet.BlockEntityPacket;
 
 /**
  * Sent to clients to activate the faucet animation clientside.

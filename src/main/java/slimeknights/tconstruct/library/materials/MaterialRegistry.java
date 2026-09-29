@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import slimeknights.mantle.command.argument.TagSource;
+import javax.annotation.Nullable;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 public final class MaterialRegistry {
   /** Internal material stats ID for the sake of adding traits exclusive to melee or harvest materials */

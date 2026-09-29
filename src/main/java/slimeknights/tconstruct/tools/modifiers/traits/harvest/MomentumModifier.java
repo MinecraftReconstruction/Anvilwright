@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import slimeknights.mantle.client.TooltipKey;
 import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
+import net.minecraft.world.phys.Vec3;
 
 public class MomentumModifier extends Modifier implements ProjectileLaunchModifierHook, ConditionalStatModifierHook, BlockBreakModifierHook, BreakSpeedModifierHook, SlingLaunchModifierHook, TooltipModifierHook {
   private static final Component SPEED = TConstruct.makeTranslation("modifier", "momentum.speed");

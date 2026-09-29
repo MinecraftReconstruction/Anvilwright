@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.world.item.crafting.Ingredient;
 
 public class MeltingFuelHandler {
   /**

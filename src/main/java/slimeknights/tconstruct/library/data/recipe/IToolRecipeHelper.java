@@ -21,6 +21,7 @@ import slimeknights.tconstruct.tools.data.material.MaterialIds;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.world.level.ItemLike;
 
 /**
  * Interface for tool and part crafting recipes

@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.crafting.Ingredient;
 
 /** Recipe to dye travelers gear */
 public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisplayModifierRecipe> {

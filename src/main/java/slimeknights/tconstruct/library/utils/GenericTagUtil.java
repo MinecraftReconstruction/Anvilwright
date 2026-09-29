@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.List;
 
 /** Static helpers for generic tag loading */
 public class GenericTagUtil {

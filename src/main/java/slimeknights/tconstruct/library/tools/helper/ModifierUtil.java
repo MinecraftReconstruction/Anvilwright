@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.level.Level;
 
 /** Generic modifier hooks that don't quite fit elsewhere */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

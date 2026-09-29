@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.modifiers.ModifierEntry.VALID_LEVEL;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 /** Shared logic between normal and incremental modifier recipe builders */
 @SuppressWarnings("unchecked")

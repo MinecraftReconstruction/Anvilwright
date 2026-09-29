@@ -32,6 +32,8 @@ import java.util.Optional;
 import static slimeknights.tconstruct.library.modifiers.modules.behavior.ReduceToolDamageModule.reduceDamage;
 import slimeknights.mantle.client.TooltipKey;
 import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EquipmentSlot;
 
 /** @deprecated use {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule},
  * {@link slimeknights.tconstruct.library.modifiers.modules.behavior.ConditionalStatModule},

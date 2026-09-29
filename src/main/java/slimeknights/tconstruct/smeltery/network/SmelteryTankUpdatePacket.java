@@ -10,6 +10,7 @@ import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import slimeknights.mantle.network.packet.BlockEntityPacket;
 
 /**
  * Packet sent whenever the contents of the smeltery tank change.

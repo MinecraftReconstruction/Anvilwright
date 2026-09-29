@@ -22,6 +22,9 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Default modifier model loader, loads a single texture from the standard path.

@@ -36,6 +36,8 @@ import slimeknights.tconstruct.tools.modules.interaction.PlaceFireModule;
 
 import javax.annotation.Nullable;
 import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 /** @deprecated use {@link PlaceFireModule} and {@link ShowOffhandModule} */
 @Deprecated(forRemoval = true)

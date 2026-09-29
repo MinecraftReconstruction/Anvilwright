@@ -47,6 +47,7 @@ import slimeknights.tconstruct.shared.TinkerFood;
 import slimeknights.tconstruct.world.block.FoliageType;
 import slimeknights.tconstruct.gadgets.item.slimesling.BaseSlimeSlingItem;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import java.util.function.Function;
 
 /**
  * Contains any special tools unrelated to the base tools.

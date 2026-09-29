@@ -26,6 +26,7 @@ import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import net.minecraft.world.item.CreativeModeTab;
 
 /**
  * Represents an item that has a Material associated with it. The NBT of the itemstack identifies which material the

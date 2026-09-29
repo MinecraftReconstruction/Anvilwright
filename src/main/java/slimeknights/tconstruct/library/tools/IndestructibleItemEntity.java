@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
 
 /** Item entity that will never die */
 public class IndestructibleItemEntity extends ItemEntity {

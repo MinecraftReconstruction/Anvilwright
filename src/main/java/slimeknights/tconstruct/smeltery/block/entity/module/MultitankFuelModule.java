@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import slimeknights.tconstruct.library.fluid.FluidAction;
 
 /** Fuel module that supports multiple tanks, selecting just one for the fuel result */
 public class MultitankFuelModule extends FuelModule implements IFluidHandler {

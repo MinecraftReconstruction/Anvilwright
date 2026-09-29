@@ -82,6 +82,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook.KEY_DRAWTIME;
+import net.minecraft.world.item.CreativeModeTab;
 
 /** Base class for any items that launch projectiles */
 public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implements IModifiableDisplay, CustomEnchantingBehaviorItem, DamageableItem, CustomMaxCountItem, ShieldBlockItem, ToolActionItem, RepairableItem, ReequipAnimationItem {

@@ -29,6 +29,10 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 
 public class CreativeSlotItem extends Item {
   private static final String NBT_KEY = "slot";

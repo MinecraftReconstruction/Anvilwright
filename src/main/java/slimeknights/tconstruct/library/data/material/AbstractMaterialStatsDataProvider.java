@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import com.google.gson.JsonObject;
 
 /** Base data generator for use in addons, depends on the regular material provider */
 public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvider {

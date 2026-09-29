@@ -43,6 +43,10 @@ import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
+import java.util.function.Consumer;
+import lombok.Getter;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   public static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "remove_modifier");

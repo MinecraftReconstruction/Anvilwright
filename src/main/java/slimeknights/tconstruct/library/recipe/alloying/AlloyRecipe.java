@@ -21,6 +21,9 @@ import java.util.BitSet;
 import java.util.List;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
+import javax.annotation.Nullable;
+import net.minecraft.network.FriendlyByteBuf;
+import slimeknights.tconstruct.library.recipe.alloying.AlloyRecipe.AlloyIngredient;
 
 /**
  * Base class for alloying recipes
