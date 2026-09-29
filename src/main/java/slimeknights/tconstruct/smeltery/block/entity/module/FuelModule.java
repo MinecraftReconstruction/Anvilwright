@@ -22,7 +22,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
@@ -31,39 +33,53 @@ import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
+import slimeknights.tconstruct.library.fluid.EmptyFluidStorage;
 import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Module handling fuel consumption for the melter and smeltery
  */
-@RequiredArgsConstructor
 public abstract class FuelModule implements ContainerData {
+  /** Block position that will never be valid in world, used as the "no tank cached" marker */
+  protected static final BlockPos NULL_POS = new BlockPos(0, Short.MIN_VALUE, 0);
+
   /** Listener to attach to stored capability */
   private final NonNullConsumer<SlottedStorage<FluidVariant>> fluidListener = new WeakConsumerWrapper<>(this, (self, cap) -> self.reset());
   private final NonNullConsumer<SlottedStorage<ItemVariant>> itemListener = new WeakConsumerWrapper<>(this, (self, cap) -> self.reset());
 
   /** Parent TE */
   protected final MantleBlockEntity parent;
+  /** Supplier for the list of valid tank positions */
+  protected final Supplier<List<BlockPos>> tankSupplier;
+  /** Position of the parent's own tank, which is always a fuel source and the primary display tank */
+  protected final BlockPos mainTank;
 
   /** Last fuel recipe used */
   @Nullable
   private MeltingFuel lastRecipe;
   /** Last fluid handler where fluid was extracted */
   @Nullable
-  private StorageProvider<FluidVariant> fluidHandler;
+  protected StorageProvider<FluidVariant> fluidHandler;
   /** Last item handler where items were extracted */
   @Nullable
-  private StorageProvider<ItemVariant> itemHandler;
+  protected StorageProvider<ItemVariant> itemHandler;
   /** Position of the last fluid handler */
-  private BlockPos lastPos = NULL_POS;
+  protected BlockPos lastPos = NULL_POS;
 
 
   /** Client fuel display */
   private List<BlockPos> tankDisplayHandlers;
+
+  /** Clears the cached list of tanks used for display, called when the structure changes */
+  protected void clearDisplayHandlers() {
+    tankDisplayHandlers = null;
+  }
   /** Listener to attach to display capabilities */
   private final NonNullConsumer<SlottedStorage<FluidVariant>> displayListener = new WeakConsumerWrapper<>(this, (self, cap) -> {
     if (self.tankDisplayHandlers != null) {
@@ -91,14 +107,16 @@ public abstract class FuelModule implements ContainerData {
 
   /** Called when the capability invalidates to reset any listeners */
   protected void resetHandler(@Nullable LazyOptional<?> source) {
-    if (source == null || source == fluidHandler) {
-      // for efficiency on Forge, clear listener. Neo lacks this so we protect against redundant calls
-      // note that this will break if the source is the listener, below check does both null check and not source check
-      if (source != fluidHandler && Util.isForge()) {
-        fluidHandler.removeListener(fluidListener);
-      }
-      fluidHandler = null;
-    }
+    // Fabric has no capability listeners, so this only means "the cached handlers are stale"
+    reset();
+    lastPos = NULL_POS;
+    clearDisplayHandlers();
+  }
+
+  /** Drops the cached handlers so the next lookup refetches them */
+  protected void reset() {
+    fluidHandler = null;
+    itemHandler = null;
   }
 
   /** Gets a nonnull world instance from the parent */
@@ -170,7 +188,7 @@ public abstract class FuelModule implements ContainerData {
             long extracted = view.extract(view.getResource(), 1, tx);
             fuel += time;
             fuelQuality = time;
-            temperature = SOLID_TEMPERATURE;
+            temperature = MeltingFuelLookup.getSolid().getTemperature();
             parent.setChangedFast();
             // return the container
             ItemStack container = resource.toStack((int) extracted).getRecipeRemainder();
@@ -191,7 +209,7 @@ public abstract class FuelModule implements ContainerData {
             tx.commit();
           }
         }
-        return SOLID_TEMPERATURE;
+        return MeltingFuelLookup.getSolid().getTemperature();
       }
     }
     return 0;
@@ -246,6 +264,12 @@ public abstract class FuelModule implements ContainerData {
    */
   private NonNullFunction<Storage<FluidVariant>,Integer> tryLiquidFuel(boolean consume) {
     return consume ? tryLiquidFuelConsume : tryLiquidFuelNoConsume;
+  }
+
+  protected FuelModule(MantleBlockEntity parent, Supplier<List<BlockPos>> tankSupplier) {
+    this.parent = parent;
+    this.tankSupplier = tankSupplier;
+    this.mainTank = parent.getBlockPos();
   }
 
   /**
@@ -335,6 +359,19 @@ public abstract class FuelModule implements ContainerData {
       reset();
     }
     return storage;
+  }
+
+  /**
+   * Gets the fuel tank storage for menus that proxy fluid to it, empty when there is no tank.
+   * Unlike {@link #getFluidStorage()} this never throws when no handler was found yet.
+   */
+  public Storage<FluidVariant> getTankStorage() {
+    StorageProvider<FluidVariant> handler = fluidHandler;
+    if (handler == null) {
+      return EmptyFluidStorage.INSTANCE;
+    }
+    Storage<FluidVariant> storage = handler.get(null);
+    return storage == null ? EmptyFluidStorage.INSTANCE : storage;
   }
 
   /* Tag */
@@ -452,7 +489,7 @@ public abstract class FuelModule implements ContainerData {
       if (tankDisplayHandlers == null) {
         tankDisplayHandlers = new ArrayList<>();
         // only need to fetch this if either case requests
-        if (positions == null) positions = tankSupplier.get();
+        List<BlockPos> positions = tankSupplier.get();
         for (BlockPos pos : positions) {
           if (!pos.equals(mainTank)) {
             Storage<FluidVariant> handler = FluidStorage.SIDED.find(world, pos, null);

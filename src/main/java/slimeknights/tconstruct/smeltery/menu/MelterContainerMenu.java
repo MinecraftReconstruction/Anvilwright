@@ -4,7 +4,9 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackSto
 import lombok.Getter;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -78,11 +80,11 @@ public class MelterContainerMenu extends TriggeringBaseContainerMenu<MelterBlock
       ItemStack held = getCarried();
       if (!held.isEmpty()) {
         if (!player.level().isClientSide && tile != null) {
-          IFluidHandler tank = id < 2 ? tile.getTank() : tile.getFuelModule().getTank();
+          Storage<FluidVariant> tank = id < 2 ? tile.getTank() : tile.getFuelModule().getTankStorage();
           TransferResult result;
           // even means drain fluid, odd means fill
           if ((id & 1) == 0) {
-            result = FluidTransferHelper.fillStack(tank, held, tank.getFluidInTank(0));
+            result = FluidTransferHelper.fillStack(tank, held, TransferUtil.firstOrEmpty(tank));
           } else {
             result = FluidTransferHelper.interactWithStack(tank, held, TransferDirection.EMPTY_ITEM);
           }
