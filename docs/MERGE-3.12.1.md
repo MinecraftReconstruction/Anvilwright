@@ -185,3 +185,26 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 2. **Forge 事件**：`SubscribeEvent`(28)、`BreakSpeed`(15) —— 需要换成 Fabric 的事件注册
 3. **可选兼容**：JEI 的 `api.forge`、jsonthings、diet、Immersive Engineering 在 Fabric 上没有对等物，
    建议直接把这几处集成**移除**并在 CHANGELOG 里写明（而不是硬凑）
+
+## 剩余工作的分类清单（自动生成）
+
+[merge-3.12.1-workqueue.txt](merge-3.12.1-workqueue.txt) 是按当前编译日志自动分类的待办清单，
+每一条都带文件与错误数，可以直接照着清。1736 个错误的分布：
+
+| 类别 | 错误 | 说明 |
+|---|---|---|
+| **B. Forge 通用/事件/datagen API** | 377 | `SubscribeEvent`、`BreakSpeed`、`IGeometryBakingContext`、`ExistingFileHelper`、`ItemModelBuilder`… |
+| **A. Forge 流体 API** | 168 | `FluidAction`、`IFluidHandler`、`FluidAttributes`（77 个文件） |
+| **D. hook/module 体系** | 76 | `TinkerHooks`、`ModifierHook`、`IncrementalModifier` |
+| **C. Mantle 1.9 → 1.11 API** | 51 | `IGenericLoader` 为主 |
+| **E. 可选兼容 / 依赖** | 42 | JEI `api.forge`、jsonthings、diet、IE、CCA |
+| F. 其它 / 级联 | 1022 | **多数是上面几类的级联**：某个类型解析失败后，同文件后续错误都会被归到这里 |
+
+### 两个需要人来定的决策
+
+1. **`FluidAction`（61 处，46 个文件）**：Fabric 的 Transfer API 用 `Transaction` 表达
+   simulate/execute，Porting Lib 也没有 `FluidAction`。两条路：
+   (a) 在 TCon 里保留一个自己的 `FluidAction` 垫片枚举，把语义翻译成 `Transaction`；
+   (b) 逐处重写成 `StorageUtil.simulateInsert` / 真实调用。前者改动小但多一层抽象，后者更"正统"但工作量大。
+2. **只有 Forge 版的可选兼容**（JEI `api.forge` 等）：建议移除对应集成，而不是硬凑。
+   这会让 `plugin/` 目录缩小一部分，需要写进 CHANGELOG。
