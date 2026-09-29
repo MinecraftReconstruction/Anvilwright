@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Predicate;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 
 @SuppressWarnings("unused")
 public class WorldEvents {
@@ -56,6 +57,7 @@ public class WorldEvents {
     LootTableEvents.MODIFY.register(WorldEvents::onLootTableLoad);
     LivingVisibilityEvent.VISIBILITY.register(WorldEvents::livingVisibility);
     LivingEntityEvents.DROPS.register(WorldEvents::creeperKill);
+    wanderingTrades();
     ConfigEvents.LOADING.register(config -> {
       if (config.getModId().equals(TConstruct.MOD_ID) && config.getType() == ConfigType.COMMON)
         onBiomeLoad();
@@ -245,12 +247,18 @@ public class WorldEvents {
     return false;
   }
 
-  @SubscribeEvent
-  static void wanderingTrades(WandererTradesEvent event) {
+  /**
+   * Adds the ancient tool listing to the wandering trader's rare trades.
+   * <p>
+   * <b>Porting note:</b> upstream listens to Forge's {@code WandererTradesEvent} and appends to
+   * {@code getRareTrades()}; Fabric's {@link TradeOfferHelper} expresses the same thing by registering into
+   * pool {@code 2} (vanilla's rare pool).
+   */
+  static void wanderingTrades() {
     // add ancient tools to the wandering trader table
     int weight = Config.COMMON.wandererAncientToolWeight.get();
     if (weight > 0) {
-      event.getRareTrades().addAll(Collections.nCopies(weight, AncientToolItemListing.INSTANCE));
+      TradeOfferHelper.registerWanderingTraderOffers(2, factories -> factories.addAll(Collections.nCopies(weight, AncientToolItemListing.INSTANCE)));
     }
   }
 }

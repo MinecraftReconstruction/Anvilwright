@@ -5,6 +5,7 @@ import io.github.fabricators_of_create.porting_lib.event.client.FieldOfViewEvent
 import io.github.fabricators_of_create.porting_lib.event.client.RenderHandCallback;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -39,6 +40,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 
 /** Modifier event hooks that run client side */
 public class ModifierClientEvents {
@@ -49,6 +51,8 @@ public class ModifierClientEvents {
     RenderHandCallback.EVENT.register(ModifierClientEvents::renderHand);
     ToolEquipmentChangeEvent.EVENT.register(ModifierClientEvents::equipmentChange);
     FieldOfViewEvents.MODIFY.register(ModifierClientEvents::handleZoom);
+    // clear the client side caches when leaving a world
+    ClientPlayConnectionEvents.DISCONNECT.register(ModifierClientEvents::playerLoggedOut);
   }
 
   static void onTooltipEvent(ItemStack stack, TooltipFlag context, List<Component> lines) {
@@ -142,8 +146,8 @@ public class ModifierClientEvents {
   /** Items to render for the item frame modifier */
   private static final List<ItemStack> itemFrames = new ArrayList<>();
 
-  @SubscribeEvent
-  static void playerLoggedOut(LoggingOut event) {
+  /** Clears the caches that must not survive a world change. */
+  static void playerLoggedOut(ClientPacketListener handler, Minecraft client) {
     nextOffhand = ItemStack.EMPTY;
     itemFrames.clear();
   }
