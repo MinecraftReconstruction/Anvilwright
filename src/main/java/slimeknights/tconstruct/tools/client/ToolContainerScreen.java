@@ -67,7 +67,7 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
   private final GuiTankModule tank;
   public ToolContainerScreen(ToolContainerMenu menu, Inventory inv, Component title) {
     super(menu, inv, title);
-    int slots = menu.getItemHandler().getSlotCount();
+    int slots = menu.getItemHandler().getSlots();
     if (menu.isShowOffhand()) {
       slots++;
     }

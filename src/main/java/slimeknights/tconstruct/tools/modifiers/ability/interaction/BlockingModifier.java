@@ -1,15 +1,6 @@
 package slimeknights.tconstruct.tools.modifiers.ability.interaction;
 
-import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
-import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.UseAnim;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
-import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
 import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
 import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;

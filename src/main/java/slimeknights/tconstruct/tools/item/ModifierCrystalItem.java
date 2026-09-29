@@ -1,12 +1,13 @@
 package slimeknights.tconstruct.tools.item;
 
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -30,6 +31,10 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 
 /** Dynamic item holding a modifier */
 public class ModifierCrystalItem extends Item {
@@ -37,6 +42,7 @@ public class ModifierCrystalItem extends Item {
   private static final Component TOOLTIP_APPLY = TConstruct.makeTranslation("item", "modifier_crystal.tooltip").withStyle(ChatFormatting.GRAY);
   private static final String MODIFIER_KEY = TConstruct.makeTranslationKey("item", "modifier_crystal.modifier_id");
   private static final String TAG_MODIFIER = "modifier";
+  /** Port helper: Fabric has no forge-style creative tab builder, so the item registers its variants on the tab's entries event */
   public ModifierCrystalItem(Properties props, ResourceKey<CreativeModeTab> tab) {
     super(props);
     ItemGroupEvents.modifyEntriesEvent(tab).register(this::fillItemCategory);
@@ -49,9 +55,16 @@ public class ModifierCrystalItem extends Item {
 
   @Override
   public Component getName(ItemStack stack) {
-    ModifierId modifier = getModifier(stack);
-    if (modifier != null) {
-      return Component.translatable(getDescriptionId(stack) + ".format", Component.translatable(Util.makeTranslationKey("modifier", modifier)));
+    ModifierId id = getModifier(stack);
+    if (id != null) {
+      Modifier modifier = ModifierManager.getValue(id);
+      Component modifierName;
+      if (modifier != ModifierManager.INSTANCE.getDefaultValue()) {
+        modifierName = modifier.getDisplayName();
+      } else {
+        modifierName = Component.translatable(Util.makeTranslationKey("modifier", id));
+      }
+      return Component.translatable(getDescriptionId(stack) + ".format", modifierName).setStyle(modifierName.getStyle());
     }
     return super.getName(stack);
   }
@@ -193,7 +206,12 @@ public class ModifierCrystalItem extends Item {
     return null;
   }
 
-  public void fillItemCategory(FabricItemGroupEntries items) {
-    ModifierRecipeLookup.getRecipeModifierList().forEach(modifier -> items.accept(withModifier(modifier.getId())));
+  /** Gets all variants of this item */
+  public static void addVariants(Consumer<ItemStack> items) {
+    ModifierRecipeLookup.getRecipeModifierList().forEach(modifier -> {
+      if (!ModifierManager.isInTag(modifier.getId(), Modifiers.EXTRACT_MODIFIER_BLACKLIST)) {
+        items.accept(withModifier(modifier.getId()));
+      }
+    });
   }
 }
