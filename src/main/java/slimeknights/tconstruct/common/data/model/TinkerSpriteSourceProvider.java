@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
-import net.minecraftforge.common.data.SpriteSourceProvider;
+import io.github.fabricators_of_create.porting_lib.data.SpriteSourceProvider;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.modifiers.model.TrimModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.model.TrimModifierModel.Armor;

@@ -5,7 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import io.github.fabricators_of_create.porting_lib.util.CraftingHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;

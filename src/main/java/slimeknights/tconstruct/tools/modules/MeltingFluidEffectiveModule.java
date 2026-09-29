@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.tools.modules;
 
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.TierSortingRegistry;
+import io.github.fabricators_of_create.porting_lib.util.TierSortingRegistry;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
