@@ -122,6 +122,11 @@ public class JsonUtils {
     allowDebugLogging = false;
   }
 
+  /** If true, log the values of all resources loaded from data packs, for debugging pack loading */
+  public static boolean debugLogResourceValues() {
+    return allowDebugLogging && Config.COMMON.debugLogResourceValues.get();
+  }
+
   /**
    * Reads the result from the given JSON
    * @param parent  Parent JSON

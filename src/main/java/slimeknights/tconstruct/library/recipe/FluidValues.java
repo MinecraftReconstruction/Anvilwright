@@ -60,9 +60,15 @@ public final class FluidValues {
   public static final int BOWL = 20250;
   /** Value of a single bottle of a potion */
   public static final long BOTTLE = FluidConstants.BOTTLE;
+  /** Minimum unit for a bottle or bowl */
+  public static final long SIP = BOTTLE / 5;
 
   // tank capacities
-  /** Capacity of a seared or scorched lantern */
+  /** Capacity of a lantern. Upstream 3.12.1 uses a single capacity for both the seared and the
+   * scorched lantern; our port kept two, and this is the seared value (see BEHAVIOUR-DIFFERENCES). */
+  public static final int LANTERN_CAPACITY = 4050;
+  /** Capacity of a seared lantern */
   public static final int SEARED_LANTERN_CAPACITY = 4050;
+  /** Capacity of a scorched lantern */
   public static final int SCORCHED_LANTERN_CAPACITY = 8100;
 }
