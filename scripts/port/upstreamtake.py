@@ -47,6 +47,26 @@ def errors_for(output, path):
     return len(re.findall(rf'^{re.escape(path)}:\d+: error:', output, re.M))
 
 
+def run_chunk_compile(path):
+    """Compile the file together with every source in its own directory.
+
+    A whole-tree run is not a reliable baseline for one file: javac stops
+    attributing classes once the compile is failing, which can leave the file
+    unattributed (its "0 errors" then means "never looked at"). Passing the
+    directory's sources explicitly guarantees this file is attributed.
+    """
+    import glob
+    import os
+    cp = open('.port/compile-cp.txt').read().strip()
+    ap = open('.port/ap-cp.txt').read().strip()
+    files = sorted(glob.glob(os.path.join(os.path.dirname(path), '*.java')))
+    with tempfile.TemporaryDirectory() as out:
+        proc = subprocess.run([JAVAC, '-nowarn', '-proc:full', '-Xmaxerrs', '100000',
+                               '-processorpath', ap, '-cp', cp, '-sourcepath', 'src/main/java',
+                               '-d', out, *files], capture_output=True, text=True)
+    return proc.stdout + proc.stderr
+
+
 def port_imports(text):
     changed = []
     for old, new in IMPORT_MAP.items():
@@ -81,18 +101,18 @@ def main():
         return
 
     print('compiling baseline ...')
-    baseline_output = run_tree_compile()
     kept, reverted = [], []
     for path in args.files:
         up = subprocess.run(['git', 'show', f'{UPSTREAM}:{path}'], capture_output=True, text=True)
         if up.returncode != 0:
             print(f'{path}: NOT in upstream, skipped')
             continue
-        before = errors_for(baseline_output, path)
+        # both measures can under-report (javac stops attributing once the compile is failing), so
+        # take the larger of the two; a 0 baseline must never be trusted on its own
+        before = max(errors_for(run_chunk_compile(path), path), errors_for(run_tree_compile(), path))
         text, _changed = port_imports(up.stdout)
         open(path, 'w', encoding='utf-8').write(text)
-        after_output = run_tree_compile()
-        after = errors_for(after_output, path)
+        after = max(errors_for(run_chunk_compile(path), path), errors_for(run_tree_compile(), path))
         if after < before:
             kept.append((path, before, after))
             print(f'KEPT     {before} -> {after}  {path}')
@@ -100,7 +120,6 @@ def main():
             subprocess.run(['git', 'checkout', '--', path], check=False)
             reverted.append((path, before, after))
             print(f'REVERTED {before} -> {after}  {path}')
-        baseline_output = after_output if kept and kept[-1][0] == path else baseline_output
 
     print(f'\nkept: {len(kept)}   reverted: {len(reverted)}')
     print('note: a kept file still needs the behaviour-difference check and, for data providers, a datagen run')
