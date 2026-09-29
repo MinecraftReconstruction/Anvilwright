@@ -41,21 +41,17 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.client.RenderTypeGroup;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.client.model.CompositeModel;
-import net.minecraftforge.client.model.DynamicFluidContainerModel;
-import net.minecraftforge.client.model.QuadTransformers;
-import net.minecraftforge.client.model.SimpleModelState;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
-import net.minecraftforge.client.model.geometry.StandaloneGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.UnbakedGeometryHelper;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import io.github.fabricators_of_create.porting_lib.models.CompositeModel;
+import io.github.fabricators_of_create.porting_lib.models.DynamicFluidContainerModel;
+import io.github.fabricators_of_create.porting_lib.models.QuadTransformers;
+import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
+import io.github.fabricators_of_create.porting_lib.models.UnbakedGeometryHelper;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.FluidUtil;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
@@ -67,6 +63,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.nbt.TagParser;
+import com.google.gson.Gson;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 
 /**
  * Extension of {@link net.minecraftforge.client.model.DynamicFluidContainerModel} with two additional features: baked tints and fluid stack sensitive models.
@@ -90,7 +94,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
         JsonObject fluidObject = fluidElement.getAsJsonObject();
         fluid = Loadables.FLUID.getIfPresent(fluidObject, "name");
         if (fluidObject.has("nbt")) {
-          tag = CraftingHelper.getNBT(fluidObject.get("nbt"));
+          tag = TagParser.parseTag(GSON.toJson(fluidObject.get("nbt")));
         }
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");
@@ -103,18 +107,17 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
 
   /** Gets the given sprite, or null if the texture is not present in the model */
   @Nullable
-  private static TextureAtlasSprite getSprite(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, String key) {
+  private static TextureAtlasSprite getSprite(BlockModel context, Function<Material,TextureAtlasSprite> spriteGetter, String key) {
     if (context.hasMaterial(key)) {
       return spriteGetter.apply(context.getMaterial(key));
     }
     return null;
   }
 
-  private static BakedModel bakeInternal(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, FluidStack fluid, boolean flipGas) {
+  private static BakedModel bakeInternal(BlockModel context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, FluidStack fluid, boolean flipGas) {
     // get basic sprites
-    IClientFluidTypeExtensions clientFluid = IClientFluidTypeExtensions.of(fluid.getFluid());
     TextureAtlasSprite baseSprite = getSprite(context, spriteGetter, "base");
-    TextureAtlasSprite fluidSprite = !fluid.isEmpty() ? spriteGetter.apply(new Material(InventoryMenu.BLOCK_ATLAS, clientFluid.getStillTexture(fluid))) : null;
+    TextureAtlasSprite fluidSprite = !fluid.isEmpty() ? FluidVariantRendering.getSprite(fluid.getType()) : null;
 
     // determine particle
     TextureAtlasSprite particleSprite = getSprite(context, spriteGetter, "particle");
@@ -131,12 +134,11 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     }
 
     // start building the mode
-    CompositeModel.Baked.Builder modelBuilder = CompositeModel.Baked.builder(context, particleSprite, overrides, context.getTransforms());
-    RenderTypeGroup renderTypes = DynamicFluidContainerModel.getLayerRenderTypes(false);
+    CompositeModel.Baked.Builder modelBuilder = CompositeModel.Baked.builder(context.isAmbientOcclusion(), false, false, particleSprite, overrides, context.getTransforms());
 
     // add in the base
     if (baseSprite != null) {
-      modelBuilder.addQuads(renderTypes, UnbakedGeometryHelper.bakeElements(
+      modelBuilder.addQuads(UnbakedGeometryHelper.bakeElements(
         UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents()),
         $ -> baseSprite, modelState, modelLocation
       ));
@@ -152,26 +154,23 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       );
 
       // apply light
-      RenderTypeGroup fluidRenderTypes = renderTypes;
       int light = fluid.getFluid().getFluidType().getLightLevel(fluid);
       if (light > 0) {
-        fluidRenderTypes = DynamicFluidContainerModel.getLayerRenderTypes(true);
         QuadTransformers.settingEmissivity(light).processInPlace(quads);
       }
       // apply color
-      int color = clientFluid.getTintColor(fluid);
+      int color = FluidVariantRendering.getColor(fluid.getType());
       if (color != -1) {
         ColoredBlockModel.applyColorQuadTransformer(color).processInPlace(quads);
       }
-      modelBuilder.addQuads(fluidRenderTypes, quads);
+      modelBuilder.addQuads(quads);
     }
     return modelBuilder.build();
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+  public BakedModel bake(BlockModel context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
     // We need to disable GUI 3D and block lighting for this to render properly
-    context = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(modelLocation);
     // only do contained fluid if we did not set the fluid in the model properties
     if (fluid.isEmpty()) {
       overrides = new ContainedFluidOverrideHandler(context, overrides, modelState, flipGas);
@@ -186,7 +185,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
 
     private final Map<FluidStack,BakedModel> cache = Maps.newHashMap(); // contains all the baked models since they'll never change
 
-    private final IGeometryBakingContext context;
+    private final BlockModel context;
     private final ItemOverrides nested;
     private final ModelState modelState;
     private final boolean flipGas;
@@ -201,7 +200,8 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     public BakedModel resolve(BakedModel originalModel, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
       BakedModel overriden = nested.resolve(originalModel, stack, world, entity, seed);
       if (overriden != originalModel) return overriden;
-      Optional<FluidStack> optional = FluidUtil.getFluidContained(stack);
+      Storage<FluidVariant> handler = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+      Optional<FluidStack> optional = handler == null ? Optional.empty() : Optional.of(TransferUtil.firstCopyOrEmpty(handler));
       if (optional.isPresent()) {
         FluidStack fluid = optional.get();
         fluid.setAmount(FluidType.BUCKET_VOLUME); // cache considers amount, so ensure its consistent
