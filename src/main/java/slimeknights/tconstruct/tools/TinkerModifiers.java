@@ -344,6 +344,7 @@ import slimeknights.tconstruct.tools.recipe.severing.SnowGolemBeheadingRecipe;
 import slimeknights.tconstruct.tools.stats.ToolType;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 
 /**
  * Contains modifiers and the items or blocks used to craft modifiers
@@ -788,7 +789,6 @@ public final class TinkerModifiers extends TinkerModule {
    * Events
    */
 
-  @SubscribeEvent
   /**
    * Registers every loader registry Tinkers ships (modifier modules, fluid effects, level displays, ...).
    * <p>
