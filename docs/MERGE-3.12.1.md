@@ -494,3 +494,18 @@ $JDK17/bin/javac -encoding UTF-8 -proc:full -processorpath "$AP" -cp "src/main/j
 
 **仍然没解开的**：`PartRecipe` 看不到 Lombok 生成物（见上一节），`getVariant()`/`getId()`/`getCraftingResult()`
 这一批共 ~28 条错误都属于它，**先别单独去修**。
+
+### 2026-09-29 · 补回"藏在 Forge 事件处理器里的运行时注册" —— 548 → 534
+
+清 `@SubscribeEvent` 残余时发现三处**在 Fabric 上从来没执行过**的注册（属于功能缺失，不只是编译问题）：
+
+| 位置 | 问题 | 处理 |
+|---|---|---|
+| `TinkerModifiers.registerSerializers(RegisterEvent)` | **整个** loader 注册表（modifier modules、fluid effects、level displays、tank helpers…，约 300 行）被包在 `if (registry == RECIPE_SERIALIZER)` 里，靠 Forge 的 `RegisterEvent` 触发。Fabric 没有这个事件 ⇒ **运行时这些注册表是空的** | 抽成 `public static void registerLoaders()`，由 `TinkerModifiers` 析构函数调用 |
+| `TinkerModifiers.commonSetup(FMLCommonSetupEvent)` | 是 `PersistentDataCapability.register()` 的**唯一调用点**，而它要注册 4 个 Fabric 玩家事件（copy/respawn/换维度/join）| 抽成 `registerCapabilities()`，同样由构造函数调用 |
+| `TinkerModifiers/TinkerTables.gatherData(GatherDataEvent)` | Forge 版 datagen，`TConstructData` 调的其实是不存在的方法（javac 没报错，见上面"假错误"一节） | 补上 `FabricDataGenerator.Pack` 版本 |
+| `TinkerTables.commonSetup` | 唯一在注册"必需的工作台布局" | 抽成 `TinkerTables.init()`，由 `FabricEvents` 调用 |
+| `WorldEvents.wanderingTrades` / `ModifierClientEvents.playerLoggedOut` | Forge 的 `WandererTradesEvent` / `ClientPlayerNetworkEvent.LoggingOut` | 换成 Fabric 的 `TradeOfferHelper`（rare pool = 2）/ `ClientPlayConnectionEvents.DISCONNECT` |
+
+**教训**：`@SubscribeEvent` 残留不能一律当"死代码"删。这里有一半是**真正没跑起来的业务逻辑**，
+删之前一定先搜这个 handler 里调用的方法还有没有别的调用点（`rg <method>` 全树查一遍）。
