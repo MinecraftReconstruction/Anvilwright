@@ -1,8 +1,5 @@
 package slimeknights.tconstruct.tables.block.entity.table;
 
-import io.github.fabricators_of_create.porting_lib.event.common.ItemCraftedCallback;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -17,6 +14,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import slimeknights.mantle.client.model.ModelData;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
+import io.github.fabricators_of_create.porting_lib.event.common.ItemCraftedCallback;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import org.apache.commons.lang3.StringUtils;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -44,8 +45,6 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static slimeknights.tconstruct.library.tools.part.IMaterialItem.MATERIAL_TAG;
-import slimeknights.mantle.client.model.ModelData;
-import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 
 public class TinkerStationBlockEntity extends RetexturedTableBlockEntity implements ILazyCrafter {
   /** Slot index of the tool slot */
@@ -87,6 +86,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   public TinkerStationBlockEntity(BlockPos pos, BlockState state, int slots) {
     super(TinkerTables.tinkerStationTile.get(), pos, state, NAME, slots);
     this.itemHandler = new ConfigurableInvWrapperCapability(this, false, false);
+    this.itemHandlerCap = LazyOptional.of(() -> this.itemHandler);
     this.inventoryWrapper = new TinkerStationContainerWrapper(this);
     this.craftingResult = new LazyResultContainer(this);
   }
@@ -174,7 +174,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
         }
 
         // try for UI errors
-        ValidatedResult validatedResult = recipe.getValidatedResult(this.inventoryWrapper, this.level.registryAccess());
+        RecipeResult<LazyToolStack> validatedResult = recipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
         if (validatedResult.isSuccess()) {
           result = validatedResult.getResult();
         } else if (validatedResult.hasError()) {
@@ -188,7 +188,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     }
     // client side only needs to update result, server syncs message elsewhere
     else if (this.lastRecipe != null && this.lastRecipe.matches(this.inventoryWrapper, level)) {
-      ValidatedResult validatedResult = this.lastRecipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
+      RecipeResult<LazyToolStack> validatedResult = this.lastRecipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
       if (validatedResult.isSuccess()) {
         result = validatedResult.getResult();
       } else if (validatedResult.hasError()) {
@@ -217,8 +217,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     }
 
     // fire crafting events
-    result.onCraftedBy(this.level, player, amount);
-    ItemCraftedCallback.EVENT.invoker().onCraft(player, result, this.inventoryWrapper);
+    resultItem.onCraftedBy(this.level, player, amount);
+    ItemCraftedCallback.EVENT.invoker().onCraft(player, resultItem, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // fetch this before updating inputs so they can do input sensitive shrinking
@@ -252,7 +252,13 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   
   @Override
   protected void playCraftSound(Player player) {
-    SoundUtils.playSoundForAll(player, this.getInputCount() > 4 ? SoundEvents.ANVIL_USE : Sounds.SAW.getSound(), 0.8f, 0.8f + 0.4f * player.level().random.nextFloat());
+    if (isSoundReady(player)) {
+      if (this.getInputCount() > 4) {
+        SoundUtils.playSoundForAll(player, SoundEvents.ANVIL_USE, 0.4f, 0.9f + 0.1f * player.getRandom().nextFloat());
+      } else {
+        SoundUtils.playSoundForAll(player, Sounds.SAW.getSound(), 0.8f, 0.8f + 0.4f * player.getRandom().nextFloat());
+      }
+    }
   }
 
 
