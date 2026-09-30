@@ -32,10 +32,6 @@ public abstract class GenericStringProvider implements DataProvider {
     this(output.createPathProvider(type, folder), folder, extension);
   }
 
-  public GenericStringProvider(DataGenerator generator, Target type, String folder, String extension) {
-    this(generator.getPackOutput(), type, folder, extension);
-  }
-
   /** Localizes the given resource to the folder */
   public ResourceLocation localize(ResourceLocation name) {
     return JsonHelper.localize(name, folder, '.' + extension);

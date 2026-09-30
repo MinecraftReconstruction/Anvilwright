@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.JsonUtils;
 
@@ -38,7 +39,7 @@ public class NoContainerIngredient extends NestedIngredient {
   public JsonElement toJson() {
     JsonElement nestedElement = nested.toJson();
     // if we are a vanilla ingredient, and not an array ingredient, serialize into the ingredient directly
-    if (nested.isVanilla() && nestedElement.isJsonObject()) {
+    if (!(nested instanceof CustomIngredient) && nestedElement.isJsonObject()) {
       JsonObject nestedObject = nestedElement.getAsJsonObject();
       nestedObject.addProperty("fabric:type", ID.toString());
       return nestedObject;
@@ -77,6 +78,16 @@ public class NoContainerIngredient extends NestedIngredient {
     @Override
     public void write(FriendlyByteBuf buffer, NoContainerIngredient ingredient) {
       ingredient.nested.toNetwork(buffer);
+    }
+
+    @Override
+    public ResourceLocation getIdentifier() {
+      return ID;
+    }
+
+    @Override
+    public void write(JsonObject parent, NoContainerIngredient ingredient) {
+      parent.add("match", ingredient.nested.toJson());
     }
   }
 

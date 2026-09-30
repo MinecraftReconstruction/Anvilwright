@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import slimeknights.tconstruct.library.data.AbstractTagProvider;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierManager;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
 import net.minecraft.data.PackOutput;
 
 /** Tag provider to generate modifier tags */

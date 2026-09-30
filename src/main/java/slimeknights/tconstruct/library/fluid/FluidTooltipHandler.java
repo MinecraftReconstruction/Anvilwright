@@ -41,10 +41,10 @@ public class FluidTooltipHandler {
   @Deprecated
   public static final slimeknights.mantle.fluid.tooltip.FluidTooltipHandler INSTANCE = slimeknights.mantle.fluid.tooltip.FluidTooltipHandler.INSTANCE;
 
-  /** @deprecated use {@link slimeknights.mantle.fluid.tooltip.FluidTooltipHandler#init()} */
+  /** @deprecated use {@link slimeknights.mantle.fluid.tooltip.FluidTooltipHandler#init(ResourceManagerHelper)} */
   @Deprecated
-  public static void init() {
-    slimeknights.mantle.fluid.tooltip.FluidTooltipHandler.init();
+  public static void init(net.fabricmc.fabric.api.resource.ResourceManagerHelper helper) {
+    slimeknights.mantle.fluid.tooltip.FluidTooltipHandler.init(helper);
   }
 
   private FluidTooltipHandler() {}

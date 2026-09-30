@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.recipe.ingredient;
 import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.recipe.ingredient.AbstractIngredient;
@@ -44,6 +45,6 @@ public abstract class NestedIngredient extends AbstractIngredient {
 
   @Override
   public boolean isSimple() {
-    return nested.isSimple();
+    return !(nested instanceof CustomIngredient custom) || !custom.requiresTesting();
   }
 }

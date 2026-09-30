@@ -39,12 +39,18 @@ public class BlockSideHitListener {
 
   /** Called when the player left clicks a block to store the face */
   private static void onLeftClickBlock(PlayerInteractionEvents.LeftClickBlock event) {
-    HIT_FACE.put(event.getPlayer().getUUID(), event.getFace());
+    TinkerDataCapability.Holder data = TinkerDataCapability.getData(event.getPlayer());
+    if (data != null) {
+      data.put(HIT_FACE, event.getFace());
+    }
   }
 
   /** Called when a player leaves the server to clear the face */
   private static void onLeaveServer(ServerGamePacketListenerImpl handler, MinecraftServer server) {
-    HIT_FACE.remove(handler.getPlayer().getUUID());
+    TinkerDataCapability.Holder data = TinkerDataCapability.getData(handler.getPlayer());
+    if (data != null) {
+      data.remove(HIT_FACE);
+    }
   }
 
   /**

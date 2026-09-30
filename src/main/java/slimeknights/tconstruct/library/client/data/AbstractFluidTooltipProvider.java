@@ -7,6 +7,6 @@ import net.minecraft.data.DataGenerator;
 @Deprecated
 public abstract class AbstractFluidTooltipProvider extends slimeknights.mantle.fluid.tooltip.AbstractFluidTooltipProvider {
   public AbstractFluidTooltipProvider(FabricDataOutput output, String modId) {
-    super(output, modId);
+    super(output);
   }
 }

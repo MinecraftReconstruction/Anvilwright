@@ -130,5 +130,17 @@ public class ToolHookIngredient extends AbstractIngredient {
       Loadables.ITEM_TAG.encode(buffer, ingredient.tag);
       ToolHooks.LOADER.encode(buffer, ingredient.hook);
     }
+
+    @Override
+    public ResourceLocation getIdentifier() {
+      return ID;
+    }
+
+    @Override
+    public void write(JsonObject parent, ToolHookIngredient ingredient) {
+      parent.addProperty("type", ID.toString());
+      parent.addProperty("tag", ingredient.tag.location().toString());
+      parent.addProperty("hook", ingredient.hook.getId().toString());
+    }
   }
 }
