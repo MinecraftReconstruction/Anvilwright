@@ -23,6 +23,8 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import java.util.List;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
+import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
  * Recipe to convert an entity into a head or other item for the severing modifier
@@ -66,6 +68,13 @@ public class SeveringRecipe implements ICustomOutputRecipe<IEmptyContainer> {
   public float getChance(float level, float looting) {
     return level * (baseChance + lootingBonus * looting);
   }
+
+  /** Cached list of entity types for display, built on demand */
+  @Nullable
+  private List<EntityType> entityInputs;
+  /** Cached list of item inputs for display, built on demand */
+  @Nullable
+  private List<ItemStack> itemInputs;
 
   /**
    * Gets the output for this recipe for display in JEI, needs to be consistent

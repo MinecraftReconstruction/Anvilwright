@@ -85,6 +85,18 @@ public class CreativeSlotItem extends Item {
     }
   }
 
+  /** Adds all variants of this slot item to the creative tab */
+  public void addVariants(Consumer<ItemStack> items) {
+    Collection<SlotType> allTypes = SlotType.getAllSlotTypes();
+    if (allTypes.isEmpty()) {
+      items.accept(new ItemStack(this));
+    } else {
+      for (SlotType type : allTypes) {
+        items.accept(withSlot(new ItemStack(this), type));
+      }
+    }
+  }
+
   public void fillItemCategory(FabricItemGroupEntries items) {
     Collection<SlotType> allTypes = SlotType.getAllSlotTypes();
     if (allTypes.isEmpty()) {

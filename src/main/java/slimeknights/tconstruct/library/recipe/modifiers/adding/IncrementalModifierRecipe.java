@@ -38,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import slimeknights.mantle.data.loadable.field.ContextKey;
 import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 
 /** Modifier that incrementally fills the entry, allowing partial application. */
 public class IncrementalModifierRecipe extends AbstractModifierRecipe {
@@ -79,9 +80,8 @@ public class IncrementalModifierRecipe extends AbstractModifierRecipe {
   }
 
   @Override
-  public ValidatedResult getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack tinkerable = inv.getTinkerableStack();
-    ToolStack tool = ToolStack.from(tinkerable);
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess registryAccess) {
+    ToolStack tool = inv.getTinkerable();
 
     // fetch the amount from the modifier, will be 0 if we have a full level
     ModifierId modifier = result.getId();

@@ -92,6 +92,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   public static final TinkerDataKey<Float> DRAWSPEED = TConstruct.createKey("drawspeed");
   /** Int version of above, just used for sound effects */
   public static final ResourceLocation KEY_DRAWTIME = TConstruct.getResource("drawtime");
+  /** Key for the ammo a launcher is currently drawing back */
+  public static final ResourceLocation KEY_DRAWBACK_AMMO = TConstruct.getResource("drawback_ammo");
 
   /** Tool definition for the given tool */
   @Getter

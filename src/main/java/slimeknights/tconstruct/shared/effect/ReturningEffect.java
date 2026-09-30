@@ -27,7 +27,7 @@ public class ReturningEffect extends TinkerEffect {
     // store entity's current position when the effect is added
     LivingEntity entity = event.getEntity();
     if (!entity.level().isClientSide() && event.getOldEffectInstance() == null && event.getEffectInstance().getEffect() == this) {
-      ModDataNBT data = PersistentDataCapability.getOrWarn(entity);
+      ModDataNBT data = new ModDataNBT(PersistentDataCapability.getOrWarn(entity));
       CompoundTag pos = NbtUtils.writeBlockPos(entity.blockPosition());
       pos.putString("dimension", entity.level().dimension().location().toString());
       data.put(KEY, pos);
@@ -41,7 +41,7 @@ public class ReturningEffect extends TinkerEffect {
 
   @Override
   public void applyEffectTick(LivingEntity living, int amplifier) {
-    ModDataNBT data = PersistentDataCapability.getOrWarn(living);
+    ModDataNBT data = new ModDataNBT(PersistentDataCapability.getOrWarn(living));
     if (data.contains(KEY, Tag.TAG_COMPOUND)) {
       CompoundTag tag = data.getCompound(KEY);
       ResourceLocation dimension = ResourceLocation.tryParse(tag.getString("dimension"));

@@ -35,8 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.LinkedHashMap;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 
-public class ArmorModelManager extends SimpleJsonResourceReloadListener {
+public class ArmorModelManager extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
   /** Folder containing the logic */
   public static final String FOLDER = "tinkering/armor_models";
 
@@ -56,6 +58,11 @@ public class ArmorModelManager extends SimpleJsonResourceReloadListener {
   private static final List<ArmorModelDispatcher> DISPATCHERS = new ArrayList<>();
   /** Items waiting for the client to register their armor renderer */
   private static final Map<Item,ArmorModelDispatcher> PENDING_RENDERERS = new LinkedHashMap<>();
+
+  @Override
+  public ResourceLocation getFabricId() {
+    return TConstruct.getResource(FOLDER);
+  }
 
   /**
    * Initializes this manager, registering it with the resource manager
@@ -160,7 +167,7 @@ public class ArmorModelManager extends SimpleJsonResourceReloadListener {
       // Porting Lib's ArmorRenderer is that layer, so render here; the model pulls its own textures and uses the
       // render buffer captured from LivingEntityRenderEvents (see AbstractArmorModel#buffer).
       Model model = getGenericArmorModel(living, stack, slot, contextModel);
-      model.renderToBuffer(matrices, buffers.getBuffer(net.minecraft.client.renderer.RenderType.armorCutoutNoCull(slimeknights.tconstruct.library.tools.helper.ArmorUtil.getDummyArmorTexture(slot))), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+      model.renderToBuffer(matrices, buffers.getBuffer(net.minecraft.client.renderer.RenderType.armorCutoutNoCull(net.minecraft.resources.ResourceLocation.tryParse(slimeknights.tconstruct.library.tools.helper.ArmorUtil.getDummyArmorTexture(slot)))), light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
     }
   }
 }

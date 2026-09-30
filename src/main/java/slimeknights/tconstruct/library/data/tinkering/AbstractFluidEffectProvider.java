@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 import static slimeknights.mantle.Mantle.commonResource;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.PackOutput;
+import net.minecraft.core.registries.Registries;
 
 /** Data provider for spilling fluids */
 @SuppressWarnings("deprecation")  // fluid registry is ours to use, not yours forge
@@ -136,7 +137,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Adds a conditional fluid effect */
   protected Builder compatFluid(String name, int amount) {
-    return compatFluid(FluidTags.create(commonResource(name)), amount);
+    return compatFluid(TagKey.create(Registries.FLUID, commonResource(name)), amount);
   }
 
   /** Adds a conditional fluid effect */
@@ -146,7 +147,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Adds a conditional fluid effect */
   protected Builder compatFluid(String modId, String name, int amount) {
-    return compatFluid(modId, FluidTags.create(commonResource(name)), amount);
+    return compatFluid(modId, TagKey.create(Registries.FLUID, commonResource(name)), amount);
   }
 
   /** Builder for a metal based fluid */
@@ -224,7 +225,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       ConditionJsonProvider[] conditions = new ConditionJsonProvider[names.length + 1];
       conditions[0] = ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS;
       for (int i = 0; i < names.length; i++) {
-        conditions[i+1] = new TagFilledCondition<>(ItemTags.create(commonResource("ingots/" + names[i])));
+        conditions[i+1] = new TagFilledCondition<>(TagKey.create(Registries.ITEM, commonResource("ingots/" + names[i])));
       }
       return addCondition(DefaultResourceConditions.or(conditions));
     }

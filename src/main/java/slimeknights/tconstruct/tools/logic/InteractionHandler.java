@@ -474,7 +474,7 @@ public class InteractionHandler {
           if (damage >= 3) {
             InteractionHand usingHand = entity.getUsedItemHand();
             if (ToolDamageUtil.damageAnimated(tool, 1 + Mth.floor(damage), entity, usingHand)) {
-              ForgeEventFactory.onPlayerDestroyItem(player, activeStack, usingHand);
+              // note: Forge fired PlayerDestroyItemEvent here, Fabric has no equivalent hook
               entity.stopUsingItem();
               entity.playSound(SoundEvents.SHIELD_BREAK, 0.8F, 0.8F + entity.level().random.nextFloat() * 0.4F);
             }

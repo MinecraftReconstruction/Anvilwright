@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.ChatFormatting;
+import slimeknights.tconstruct.common.config.Config;
 
 /**
  * Represents an item that has a Material associated with it. The NBT of the itemstack identifies which material the
@@ -64,7 +65,7 @@ public class MaterialItem extends Item implements IMaterialItem {
   public void fillItemCategory(FabricItemGroupEntries items) {
     if (MaterialRegistry.isFullyLoaded()) {
       // if a specific material is set in the config, try adding that
-      String showOnlyId = Config.COMMON.showOnlyPartMaterial.get();
+      String showOnlyId = Config.CLIENT.showOnlyPartMaterial.get();
       boolean added = false;
       if (!showOnlyId.isEmpty()) {
         MaterialVariantId materialId = MaterialVariantId.tryParse(showOnlyId);

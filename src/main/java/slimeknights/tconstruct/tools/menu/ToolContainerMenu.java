@@ -284,6 +284,11 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     }
   }
 
+  /** Gets the fluid tank for this menu, used by the fluid sync packet */
+  public SimpleFluidTank getTank() {
+    return tank;
+  }
+
   /** Logic handling the fluid tank in the UI */
   private record ToolFluidHandler(IToolStackView tool, @Nullable Player player) implements SimpleFluidTank {
     @Nonnull

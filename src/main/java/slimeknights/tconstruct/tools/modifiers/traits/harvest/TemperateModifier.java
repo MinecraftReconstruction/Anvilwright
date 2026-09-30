@@ -70,7 +70,7 @@ public class TemperateModifier extends Modifier implements ConditionalStatModifi
   private static float getBonus(LivingEntity living, BlockPos pos) {
     // temperature ranges from -1.25 to 1.25, so make it go -1 to 1
     // negative is cold, positive is hot
-    return (living.level().getBiome(pos).value().getTemperature(pos) - BASELINE_TEMPERATURE) * level / 1.25f;
+    return (living.level().getBiome(pos).value().getTemperature(pos) - BASELINE_TEMPERATURE);
   }
 
   @Override
@@ -86,9 +86,9 @@ public class TemperateModifier extends Modifier implements ConditionalStatModifi
   }
 
   @Override
-  public void onBreakSpeed(IToolStackView tool, int level, PlayerEvents.BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
+  public void onBreakSpeed(IToolStackView tool, ModifierEntry modifier, BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
     // break faster in the cold
-    Optional<BlockPos> pos = event.getPosition();
+    Optional<BlockPos> pos = Optional.of(event.getPos());
     if (isEffective && pos.isPresent()) {
       float bonus = getBonus(event.getEntity(), pos.get());
       if (bonus < 0) {

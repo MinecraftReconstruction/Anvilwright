@@ -79,9 +79,10 @@ import slimeknights.tconstruct.world.block.DirtType;
 
 import java.util.function.Function;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 public class FluidEffectProvider extends AbstractFluidEffectProvider {
-  public FluidEffectProvider(PackOutput packOutput) {
+  public FluidEffectProvider(FabricDataOutput packOutput) {
     super(packOutput, TConstruct.MOD_ID);
   }
 

@@ -73,6 +73,6 @@ public class ToolHarvestContext {
 
   /** Creates a copy of this context for the given position */
   public ToolHarvestContext forPosition(BlockPos pos, BlockState state) {
-    return new ToolHarvestContext(this.world, this.living, this.player, state, pos, this.sideHit, state.getBlock() instanceof HarvestableBlock block ? block.canHarvestBlock(state, world, pos, player) : player.hasCorrectToolForDrops(state), true, true, this.targetedPos, this.targetedState);
+    return new ToolHarvestContext(world, living, player, projectile, state, pos, this.sideHit, state.getBlock() instanceof HarvestableBlock block ? block.canHarvestBlock(state, world, pos, player) : player.hasCorrectToolForDrops(state), true, true, targetedPos, targetedState);
   }
 }

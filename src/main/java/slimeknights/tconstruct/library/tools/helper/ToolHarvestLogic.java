@@ -289,6 +289,47 @@ public class ToolHarvestLogic {
     return true;
   }
 
+  /**
+   * Breaks a block with the given tool, running AOE and the harvest hooks, and returns how many blocks were broken.
+   * Used by thrown tools, which break blocks without a real player digging action.
+   */
+  public static int runBlockBreak(ItemStack stack, IToolStackView tool, BlockState state, BlockPos pos, Direction sideHit, ServerPlayer player, @Nullable Projectile projectile) {
+    // create contexts
+    ServerLevel world = player.serverLevel();
+    ToolStack toolStack = ToolStack.from(stack);
+    ToolHarvestContext context = new ToolHarvestContext(world, player, projectile, state, pos, sideHit,
+                                                        !player.isCreative() && player.hasCorrectToolForDrops(state),
+                                                        isEffective(tool, state));
+
+    // add enchants
+    ListTag originalEnchants = ModifierUtil.applyHarvestEnchantments(toolStack, stack, context);
+    // need to calculate the iterator before we break the block, as we need the reference hardness from the center
+    Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getDefinition().getData().getAOE().getBlocks(tool, stack, player, state, world, pos, sideHit, AOEMatchType.BREAKING) : Collections.emptyList();
+
+    // actually break the block, run AOE if successful
+    int harvested = 0;
+    if (breakBlock(toolStack, stack, context)) {
+      harvested = 1;
+      for (BlockPos extraPos : extraBlocks) {
+        BlockState extraState = world.getBlockState(extraPos);
+        // prevent calling that stuff for air blocks, could lead to unexpected behaviour since it fires events
+        if (!extraState.isAir()) {
+          breakExtraBlock(toolStack, stack, context.forPosition(extraPos.immutable(), extraState));
+          harvested += 1;
+        }
+      }
+      for (ModifierEntry entry : tool.getModifierList()) {
+        entry.getHook(ModifierHooks.BLOCK_HARVEST).finishHarvest(tool, entry, context, harvested);
+      }
+    }
+
+    // blocks done being broken, clear extra enchants added
+    if (originalEnchants != null) {
+      ModifierUtil.restoreEnchantments(stack, originalEnchants);
+    }
+    return harvested;
+  }
+
   /** Handles {@link net.minecraft.world.item.Item#mineBlock(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.world.entity.LivingEntity)} for modifiable items */
   public static boolean mineBlock(ItemStack stack, Level worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
     ToolStack tool = ToolStack.from(stack);

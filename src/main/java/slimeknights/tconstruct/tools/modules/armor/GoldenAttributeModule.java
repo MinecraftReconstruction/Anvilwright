@@ -45,6 +45,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+import net.minecraft.world.item.ItemStack;
+import io.github.fabricators_of_create.porting_lib.item.PiglinsNeutralItem;
 
 /**
  * Module that applies an attribute conditioned on the amount of gold the player is wearing.
@@ -183,7 +185,8 @@ public record GoldenAttributeModule(String unique, TinkerDataKey<TotalGold> data
       return tool.getVolatileData().getBoolean(ModifiableArmorItem.PIGLIN_NEUTRAL);
     } else {
       LivingEntity living = context.getEntity();
-      return living.getItemBySlot(slotType).makesPiglinsNeutral(living);
+      ItemStack stack = living.getItemBySlot(slotType);
+      return stack.getItem() instanceof PiglinsNeutralItem piglinsNeutralItem && piglinsNeutralItem.makesPiglinsNeutral(stack, living);
     }
   }
 

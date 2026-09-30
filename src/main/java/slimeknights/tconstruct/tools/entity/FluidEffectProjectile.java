@@ -167,7 +167,7 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
   /** Updates the stack for the fluid cannon */
   private void updateCannonStack(FluidEffectContext context) {
     if (cannon != null) {
-      IItemHandlerModifiable handler = getCannonInventory();
+      SlottedStackStorage handler = getCannonInventory();
       if (handler != null) {
         handler.setStackInSlot(0, context.getStack());
       }

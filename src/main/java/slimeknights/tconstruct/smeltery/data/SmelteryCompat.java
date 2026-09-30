@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static slimeknights.mantle.Mantle.commonResource;
+import net.minecraft.tags.TagKey;
+import net.minecraft.core.registries.Registries;
 
 /**
  * Enum holding all relevant smeltery compat, used in datagen and JEI.
@@ -129,7 +131,7 @@ public enum SmelteryCompat {
   /** Checks if the given tag exists */
   @SuppressWarnings("deprecation")
   private static boolean ingotPresent(String name) {
-    Optional<Named<Item>> tag = BuiltInRegistries.ITEM.getTag(ItemTags.create(commonResource("ingots/" + name)));
+    Optional<Named<Item>> tag = BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, commonResource("ingots/" + name)));
     return tag.isPresent() && tag.get().size() > 0;
   }
 }

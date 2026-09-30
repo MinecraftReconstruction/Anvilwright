@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import slimeknights.tconstruct.library.client.armor.ArmorModelManager;
+import slimeknights.tconstruct.TConstruct;
 
 /** Model to render a slimeskull helmet with both the helmet and skull */
 public class SlimeskullArmorModel extends MultilayerArmorModel {
@@ -67,6 +69,11 @@ public class SlimeskullArmorModel extends MultilayerArmorModel {
   private float walkAnimation = 0;
 
   private SlimeskullArmorModel() {}
+
+  /** Gets the model to render for the given skull, using the skull armor model entry */
+  public static Model getModel(LivingEntity living, ItemStack stack, HumanoidModel<?> baseModel) {
+    return INSTANCE.setup(living, stack, baseModel, ArmorModelManager.INSTANCE.getModel(TConstruct.getResource("slimeskull")));
+  }
 
   /** Prepares the model */
   public Model setup(LivingEntity living, ItemStack stack, HumanoidModel<?> base, ArmorModel model) {

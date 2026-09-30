@@ -527,7 +527,7 @@ public class ToolEvents {
     Projectile projectile = event.getProjectile();
     ModifierNBT modifiers = EntityModifierCapability.getOrEmpty(projectile);
     if (!modifiers.isEmpty()) {
-      ModDataNBT nbt = PersistentDataCapability.getOrWarn(projectile);
+      ModDataNBT nbt = new ModDataNBT(PersistentDataCapability.getOrWarn(projectile));
       HitResult hit = event.getRayTraceResult();
       HitResult.Type type = hit.getType();
       // extract a firing entity as that is a common need

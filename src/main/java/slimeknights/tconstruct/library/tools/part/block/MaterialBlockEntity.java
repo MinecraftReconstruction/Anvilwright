@@ -35,9 +35,15 @@ public class MaterialBlockEntity extends MantleBlockEntity {
     this(TinkerToolParts.materialBlock.get(), pos, state);
   }
 
-  @Override
+  /** Model data for the current material, override to add extra properties */
   public ModelData getModelData() {
     return ModelData.builder().with(ModelProperties.MATERIAL, material).build();
+  }
+
+  @Nonnull
+  @Override
+  public ModelData getRenderData() {
+    return getModelData();
   }
 
   /** Called to update the material on the block. */

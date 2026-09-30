@@ -12,6 +12,8 @@ import slimeknights.tconstruct.library.recipe.material.MaterialRecipe;
 import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 
 import java.util.function.Predicate;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 
 /** Simple implementation of an ingot for use with materials that lack ingots. Class could be reused for other 1 cost composite materials. */
 public class FakeIngotItem extends RepairKitItem {
@@ -21,8 +23,8 @@ public class FakeIngotItem extends RepairKitItem {
   private final Predicate<MaterialId> missingItemGetter = material -> hasItem(material, getRepairAmount());
 
   private final TagKey<IMaterial> validMaterials;
-  public FakeIngotItem(Properties properties, int value, TagKey<IMaterial> validMaterials) {
-    super(properties, value);
+  public FakeIngotItem(Properties properties, int value, TagKey<IMaterial> validMaterials, ResourceKey<CreativeModeTab> tab) {
+    super(properties, value, tab);
     this.validMaterials = validMaterials;
     RecipeCacheInvalidator.addReloadListener(client -> missingItemCache.clear());
   }

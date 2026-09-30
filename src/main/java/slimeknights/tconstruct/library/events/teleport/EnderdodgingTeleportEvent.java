@@ -15,8 +15,21 @@ public class EnderdodgingTeleportEvent extends EntityEvents.Teleport.EntityTelep
       e.onTeleport(event);
   });
 
-  public EnderdodgingTeleportEvent(LivingEntity entity, double targetX, double targetY, double targetZ) {
+  /** Modifier that caused the teleport, upstream exposes this on {@code ModifierTeleportEvent} */
+  private final ModifierEntry modifier;
+
+  public EnderdodgingTeleportEvent(Entity entity, double targetX, double targetY, double targetZ, ModifierEntry modifier) {
     super(entity, targetX, targetY, targetZ);
+    this.modifier = modifier;
+  }
+
+  public EnderdodgingTeleportEvent(LivingEntity entity, double targetX, double targetY, double targetZ) {
+    this(entity, targetX, targetY, targetZ, new ModifierEntry(ModifierIds.enderclearance, 1));
+  }
+
+  /** Gets the modifier that caused this teleport */
+  public ModifierEntry getModifier() {
+    return modifier;
   }
 
   @Override

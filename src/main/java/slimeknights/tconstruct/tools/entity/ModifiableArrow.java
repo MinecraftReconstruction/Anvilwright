@@ -108,7 +108,7 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
       super.shoot(pX, pY, pZ, velocity, inaccuracy);
 
       // run modifier hooks from the arrow's perspective
-      ModDataNBT arrowData = PersistentDataCapability.getOrWarn(this);
+      ModDataNBT arrowData = new ModDataNBT(PersistentDataCapability.getOrWarn(this));
       for (ModifierEntry entry : tool.getModifiers()) {
         entry.getHook(ModifierHooks.PROJECTILE_SHOT).onProjectileShoot(tool, entry, shooter, stack, this, this, arrowData, true);
       }

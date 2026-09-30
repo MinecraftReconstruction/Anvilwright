@@ -514,7 +514,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
      * Registers that the given modifier is expected to be loaded in datapacks
      * @param name  Modifier name
      */
-    public void registerExpected(ModifierId name, Class<?> classFilter) {
+    public void registerExpected(ModifierId name) {
       // should not include under both types
       if (staticModifiers.containsKey(name)) {
         throw new IllegalArgumentException(name + " is already registered as a static modifier");

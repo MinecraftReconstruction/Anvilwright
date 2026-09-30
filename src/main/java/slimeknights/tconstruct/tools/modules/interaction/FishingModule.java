@@ -111,7 +111,7 @@ public enum FishingModule implements ModifierModule, GeneralInteractionModifierH
           }
 
           // fetch the persistent data for the hook as modifiers may want to store data
-          ModDataNBT arrowData = PersistentDataCapability.getOrWarn(hook);
+          ModDataNBT arrowData = new ModDataNBT(PersistentDataCapability.getOrWarn(hook));
 
           // let modifiers such as fiery and punch set properties
           for (ModifierEntry entry : modifiers.getModifiers()) {

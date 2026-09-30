@@ -22,6 +22,7 @@ import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /** Internal item used by crystalshot modifier */
 public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
@@ -59,7 +60,7 @@ public class CrystalshotItem extends ArrowItem implements InfiniteArrowItem {
 
   @Override
   public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
-    return bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+    return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, bow) > 0;
   }
 
   /** Creates a crystal shot with the given variant */

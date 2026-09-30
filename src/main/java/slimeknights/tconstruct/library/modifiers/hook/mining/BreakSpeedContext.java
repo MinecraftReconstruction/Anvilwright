@@ -102,7 +102,7 @@ public sealed interface BreakSpeedContext {
     @Nullable
     @Override
     public BlockPos pos() {
-      return event.getPosition().orElse(null);
+      return event.getPos();
     }
 
     @Override

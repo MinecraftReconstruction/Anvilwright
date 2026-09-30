@@ -64,12 +64,15 @@ public class StrongBonesModifier extends SingleLevelModifier {
     return didSomething;
   }
 
-  /** Called when you finish drinking milk */
-  private static void onItemFinishUse(LivingEntityUseItemEvents.LivingUseItemFinish event) {
-    LivingEntity living = event.getEntity();
-    if (event.getItem().getItem() == Items.MILK_BUCKET) {
+  /**
+   * Called when you finish drinking milk. Porting Lib's event hands us the values directly instead of
+   * an event object, and expects the resulting stack back.
+   */
+  private static ItemStack onItemFinishUse(LivingEntity living, ItemStack usedStack, int duration, ItemStack result) {
+    if (usedStack.getItem() == Items.MILK_BUCKET) {
       drinkMilk(living, 600, 600, FluidAction.EXECUTE);
     }
+    return result;
   }
 
 
