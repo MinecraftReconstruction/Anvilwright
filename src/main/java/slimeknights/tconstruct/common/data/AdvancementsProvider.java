@@ -101,6 +101,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import net.minecraft.data.PackOutput.Target;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 
 /**
  * Generates advancements used by this mod.
@@ -114,7 +116,7 @@ public class AdvancementsProvider extends GenericDataProvider {
   protected BiConsumer<Advancement, ConditionJsonProvider> conditionalConsumer;
 
   public AdvancementsProvider(FabricDataOutput output) {
-    super(output, "advancements");
+    super(output, Target.DATA_PACK, "advancements");
   }
 
   @Override
@@ -193,8 +195,8 @@ public class AdvancementsProvider extends GenericDataProvider {
       with.accept(MaterialIds.knightslime);
       with.accept(MaterialIds.enderslimeVine);
     });
-    builder(TinkerTools.travelersGear.get(ArmorItem.Type.HELMET).getRenderTool(), resource("tools/travelers_gear"), tinkerStation, FrameType.TASK, builder ->
-      TinkerTools.travelersGear.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getName(), hasItem(armor))));
+    builder(TinkerTools.travelersGear.get(ArmorSlotType.HELMET).getRenderTool(), resource("tools/travelers_gear"), tinkerStation, FrameType.TASK, builder ->
+      TinkerTools.travelersGear.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getSerializedName(), hasItem(armor))));
     builder(TinkerTools.pickaxe.get().getRenderTool(), resource("tools/tool_smith"), tinkerTool, FrameType.CHALLENGE, builder -> {
       Consumer<Item> with = item -> builder.addCriterion(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(item)).getPath(), hasItem(item));
       with.accept(TinkerTools.pickaxe.get());
@@ -399,8 +401,8 @@ public class AdvancementsProvider extends GenericDataProvider {
       TinkerSmeltery.searedTank.forEach(with);
       TinkerSmeltery.scorchedTank.forEach(with);
     });
-    builder(TinkerTools.plateArmor.get(ArmorItem.Type.CHESTPLATE).getRenderTool(), resource("foundry/plate_armor"), blazingBlood, FrameType.GOAL, builder ->
-      TinkerTools.plateArmor.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getName(), hasItem(armor))));
+    builder(TinkerTools.plateArmor.get(ArmorSlotType.CHESTPLATE).getRenderTool(), resource("foundry/plate_armor"), blazingBlood, FrameType.GOAL, builder ->
+      TinkerTools.plateArmor.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getSerializedName(), hasItem(armor))));
     builder(TankItem.setTank(new ItemStack(TinkerSmeltery.scorchedLantern), getTankWith(TinkerFluids.moltenManyullyn.get(), TinkerSmeltery.scorchedLantern.get().getCapacity())),
             resource("foundry/manyullyn_lanterns"), foundry, FrameType.CHALLENGE, builder -> {
       Consumer<SearedLanternBlock> with = block -> {
@@ -419,15 +421,15 @@ public class AdvancementsProvider extends GenericDataProvider {
     Advancement tinkersGadgetry = builder(TinkerCommons.tinkersGadgetry, resource("world/tinkers_gadgetry"), materialsAndYou, FrameType.TASK, builder ->
       builder.addCriterion("crafted_book", hasItem(TinkerCommons.tinkersGadgetry)));
     builder(TinkerWorld.slimeSapling.get(FoliageType.EARTH), resource("world/earth_island"), tinkersGadgetry, FrameType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.earthSlimeIslandKey))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.earthSlimeIsland))));
     builder(TinkerWorld.slimeSapling.get(FoliageType.SKY), resource("world/sky_island"), tinkersGadgetry, FrameType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.skySlimeIslandKey))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.skySlimeIsland))));
     builder(TinkerWorld.slimeSapling.get(FoliageType.BLOOD), resource("world/blood_island"), tinkersGadgetry, FrameType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.bloodIslandKey))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.bloodIsland))));
     Advancement enderslimeIsland = builder(TinkerWorld.slimeSapling.get(FoliageType.ENDER), resource("world/ender_island"), tinkersGadgetry, FrameType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.endSlimeIslandKey))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.endSlimeIsland))));
     builder(Items.CLAY_BALL, resource("world/clay_island"), tinkersGadgetry, FrameType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.clayIslandKey))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(TinkerStructures.clayIsland))));
     Advancement slimes = builder(TinkerCommons.slimeball.get(SlimeType.ICHOR), resource("world/slime_collector"), tinkersGadgetry, FrameType.TASK, builder -> {
       for (SlimeType type : SlimeType.values()) {
         builder.addCriterion(type.getSerializedName(), hasTag(type.getSlimeballTag()));
@@ -446,7 +448,7 @@ public class AdvancementsProvider extends GenericDataProvider {
       TinkerTools.slimesuit.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getSerializedName(), hasItem(armor))));
     builder(new MaterialIdNBT(Collections.singletonList(MaterialIds.glass)).updateStack(new ItemStack(TinkerTools.slimesuit.get(ArmorSlotType.HELMET))),
             resource("world/slimeskull"), slimesuit, FrameType.CHALLENGE, builder -> {
-      Item helmet = TinkerTools.slimesuit.get(ArmorItem.Type.HELMET);
+      Item helmet = TinkerTools.slimesuit.get(ArmorSlotType.HELMET);
       Consumer<MaterialId> with = mat -> builder.addCriterion(mat.getPath(), hasTool(ToolContextPredicate.set(helmet), new HasMaterialPredicate(mat, 0)));
       with.accept(MaterialIds.gunpowder);
       with.accept(MaterialIds.blaze);

@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 
 /**
  * Model that replaces fluid textures with the fluid from model data
@@ -150,8 +151,8 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
       }
 
       // setup transformers, quadTransformer will be applied to all parts while fluid also adds in colors for the fluid
-      IQuadTransformer quadTransformer = SimpleBlockModel.applyTransform(transform, owner.getRootTransform());
-      IQuadTransformer fluidTransformer = quadTransformer;
+      QuadTransform quadTransformer = SimpleBlockModel.applyTransform(transform, owner.getRootTransform());
+      QuadTransform fluidTransformer = quadTransformer;
 
       // get fluid details if needed
       int luminosity = 0;
@@ -174,7 +175,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
           ColoredBlockModel.bakePart(builder, textured, element, luminosity, spriteGetter, transform.getRotation(), fluidTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         } else {
           int partColor = colors.color();
-          IQuadTransformer partTransformer = partColor == -1 ? quadTransformer : ColoredBlockModel.applyColorQuadTransformer(partColor).andThen(quadTransformer);
+          QuadTransform partTransformer = partColor == -1 ? quadTransformer : ColoredBlockModel.applyColorQuadTransformer(partColor).andThen(quadTransformer);
           ColoredBlockModel.bakePart(builder, textured, element, colors.luminosity(), spriteGetter, transform.getRotation(), partTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         }
       }

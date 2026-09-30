@@ -123,12 +123,13 @@ import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE;
 import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE_PARTS;
 import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE_TOOLS;
 import static slimeknights.tconstruct.common.TinkerTags.Items.WORN_ARMOR;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 
 @SuppressWarnings({"unchecked", "removal"})
 public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
   /** Twlight forest uncrafting table blacklist */
-  private static final TagKey<Item> BANNED_UNCRAFTABLE = ItemTags.create(new ResourceLocation("twilightforest", "banned_uncraftables"));
-  private final Function<ResourceLocation,FabricTagBuilder> MAKE_TAG = tag -> getOrCreateTagBuilder(ItemTags.create(tag));
+  private static final TagKey<Item> BANNED_UNCRAFTABLE = TagKey.create(Registries.ITEM, new ResourceLocation("twilightforest", "banned_uncraftables"));
+  private final Function<ResourceLocation,FabricTagBuilder> MAKE_TAG = tag -> getOrCreateTagBuilder(TagKey.create(Registries.ITEM, tag));
 
   public ItemTagProvider(FabricDataOutput output, CompletableFuture<Provider> lookupProvider, BlockTagProvider blockTagProvider) {
     super(output, lookupProvider, blockTagProvider);
@@ -375,13 +376,13 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     addArmorTags(TinkerTools.plateArmor,    MULTIPART_TOOL, DURABILITY, BONUS_SLOTS, DYEABLE, TRIM);
     addArmorTags(TinkerTools.slimesuit,     DURABILITY, BONUS_SLOTS, DYEABLE, TRIM);
     FabricTagBuilder multipart = getOrCreateTagBuilder(MULTIPART_TOOL);
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
-      if (type != ArmorItem.Type.HELMET) {
+    for (ArmorSlotType type : ArmorSlotType.values()) {
+      if (type != ArmorSlotType.HELMET) {
         multipart.add(TinkerTools.slimesuit.get(type));
       }
     }
     addToolTags(TinkerTools.slimeWings, DURABILITY, BONUS_SLOTS, DYEABLE, TRIM, MULTIPART_TOOL, CHESTPLATES, Tags.Items.ARMORS_CHESTPLATES);
-    addToolTags(TinkerTools.slimesuit.get(ArmorItem.Type.HELMET), MULTIPART_TOOL, SWAPPABLE_SKULLS, UNRECYCLABLE);
+    addToolTags(TinkerTools.slimesuit.get(ArmorSlotType.HELMET), MULTIPART_TOOL, SWAPPABLE_SKULLS, UNRECYCLABLE);
 
     // shields
     addToolTags(TinkerTools.travelersShield, DURABILITY, BONUS_SLOTS, SHIELDS, INTERACTABLE_LEFT, Tags.Items.TOOLS_SHIELDS, MULTIPART_TOOL, UNRECYCLABLE, BANNER, DYEABLE);
@@ -390,18 +391,18 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     // care about order for armor in the book
     getOrCreateTagBuilder(BASIC_ARMOR);
     FabricTagBuilder bookArmor = getOrCreateTagBuilder(PUNY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorSlotType slotType : ArmorSlotType.values()) {
       bookArmor.add(TinkerTools.travelersGear.get(slotType));
     }
     bookArmor.add(TinkerTools.travelersShield.get());
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorSlotType slotType : ArmorSlotType.values()) {
       bookArmor.add(TinkerTools.plateArmor.get(slotType));
     }
     bookArmor.add(TinkerTools.plateShield.get());
     getOrCreateTagBuilder(MIGHTY_ARMOR);
     getOrCreateTagBuilder(FANTASTIC_ARMOR);
     bookArmor = getOrCreateTagBuilder(GADGETRY_ARMOR);
-    for (ArmorItem.Type slotType : ArmorItem.Type.values()) {
+    for (ArmorSlotType slotType : ArmorSlotType.values()) {
       bookArmor.add(TinkerTools.slimesuit.get(slotType));
     }
     bookArmor.add(TinkerTools.slimeWings.asItem());
@@ -775,7 +776,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     }
   }
 
-  private TagKey<Item> getArmorTag(ArmorItem.Type slotType) {
+  private TagKey<Item> getArmorTag(ArmorSlotType slotType) {
     return switch (slotType) {
       case BOOTS -> BOOTS;
       case LEGGINGS -> LEGGINGS;
@@ -784,7 +785,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     };
   }
 
-  private TagKey<Item> getForgeArmorTag(ArmorItem.Type slotType) {
+  private TagKey<Item> getForgeArmorTag(ArmorSlotType slotType) {
     return switch (slotType) {
       case BOOTS -> Tags.Items.ARMORS_BOOTS;
       case LEGGINGS -> Tags.Items.ARMORS_LEGGINGS;
@@ -794,7 +795,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
   }
 
   @SafeVarargs
-  private void addArmorTags(EnumObject<ArmorItem.Type,? extends Item> armor, TagKey<Item>... tags) {
+  private void addArmorTags(EnumObject<ArmorSlotType,? extends Item> armor, TagKey<Item>... tags) {
     armor.forEach((type, item) -> {
       for (TagKey<Item> tag : tags) {
         this.getOrCreateTagBuilder(tag).add(item);

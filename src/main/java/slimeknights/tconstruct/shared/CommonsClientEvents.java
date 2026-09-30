@@ -17,6 +17,7 @@ import slimeknights.tconstruct.library.utils.DomainDisplayName;
 import slimeknights.tconstruct.shared.client.FluidParticle;
 
 import java.util.function.Consumer;
+import slimeknights.tconstruct.shared.block.ClearStainedGlassBlock;
 
 public class CommonsClientEvents extends ClientEventBase {
 

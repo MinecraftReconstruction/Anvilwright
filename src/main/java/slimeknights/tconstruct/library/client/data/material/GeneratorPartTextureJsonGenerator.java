@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.data.PackOutput;
+import slimeknights.mantle.data.loadable.Loadables;
 
 /** Generates the file that tells the part generator command which parts are needed for your tools */
 public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {

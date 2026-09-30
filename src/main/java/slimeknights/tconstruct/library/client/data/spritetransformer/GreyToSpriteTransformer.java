@@ -38,6 +38,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
+import static slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping.GREY_STRING_LOADABLE;
+import static slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping.serializeColor;
 
 /**
  * Supports including sprites as "part of the palette"

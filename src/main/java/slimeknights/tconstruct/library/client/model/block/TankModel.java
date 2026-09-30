@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
+import slimeknights.tconstruct.library.client.model.UniqueGuiModel;
 
 /**
  * This model contains a single scalable fluid that can either be statically rendered or rendered in the TESR. It also supports rendering fluids in the item model
@@ -83,11 +85,11 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
 
   @Override
   public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location, boolean isGui3d) {
-    BakedModel baked = model.bakeModel(owner, transform, overrides, spriteGetter, location);
+    BakedModel baked = model.bakeModel(owner, owner.getElements(), spriteGetter, transform, overrides, location, false);
     // bake the GUI model if present
     BakedModel bakedGui = baked;
     if (gui != null) {
-      bakedGui = gui.bakeModel(owner, transform, overrides, spriteGetter, location);
+      bakedGui = gui.bakeModel(owner, owner.getElements(), spriteGetter, transform, overrides, location, false);
     }
     return new Baked<>(owner, transform, baked, bakedGui, this);
   }
@@ -104,7 +106,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
         return model;
       }
       // determine fluid
-      FluidTank tank = TankItem.getFluidTank(stack);
+      FluidTank tank = TankItem.getTank(stack, 1);
       if (tank.isEmpty()) {
         return model;
       }
@@ -192,7 +194,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
         SimpleBlockModel.bakePart(builder, owner, element, spriteGetter, originalTransforms, quadTransformer, BAKE_LOCATION);
       }
       // next, add in the fluid
-      IQuadTransformer fluidTransformer = color == -1 ? quadTransformer : quadTransformer.andThen(ColoredBlockModel.applyColorQuadTransformer(color));
+      QuadTransform fluidTransformer = color == -1 ? quadTransformer : ColoredBlockModel.mergeTransform(quadTransformer, ColoredBlockModel.applyColorQuadTransformer(color));
       ColoredBlockModel.bakePart(builder, owner, fluid, luminosity, spriteGetter, originalTransforms.getRotation(), fluidTransformer, originalTransforms.isUvLocked(), BAKE_LOCATION);
       return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
     }

@@ -47,7 +47,7 @@ public class ChannelModel implements IUnbakedGeometry<ChannelModel> {
 
 	@Override
 	public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location, boolean isGui3d) {
-		BakedModel baked = this.model.bakeModel(owner, transform, overrides, spriteGetter, location);
+		BakedModel baked = this.model.bakeModel(owner, owner.getElements(), spriteGetter, transform, overrides, location, false);
 		return new Baked(baked, this.fluids);
 	}
 
@@ -97,7 +97,7 @@ public class ChannelModel implements IUnbakedGeometry<ChannelModel> {
 	private static class Loader implements IGeometryLoader<ChannelModel> {
 		@Override
 		public ChannelModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
-			SimpleBlockModel model = SimpleBlockModel.deserialize(deserializationContext, modelContents);
+			SimpleBlockModel model = SimpleBlockModel.deserialize(modelContents, deserializationContext);
 
 			// parse fluid cuboid for each side
 			JsonObject fluidJson = GsonHelper.getAsJsonObject(modelContents, "fluids");
