@@ -59,7 +59,7 @@ public class TierRangeMaterialSectionTransformer extends BookTransformer {
   /** Range of valid material tiers */
   private static final IntRange TIER = new IntRange(0, Short.MAX_VALUE);
   /** Parsing context for material JSON */
-  private static final TypedMap CONTEXT = TypedMapBuilder.builder().put(ContextKey.CONDITION_CONTEXT, DataLoadedConditionContext.INSTANCE).build();
+  private static final TypedMap CONTEXT = TypedMapBuilder.builder().put(ContextKey.DEBUG, "Material Tier").build();
   /** Map of registered material types */
   private static final Map<ResourceLocation,MaterialType> MATERIAL_TYPES = new HashMap<>();
   /** Transformer instance added to books */

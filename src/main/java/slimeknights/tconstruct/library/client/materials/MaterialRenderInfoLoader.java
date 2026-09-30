@@ -174,6 +174,20 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
 
   /* Helpers */
 
+  /** Gets the variant for the given render info path */
+  public static MaterialVariantId variant(ResourceLocation location) {
+    String path = location.getPath();
+
+    // locate variant as a subfolder, and create final ID
+    String variant = "";
+    int slashIndex = path.lastIndexOf('/');
+    if (slashIndex >= 0) {
+      variant = path.substring(slashIndex + 1);
+      path = path.substring(0, slashIndex);
+    }
+    return MaterialVariantId.create(location.getNamespace(), path, variant);
+  }
+
   /** Checks if the given material has any of the given fallbacks. Used by {@link slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier} and {@link slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel} */
   public boolean hasFallback(MaterialVariantId material, Set<String> fallbacks) {
     MaterialRenderInfo info = getRenderInfo(material).orElse(null);

@@ -56,24 +56,14 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
     }
 
     @Override
-    public void write(JsonObject json, TagNotEmptyCondition<?> value) {
+    public void serialize(JsonObject json, TagNotEmptyCondition<?> value, JsonSerializationContext context) {
       json.addProperty("registry", value.tag.registry().location().toString());
       json.addProperty("tag", value.tag.location().toString());
     }
 
     @Override
-    public void serialize(JsonObject json, TagNotEmptyCondition<?> value, JsonSerializationContext context) {
-      write(json, value);
-    }
-
-    @Override
-    public TagNotEmptyCondition<?> read(JsonObject json) {
-      return new TagNotEmptyCondition<>(createKey(json));
-    }
-
-    @Override
     public TagNotEmptyCondition<?> deserialize(JsonObject json, JsonDeserializationContext context) {
-      return read(json);
+      return new TagNotEmptyCondition<>(createKey(json));
     }
 
     /** Registers no condition of its own, kept for API parity with upstream's condition serializer */

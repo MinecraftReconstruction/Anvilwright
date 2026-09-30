@@ -221,3 +221,5 @@ transitive-accessible method net/minecraft/world/entity/LivingEntity spawnItemPa
 transitive-accessible field net/minecraft/world/level/Explosion fire Z
 transitive-accessible field net/minecraft/world/level/Explosion damageCalculator Lnet/minecraft/world/level/ExplosionDamageCalculator;
 transitive-accessible method net/minecraft/client/renderer/texture/atlas/sources/PalettedPermutations <init> (Ljava/util/List;Lnet/minecraft/resources/ResourceLocation;Ljava/util/Map;)V
+transitive-accessible field net/minecraft/world/entity/LivingEntity jumping Z
+transitive-accessible field net/minecraft/world/item/alchemy/PotionBrewing POTION_MIXES Ljava/util/List;

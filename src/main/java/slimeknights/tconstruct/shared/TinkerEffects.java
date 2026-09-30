@@ -85,7 +85,7 @@ public class TinkerEffects extends TinkerModule {
   /** Registers recipes for brewing, longer and stronger potions for the given object */
   private static void brewing(EnumObject<PotionType,Potion> potion, Potion base, Ingredient ingredient) {
     Potion normal = potion.get(PotionType.NORMAL);
-    PotionBrewing.POTION_MIXES.add(new PotionBrewing.Mix<>(BuiltInRegistries.POTION, base, ingredient, normal));
+    PotionBrewing.POTION_MIXES.add(new PotionBrewing.Mix<>(base, ingredient, normal));
     Potion longer = potion.getOrNull(PotionType.LONG);
     if (longer != null) {
       PotionBrewing.addMix(normal, Items.REDSTONE, longer);

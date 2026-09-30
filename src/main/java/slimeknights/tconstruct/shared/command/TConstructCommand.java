@@ -60,7 +60,7 @@ public class TConstructCommand {
   /** Event listener to register the Mantle command */
   private static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(TConstruct.MOD_ID);
-    CommandBuildContext context = event.getBuildContext();
+    CommandBuildContext context = registryAccess;
 
     // sub commands
     register(builder, "modifiers", ModifiersCommand::register);
