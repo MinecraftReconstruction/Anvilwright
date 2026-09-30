@@ -190,3 +190,24 @@ Mantle 侧记在行为差异 #24，TCon 侧记在 #19。
 | `1.11.DEV.292ad3e8` | `LogicHelper.orElseNull` 增加 `LazyOptional` 重载（上游 Forge Mantle 本来就只有这一版；1.11 移植只留了 `Optional`，下游上游形状的调用点编不过） |
 
 TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生成过。
+
+### 2026-09-30 下午续：long 化收尾 + 一次 `upstreamtake`
+
+| 步骤 | `--gen` 整树 | 说明 |
+|---|---|---|
+| 本轮开工 | 6 | 6 条全在铸造配方：`AbstractMaterialCastingRecipe` 的 `getFluidAmount` 还是 `int`（接口早已是 `long`），`PartSwapCastingRecipe` 用 `mapToInt` 取流体量 |
+| 修完这两处 | **55** | 暴露的是 datagen `ToolsRecipeProvider`（合并时"上游主体进来了、fork 的辅助声明没了"） |
+| 对 `ToolsRecipeProvider` 跑 `scripts/port/upstreamtake.py --apply` | **44** | 该文件自身 55 → 4；脚本判定 KEPT（整树也从 55 → 44） |
+| 剩余 | 44 | **全部**集中在 `ToolsRecipeProvider`（外加 `TinkerTools:396` 的 `addProvider` 歧义） |
+
+`ToolsRecipeProvider` 现在剩下的 6 类问题（都是"上游文件 + Fabric 管线"要补的活）：
+
+1. `import net.minecraftforge.common.Tags` → Porting Lib `io.github.fabricators_of_create.porting_lib.tags.Tags`（11 条）
+2. `ArmorItem.Type` → 本移植的 `ArmorSlotType`（21 条）
+3. `CompoundIngredient` / `DifferenceIngredient` / `ModLoadedCondition` → Fabric 的
+   `DefaultCustomIngredients.all/any/difference` 与 `DefaultResourceConditions`（需改调用写法）
+4. `ToolsRecipeProvider(PackOutput)` → `(FabricDataOutput)`（基类要的是 Fabric 的）
+5. `buildRecipes(Consumer<FinishedRecipe>)` 的覆写签名与基类 `BaseRecipeProvider` 不一致
+6. `toolBuilding(consumer, item, folder, Pattern)` 多了一个 `Pattern` 参数；`TinkerTools:396` 的
+   `pack.addProvider(ToolsRecipeProvider::new)` 在 Fabric 下 `addProvider` 有歧义（要显式指定
+   `FabricDataGenerator.Pack.Factory`）

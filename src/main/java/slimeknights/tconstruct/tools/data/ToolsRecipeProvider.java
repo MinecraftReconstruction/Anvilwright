@@ -1,9 +1,6 @@
 package slimeknights.tconstruct.tools.data;
 
-import com.google.common.collect.Streams;
-import io.github.fabricators_of_create.porting_lib.tags.Tags;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -14,7 +11,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import slimeknights.mantle.recipe.helper.ItemOutput;
+import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.crafting.CompoundIngredient;
+import net.minecraftforge.common.crafting.DifferenceIngredient;
+import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
+import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.mantle.recipe.data.ItemNameIngredient;
+import slimeknights.mantle.recipe.ingredient.PotionDisplayIngredient;
+import slimeknights.mantle.recipe.ingredient.SizedIngredient;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.data.BaseRecipeProvider;
 import slimeknights.tconstruct.fluids.TinkerFluids;
@@ -56,18 +61,10 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import static slimeknights.mantle.Mantle.commonResource;
-import net.minecraft.data.PackOutput;
-import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.data.ItemNameIngredient;
-import slimeknights.mantle.recipe.ingredient.PotionDisplayIngredient;
-import slimeknights.mantle.recipe.ingredient.SizedIngredient;
-import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 
 public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterialRecipeHelper, IToolRecipeHelper {
-  public ToolsRecipeProvider(FabricDataOutput output) {
-    super(output);
+  public ToolsRecipeProvider(PackOutput packOutput) {
+    super(packOutput);
   }
 
   @Override
@@ -76,7 +73,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
   }
 
   @Override
-  public void buildRecipes(Consumer<FinishedRecipe> consumer) {
+  protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
     this.addToolBuildingRecipes(consumer);
     this.addPartRecipes(consumer);
     this.addRecycleRecipes(consumer);
@@ -102,7 +99,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
     // sword
     ToolBuildingRecipeBuilder.toolBuildingRecipe(TinkerTools.dagger.get())
                              .outputSize(2)
-                             .save(consumer, prefix(TinkerTools.dagger.getRegistryName(), folder));
+                             .save(consumer, prefix(TinkerTools.dagger, folder));
     toolBuilding(consumer, TinkerTools.sword, folder);
     toolBuilding(consumer, TinkerTools.cleaver, folder);
     // bow
@@ -137,18 +134,12 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .save(consumer, wrap(TinkerTools.arrow, folder, "_from_tipped"));
 
     // specialized
-    ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, TinkerTools.flintAndBrick)
+    ShapelessRecipeBuilder.shapeless(RecipeCategory.TOOLS, TinkerTools.flintAndBrick)
                           .requires(Items.FLINT)
                           .requires(Ingredient.of(TinkerSmeltery.searedBrick, TinkerSmeltery.scorchedBrick))
                           .unlockedBy("has_seared", has(TinkerSmeltery.searedBrick))
                           .unlockedBy("has_scorched", has(TinkerSmeltery.scorchedBrick))
-                          .save(consumer, prefix(TinkerTools.flintAndBrick.getRegistryName(), folder));
-    SpecializedRepairRecipeBuilder.repair(TinkerTools.flintAndBrick, MaterialIds.searedStone)
-                                  .buildRepairKit(consumer, wrap(TinkerTools.flintAndBrick.getRegistryName(), repairFolder, "_seared_repair_kit"))
-                                  .save(consumer, wrap(TinkerTools.flintAndBrick.getRegistryName(), repairFolder, "_seared_station"));
-    SpecializedRepairRecipeBuilder.repair(TinkerTools.flintAndBrick, MaterialIds.scorchedStone)
-                                  .buildRepairKit(consumer, wrap(TinkerTools.flintAndBrick.getRegistryName(), repairFolder, "_scorched_repair_kit"))
-                                  .save(consumer, wrap(TinkerTools.flintAndBrick.getRegistryName(), repairFolder, "_scorched_station"));
+                          .save(consumer, prefix(TinkerTools.flintAndBrick, folder));
 
     // staff
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.skyStaff)
@@ -159,7 +150,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
                        .define('W', TinkerWorld.skyroot.getLogItemTag())
                        .define('I', TinkerMaterials.roseGold.getIngotTag())
                        .unlockedBy("has_wood", has(TinkerWorld.skyroot.getLogItemTag()))
-                       .save(consumer, prefix(TinkerTools.skyStaff.getRegistryName(), folder));
+                       .save(consumer, prefix(TinkerTools.skyStaff, folder));
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.earthStaff)
                        .pattern("CWC")
                        .pattern(" I ")
@@ -168,7 +159,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
                        .define('W', TinkerWorld.greenheart.getLogItemTag())
                        .define('I', TinkerMaterials.cobalt.getIngotTag())
                        .unlockedBy("has_wood", has(TinkerWorld.greenheart.getLogItemTag()))
-                       .save(consumer, prefix(TinkerTools.earthStaff.getRegistryName(), folder));
+                       .save(consumer, prefix(TinkerTools.earthStaff, folder));
     ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.ichorStaff)
                        .pattern("CWC")
                        .pattern(" I ")
@@ -177,119 +168,149 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
                        .define('W', TinkerWorld.bloodshroom.getLogItemTag())
                        .define('I', TinkerMaterials.queensSlime.getIngotTag())
                        .unlockedBy("has_wood", has(TinkerWorld.bloodshroom.getLogItemTag()))
-                       .save(consumer, prefix(TinkerTools.ichorStaff.getRegistryName(), folder));
-    SpecializedRepairRecipeBuilder.repair(Ingredient.of(TinkerTools.skyStaff, TinkerTools.earthStaff, TinkerTools.ichorStaff), MaterialIds.slimewood)
-                                  .buildRepairKit(consumer, commonResource(repairFolder + "staff_repair_kit"))
-                                  .save(consumer, commonResource(repairFolder + "staff_station"));
+                       .save(consumer, prefix(TinkerTools.ichorStaff, folder));
+    ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, TinkerTools.enderStaff)
+                       .pattern("CWC")
+                       .pattern(" I ")
+                       .pattern(" W ")
+                       .define('C', TinkerWorld.enderGeode)
+                       .define('W', TinkerWorld.enderbark.getLogItemTag())
+                       .define('I', Tags.Items.INGOTS_NETHERITE)
+                       .unlockedBy("has_wood", has(TinkerWorld.enderbark.getLogItemTag()))
+                       .save(consumer, prefix(TinkerTools.enderStaff, folder));
 
     // travelers gear
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.travelersGear.get(ArmorSlotType.HELMET))
-                       .pattern("l l")
-                       .pattern("glg")
-                       .pattern("c c")
-                       .define('c', Tags.Items.INGOTS_COPPER)
-                       .define('l', Tags.Items.LEATHER)
-                       .define('g', Tags.Items.GLASS_PANES_COLORLESS)
-                       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, commonResource(armorFolder + "travelers_goggles"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.travelersGear.get(ArmorSlotType.CHESTPLATE))
-                       .pattern("l l")
-                       .pattern("lcl")
-                       .pattern("lcl")
-                       .define('c', Tags.Items.INGOTS_COPPER)
-                       .define('l', Tags.Items.LEATHER)
-                       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, commonResource(armorFolder + "travelers_chestplate"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.travelersGear.get(ArmorSlotType.LEGGINGS))
-                       .pattern("lll")
-                       .pattern("c c")
-                       .pattern("l l")
-                       .define('c', Tags.Items.INGOTS_COPPER)
-                       .define('l', Tags.Items.LEATHER)
-                       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, commonResource(armorFolder + "travelers_pants"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.travelersGear.get(ArmorSlotType.BOOTS))
-                       .pattern("c c")
-                       .pattern("l l")
-                       .define('c', Tags.Items.INGOTS_COPPER)
-                       .define('l', Tags.Items.LEATHER)
-                       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, commonResource(armorFolder + "travelers_boots"));
+    String travelersFolder = armorFolder + "travelers/";
+    Consumer<FinishedRecipe> shapedMaterial = MaterialsConsumerBuilder.shaped("cl").build(consumer);
+    // fake ingot allows things like bronze and pewter to craft it even if their ingot form is not registered
+    Function<MaterialStatsId,Ingredient> travelersMaterial = type -> CompoundIngredient.of(
+      MaterialValueIngredient.of(MaterialPredicate.and(MaterialPredicate.or(MaterialPredicate.CASTABLE, MaterialPredicate.COMPOSITE), new MaterialStatTypePredicate(type)), 1),
+      MaterialIngredient.of(TinkerToolParts.fakeIngot, new MaterialStatTypePredicate(type))
+    );
+    IJsonPredicate<MaterialVariantId> travelersCuirass = new MaterialStatTypePredicate(StatlessMaterialStats.CUIRASS.getIdentifier());
+    Ingredient cuirass = MaterialValueIngredient.of(travelersCuirass, 1);
+    ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.HELMET))
+      .pattern("l l")
+      .pattern("glg")
+      .pattern("c c")
+      .define('c', travelersMaterial.apply(PlatingMaterialStats.HELMET.getId()))
+      .define('l', cuirass)
+      .define('g', Tags.Items.GLASS_PANES_COLORLESS)
+      .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
+      .save(shapedMaterial, location(travelersFolder + "goggles"));
+    ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.CHESTPLATE))
+      .pattern("lsl")
+      .pattern("lcl")
+      .pattern("lcl")
+      .define('c', travelersMaterial.apply(PlatingMaterialStats.CHESTPLATE.getId()))
+      .define('l', cuirass)
+      .define('s', Tags.Items.STRING)
+      .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
+      .save(shapedMaterial, location(travelersFolder + "chestplate"));
+    ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.LEGGINGS))
+      .pattern("lfl")
+      .pattern("c c")
+      .pattern("l l")
+      .define('c', travelersMaterial.apply(PlatingMaterialStats.LEGGINGS.getId()))
+      .define('l', cuirass)
+      .define('f', Items.FLINT)
+      .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
+      .save(shapedMaterial, location(travelersFolder + "pants"));
+    ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.BOOTS))
+      .pattern("s s")
+      .pattern("c c")
+      .pattern("l l")
+      .define('c', travelersMaterial.apply(PlatingMaterialStats.BOOTS.getId()))
+      .define('l', cuirass)
+      .define('s', Tags.Items.STRING)
+      .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
+      .save(shapedMaterial, location(travelersFolder + "boots"));
+    // shield needs no special ingots, no compat shield cores exist
     ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersShield)
-                       .pattern(" c ")
-                       .pattern("cwc")
-                       .pattern(" c ")
-                       .define('c', Tags.Items.INGOTS_COPPER)
-                       .define('w', DefaultCustomIngredients.difference(Ingredient.of(ItemTags.PLANKS), Ingredient.of(TinkerTags.Items.SLIMY_PLANKS)))
-                       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
-                       .save(consumer, commonResource(armorFolder + "travelers_shield"));
-    SpecializedRepairRecipeBuilder.repair(Ingredient.of(Streams.concat(TinkerTools.travelersGear.values().stream(), Stream.of(TinkerTools.travelersShield.get())).map(ItemStack::new)), MaterialIds.copper)
-                                  .buildRepairKit(consumer, commonResource(armorRepairFolder + "travelers_copper_repair_kit"))
-                                  .save(consumer, commonResource(armorRepairFolder + "travelers_copper_station"));
-    SpecializedRepairRecipeBuilder.repair(Ingredient.of(TinkerTools.travelersGear.values().stream().map(ItemStack::new)), MaterialIds.leather)
-                                  .buildRepairKit(consumer, commonResource(armorRepairFolder + "travelers_leather_repair_kit"))
-                                  .save(consumer, commonResource(armorRepairFolder + "travelers_leather_station"));
-    SpecializedRepairRecipeBuilder.repair(Ingredient.of(TinkerTools.travelersShield, TinkerTools.plateShield), MaterialIds.wood)
-                                  .buildRepairKit(consumer, commonResource(armorRepairFolder + "wood_repair_kit"))
-                                  .save(consumer, commonResource(armorRepairFolder + "wood_station"));
+      .pattern("scs")
+      .pattern("lcl")
+      .define('l', cuirass)
+      .define('c', MaterialValueIngredient.of(new MaterialStatTypePredicate(StatlessMaterialStats.SHIELD_CORE.getIdentifier()), 1))
+      .define('s', Tags.Items.RODS_WOODEN)
+      .unlockedBy("has_item", has(Tags.Items.LEATHER))
+      .save(shapedMaterial, location(travelersFolder + "shield"));
+
+    // travelers part swapping - cuirass casting
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.travelersGear.get(ArmorItem.Type.HELMET)), 3)
+      .index(1)
+      .save(consumer, location(travelersFolder + "goggles_leather"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.travelersGear.get(ArmorItem.Type.CHESTPLATE)), 6)
+      .index(1)
+      .save(consumer, location(travelersFolder + "chestplate_leather"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.travelersGear.get(ArmorItem.Type.LEGGINGS)), 4)
+      .index(1)
+      .save(consumer, location(travelersFolder + "pants_leather"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.travelersGear.get(ArmorItem.Type.BOOTS), TinkerTools.travelersShield), 2)
+      .index(1)
+      .save(consumer, location(travelersFolder + "boots_leather"));
+    // travelers part swapping - metal casting
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.travelersGear.values().toArray(new Item[0])), 2)
+      .save(consumer, location(travelersFolder + "swapping_metal"));
+
+    // travelers part swapping - cuirass tinker station
+    MaterialSwappingRecipeBuilder.tool(TinkerTools.travelersGear.get(ArmorItem.Type.HELMET))
+      .index(1).materials(travelersCuirass, 3)
+      .save(consumer, location(travelersFolder + "goggles_cuirass"));
+    MaterialSwappingRecipeBuilder.tool(TinkerTools.travelersGear.get(ArmorItem.Type.CHESTPLATE))
+      .index(1).materials(travelersCuirass, 6)
+      .save(consumer, location(travelersFolder + "vest_cuirass"));
+    MaterialSwappingRecipeBuilder.tool(TinkerTools.travelersGear.get(ArmorItem.Type.LEGGINGS))
+      .index(1).materials(travelersCuirass, 4)
+      .save(consumer, location(travelersFolder + "pants_cuirass"));
+    MaterialSwappingRecipeBuilder.tools(Ingredient.of(TinkerTools.travelersGear.get(ArmorItem.Type.BOOTS), TinkerTools.travelersShield))
+      .index(1).materials(travelersCuirass, 2)
+      .save(consumer, location(travelersFolder + "boots_cuirass"));
+    MaterialSwappingRecipeBuilder.tool(TinkerTools.travelersShield)
+      .index(0).materials(new MaterialStatTypePredicate(StatlessMaterialStats.SHIELD_CORE.getIdentifier()), 2)
+      .save(consumer, location(travelersFolder + "shield_wood"));
 
     // plate armor
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.plateArmor.get(ArmorSlotType.HELMET))
-                       .pattern("mmm")
-                       .pattern("ccc")
-                       .define('m', TinkerMaterials.cobalt.getIngotTag())
-                       .define('c', Items.CHAIN)
-                       .unlockedBy("has_item", has(TinkerMaterials.cobalt.getIngotTag()))
-                       .save(consumer, commonResource(armorFolder + "plate_helmet"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.plateArmor.get(ArmorSlotType.CHESTPLATE))
-                       .pattern("m m")
-                       .pattern("mmm")
-                       .pattern("cmc")
-                       .define('m', TinkerMaterials.cobalt.getIngotTag())
-                       .define('c', Items.CHAIN)
-                       .unlockedBy("has_item", has(TinkerMaterials.cobalt.getIngotTag()))
-                       .save(consumer, commonResource(armorFolder + "plate_chestplate"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.plateArmor.get(ArmorSlotType.LEGGINGS))
-                       .pattern("mmm")
-                       .pattern("m m")
-                       .pattern("c c")
-                       .define('m', TinkerMaterials.cobalt.getIngotTag())
-                       .define('c', Items.CHAIN)
-                       .unlockedBy("has_item", has(TinkerMaterials.cobalt.getIngotTag()))
-                       .save(consumer, commonResource(armorFolder + "plate_leggings"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerTools.plateArmor.get(ArmorSlotType.BOOTS))
-                       .pattern("m m")
-                       .pattern("m m")
-                       .define('m', TinkerMaterials.cobalt.getIngotTag())
-                       .unlockedBy("has_item", has(TinkerMaterials.cobalt.getIngotTag()))
-                       .save(consumer, commonResource(armorFolder + "plate_boots"));
-    ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.plateShield)
-                       .pattern("ww")
-                       .pattern("cc")
-                       .pattern("ww")
-                       .define('c', TinkerMaterials.cobalt.getIngotTag())
-                       .define('w', DefaultCustomIngredients.difference(DefaultCustomIngredients.all(Ingredient.of(ItemTags.PLANKS), Ingredient.of(ItemTags.NON_FLAMMABLE_WOOD)), Ingredient.of(TinkerTags.Items.SLIMY_PLANKS)))
-                       .unlockedBy("has_item", has(TinkerMaterials.cobalt.getIngotTag()))
-                       .save(consumer, commonResource(armorFolder + "plate_shield"));
-    SpecializedRepairRecipeBuilder.repair(Ingredient.of(Streams.concat(TinkerTools.plateArmor.values().stream(), Stream.of(TinkerTools.plateShield.asItem())).map(ItemStack::new)), MaterialIds.cobalt)
-                                  .buildRepairKit(consumer, commonResource(armorRepairFolder + "plate_repair_kit"))
-                                  .save(consumer, commonResource(armorRepairFolder + "plate_station"));
+    String plateFolder = armorFolder + "plate/";
+    TinkerTools.plateArmor.forEach(item -> toolBuilding(consumer, item, plateFolder, Patterns.PLATE_ARMOR));
+    MaterialCastingRecipeBuilder.tableRecipe(TinkerTools.plateShield.get())
+                                .setPart(TinkerToolParts.shieldCore, true)
+                                .setItemCost(3)
+                                .save(consumer, location(plateFolder + "plate_shield"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.plateArmor.get(ArmorItem.Type.HELMET)), 3)
+      .save(consumer, location(plateFolder + "helmet_swapping"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.plateArmor.get(ArmorItem.Type.CHESTPLATE)), 6)
+      .save(consumer, location(plateFolder + "chestplate_swapping"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.plateArmor.get(ArmorItem.Type.LEGGINGS)), 5)
+      .save(consumer, location(plateFolder + "leggings_swapping"));
+    PartSwapCastingRecipeBuilder.tableRecipe(Ingredient.of(TinkerTools.plateArmor.get(ArmorItem.Type.BOOTS)), 2)
+      .save(consumer, location(plateFolder + "boots_swapping"));
 
     // slimeskull
-    slimeskullCasting(consumer, MaterialIds.glass,        Items.CREEPER_HEAD,          armorFolder);
-    slimeskullCasting(consumer, MaterialIds.bone,         Items.SKELETON_SKULL,        armorFolder);
-    slimeskullCasting(consumer, MaterialIds.necroticBone, Items.WITHER_SKELETON_SKULL, armorFolder);
-    slimeskullCasting(consumer, MaterialIds.rottenFlesh,  Items.ZOMBIE_HEAD,           armorFolder);
-    slimeskullCasting(consumer, MaterialIds.gold,         Items.PIGLIN_HEAD,           armorFolder);
-    slimeskullCasting(consumer, MaterialIds.enderPearl,  TinkerWorld.heads.get(TinkerHeadType.ENDERMAN),         armorFolder);
-    slimeskullCasting(consumer, MaterialIds.bloodbone,   TinkerWorld.heads.get(TinkerHeadType.STRAY),            armorFolder);
-    slimeskullCasting(consumer, MaterialIds.string,      TinkerWorld.heads.get(TinkerHeadType.SPIDER),           armorFolder);
-    slimeskullCasting(consumer, MaterialIds.darkthread,  TinkerWorld.heads.get(TinkerHeadType.CAVE_SPIDER),      armorFolder);
-    slimeskullCasting(consumer, MaterialIds.iron,        TinkerWorld.heads.get(TinkerHeadType.HUSK),             armorFolder);
-    slimeskullCasting(consumer, MaterialIds.copper,      TinkerWorld.heads.get(TinkerHeadType.DROWNED),          armorFolder);
-    slimeskullCasting(consumer, MaterialIds.blazingBone, TinkerWorld.heads.get(TinkerHeadType.BLAZE),            armorFolder);
-    slimeskullCasting(consumer, MaterialIds.roseGold,    TinkerWorld.heads.get(TinkerHeadType.PIGLIN_BRUTE),     armorFolder);
-    slimeskullCasting(consumer, MaterialIds.pigIron,     TinkerWorld.heads.get(TinkerHeadType.ZOMBIFIED_PIGLIN), armorFolder);
+    slimeskull(consumer, MaterialIds.gunpowder, Items.CREEPER_HEAD, armorFolder);
+    slimeskull(consumer, MaterialIds.dragonScale, Items.DRAGON_HEAD,  armorFolder);
+    slimeskull(consumer, MaterialIds.enderPearl, TinkerWorld.heads.get(TinkerHeadType.ENDERMAN), armorFolder);
+    slimeskull(consumer, MaterialIds.blaze,      TinkerWorld.heads.get(TinkerHeadType.BLAZE),    armorFolder);
+    // zombie
+    slimeskull(consumer, MaterialIds.leather, Items.ZOMBIE_HEAD, armorFolder);
+    slimeskull(consumer, MaterialIds.iron,   TinkerWorld.heads.get(TinkerHeadType.HUSK),    armorFolder);
+    slimeskull(consumer, MaterialIds.copper, TinkerWorld.heads.get(TinkerHeadType.DROWNED), armorFolder);
+    // spider
+    slimeskull(consumer, MaterialIds.string,     TinkerWorld.heads.get(TinkerHeadType.SPIDER),      armorFolder);
+    slimeskull(consumer, MaterialIds.darkthread, TinkerWorld.heads.get(TinkerHeadType.CAVE_SPIDER), armorFolder);
+    // skeleton
+    slimeskull(consumer, MaterialIds.bone,         Items.SKELETON_SKULL,        armorFolder);
+    slimeskull(consumer, MaterialIds.necroticBone, Items.WITHER_SKELETON_SKULL, armorFolder);
+    slimeskull(consumer, MaterialIds.ice, TinkerWorld.heads.get(TinkerHeadType.STRAY), armorFolder);
+    // piglin
+    slimeskull(consumer, MaterialIds.gold, Items.PIGLIN_HEAD, armorFolder);
+    slimeskull(consumer, MaterialIds.roseGold, TinkerWorld.heads.get(TinkerHeadType.PIGLIN_BRUTE),     armorFolder);
+    slimeskull(consumer, MaterialIds.pigIron, TinkerWorld.heads.get(TinkerHeadType.ZOMBIFIED_PIGLIN), armorFolder);
+    // crafted
+    slimeskull(consumer, MaterialIds.knightmetal, TinkerSmeltery.endFluidCannon.get(), armorFolder);
+    // single swapping recipe for all skulls, saves logic and duplicate recipes in JEI
+    PartSwapCastingRecipeBuilder.basinRecipe(Ingredient.of(TinkerTools.slimesuit.get(ArmorItem.Type.HELMET)), 5)
+      .index(1)
+      .save(consumer, location(armorFolder + "slime_skull/swapping/slime"));
 
     // slimelytra
     MaterialCastingRecipeBuilder.basinRecipe(TinkerTools.slimeWings.get())
@@ -403,7 +424,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .part(TinkerToolParts.smallAxeHead)
       .part(TinkerToolParts.repairKit)
       .part(TinkerToolParts.toolHandle)
-      .save(withCondition(consumer, DefaultResourceConditions.allModsLoaded("twilightforest")), location(folder + "minotaur_axe"));
+      .save(withCondition(consumer, new ModLoadedCondition("twilightforest")), location(folder + "minotaur_axe"));
   }
 
   private void addPartRecipes(Consumer<FinishedRecipe> consumer) {

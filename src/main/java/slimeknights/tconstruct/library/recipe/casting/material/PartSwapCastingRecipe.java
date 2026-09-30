@@ -190,8 +190,8 @@ public class PartSwapCastingRecipe extends AbstractMaterialCastingRecipe impleme
   protected List<IDisplayableCastingRecipe> multiRecipes;
 
   /** Gets the max fluid amount from a list of fluids */
-  protected static int getFluidAmount(List<FluidStack> fluids) {
-    return fluids.stream().mapToInt(FluidStack::getAmount).max().orElse(0);
+  protected static long getFluidAmount(List<FluidStack> fluids) {
+    return fluids.stream().mapToLong(FluidStack::getAmount).max().orElse(0);
   }
 
   /** Helper class for storing a tool ready to swap. Used in JEI displays for part swapping recipes. */

@@ -430,3 +430,19 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 - #29 `Config.COMMON.toolTweaks` 恒为空（上游两条附魔槽位扩展需要给 `Enchantment.slots` 加 AW）
 - #30 弩炮的 `ArrowNockEvent` 扩展点丢失（与 #10 同源）
 - #31 灵魂疾行用 `isFaceSturdy(..., UP)` 取代 `collisionExtendsVertically`
+
+---
+
+## 15. 2026-09-30 下午：long 化收尾，停在 datagen 的 `ToolsRecipeProvider`（本轮交接）
+
+- `--gen` 从 6 → 44，但那是**换了个领域**：铸造配方的 `long` 化已经修完（`AbstractMaterialCastingRecipe.getFluidAmount`
+  改 `long`、`PartSwapCastingRecipe` 用 `mapToLong`），暴露出来的是 datagen 的 `ToolsRecipeProvider`。
+- 对这个文件跑了配方 1：`python3 scripts/port/upstreamtake.py --apply src/main/java/slimeknights/tconstruct/tools/data/ToolsRecipeProvider.java`
+  → 该文件自身 **55 → 4**，整树 **55 → 44**，脚本 KEPT。**注意**：upstreamtake 之后文件里还是 Forge 的
+  import/调用，需要按 [NUMBERS.md](NUMBERS.md) 里那 6 条把管线换成 Fabric（ArmorSlotType、Porting Lib Tags、
+  `DefaultCustomIngredients`/`DefaultResourceConditions`、`FabricDataOutput`、`buildRecipes` 签名、`Pattern` 重载、
+  `addProvider` 歧义）。
+- **热测试还跑不了**：编译没到 0，`runServer`/`runClient` 无从谈起；第 13.4 节的第 2–4 步（真 Gradle 构建、
+  冒烟、canonical 仓库两分支）仍未开始。
+- 提醒：`ToolsRecipeProvider` 是 datagen 文件，改完除了 javac 还要跑一次 `./gradlew runData`（或 `build`）看
+  条件/原料写法是否真的能被 Fabric 接受。
