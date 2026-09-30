@@ -150,7 +150,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
    * @param isLarge         If true, the quads are for a large tool
    */
   /** Wraps vanilla quads into a mesh, as the Mantle sprite helper still works in vanilla quads */
-  private static Mesh ofQuads(List<BakedQuad> quads) {
+  public static Mesh ofQuads(List<BakedQuad> quads) {
     MeshBuilder builder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
     QuadEmitter emitter = builder.getEmitter();
     for (BakedQuad quad : quads) {

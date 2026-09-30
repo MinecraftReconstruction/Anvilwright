@@ -257,7 +257,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     compatMetal(TinkerFluids.moltenInvar, "nickel").fireDamage(3).addEffect(FluidMobEffect.builder().effect(MobEffects.HUNGER, 20 * 10, 1), TimeAction.SET);
     compatMetal(TinkerFluids.moltenConstantan, "nickel").fireDamage(3).addEffect(FluidMobEffect.builder().effect(MobEffects.HUNGER, 20 * 10, 1), TimeAction.SET);
     // slime metal
-    int slimeMetal = FluidValues.NUGGET * 2;
+    long slimeMetal = FluidValues.NUGGET * 2;
     addFluid(TinkerFluids.moltenSlimesteel, slimeMetal).addEffect(ExplosionFluidEffect.radius(1, 0.5f).knockback(LevelingValue.eachLevel(1)).build());
     addFluid(TinkerFluids.moltenCinderslime, slimeMetal).addEffect(ExplosionFluidEffect.radius(1, 1).damage(LevelingValue.eachLevel(3)).knockback(LevelingValue.flat(-2)).build());
     addFluid(TinkerFluids.moltenQueensSlime, slimeMetal).addEffect(ExplosionFluidEffect.radius(1, 1).damage(LevelingValue.eachLevel(3)).placeFire().ignoreBlocks().build());
@@ -323,7 +323,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     // twilight forest compat
     compatMetal(TinkerFluids.moltenSteeleaf).magicDamage(2).addEffect(FluidMobEffect.builder().effect(TinkerEffects.experienced.get(), 20 * 5, 1), TimeAction.SET);
     addFluid(TinkerFluids.fieryLiquid, FluidValues.SIP).metalCondition("fiery")
-        .addBlockEffect(new MeltBlockFluidEffect(BlockPredicate.ANY, FluidValues.INGOT, 1500));
+        .addBlockEffect(new MeltBlockFluidEffect(BlockPredicate.ANY, (int)FluidValues.INGOT, 1500));
 
     // potion fluid compat
     // standard potion is 250 mb, but we want a smaller number. divide into 5 pieces at 25% a piece (so healing is 1 health), means you gain 25% per potion

@@ -501,3 +501,31 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 `ArmorModelProvider`、`TinkerTrimMaterialPaletteGenerator`、`ModifierModelMapProvider`；
 `MaterialRenderInfoProvider` 也少了 `existingFileHelper` 参数（上游是 3 参）。这些类本轮都已经能编译，
 补注册本身是几行的事，但要等 `runData` 才能验证产物。
+
+---
+
+## 19. 2026-09-30 深夜（二）：**整树口径已经骗人了**，改用分块口径（本轮交接）
+
+**一句话**：整树 `--gen` 已经掉到 1 条，但那是假象 —— 分块编译（`scripts/port/truecount.sh`）
+跑到一半就有 **49 个包 / 417 条**。**不要再拿整树数字当进度条。**
+
+原因（老坑，这次量化了）：javac 一旦在某个类上报错，就不再给同一批里的其它类做归因，
+**整个文件的错误可以一条都不出现**。本轮翻出来的例子：`GuiTankModule` 里 `this.horizontal` 字段根本
+没声明、`NormalModifierModel` 里的 `textures[index]` 变量早就删了、`MaterialModel.getPartQuads`
+返回值类型和 `return` 语句不匹配 —— 这些在整树日志里**一条都没有**。
+
+**接手建议（省时间）**：
+
+1. 先跑 `scripts/port/truecount.sh .port/true_now.txt`（约 20 分钟）拿到**按包的完整错误清单**，
+   然后按清单成批修，不要再用整树日志一条条钓。
+2. 每次改完仍然跑一次 `scripts/port/fastcompile.sh --gen`，确认**没有新增**即可。
+3. 本轮已验证的两条高效套路：
+   - 数据生成器/`*Provider` 类：`git checkout v3.12.1.231 -- <文件>` → 补 4 类管线
+     （`FabricDataOutput`、`DefaultCustomIngredients`、`DefaultResourceConditions`、Porting Lib `Tags`）
+   - 客户端模型类：接口是 fork 的 `Mesh getQuads(...)`，把 `addQuads` 改写回去，
+     vanilla quads 一律用 `ToolModel.ofQuads(...)` 包成 Mesh
+4. Mantle 侧本轮修了 `mantle:tag_filled` 反相的真 bug（342 个 JSON 受影响），
+   版本推进到 `1.11.DEV.1e53afad`；**动了 Mantle 就要重新 `publishToMavenLocal` + bump + 重跑
+   `printCompileCp`**（本轮已做过）。
+5. 本轮新增两条 accesswidener（对应上游 `accesstransformer.cfg`）：
+   `FishingHookRenderer.stringVertex`、`SpriteSources.register`；**改 AW 必须重跑 `printCompileCp`**。

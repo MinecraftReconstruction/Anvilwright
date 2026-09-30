@@ -270,3 +270,48 @@ TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生
 表示"任一工具类都行"；AND 的话这个 ingredient 永远为空。`ToolsRecipeProvider` 的过路人材质（`fakeIngot`）和
 箭矢图案（图案 **或** 铸模）同理。已在 `ToolsRecipeProvider` 两处改成 `.any(...)`。
 映射表：`CompoundIngredient`→`any`、`IntersectionIngredient`→`all`、`DifferenceIngredient`→`difference`。
+
+### 2026-09-30 深夜（二）：整树口径收敛到个位数，但**分块口径暴露大批隐藏错误**
+
+第二轮继续按"取上游 + 补管线"推进，整树 `--gen` 一度掉到 **1 条**（`ToolContainerScreen`），
+但**整树口径会漏报**（javac 报错后停止归因，整个文件可以完全不出现）。于是跑了唯一可靠的口径：
+
+```
+scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式编译，约 20 分钟
+```
+
+进度到一半时：**49 个包有错、合计 417 条**。也就是说：
+
+- **整树口径**：81 → 1（看着快完了）
+- **分块口径**：还有数百条（真实的"还剩多少活"）
+
+两类数字的差就是那批**从未被归因过的文件**（`GuiTankModule` 里 `this.horizontal` 这种字段都没声明、
+`NormalModifierModel` 里 `textures[index]` 这种早就删掉的变量……都是这么被翻出来的）。
+
+本轮新修（都在 `--gen`/分块下逐个验证过）：
+
+| 文件/位置 | 问题 | 修法 |
+|---|---|---|
+| `MaterialRecipeProvider` + `IMaterialRecipeHelper` | fork 版还在用 `MaterialIds.bloodbone` 这类旧 id；helper 只有带 `forgeTag` 的签名 | 取上游文件；helper 补无 boolean 重载（用 `fluid.getForgeTag() != null` 复刻上游 `FluidObject#ingredient` 的语义）、`materialMelting(FluidObject)`、`compatMeltingCasting(..., altTag, folder)` |
+| `MaterialMeltingRecipeBuilder` | `FluidValues` 是 long，builder 只收 int | 加 long 重载 |
+| `MaterialManager` | 物料 tag 表还是 `Map<ResourceLocation,…>`（fork 版），packet/`GenericTagUtil` 是 `Map<TagKey,…>` | 字段与 `updateMaterialsFromServer` 统一成 `Map<TagKey<IMaterial>,List<IMaterial>>`；`getValues` 同步 |
+| `MaterialManager`(GSON) | 引用了 Mantle 的 `JsonCondition`/`ConditionDeserializer` | 改回 TCon 自己的 `library.json.JsonCondition` + `ConditionSerializer` |
+| `MaterialStatsManager` | 残留的 `deserializeMaterialStat`（用已删除的 `materialStatTypes`/`GSON`/`getStatsClass`） | 删除死代码（新实现已内联在 `deserializeMaterialStatsFromContent`） |
+| `AbstractMaterialTraitDataProvider` | `saveThing`/`convert` 都不存在 | `super(output, Target.DATA_PACK, folder, MaterialTraitsManager.GSON)` + `saveJson(...build())` |
+| `AbstractToolDefinitionDataProvider` | `PackType.SERVER_DATA`/`ToolDefinitionLoader.GSON`/`saveThing`/`definition.validate` | 上游写法：`Target.DATA_PACK` + `saveJson(id, ToolDefinitionData.LOADABLE.serialize(data))` |
+| `AbstractModifierProvider` | fork 版的 `allModifiers`/`addModifier` 与上游新结构混在一起 | 取上游；条件用 `ConditionJsonProvider.write` 包成 `"condition": {"fabric:conditions":[…]}`（与 `ConditionSerializer` 读法一致） |
+| `AbstractFluidEffectProvider` / `FluidEffectProvider` | `addFluid(...)` 只收 int（`FluidValues` 是 long）；`CraftingHelper.serialize` | 全改 long；条件写成 Fabric 的 `fabric:conditions` |
+| `AbstractMaterialRenderInfoProvider` | `PackType.CLIENT_RESOURCES`、缺 `existingFileHelper`、`saveThing` | `Target.RESOURCE_PACK` + 3 参构造 + `saveJson` + `MaterialPartTextureGenerator.runCallbacks` |
+| `MaterialModel` / `MaterialModifierModel` / `NormalModifierModel` / `OverslimeModifierModel` / `ModifierModel.EMPTY` | Fabric 渲染接口是 `Mesh getQuads(...)`，上游文件还在写 `addQuads`；`MantleItemLayerModel.getQuadsForSprite` 返回 `List<BakedQuad>` | 统一走 `ToolModel.ofQuads(...)`（把 vanilla quads 包成 Mesh，`ToolModel` 里已有该 helper，改为 public）；补 `getLoader()`；`MaterialModel.getMaterialSprite` 按上游补回 |
+| `Config.CLIENT` | `renderSleevesItem` 只赋值没声明 | 补声明（builder 里的 `.define("renderSleevesItem", true)` 本来就在） |
+| `ModifierClientEvents` | `offhand`/`mainhand` 是旧 fork 的变量名 | 改成 `held`/`player.getMainHandItem()`，并保留"只处理副手"的 else 分支 |
+| `ToolRenderEvents` | 局部变量 `context`（`UseOnContext`）把 `WorldRenderContext` 参数遮蔽了；`ToolHarvestLogic` 已不存在；`matchType` 丢失 | 局部改名 `useContext`；恢复上游的 `IsEffectiveToolHook.isEffective` + `AOEMatchType` 计算；回调返回 `false`（交给 vanilla 画主方块轮廓） |
+| `PlateArmorModel` | `ISafeManagerReloadListener.create(...)` 不存在（Fabric 侧要固定 ID） | 改用 `IdentifiableISafeManagerReloadListener` |
+| `GuiTankModule` | `horizontal`/`fluidLoc` 字段没声明、缺 `isFluidHovered`/`getFluidUnderMouse` | 补字段 + 8 参构造（保留 7 参重载）、补两个方法 |
+| `ToolContainerScreen` / `ToolContainerMenu` | `getSlots()`（Forge）→ `getSlotCount()`（Porting Lib）；`menu.getPlayer()` 缺 `@Getter`；tank 是 `Storage` 不是 `StorageView` | 逐个对症修（tank 传 `tank.iterator().next()`） |
+| `ShieldBannerModifierSpriteSource` | `SpriteSources.register` 在 vanilla 是 private、`SpriteContents` 的 5 参构造是 Forge 的 | 加两条 accesswidener（`stringVertex`、`SpriteSources.register`，对应上游 AT）；`SpriteContents` 用 4 参 |
+
+⚠️ **Mantle 侧**：本轮还修了一个真 bug —— `Mantle#register()` 把 `mantle:tag_filled` 注册成了
+`TagEmptyCondition.SERIALIZER::test`（语义反了）。TCon 生成的数据里有 **342 个** JSON 用这个条件，
+兼容材料会在标签**不存在**时反而加载。已修、已 push、已 `publishToMavenLocal` 为
+`1.11.DEV.1e53afad`，TCon 的 `mantle_version` 已同步（classpath 也已重新生成）。

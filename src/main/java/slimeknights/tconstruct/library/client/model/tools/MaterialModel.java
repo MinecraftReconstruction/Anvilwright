@@ -137,10 +137,44 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
     int light = 0;
     TextureAtlasSprite finalSprite = null;
     // if the base material is non-null, try to find the sprite for that material
-    // first, find a render info
-    Optional<MaterialRenderInfo> optional = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material);
-    if (optional.isPresent()) {
-      return optional.get().getSprite(texture, spriteGetter);
+    if (material != null) {
+      // first, find a render info
+      Optional<MaterialRenderInfo> optional = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material);
+      if (optional.isPresent()) {
+        // determine the texture to use and whether or not to tint it
+        MaterialRenderInfo info = optional.get();
+        TintedSprite sprite = info.getSprite(texture, spriteGetter);
+        finalSprite = sprite.sprite();
+        color = sprite.color();
+        light = info.getLuminosity();
+      }
+    }
+
+    // if we have no material, or the material failed to fetch, use the default sprite and tint index
+    if (finalSprite == null) {
+      finalSprite = spriteGetter.apply(texture);
+    }
+
+    // get quads
+    quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels));
+
+    // return sprite
+    return finalSprite;
+  }
+
+  /**
+   * Gets the tinted sprite for the given material on the given texture, used by modifier models that bake their own quads
+   * @param spriteGetter  Sprite getter function
+   * @param texture       Base texture
+   * @param material      Material variant, may be null to use the base texture
+   * @return  Tinted sprite, or the base sprite if the material has no render info
+   */
+  public static TintedSprite getMaterialSprite(Function<Material, TextureAtlasSprite> spriteGetter, Material texture, @Nullable MaterialVariantId material) {
+    if (material != null) {
+      Optional<MaterialRenderInfo> optional = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material);
+      if (optional.isPresent()) {
+        return optional.get().getSprite(texture, spriteGetter);
+      }
     }
     return new TintedSprite(spriteGetter.apply(texture), -1, 0);
   }

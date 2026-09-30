@@ -52,39 +52,45 @@ public class ToolRenderEvents {
   /**
    * Renders the outline on the extra blocks
    *
-   * @param event the highlight event
+   * @param context the render context
+   * @param target  the block being targeted, null if none
+   * @return  false to let vanilla draw the outline of the targeted block as well
    */
   static boolean renderBlockHighlights(WorldRenderContext context, @Nullable HitResult target) {
     Level world = Minecraft.getInstance().level;
     Player player = Minecraft.getInstance().player;
     if (world == null || player == null) {
-      return true;
+      return false;
     }
     // must have the right tags
     ItemStack stack = player.getMainHandItem();
     if (stack.isEmpty() || !stack.is(TinkerTags.Items.HARVEST)) {
-      return true;
+      return false;
     }
     // must be targeting a block
     HitResult result = Minecraft.getInstance().hitResult;
     if (result == null || result.getType() != Type.BLOCK) {
-      return true;
+      return false;
     }
     // must not be broken, must be right interface
     ToolStack tool = ToolStack.from(stack);
     if (tool.isBroken()) {
-      return true;
+      return false;
     }
     BlockHitResult blockTrace = (BlockHitResult) target;
     BlockPos origin = blockTrace.getBlockPos();
     BlockState state = world.getBlockState(origin);
-    if (!ToolHarvestLogic.isEffective(tool, state)) {
-      return true;
+    AOEMatchType matchType = AOEMatchType.BREAKING;
+    // if we have any modifier that has an AOE interaction, make our match type more liberal
+    if (tool.getModifiers().has(TinkerTags.Modifiers.AOE_INTERACTION)) {
+      matchType = AOEMatchType.DISPLAY;
+    } else if (!IsEffectiveToolHook.isEffective(tool, state)) {
+      return false;
     }
-    UseOnContext context = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, blockTrace);
-    Iterator<BlockPos> extraBlocks = tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, context, state, matchType).iterator();
+    UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, blockTrace);
+    Iterator<BlockPos> extraBlocks = tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, matchType).iterator();
     if (!extraBlocks.hasNext()) {
-      return true;
+      return false;
     }
 
     // set up renderer
@@ -109,7 +115,7 @@ public class ToolRenderEvents {
     } while(rendered < MAX_BLOCKS && extraBlocks.hasNext());
     context.matrixStack().popPose();
     buffers.endBatch();
-    return true;
+    return false;
   }
 
   /** Renders the block damage process on the extra blocks */
@@ -158,8 +164,8 @@ public class ToolRenderEvents {
     if (!IsEffectiveToolHook.isEffective(tool, state)) {
       return;
     }
-    UseOnContext context = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, blockTrace.withDirection(BlockSideHitListener.getClientSideHit()));
-    Iterator<BlockPos> extraBlocks = tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, context, state, AreaOfEffectIterator.AOEMatchType.BREAKING).iterator();
+    UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, blockTrace.withDirection(BlockSideHitListener.getClientSideHit()));
+    Iterator<BlockPos> extraBlocks = tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AreaOfEffectIterator.AOEMatchType.BREAKING).iterator();
     if (!extraBlocks.hasNext()) {
       return;
     }

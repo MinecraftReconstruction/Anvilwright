@@ -102,7 +102,7 @@ public record ShieldBannerModifierSpriteSource(int cropX, int cropY, int cropWid
         } else {
           NativeImage generated = new NativeImage(outSize * scale, outSize * scale, true);
           original.copyRect(generated, cropX * scale, cropY * scale, offsetX * scale, offsetY * scale, cropWidth * scale, cropHeight * scale, false, false);
-          return new SpriteContents(this.output, new FrameSize(generated.getWidth(), generated.getHeight()), generated, AnimationMetadataSection.EMPTY, null);
+          return new SpriteContents(this.output, new FrameSize(generated.getWidth(), generated.getHeight()), generated, AnimationMetadataSection.EMPTY);
         }
       } catch (IllegalArgumentException | IOException ex) {
         TConstruct.LOG.warn("Unable to crop {} to produce {}", this.input, this.output, ex);

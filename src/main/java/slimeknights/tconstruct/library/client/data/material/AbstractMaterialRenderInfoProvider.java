@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.mantle.data.GenericDataProvider;
@@ -33,14 +34,18 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
   @Nullable
   private final ExistingFileHelper existingFileHelper;
 
-  public AbstractMaterialRenderInfoProvider(FabricDataOutput output, @Nullable AbstractMaterialSpriteProvider materialSprites) {
-    super(output, PackType.CLIENT_RESOURCES, MaterialRenderInfoLoader.FOLDER, MaterialRenderInfoLoader.GSON);
+  public AbstractMaterialRenderInfoProvider(FabricDataOutput output, @Nullable AbstractMaterialSpriteProvider materialSprites, @Nullable ExistingFileHelper existingFileHelper) {
+    super(output, Target.RESOURCE_PACK, MaterialRenderInfoLoader.FOLDER, MaterialRenderInfoLoader.GSON);
     this.materialSprites = materialSprites;
     this.existingFileHelper = existingFileHelper;
   }
 
+  public AbstractMaterialRenderInfoProvider(FabricDataOutput output, @Nullable AbstractMaterialSpriteProvider materialSprites) {
+    this(output, materialSprites, null);
+  }
+
   public AbstractMaterialRenderInfoProvider(FabricDataOutput output) {
-    this(output, null);
+    this(output, null, null);
   }
 
   /** Adds all relevant material stats */
@@ -48,11 +53,17 @@ public abstract class AbstractMaterialRenderInfoProvider extends GenericDataProv
 
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
+    if (existingFileHelper != null) {
+      MaterialPartTextureGenerator.runCallbacks(existingFileHelper, null);
+    }
     addMaterialRenderInfo();
     // generate
-    List<CompletableFuture<?>> futures = new ArrayList<>();
-    allRenderInfo.forEach((materialId, info) -> futures.add(saveThing(cache, materialId.getLocation('/'), info.build())));
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return allOf(allRenderInfo.entrySet().stream().map(entry -> saveJson(cache, entry.getKey().getLocation('/'), entry.getValue().build(entry.getKey()))))
+      .thenRunAsync(() -> {
+        if (existingFileHelper != null) {
+          MaterialPartTextureGenerator.runCallbacks(null, null);
+        }
+    });
   }
 
 

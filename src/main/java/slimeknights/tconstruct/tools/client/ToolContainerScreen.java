@@ -67,7 +67,7 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
   private final GuiTankModule tank;
   public ToolContainerScreen(ToolContainerMenu menu, Inventory inv, Component title) {
     super(menu, inv, title);
-    int slots = menu.getItemHandler().getSlots();
+    int slots = menu.getItemHandler().getSlotCount();
     if (menu.isShowOffhand()) {
       slots++;
     }
@@ -86,7 +86,8 @@ public class ToolContainerScreen extends AbstractContainerScreen<ToolContainerMe
     SimpleFluidTank tank = menu.getTank();
     if (tank.getCapacity() > 0) {
       this.imageHeight += FLUID_TANK.h;
-      this.tank = new GuiTankModule(this, tank, 8, this.imageHeight - PLAYER_INVENTORY_HEIGHT - 9, 160, 8, true, null);
+      // the tool tank is a single tank storage, so hand the module the one view it exposes
+      this.tank = new GuiTankModule(this, tank.iterator().next(), 8, this.imageHeight - PLAYER_INVENTORY_HEIGHT - 9, 160, 8, true, null);
     } else {
       this.tank = null;
     }

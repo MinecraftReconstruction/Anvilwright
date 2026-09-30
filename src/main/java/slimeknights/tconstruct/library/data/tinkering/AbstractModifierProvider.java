@@ -4,9 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.data.PackOutput.Target;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -15,22 +14,17 @@ import slimeknights.tconstruct.library.modifiers.impl.ComposableModifier;
 import slimeknights.tconstruct.library.modifiers.util.DynamicModifier;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import slimeknights.tconstruct.library.modifiers.Modifier;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.PackOutput.Target;
 
 /** Datagen for dynamic modifiers */
 @SuppressWarnings("SameParameterValue")
 public abstract class AbstractModifierProvider extends GenericDataProvider {
   private final Map<ModifierId,Composable> composableModifiers = new HashMap<>();
 
-  public AbstractModifierProvider(FabricDataOutput output) {
-    super(output, PackType.SERVER_DATA, ModifierManager.FOLDER, ModifierManager.GSON);
+  public AbstractModifierProvider(FabricDataOutput packOutput) {
+    super(packOutput, Target.DATA_PACK, ModifierManager.FOLDER, ModifierManager.GSON);
   }
 
   /**
@@ -38,32 +32,13 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
    */
   protected abstract void addModifiers();
 
-  /** Adds a modifier to be saved */
-  protected void addModifier(ModifierId id, @Nullable ConditionJsonProvider condition, @Nullable Modifier result, JsonRedirect... redirects) {
-    if (result == null && redirects.length == 0) {
-      throw new IllegalArgumentException("Must have either a modifier or a redirect");
-    }
-    Result previous = allModifiers.putIfAbsent(id, new Result(result, condition, redirects));
-    if (previous != null || composableModifiers.containsKey(id)) {
+  /** Adds the given builder, handling duplicate modifiers */
+  private void addBuilder(ModifierId id, @Nullable ComposableModifier.Builder builder, @Nullable ConditionJsonProvider condition, JsonRedirect... redirects) {
+    Composable previous = composableModifiers.putIfAbsent(id, new Composable(builder, condition, redirects));
+    if (previous != null) {
       throw new IllegalArgumentException("Duplicate modifier " + id);
     }
   }
-
-  /** Adds a modifier to be saved */
-  protected void addModifier(ModifierId id, @Nullable Modifier result, JsonRedirect... redirects) {
-    addModifier(id, null, result, redirects);
-  }
-
-  /** Adds a modifier to be saved */
-  protected void addModifier(DynamicModifier id, @Nullable ConditionJsonProvider condition, @Nullable Modifier result, JsonRedirect... redirects) {
-    addModifier(id.getId(), condition, result, redirects);
-  }
-
-  /** Adds a modifier to be saved */
-  protected void addModifier(DynamicModifier id, @Nullable Modifier result, JsonRedirect... redirects) {
-    addModifier(id, null, result, redirects);
-  }
-
 
   /* Composable helpers */
 
@@ -115,43 +90,17 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addModifiers();
-    List<CompletableFuture<?>> futures = new ArrayList<>();
-    allModifiers.forEach((id, data) -> futures.add(saveThing(cache, id, data.serialize())));
-    composableModifiers.forEach((id, data) -> saveThing(cache, id, data.serialize()));
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-  }
-
-  /** Serializes the given modifier with its condition and redirects */
-  private static JsonObject serializeModifier(@Nullable Modifier modifier, @Nullable ConditionJsonProvider condition, JsonRedirect[] redirects) {
-    JsonObject json;
-    if (modifier != null) {
-      json = ModifierManager.MODIFIER_LOADERS.serialize(modifier).getAsJsonObject();
-    } else {
-      json = new JsonObject();
-    }
-    if (redirects.length != 0) {
-      JsonArray array = new JsonArray();
-      for (JsonRedirect redirect : redirects) {
-        array.add(redirect.toJson());
+    return allOf(composableModifiers.entrySet().stream().map(entry -> {
+      try {
+        return saveJson(cache, entry.getKey(), entry.getValue().serialize());
+      } catch (RuntimeException e) {
+        throw new RuntimeException("Failed to serialize modifier " + entry.getKey(), e);
       }
-      json.add("redirects", array);
-    }
-    if (condition != null) {
-      json.add(ResourceConditions.CONDITIONS_KEY, condition.toJson());
-    }
-    return json;
-  }
-
-  /** Result record, as its nicer than a pair */
-  private record Result(@Nullable Modifier modifier, @Nullable ConditionJsonProvider condition, JsonRedirect[] redirects) {
-    /** Writes this result to JSON */
-    public JsonObject serialize() {
-      return serializeModifier(modifier, condition, redirects);
-    }
+    }));
   }
 
   /** Result for composable too */
-  private record Composable(ComposableModifier.Builder builder, @Nullable ConditionJsonProvider condition, JsonRedirect[] redirects) {
+  private record Composable(@Nullable ComposableModifier.Builder builder, @Nullable ConditionJsonProvider condition, JsonRedirect[] redirects) {
     /** Writes this result to JSON */
     public JsonObject serialize() {
       JsonObject json;
@@ -168,7 +117,10 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
         json.add("redirects", array);
       }
       if (condition != null) {
-        json.add("condition", CraftingHelper.serialize(condition));
+        // Mantle's JsonCondition reads the Fabric resource condition wrapper, so nest it rather than writing a bare Forge condition
+        JsonObject conditionJson = new JsonObject();
+        ConditionJsonProvider.write(conditionJson, condition);
+        json.add("condition", conditionJson);
       }
       return json;
     }

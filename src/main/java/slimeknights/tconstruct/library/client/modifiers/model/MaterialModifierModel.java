@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.client.modifiers.model;
 
 import com.mojang.math.Transformation;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.nbt.Tag;
@@ -18,6 +18,7 @@ import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo.TintedSprite;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
 import slimeknights.tconstruct.library.client.model.tools.MaterialModel;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
@@ -26,8 +27,6 @@ import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Implementation of modifier models that have variants based on a material texture */
@@ -61,15 +60,16 @@ public interface MaterialModifierModel extends SimpleModifierModel {
   }
 
   @Override
-  default void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
+  default Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     Material texture = isLarge ? large() : small();
     if (texture != null) {
       MaterialVariantId material = getMaterial(tool, modifier);
       if (material != null) {
         TintedSprite sprite = MaterialModel.getMaterialSprite(spriteGetter, texture, material);
-        quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(getColor(tool, modifier, sprite), -1, sprite.sprite(), transforms, sprite.emissivity(), pixels));
+        return ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(getColor(tool, modifier, sprite), -1, sprite.sprite(), transforms, sprite.emissivity(), pixels));
       }
     }
+    return EMPTY_MESH;
   }
 
   /** Common code between {@link Index} and {@link Dyed} */

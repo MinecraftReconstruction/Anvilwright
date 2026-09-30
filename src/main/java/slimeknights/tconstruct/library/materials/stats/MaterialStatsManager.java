@@ -259,21 +259,6 @@ public class MaterialStatsManager extends MergingJsonDataLoader<Map<ResourceLoca
     return builder.build();
   }
 
-  /**
-   * Deserializes the json element and stats ID into material stats
-   * @param statsId    Stats ID
-   * @param statsJson  Stats JSON
-   * @return  Optional of the element, empty if the stats failed to parse
-   */
-  private Optional<IMaterialStats> deserializeMaterialStat(MaterialStatsId statsId, JsonElement statsJson) {
-    MaterialStatType<?> type = materialStatTypes.get(statsId);
-    if (type == null) {
-      log.error("The material stat of type '" + statsId + "' has not been registered");
-      return Optional.empty();
-    }
-    return Optional.ofNullable(GSON.fromJson(statsJson, type.getStatsClass()));
-  }
-
   @Override
   public ResourceLocation getFabricId() {
     return TConstruct.getResource("material_stats_manager");
