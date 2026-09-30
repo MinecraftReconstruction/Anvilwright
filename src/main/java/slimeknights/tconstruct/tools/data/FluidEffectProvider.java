@@ -78,6 +78,7 @@ import slimeknights.tconstruct.tools.modifiers.traits.skull.StrongBonesModifier;
 import slimeknights.tconstruct.world.block.DirtType;
 
 import java.util.function.Function;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 public class FluidEffectProvider extends AbstractFluidEffectProvider {
   public FluidEffectProvider(PackOutput packOutput) {
@@ -93,18 +94,18 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
       .addDamage(LivingEntityPredicate.WATER_SENSITIVE, 2f, TinkerDamageTypes.WATER)
       .addEntityEffect(FluidEffect.EXTINGUISH_FIRE)
       .addBlockEffect(BlockPredicate.or(BlockPredicate.BLOCKS_MOTION, BlockPredicate.tag(TinkerTags.Blocks.UNREPLACABLE_BY_LIQUID)).inverted(), new BreakBlockFluidEffect(0));
-    addFluid(TinkerFluids.powderedSnow, FluidType.BUCKET_VOLUME / 10)
+    addFluid(TinkerFluids.powderedSnow, FluidConstants.BUCKET / 10)
       .coldDamage(2f)
       .addEntityEffect(new FreezeFluidEffect(TimeAction.ADD, 80))
       .addBlockEffect(new PlaceBlockFluidEffect(Blocks.SNOW));
 
     // fire
-    addFluid(Fluids.LAVA, FluidType.BUCKET_VOLUME / 20)
+    addFluid(Fluids.LAVA, FluidConstants.BUCKET / 20)
       .fireDamage(1f)
       .addEntityEffect(new FireFluidEffect(TimeAction.ADD, 4))
       .placeFire();
     // blaze - more damage, less fire, and brighter
-    addFluid(TinkerFluids.blazingBlood.getTag(), FluidType.BUCKET_VOLUME / 20)
+    addFluid(TinkerFluids.blazingBlood.getTag(), FluidConstants.BUCKET / 20)
       .fireDamage(2f)
       .addEntityEffect(new FireFluidEffect(TimeAction.ADD, 2))
       .addEntityEffects(FluidMobEffect.builder().effect(MobEffects.GLOWING, 20*5).buildEntity(TimeAction.ADD))

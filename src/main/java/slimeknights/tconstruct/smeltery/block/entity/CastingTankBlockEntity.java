@@ -47,10 +47,11 @@ import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.I
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer {
   /** Max capacity for the tank */
-  public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 4;
+  public static final int DEFAULT_CAPACITY = FluidConstants.BUCKET * 4;
   // slots
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;

@@ -53,7 +53,7 @@ public final class FluidValues {
   /** Amount of ichor returned from melting 1 ball of ichor, needs to be less than {@link #SLIMEBALL} or you get dupes. */
   public static final int ICHOR_BYPRODUCT = SLIME_DROP * 4;
   /** Amount of blazing blood returned from melting 1 ball of ichor, makes a stack of ichor crystal blocks about 2 buckets */
-  public static final int ICHOR_BLAZING_BLOOD = FluidType.BUCKET_VOLUME / 100;
+  public static final int ICHOR_BLAZING_BLOOD = FluidConstants.BUCKET / 100;
 
   // soup
   /** Value of a single bowl of soup */

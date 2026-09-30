@@ -71,6 +71,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 /**
  * Extension of {@link net.minecraftforge.client.model.DynamicFluidContainerModel} with two additional features: baked tints and fluid stack sensitive models.
@@ -99,7 +100,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");
       }
-      fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME, tag);
+      fluidStack = new FluidStack(fluid, FluidConstants.BUCKET, tag);
     }
     boolean flipGas = GsonHelper.getAsBoolean(json, "flip_gas", true);
     return new FluidContainerModel(fluidStack, flipGas);
@@ -204,7 +205,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       Optional<FluidStack> optional = handler == null ? Optional.empty() : Optional.of(TransferUtil.firstCopyOrEmpty(handler));
       if (optional.isPresent()) {
         FluidStack fluid = optional.get();
-        fluid.setAmount(FluidType.BUCKET_VOLUME); // cache considers amount, so ensure its consistent
+        fluid.setAmount(FluidConstants.BUCKET); // cache considers amount, so ensure its consistent
         return cache.computeIfAbsent(fluid, this::getUncahcedModel);
       }
       return originalModel;
