@@ -447,7 +447,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     this.getOrCreateTagBuilder(UNSWAPPABLE_TOOLS).addTag(UNSWAPPABLE);
     this.getOrCreateTagBuilder(UNSWAPPABLE_PARTS).addTag(UNSWAPPABLE);
     // headlight support
-    this.getOrCreateTagBuilder(ItemTags.create(new ResourceLocation("headlight", "headlight_helmets"))).addTag(HELMETS);
+    this.getOrCreateTagBuilder(TagKey.create(Registries.ITEM, new ResourceLocation("headlight", "headlight_helmets"))).addTag(HELMETS);
 
     // general
     this.getOrCreateTagBuilder(MULTIPART_TOOL).addOptionalTag(SINGLEPART_TOOL);

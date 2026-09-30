@@ -115,7 +115,7 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
     fluidTag(TinkerFluids.meatSoup);
 
     /* Normal tags */
-    this.tag(TinkerTags.Fluids.SLIME)
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.SLIME)
         .addTag(TinkerFluids.earthSlime.getTag())
         .addTag(TinkerFluids.skySlime.getTag())
         .addTags(TinkerFluids.ichor.getTag())
@@ -126,12 +126,12 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
 
     // drowned want fluids that work nice in water, while wither skeletons want to complement the withering
     // both need to act as a swasher tutorial though
-    tag(TinkerTags.Fluids.DROWNED_SWASHER).add(Fluids.LAVA, TinkerFluids.powderedSnow.get(), TinkerFluids.moltenGlass.get(), TinkerFluids.moltenObsidian.get());
-    tag(TinkerTags.Fluids.WITHER_SKELETON_SWASHER).add(Fluids.LAVA, TinkerFluids.blazingBlood.get(), TinkerFluids.liquidSoul.get(), TinkerFluids.magma.get());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.DROWNED_SWASHER).add(Fluids.LAVA, TinkerFluids.powderedSnow.get(), TinkerFluids.moltenGlass.get(), TinkerFluids.moltenObsidian.get());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.WITHER_SKELETON_SWASHER).add(Fluids.LAVA, TinkerFluids.blazingBlood.get(), TinkerFluids.liquidSoul.get(), TinkerFluids.magma.get());
 
     // tag local tags with the chemthrower, do not include forge tags as its on other mods to choose how they want to support IE
     // block effects - mostly mining
-    this.tag(TinkerTags.Fluids.CHEMTHROWER_BLOCK_EFFECTS)
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.CHEMTHROWER_BLOCK_EFFECTS)
       .addTags(
         // small gem
         TinkerFluids.moltenAmethyst.getLocalTag(), TinkerFluids.moltenQuartz.getLocalTag(),
@@ -141,7 +141,7 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
         TinkerFluids.fieryLiquid.getLocalTag()
       );
     // entity effects - most of these have block effects, but we don't want the clouds triggering mostly
-    this.tag(TinkerTags.Fluids.CHEMTHROWER_ENTITY_EFFECTS)
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.CHEMTHROWER_ENTITY_EFFECTS)
       .add(TinkerFluids.powderedSnow.get())
       .addTags(
         // common
@@ -181,7 +181,7 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
         TinkerFluids.moltenSteeleaf.getLocalTag()
       );
     // both effects - all the neat slimes
-    this.tag(TinkerTags.Fluids.CHEMTHROWER_BOTH_EFFECTS)
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.CHEMTHROWER_BOTH_EFFECTS)
       // slime
       .addTags(
         // slime
@@ -195,11 +195,11 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
       );
 
     // tooltips //
-    this.tag(TinkerTags.Fluids.GLASS_TOOLTIPS).addTags(TinkerFluids.moltenGlass.getTag(), TinkerFluids.liquidSoul.getTag(), TinkerFluids.moltenObsidian.getTag());
-    this.tag(TinkerTags.Fluids.SLIME_TOOLTIPS).addTags(TinkerFluids.magma.getTag(), TinkerFluids.moltenEnder.getTag(), TinkerTags.Fluids.SLIME);
-    this.tag(TinkerTags.Fluids.BOTTLE_TOOLTIPS).addTags(TinkerFluids.venom.getTag(), TinkerFluids.fieryLiquid.getTag());
-    this.tag(TinkerTags.Fluids.CLAY_TOOLTIPS).addTags(TinkerFluids.moltenClay.getTag(), TinkerFluids.moltenPorcelain.getTag(), TinkerFluids.searedStone.getTag(), TinkerFluids.scorchedStone.getTag());
-    this.tag(TinkerTags.Fluids.METAL_TOOLTIPS).addTags(
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.GLASS_TOOLTIPS).addTags(TinkerFluids.moltenGlass.getTag(), TinkerFluids.liquidSoul.getTag(), TinkerFluids.moltenObsidian.getTag());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.SLIME_TOOLTIPS).addTags(TinkerFluids.magma.getTag(), TinkerFluids.moltenEnder.getTag(), TinkerTags.Fluids.SLIME);
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.BOTTLE_TOOLTIPS).addTags(TinkerFluids.venom.getTag(), TinkerFluids.fieryLiquid.getTag());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.CLAY_TOOLTIPS).addTags(TinkerFluids.moltenClay.getTag(), TinkerFluids.moltenPorcelain.getTag(), TinkerFluids.searedStone.getTag(), TinkerFluids.scorchedStone.getTag());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.METAL_TOOLTIPS).addTags(
         // vanilla ores
         TinkerFluids.moltenIron.getTag(), TinkerFluids.moltenGold.getTag(), TinkerFluids.moltenCopper.getTag(),
         TinkerFluids.moltenCobalt.getTag(), TinkerFluids.moltenSteel.getTag(), TinkerFluids.moltenDebris.getTag(),
@@ -225,14 +225,14 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
         TinkerFluids.moltenSteeleaf.getTag()
     );
 
-    this.tag(TinkerTags.Fluids.LARGE_GEM_TOOLTIPS).addTags(TinkerFluids.moltenEmerald.getTag(), TinkerFluids.moltenDiamond.getTag());
-    this.tag(TinkerTags.Fluids.SMALL_GEM_TOOLTIPS).addTags(TinkerFluids.moltenQuartz.getTag(), TinkerFluids.moltenAmethyst.getTag());
-    this.tag(MantleTags.Fluids.SOUP).addTag(TinkerFluids.meatSoup.getTag()).addOptionalTag(TinkerTags.Fluids.SOUP_TOOLTIPS.location());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.LARGE_GEM_TOOLTIPS).addTags(TinkerFluids.moltenEmerald.getTag(), TinkerFluids.moltenDiamond.getTag());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.SMALL_GEM_TOOLTIPS).addTags(TinkerFluids.moltenQuartz.getTag(), TinkerFluids.moltenAmethyst.getTag());
+    this.getOrCreateTagBuilder(MantleTags.Fluids.SOUP).addTag(TinkerFluids.meatSoup.getTag()).addOptionalTag(TinkerTags.Fluids.SOUP_TOOLTIPS.location());
 
     // hide upcoming fluids
-    tag(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS).add(TinkerFluids.moltenSoulsteel.get());
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS).add(TinkerFluids.moltenSoulsteel.get());
     // hide upcoming fluids that require NBT. Can expand this list if other mods report problems
-    tag(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS).add(TinkerFluids.potion.get()).addTag(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS);
+    this.getOrCreateTagBuilder(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS).add(TinkerFluids.potion.get()).addTag(TinkerTags.Fluids.HIDDEN_IN_RECIPE_VIEWERS);
   }
 
   @Override
@@ -242,15 +242,15 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
 
   /** Adds tags for an unplacable fluid */
   private void fluidTag(FluidObject<?> fluid) {
-    tag(Objects.requireNonNull(fluid.getCommonTag())).add(fluid.get());
+    this.getOrCreateTagBuilder(Objects.requireNonNull(fluid.getCommonTag())).add(fluid.get());
   }
 
   /** Adds tags for a placable fluid */
   private void fluidTag(FlowingFluidObject<?> fluid) {
-    tag(fluid.getLocalTag()).add(fluid.getStill(), fluid.getFlowing());
+    this.getOrCreateTagBuilder(fluid.getLocalTag()).add(fluid.getStill(), fluid.getFlowing());
     TagKey<Fluid> tag = fluid.getCommonTag();
     if (tag != null) {
-      tag(tag).addTag(fluid.getLocalTag());
+      this.getOrCreateTagBuilder(tag).addTag(fluid.getLocalTag());
     }
   }
 }

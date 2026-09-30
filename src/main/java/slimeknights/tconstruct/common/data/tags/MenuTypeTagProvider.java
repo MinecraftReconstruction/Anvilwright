@@ -1,29 +1,25 @@
 package slimeknights.tconstruct.common.data.tags;
 
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.PackOutput;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.inventory.MenuType;
-import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import slimeknights.mantle.data.BuiltinRegistryTagProvider;
 import slimeknights.mantle.datagen.MantleTags;
-import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tools.TinkerTools;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public class MenuTypeTagProvider extends BuiltinRegistryTagProvider<MenuType<?>> {
-  @SuppressWarnings("deprecation")
-  public MenuTypeTagProvider(PackOutput packOutput, CompletableFuture<Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-    super(packOutput, BuiltInRegistries.MENU, lookupProvider, TConstruct.MOD_ID, existingFileHelper);
+  public MenuTypeTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+    super(output, BuiltInRegistries.MENU, registriesFuture);
   }
 
   @Override
-  protected void addTags(Provider provider) {
+  protected void addTags(HolderLookup.Provider provider) {
     tag(MantleTags.MenuTypes.REPLACEABLE).add(
       // tool inventory allows really nice switching behavior
       TinkerTools.toolContainer.get(),
