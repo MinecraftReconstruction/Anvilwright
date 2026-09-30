@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.common.data.render;
 
 import net.minecraft.core.Direction;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import slimeknights.mantle.client.render.FluidCuboid;
@@ -12,10 +11,11 @@ import slimeknights.tconstruct.smeltery.block.FaucetBlock;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
 
 import java.util.List;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Provides fluid cuboids for block entity renderers */
 public class RenderFluidProvider extends BlockStateDataMapProvider<List<FluidCuboid>> {
-  public RenderFluidProvider(PackOutput output) {
+  public RenderFluidProvider(FabricDataOutput output) {
     super(output, Target.RESOURCE_PACK, FluidCuboid.REGISTRY, TConstruct.MOD_ID);
   }
 

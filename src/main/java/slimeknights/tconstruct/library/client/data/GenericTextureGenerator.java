@@ -6,7 +6,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data generator to create png image files */
 public abstract class GenericTextureGenerator extends GenericDataProvider {
@@ -28,7 +28,7 @@ public abstract class GenericTextureGenerator extends GenericDataProvider {
   private final ExistingFileHelper.ResourceType resourceType;
 
   /** Constructor which marks files as existing */
-  public GenericTextureGenerator(PackOutput packOutput, @Nullable ExistingFileHelper existingFileHelper, String folder) {
+  public GenericTextureGenerator(FabricDataOutput packOutput, @Nullable ExistingFileHelper existingFileHelper, String folder) {
     super(packOutput, Target.RESOURCE_PACK, folder);
     this.existingFileHelper = existingFileHelper;
     if (existingFileHelper != null) {
@@ -39,7 +39,7 @@ public abstract class GenericTextureGenerator extends GenericDataProvider {
   }
 
   /** Constructor which does not mark files as existing */
-  public GenericTextureGenerator(PackOutput packOutput, String folder) {
+  public GenericTextureGenerator(FabricDataOutput packOutput, String folder) {
     this(packOutput, null, folder);
   }
 

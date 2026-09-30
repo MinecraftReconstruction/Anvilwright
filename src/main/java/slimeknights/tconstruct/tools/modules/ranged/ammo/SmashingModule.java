@@ -254,7 +254,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
       return getAmount(modifier, fluid);
     }
     // TODO: should we return something else? this number when empty is really meaningless
-    return FluidValues.BOTTLE;
+    return (int) FluidValues.BOTTLE;
   }
 
   @Override
@@ -501,7 +501,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
       if (fluid != Fluids.EMPTY) {
         return getAmount(fluid);
       }
-      return FluidValues.BOTTLE;
+      return (int) FluidValues.BOTTLE;
     }
   };
 }

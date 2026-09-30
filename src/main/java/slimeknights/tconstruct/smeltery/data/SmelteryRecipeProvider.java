@@ -1615,8 +1615,8 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
                         .save(consumer, location(metalFolder + "iron/horse_armor"));
     // chainmail armor to steel
     // working off the assumption that some mods out there decided to craft chainmail for an ingots worth of material at minimum, possibly a bit more if they used chains (which is nonsensical)
-    final int chainIron = FluidValues.NUGGET * 6;
-    final int chainSteel = FluidValues.NUGGET * 3;
+    final long chainIron = FluidValues.NUGGET * 6;
+    final long chainSteel = FluidValues.NUGGET * 3;
     MeltingRecipeBuilder.melting(Ingredient.of(Items.CHAINMAIL_HELMET), TinkerFluids.moltenIron, chainIron * 5)
                         .addByproduct(TinkerFluids.moltenSteel.result(chainSteel * 5))
                         .setDamagable(FluidValues.NUGGET, FluidValues.NUGGET)
@@ -1722,7 +1722,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     MeltingRecipeBuilder.melting(Ingredient.of(Blocks.LODESTONE), TinkerFluids.moltenNetherite, FluidValues.INGOT)
                         .save(consumer, location(metalFolder + "netherite/lodestone"));
     // armor
-    int[] netheriteSizes = {FluidValues.NUGGET, FluidValues.GEM_SHARD};
+    long[] netheriteSizes = {FluidValues.NUGGET, FluidValues.GEM_SHARD};
     MeltingRecipeBuilder.melting(Ingredient.of(Items.NETHERITE_HELMET), TinkerFluids.moltenNetherite, FluidValues.INGOT)
                         .setDamagable(netheriteSizes)
                         .addByproduct(TinkerFluids.moltenDiamond.result(FluidValues.GEM * 5))
@@ -2378,11 +2378,11 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
 
     // ceramics constants //
     // normally its 1/8 of a bucket per lava (125mb), but we give a small discount on casting to make the slab math work out nicer (100 is divisible by 2)
-    int lavaPerBlock = FluidConstants.BUCKET / 10;
+    long lavaPerBlock = FluidConstants.BUCKET / 10;
     // normally a quarter of a glass pane, but thats 62.5, so round down to 50 for a nice number
-    int gaugeGlass = FluidValues.GLASS_PANE / 5;
+    long gaugeGlass = FluidValues.GLASS_PANE / 5;
     // normally its 1 ingot per 8, we do 1 nugget giving a small discount
-    int goldPerBlock = FluidValues.NUGGET;
+    long goldPerBlock = FluidValues.NUGGET;
 
     // ID helpers
     String ceramics = "ceramics";

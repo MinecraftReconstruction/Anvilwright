@@ -51,7 +51,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer {
   /** Max capacity for the tank */
-  public static final int DEFAULT_CAPACITY = FluidConstants.BUCKET * 4;
+  public static final long DEFAULT_CAPACITY = FluidConstants.BUCKET * 4;
   // slots
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;

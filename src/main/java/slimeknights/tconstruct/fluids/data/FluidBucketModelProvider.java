@@ -3,17 +3,17 @@ package slimeknights.tconstruct.fluids.data;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.world.item.BucketItem;
 import slimeknights.mantle.data.GenericDataProvider;
 
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Quick and dirty data provider to generate fluid bucket models */
 public class FluidBucketModelProvider extends GenericDataProvider {
   private final String modId;
-  public FluidBucketModelProvider(PackOutput packOutput, String modId) {
+  public FluidBucketModelProvider(FabricDataOutput packOutput, String modId) {
     super(packOutput, Target.RESOURCE_PACK, "models/item");
     this.modId = modId;
   }

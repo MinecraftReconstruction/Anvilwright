@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.common.data.loot;
 
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.level.material.Fluids;
@@ -34,10 +33,11 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Add all relevant loot to loot tables */
 public class LootTableInjectionProvider extends AbstractLootTableInjectionProvider {
-  public LootTableInjectionProvider(PackOutput packOutput) {
+  public LootTableInjectionProvider(FabricDataOutput packOutput) {
     super(packOutput, TConstruct.MOD_ID);
   }
 

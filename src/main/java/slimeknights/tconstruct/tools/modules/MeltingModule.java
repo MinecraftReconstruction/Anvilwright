@@ -161,7 +161,7 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
       FluidStack output = meltItem(modifier, stack, world);
       // fluid must match tank fluid
       if (!output.isEmpty() && (current.isEmpty() || current.isFluidEqual(output))) {
-        int amount;
+        long amount;
 
         // if forced to melt, melt everything regardless, fluid handler will ensure we don't overflow
         if (forceMelt) {
@@ -169,7 +169,7 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
           iterator.remove();
         } else {
           // if not forced, then only melt what we have space for. Determine how many copies we can melt.
-          int maxCopies = Math.min((capacity - current.getAmount()) / output.getAmount(), stack.getCount());
+          int maxCopies = (int) Math.min((capacity - current.getAmount()) / output.getAmount(), stack.getCount());
           if (maxCopies <= 0) {
             continue;
           }

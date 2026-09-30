@@ -3,17 +3,17 @@ package slimeknights.tconstruct.fluids.data;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.world.level.block.LiquidBlock;
 import slimeknights.mantle.data.GenericDataProvider;
 
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Quick and dirty data provider to generate blockstate files for fluids */
 public class FluidBlockstateModelProvider extends GenericDataProvider {
   private final String modId;
-  public FluidBlockstateModelProvider(PackOutput packOutput, String modId) {
+  public FluidBlockstateModelProvider(FabricDataOutput packOutput, String modId) {
     super(packOutput, Target.RESOURCE_PACK, "blockstates");
     this.modId = modId;
   }
