@@ -82,7 +82,7 @@ public class PersistentDataCapability implements EntityComponentInitializer {
         CAPABILITY.maybeGet(newPlayer).ifPresent(newData -> newData.copyFrom(nbt));
       }
     });
-    original.invalidateCaps();
+    // Forge's reviveCaps/invalidateCaps pair does not exist on Fabric
   }
 
   /** sync caps when the player respawns/returns from the end */

@@ -93,6 +93,11 @@ public class TinkerDataCapability implements EntityComponentInitializer {
     /** Name for debug */
     private final ResourceLocation name;
 
+    /** Gets the name of this data key */
+    public ResourceLocation getId() {
+      return name;
+    }
+
     @Override
     public String toString() {
       return "TinkerDataKey{" + name + '}';

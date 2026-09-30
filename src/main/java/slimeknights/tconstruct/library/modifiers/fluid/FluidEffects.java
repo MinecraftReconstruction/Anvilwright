@@ -40,7 +40,7 @@ public record FluidEffects(FluidIngredient ingredient, List<FluidEffect<? super 
   }
 
   /** Gets the amount of fluid needed for a single level */
-  public int getAmount(Fluid fluid) {
+  public long getAmount(Fluid fluid) {
     return ingredient.getAmount(fluid);
   }
 
@@ -71,7 +71,7 @@ public record FluidEffects(FluidIngredient ingredient, List<FluidEffect<? super 
 
   /** Runs the effects for a generic context */
   private <C extends FluidEffectContext> int apply(FluidStack fluid, float level, C context, List<FluidEffect<? super C>> effects, FluidAction action) {
-    int amountPerLevel = getAmount(fluid.getFluid());
+    long amountPerLevel = getAmount(fluid.getFluid());
     float scale;
     if (fluid.getAmount() >= amountPerLevel * level) {
       scale = level;

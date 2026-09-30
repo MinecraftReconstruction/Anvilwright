@@ -75,4 +75,9 @@ public class ToolHarvestContext {
   public ToolHarvestContext forPosition(BlockPos pos, BlockState state) {
     return new ToolHarvestContext(world, living, player, projectile, state, pos, this.sideHit, state.getBlock() instanceof HarvestableBlock block ? block.canHarvestBlock(state, world, pos, player) : player.hasCorrectToolForDrops(state), true, true, targetedPos, targetedState);
   }
+
+  /** Checks if this is a projectile */
+  public boolean isProjectile() {
+    return projectile != null;
+  }
 }

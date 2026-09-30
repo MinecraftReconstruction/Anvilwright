@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Packet to sync modifiers */
 @RequiredArgsConstructor

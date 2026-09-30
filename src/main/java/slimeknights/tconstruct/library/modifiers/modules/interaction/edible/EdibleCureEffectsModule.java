@@ -20,6 +20,7 @@ import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import java.util.List;
+import net.minecraft.world.effect.MobEffectInstance;
 
 /** Module for making eating a tool remove all effects using an item. */
 public record EdibleCureEffectsModule(ItemStack curativeItem, IJsonPredicate<LivingEntity> holder, ModifierCondition<IToolStackView> condition) implements ModifierModule, EdibleEffectHook, ConditionalModule<IToolStackView> {
@@ -46,7 +47,12 @@ public record EdibleCureEffectsModule(ItemStack curativeItem, IJsonPredicate<Liv
   @Override
   public void onToolEaten(IToolStackView tool, ModifierEntry modifier, Player player, EquipmentSlot eatenSlot, int hunger, float saturation, List<ItemStack> representativeItems) {
     if (condition.matches(tool, modifier) && holder.matches(player)) {
-      player.curePotionEffects(curativeItem);
+      // Forge's curePotionEffects hook does not exist on Fabric; apply the vanilla milk cure instead
+      for (MobEffectInstance effect : List.copyOf(player.getActiveEffects())) {
+        if (effect.isCurativeItem(curativeItem)) {
+          player.removeEffect(effect.getEffect());
+        }
+      }
     }
   }
 }

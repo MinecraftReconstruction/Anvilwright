@@ -35,6 +35,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import java.util.List;
 
 import static slimeknights.tconstruct.library.modifiers.ModifierEntry.VALID_LEVEL;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Module to replace blocks with another block while walking.
@@ -162,7 +163,11 @@ public record ReplaceBlockWalkerModule(List<BlockReplacement> replacements, Leve
    * go through (see docs/BEHAVIOUR-DIFFERENCES.md #20).
    */
   private static boolean beforePlace(LivingEntity living, Level world, BlockPos pos, BlockState state) {
-    BlockPlaceContext context = new BlockPlaceContext(world, living, InteractionHand.MAIN_HAND, ItemStack.EMPTY,
+    // vanilla's BlockPlaceContext wants a player (Forge's variant took any living entity), so non-player walkers skip the check
+    if (!(living instanceof Player player)) {
+      return true;
+    }
+    BlockPlaceContext context = new BlockPlaceContext(world, player, InteractionHand.MAIN_HAND, ItemStack.EMPTY,
       new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
     return BlockEvents.BEFORE_PLACE.invoker().beforePlace(context) == InteractionResult.PASS;
   }

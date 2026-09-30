@@ -36,6 +36,9 @@ import java.util.function.Predicate;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.minecraft.world.entity.player.Player;
+import slimeknights.mantle.fluid.FluidTransferHelper;
 
 public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
   private static final String KEY_FLUID = TConstruct.makeTranslationKey("block", "tank.fluid");
@@ -107,6 +110,20 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
    * @param tank   Tank instance
    * @return  Stack with tank
    */
+  /** If true, the given stack may contain a fluid (used by the tool tank module to decide whether to interact) */
+  public static boolean mayHaveFluid(ItemStack stack) {
+    return FluidContainerTransferManager.INSTANCE.mayHaveTransfer(stack) || FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack)) != null;
+  }
+
+  /** Updates the held item after transferring fluid into or out of it */
+  public static void updateHeldItem(Player player, ItemStack held, ItemStack result) {
+    if (player.containerMenu.getCarried() == held) {
+      player.containerMenu.setCarried(FluidTransferHelper.getOrTransferFilled(player, held, result));
+    } else if (!player.getInventory().add(result)) {
+      player.drop(result, false);
+    }
+  }
+
   public static ItemStack setTank(ItemStack stack, FluidTank tank) {
     if (tank.isEmpty()) {
       removeTank(stack);

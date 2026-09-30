@@ -209,3 +209,10 @@ transitive-accessible method net/minecraft/client/renderer/texture/atlas/SpriteS
 # Slime tree root variant placer copies the vanilla mangrove placement (upstream: accesstransformer.cfg)
 transitive-accessible field net/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacer mangroveRootPlacement Lnet/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacement;
 
+# Skull item rendering reuses the vanilla model list renderer (upstream: accesstransformer.cfg)
+transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
+
+# Enchantment slots + item eating particles (upstream: accesstransformer.cfg)
+transitive-accessible field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;
+transitive-accessible method net/minecraft/world/entity/LivingEntity spawnItemParticles (Lnet/minecraft/world/item/ItemStack;I)V
+

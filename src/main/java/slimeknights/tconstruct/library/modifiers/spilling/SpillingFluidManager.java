@@ -41,7 +41,7 @@ public class SpillingFluidManager extends SimpleJsonResourceReloadListener imple
     .registerTypeAdapter(JsonCondition.class, ConditionSerializer.DESERIALIZER)
     .registerTypeAdapter(JsonCondition.class, ConditionSerializer.SERIALIZER)
     .registerTypeHierarchyAdapter(ISpillingEffect.class, ISpillingEffect.LOADER)
-    .registerTypeAdapter(FluidIngredient.class, FluidIngredient.SERIALIZER)
+    .registerTypeAdapter(FluidIngredient.class, FluidIngredient.LOADABLE)
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();

@@ -79,7 +79,8 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
     Player player = context.getPlayer();
     boolean skipBlock = false;
     if (player != null) {
-      skipBlock = player.isSecondaryUseActive() && (!player.getMainHandItem().doesSneakBypassUse(world, pos, player) || !player.getOffhandItem().doesSneakBypassUse(player.level(), pos, player));
+      // Forge's doesSneakBypassUse hook has no Fabric counterpart; vanilla items/blocks never bypass, so sneak always skips
+      skipBlock = player.isSecondaryUseActive();
     } else if (entity != null) {
       skipBlock = entity.isShiftKeyDown() && (!entity.getMainHandItem().isEmpty() || !entity.getOffhandItem().isEmpty());
     }
@@ -117,19 +118,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
 
       // use the item
       UseOnContext useContext = new UseOnContext(world, player, hand, heldItem, hitResult);
-      if (!heldItem.isEmpty()) {
-        InteractionResult result = heldItem.onItemUseFirst(useContext);
-        if (result != InteractionResult.PASS) {
-          if (result.consumesAction()) {
-            if (entity != null) {
-              entity.swing(hand, true);
-            }
-            damageIfNeeded(useContext);
-            return 1;
-          }
-          return 0; // failure exits the loop
-        }
-      }
+      // Forge's onItemUseFirst hook (item acts before the block) has no Fabric counterpart; vanilla goes straight to the block
 
       // click the block
       ItemStack original = heldItem.copy();

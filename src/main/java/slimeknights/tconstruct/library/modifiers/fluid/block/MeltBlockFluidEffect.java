@@ -73,7 +73,7 @@ public record MeltBlockFluidEffect(IJsonPredicate<BlockState> validBlocks, int m
         toPlace = result.getFluid().defaultFluidState().createLegacyBlock();
       } else if (result.getFluid() instanceof FlowingFluid flowing) {
         // place a block that will disappear in a few ticks
-        int fluidLevel = result.getAmount() * 8 / minAmount;
+        int fluidLevel = (int)(result.getAmount() * 8 / minAmount);
         if (fluidLevel > 0) {
           toPlace = flowing.getFlowing(fluidLevel, false).createLegacyBlock();
         }
