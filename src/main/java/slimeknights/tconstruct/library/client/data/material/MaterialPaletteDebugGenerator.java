@@ -1,8 +1,8 @@
 package slimeknights.tconstruct.library.client.data.material;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.library.client.data.GenericTextureGenerator;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialSpriteProvider.MaterialSpriteInfo;
@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public class MaterialPaletteDebugGenerator extends GenericTextureGenerator {
   private final String name;
   private final AbstractMaterialSpriteProvider[] materialProviders;
-  public MaterialPaletteDebugGenerator(PackOutput packOutput, String name, AbstractMaterialSpriteProvider... materialProviders) {
+  public MaterialPaletteDebugGenerator(FabricDataOutput packOutput, String name, AbstractMaterialSpriteProvider... materialProviders) {
     super(packOutput, "debug/material_palettes");
     this.name = name;
     this.materialProviders = materialProviders;

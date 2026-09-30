@@ -18,8 +18,10 @@ import lombok.experimental.Accessors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.FastColor.ABGR32;
 import net.minecraft.util.GsonHelper;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
+import slimeknights.mantle.data.loadable.common.ColorLoadable;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.data.material.MaterialPartTextureGenerator;
@@ -38,6 +40,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
+import static slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping.GREY_LOADABLE;
 import static slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping.GREY_STRING_LOADABLE;
 import static slimeknights.tconstruct.library.client.data.spritetransformer.GreyToColorMapping.serializeColor;
 

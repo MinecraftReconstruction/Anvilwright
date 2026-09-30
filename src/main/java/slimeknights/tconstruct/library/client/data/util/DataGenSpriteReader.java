@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.server.packs.resources.Resource;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 
