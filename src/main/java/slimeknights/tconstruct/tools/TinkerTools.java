@@ -393,7 +393,8 @@ public final class TinkerTools extends TinkerModule {
   }
 
   public static void gatherData(FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
-    pack.addProvider(ToolsRecipeProvider::new);
+    // the Fabric pack exposes two-arg factories, so the ctor reference needs the explicit target type
+    pack.addProvider((FabricDataGenerator.Pack.Factory<ToolsRecipeProvider>) ToolsRecipeProvider::new);
     pack.addProvider(MaterialRecipeProvider::new);
     MaterialDataProvider materials = pack.addProvider(MaterialDataProvider::new);
     pack.addProvider((output, registriesFuture) -> new MaterialStatsDataProvider(output, materials));

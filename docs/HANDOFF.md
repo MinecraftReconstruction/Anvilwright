@@ -446,3 +446,17 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
   冒烟、canonical 仓库两分支）仍未开始。
 - 提醒：`ToolsRecipeProvider` 是 datagen 文件，改完除了 javac 还要跑一次 `./gradlew runData`（或 `build`）看
   条件/原料写法是否真的能被 Fabric 接受。
+
+---
+
+## 16. 2026-09-30 傍晚：datagen 集群已清，停在 fork 独有的伤害类型（本轮交接）
+
+- `--gen`：44 → **8**。`ToolsRecipeProvider` 的 6 类 Fabric 管线问题全部修完（`ArmorSlotType`、
+  Porting Lib `Tags`、`DefaultCustomIngredients`、`DefaultResourceConditions.allModsLoaded`、`FabricDataOutput`、
+  `buildRecipes` 公开签名、4 参 `toolBuilding` 重载、`addProvider` 显式 `FabricDataGenerator.Pack.Factory`）。
+  注意 `TinkerToolParts.plating` / `TinkerSmeltery.dummyPlating` 仍然是 `ArmorItem.Type` 键（只在这 4 行里用），
+  所以那两个 `EnumObject` **没有**跟着改成 `ArmorSlotType`。
+- 现在剩下 8 条全在 `library/modifiers/spilling/effects/DamageSpillingEffect.java`：它是 fork 独有文件，
+  引用了 8 个本树不存在的伤害类型常量。细节与补法见 [NUMBERS.md](NUMBERS.md) 最后一节。
+- 修完这 8 条后按第 13.4 节继续：真 Gradle 构建（`./gradlew build --offline`，datagen 建议再跑一次
+  `runData`）→ `runServer` → `runClient` 热测试。

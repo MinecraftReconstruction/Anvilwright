@@ -8,6 +8,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.CastItemObject;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 import slimeknights.tconstruct.library.recipe.casting.material.CompositeCastingRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.casting.material.MaterialCastingRecipeBuilder;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialIngredient;
@@ -19,6 +20,7 @@ import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.tools.data.material.MaterialIds;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.world.level.ItemLike;
@@ -49,6 +51,19 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    */
   default void toolBuilding(Consumer<FinishedRecipe> consumer, Supplier<? extends IModifiable> tool, String folder) {
     toolBuilding(consumer, tool.get(), folder);
+  }
+
+  /**
+   * Registers recipe for tool building using a custom layout slot
+   * @param consumer    Recipe consumer
+   * @param tool        Tool
+   * @param folder      Folder for recipe
+   * @param layoutSlot  Slot in the tinker station this tool is built in
+   */
+  default void toolBuilding(Consumer<FinishedRecipe> consumer, IModifiable tool, String folder, ResourceLocation layoutSlot) {
+    ToolBuildingRecipeBuilder.toolBuildingRecipe(tool)
+                             .layoutSlot(layoutSlot)
+                             .save(consumer, commonResource(folder + Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(tool.asItem())).getPath()));
   }
 
   /**
@@ -124,11 +139,11 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
     // Material Casting
     partCasting(consumer, part, cast, cost, partFolder);
     // Cast Casting
-    castCreation(consumer, CompoundIngredient.of(Ingredient.of(dummyPart), MaterialIngredient.of(part)), cast, castFolder, id(part).getPath());
+    castCreation(consumer, DefaultCustomIngredients.all(Ingredient.of(dummyPart), MaterialIngredient.of(part)), cast, castFolder, id(part).getPath());
     // dummy part builder recipe
     ItemPartRecipeBuilder.item(cast.getName(), ItemOutput.fromItem(dummyPart))
                          .material(MaterialIds.rock, cost)
-                         .setPatternItem(CompoundIngredient.of(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
+                         .setPatternItem(DefaultCustomIngredients.all(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(cast.get())))
                          .save(consumer, location(partFolder + "builder/" + cast.getName().getPath()));
   }
 
@@ -164,7 +179,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
                                  .save(consumer, commonResource(castingFolder + name + "_composite"));
 
     // Cast Casting
-    MaterialIngredient ingredient = MaterialIngredient.fromItem(part);
+    MaterialIngredient ingredient = MaterialIngredient.of(part, MaterialPredicate.ANY);
     castCreation(consumer, ingredient, cast, castFolder, Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(part.asItem())).getPath());
   }
 

@@ -211,3 +211,20 @@ TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生
 6. `toolBuilding(consumer, item, folder, Pattern)` 多了一个 `Pattern` 参数；`TinkerTools:396` 的
    `pack.addProvider(ToolsRecipeProvider::new)` 在 Fabric 下 `addProvider` 有歧义（要显式指定
    `FabricDataGenerator.Pack.Factory`）
+
+### 2026-09-30 傍晚续：datagen 集群修完，翻到"伤害类型常量"
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 44（全在 `ToolsRecipeProvider` + `TinkerTools` 1 条） |
+| 修完 `ToolsRecipeProvider` 的 6 类管线问题 | 8 |
+| 修 `IToolRecipeHelper` / `IMaterialRecipeHelper` 的残留（`modResource`→`location`、Forge `CompoundIngredient`→`DefaultCustomIngredients`、`MaterialIngredient.fromItem`→`of(part, ANY)`、补 `Objects` 导入、新增 4 参 `toolBuilding` 重载） | **8**（全在 `DamageSpillingEffect`） |
+
+`DamageSpillingEffect`（**fork 独有文件，上游 3.12.1 没有**）用了 8 个伤害类型常量，本树里没有：
+`PLAYER/MOB_ATTACK_{FIRE,MAGIC,EXPLOSION,BYPASS_ARMOR}`。它们在 fork 的
+`slimeknights/tconstruct/shared/TinkerDamageTypes.java`（第 20–27 行定义、第 34 行起 `context.register(...)`）里，
+本树现在只有 `slimeknights/tconstruct/common/TinkerDamageTypes.java`（`SMELTERY_HEAT` 等，没有这 8 个）。
+
+补法（下一位接力）：把这 8 个 `ResourceKey.create(Registries.DAMAGE_TYPE, TConstruct.getResource(...))` 常量、
+它们的 `DamageType` 注册，以及 `src/generated/resources/data/tconstruct/damage_type/{player,mob}_attack_*.json`
+一并从 fork 取回来（fork 里都有），然后重跑 `--gen`；这一步之后应该就摸到 0 了。
