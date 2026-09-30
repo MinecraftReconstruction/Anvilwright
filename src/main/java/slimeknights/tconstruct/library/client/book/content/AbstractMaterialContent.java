@@ -2,20 +2,20 @@ package slimeknights.tconstruct.library.client.book.content;
 
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.SerializedName;
-import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import io.github.fabricators_of_create.porting_lib.util.ForgeI18n;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import slimeknights.mantle.client.book.HTMLUtils;
 import slimeknights.mantle.client.book.data.BookData;
 import slimeknights.mantle.client.book.data.content.PageContent;
 import slimeknights.mantle.client.book.data.element.TextComponentData;
@@ -25,7 +25,6 @@ import slimeknights.mantle.client.screen.book.element.BookElement;
 import slimeknights.mantle.client.screen.book.element.ItemElement;
 import slimeknights.mantle.client.screen.book.element.TextComponentElement;
 import slimeknights.mantle.client.screen.book.element.TextElement;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.mantle.util.html.HtmlElement;
 import slimeknights.mantle.util.html.HtmlGroup;
@@ -45,10 +44,9 @@ import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.modifiers.Modifier;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.util.ModifierTooltip;
-import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.casting.material.MaterialCastingLookup;
 import slimeknights.tconstruct.library.recipe.casting.material.MaterialFluidRecipe;
-import slimeknights.tconstruct.library.recipe.material.MaterialRecipe;
+import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 import slimeknights.tconstruct.library.tools.definition.module.material.ToolMaterialHook;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
@@ -65,13 +63,11 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Base class for material content pages.
@@ -174,12 +170,11 @@ public abstract class AbstractMaterialContent extends PageContent {
       }
       // simply combine all items from all recipes
       MaterialVariantId material = getMaterialVariant();
-      repairStacks = RecipeHelper.getUIRecipes(world.getRecipeManager(), TinkerRecipeTypes.MATERIAL.get(), MaterialRecipe.class, recipe -> material.matchesVariant(recipe.getMaterial()))
+      // not using #getItems or #addItems as we want to keep count of 1
+      repairStacks = MaterialRecipeCache.getRecipes(materialVariant)
         .stream()
-        // prefer 1 value 1 needed (ingots), then 1 value with higher needed (nuggets), then higher value (blocks)
-        .sorted(Comparator.comparing(MaterialRecipe::getValue).thenComparing(MaterialRecipe::getNeeded))
         .flatMap(recipe -> Arrays.stream(recipe.getIngredient().getItems()))
-        .collect(Collectors.toList());
+        .toList();
       // no repair items? use the fallbacks
       if (repairStacks.isEmpty()) {
         // use the fallback stacks
@@ -189,9 +184,9 @@ public abstract class AbstractMaterialContent extends PageContent {
 
         // no matching fallback? just use a repair kit
         if (repairStacks.isEmpty()) {
-          TConstruct.LOG.debug("Material with id " + material + " has no representation items associated with it, using repair kit");
+          TConstruct.LOG.debug("Material with id {} has no representation items associated with it, using repair kit", material);
           // bypass the valid check, because we need to show something
-          repairStacks = Collections.singletonList(TinkerToolParts.repairKit.get().withMaterialForDisplay(material));
+          repairStacks = List.of(TinkerToolParts.repairKit.get().withMaterialForDisplay(material));
         }
       }
     }
@@ -276,9 +271,8 @@ public abstract class AbstractMaterialContent extends PageContent {
 
     List<TextComponentData> lineData = Lists.newArrayList();
     // add lines of tool information
-    List<Component> localizedDescription = stats.get().getLocalizedDescriptions();
-    if (!localizedDescription.isEmpty() && (localizedDescription.size() > 1 || localizedDescription.get(0) != Component.empty())) {
-      lineData.addAll(getStatLines(stats.get()));
+    if (includeStats) {
+      addStatLines(lineData, stats.get());
     }
     addTraitLines(lineData, registry.getTraits(material.getId(), statsId));
 
@@ -364,32 +358,43 @@ public abstract class AbstractMaterialContent extends PageContent {
     }
 
     // regular casting recipes
-    List<MaterialFluidRecipe> fluids = MaterialCastingLookup.getCastingFluids(materialId);
-    if (!fluids.isEmpty()) {
-      ItemElement elementItem = new TinkerItemElement(0, 0, 1, fluids.stream().flatMap(recipe -> recipe.getFluids().stream())
-                                                                     .map(fluid -> new ItemStack(fluid.getFluid().getBucket()))
-                                                                     .collect(Collectors.toList()));
-      FluidStack firstFluid = fluids.stream()
-                                    .flatMap(recipe -> recipe.getFluids().stream())
-                                    .findFirst().orElse(FluidStack.EMPTY);
-      elementItem.tooltip = ImmutableList.of(Component.translatable(CAST_FROM, FluidVariantAttributes.getName(firstFluid.getType())));
-      displayTools.add(elementItem);
-    }
+    if (allowCasting()) {
+      List<MaterialFluidRecipe> fluids = MaterialCastingLookup.getCastingFluids(materialId);
+      if (!fluids.isEmpty()) {
+        // get a list of all fluids from just visible recipes
+        List<FluidStack> filtered = fluids.stream().filter(r -> !r.isHideInBook()).flatMap(recipe -> recipe.getFluids().stream()).toList();
+        if (!filtered.isEmpty()) {
+          ItemElement elementItem = new TinkerItemElement(0, 0, 1, filtered.stream().map(fluid -> new ItemStack(fluid.getFluid().getBucket())).toList());
+          elementItem.tooltip = List.of(
+            CASTABLE,
+            Component.translatable(CAST_FROM, filtered.get(0).getDisplayName()).withStyle(ChatFormatting.GRAY)
+          );
+          displayTools.add(elementItem);
+        }
+      }
 
-    // composite casting
-    List<MaterialFluidRecipe> composites = MaterialCastingLookup.getCompositeFluids(materialId);
-    for (MaterialFluidRecipe composite : composites) {
-      MaterialVariant input = composite.getInput();
-      if (input != null) {
-        MaterialVariantId inputId = input.getVariant();
-        ItemElement elementItem = new TinkerItemElement(0, 0, 1, MaterialCastingLookup.getAllItemCosts().stream()
-                                                                                      .map(Entry::getKey)
-                                                                                      .filter(part -> part.canUseMaterial(inputId.getId()) && part.canUseMaterial(material))
-                                                                                      .map(part -> part.withMaterial(inputId))
-                                                                                      .collect(Collectors.toList()));
-        FluidStack firstFluid = composite.getFluids().stream().findFirst().orElse(FluidStack.EMPTY);
-        elementItem.tooltip = ImmutableList.of(Component.translatable(COMPOSITE_FROM, FluidVariantAttributes.getName(firstFluid.getType()), MaterialTooltipCache.getDisplayName(inputId)));
-        displayTools.add(elementItem);
+      // composite casting
+      List<MaterialFluidRecipe> composites = MaterialCastingLookup.getCompositeFluids(materialId);
+      for (MaterialFluidRecipe composite : composites) {
+        MaterialVariant input = composite.getInput();
+        if (!composite.isHideInBook() && input != null && !materialVariant.matchesVariant(input.getVariant())) {
+          MaterialVariantId inputId = input.getVariant();
+          // TODO: filter out tool parts that cannot be casted due to a composite cast conflict
+          List<ItemStack> compositeParts = MaterialCastingLookup.getAllItemCosts().stream()
+            .map(Entry::getKey)
+            .filter(part -> part.canUseMaterial(inputId.getId()) && part.canUseMaterial(material) && (!(part instanceof IToolPart toolPart) || supportsStatType(toolPart.getStatType())))
+            .map(part -> part.withMaterial(inputId))
+            .toList();
+          if (!compositeParts.isEmpty()) {
+            ItemElement elementItem = new TinkerItemElement(0, 0, 1, compositeParts);
+            FluidStack firstFluid = composite.getFluids().stream().findFirst().orElse(FluidStack.EMPTY);
+            elementItem.tooltip = List.of(
+              COMPOSITE,
+              Component.translatable(COMPOSITE_FROM, FluidVariantAttributes.getName(firstFluid.getType()), MaterialTooltipCache.getDisplayName(inputId)).withStyle(ChatFormatting.GRAY)
+            );
+            displayTools.add(elementItem);
+          }
+        }
       }
     }
   }
@@ -410,8 +415,8 @@ public abstract class AbstractMaterialContent extends PageContent {
       MaterialId materialId = materialVariant.getId();
       toolLoop:
       for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.MULTIPART_TOOL)) {
-        if (item.value() instanceof IModifiable tool) {
-          List<PartRequirement> requirements = tool.getToolDefinition().getData().getParts();
+        if (item.value() instanceof IModifiable tool && (showAllTools || !item.is(TinkerTags.Items.ANCIENT_TOOLS))) {
+          List<MaterialStatsId> requirements = ToolMaterialHook.stats(tool.getToolDefinition());
           // start building the tool with the given material
           MaterialNBT.Builder materials = MaterialNBT.builder();
           boolean usedMaterial = false;
@@ -474,10 +479,125 @@ public abstract class AbstractMaterialContent extends PageContent {
 
 
   /** Gets a list of all tool parts */
-  private List<IToolPart> getToolParts() {
-    return RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.TOOL_PARTS)
-                         .filter(item -> item instanceof IToolPart)
-                         .map(item -> (IToolPart) item)
-                         .collect(Collectors.toList());
+  private static List<IToolPart> ALL_PARTS = null;
+
+  /** Gets a list of all tool parts */
+  @SuppressWarnings("deprecation")
+  private static List<IToolPart> getToolParts() {
+    if (ALL_PARTS == null) {
+      ALL_PARTS = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, TinkerTags.Items.TOOL_PARTS)
+                                .filter(item -> item instanceof IToolPart)
+                                .map(item -> (IToolPart)item)
+                                .toList();
+    }
+    return ALL_PARTS;
+  }
+
+  /** Gets a list of all parts with the given material */
+  private static List<ItemStack> getPartsWithMaterial(MaterialVariantId material, MaterialStatsId statType) {
+    return getToolParts().stream()
+                         .filter(part -> part.getStatType().equals(statType))
+                         .map(part -> part.withMaterialForDisplay(material))
+                         .toList();
+  }
+
+  /** Registers a part to use for display of materials with no material recipes. If none of these parts match, the repair kit will be used. */
+  public static void registerFallbackPart(Supplier<? extends IMaterialItem> part) {
+    FALLBACKS.add(part);
+  }
+
+
+  /* HTML */
+
+  @Override
+  public HtmlSerializable toHTML(BookData book) {
+    int rgb = MaterialTooltipCache.getColor(getMaterialVariant()).getValue();
+
+    HtmlElement page = HtmlElement.div().classes("page-material")
+      .add(makeTitleHTML().classes("format-custom").color(rgb))
+      .add(makeStatsHtml(book));
+    HtmlElement description = HtmlElement.p().classes("trait");
+    String text = ForgeI18n.getPattern(getTextKey(getMaterialVariant().getId()));
+    page.add(description);
+    if (!detailed) {
+      description.style("font-style", "italic");
+      text = '"' + text + '"';
+    }
+    description.add(text);
+    return page;
+  }
+
+  /** Adds the elements for all material stats for this content. TODO 1.21: make abstract. */
+  protected HtmlSerializable makeStatsHtml(BookData data) {
+    return HtmlSerializable.EMPTY;
+  }
+
+  /** Adds the element for a single stats content */
+  protected HtmlSerializable makeStatHtml(MaterialStatsId statsId) {
+    return makeStatHtml(statsId, true, true);
+  }
+
+  /** Adds the element for a single stats content */
+  protected HtmlSerializable makeStatHtml(MaterialStatsId statsId, boolean addStats, boolean hasPart) {
+    return makeStatHtml(statsId, null, addStats, hasPart);
+  }
+
+  /**
+   * Adds the element for a single stats content
+   * @param statsId      ID for the stat type.
+   * @param name         Name to use. If null, uses the localized name.
+   * @param addStats     If true, adds stat lines. If false, adds just traits.
+   * @param hasPart      If true, offsetting the element for part display.
+   * @return  Element for the stats.
+   */
+  protected HtmlSerializable makeStatHtml(MaterialStatsId statsId, @Nullable String name, boolean addStats, boolean hasPart) {
+    Optional<IMaterialStats> statsOptional = MaterialRegistry.getInstance().getMaterialStats(getMaterialVariant().getId(), statsId);
+    if (statsOptional.isEmpty()) return HtmlSerializable.EMPTY;
+    IMaterialStats stats = statsOptional.get();
+
+    HtmlElement title = HtmlElement.p().classes("underline").style("font-weight", "bold").style("padding-bottom", 2)
+      .add(Objects.requireNonNullElse(name, stats.getLocalizedName().getString()));
+    if (hasPart) {
+      title.style("padding-left", 20);
+    }
+    HtmlElement root = HtmlElement.div().add(title);
+    // add stats if requested
+    if (addStats) {
+      List<Component> texts = stats.getLocalizedInfo();
+      List<Component> tooltips = stats.getLocalizedDescriptions();
+      int max = Math.min(texts.size(), tooltips.size());
+      for (int i = 0; i < max; i++) {
+        HtmlElement p = HtmlElement.p().add(HTMLUtils.toHtml(texts.get(i)));
+        Component tooltip = tooltips.get(i);
+        if (!tooltip.getString().isEmpty()) {
+          p.minetip(HTMLUtils.toHtml(tooltips.get(i)));
+        }
+        root.add(p);
+      }
+    }
+    // add traits
+    return root.add(makeTraitsHtml(statsId));
+  }
+
+  /** Formats materials traits as HTML */
+  protected HtmlSerializable makeTraitsHtml(MaterialStatsId statsId) {
+    HtmlGroup group = HtmlGroup.indent();
+    for (ModifierEntry entry : MaterialRegistry.getInstance().getTraits(getMaterialVariant().getId(), statsId)) {
+      if (!entry.isBound()) {
+        continue;
+      }
+      Modifier modifier = entry.getModifier();
+      if (!modifier.shouldDisplay(ModifierTooltip.BOOK)) {
+        continue;
+      }
+      HtmlGroup tooltip = HtmlGroup.indent();
+      for (Component component : modifier.getDescriptionList()) {
+        tooltip.add(HTMLUtils.toHtml(component));
+      }
+      group.add(HtmlElement.p().classes("underline").color(0x545454)
+        .add(modifier.getDisplayName().getString())
+        .minetip(tooltip));
+    }
+    return group;
   }
 }

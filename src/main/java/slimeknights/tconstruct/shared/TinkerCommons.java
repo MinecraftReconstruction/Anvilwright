@@ -192,14 +192,9 @@ public final class TinkerCommons extends TinkerModule {
     ResourceConditions.register(TagIntersectionPresentCondition.NAME, TinkerConditons::tagIntersectionPresentPredicate);
     ResourceConditions.register(TagDifferencePresentCondition.NAME, TinkerConditons::tagDifferencePresentPredicate);
     // block predicates
-    BlockPredicate.LOADER.register(TConstruct.getResource("and"), BlockPredicate.AND);
-    BlockPredicate.LOADER.register(TConstruct.getResource("or"), BlockPredicate.OR);
-    BlockPredicate.LOADER.register(TConstruct.getResource("inverted"), BlockPredicate.INVERTED);
+    // and/or/inverted are registered by Mantle's predicate registry (JSON addons use the common names)
     BlockPredicate.LOADER.register(TConstruct.getResource("requires_tool"), BlockPredicate.REQUIRES_TOOL.getLoader());
     // entity predicates
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("and"), LivingEntityPredicate.AND);
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("or"), LivingEntityPredicate.OR);
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("inverted"), LivingEntityPredicate.INVERTED);
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("any"), LivingEntityPredicate.ANY.getLoader());
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("fire_immune"), LivingEntityPredicate.FIRE_IMMUNE.getLoader());
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("water_sensitive"), LivingEntityPredicate.WATER_SENSITIVE.getLoader());
