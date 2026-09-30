@@ -12,12 +12,14 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.block.Block;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.client.book.TinkerBook;
+import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
 import slimeknights.tconstruct.library.client.model.UniqueGuiModel;
 import slimeknights.tconstruct.library.utils.DomainDisplayName;
 import slimeknights.tconstruct.shared.client.FluidParticle;
 
 import java.util.function.Consumer;
 import slimeknights.tconstruct.shared.block.ClearStainedGlassBlock;
+import slimeknights.tconstruct.shared.block.ClearStainedGlassBlock.GlassColor;
 
 public class CommonsClientEvents extends ClientEventBase {
 

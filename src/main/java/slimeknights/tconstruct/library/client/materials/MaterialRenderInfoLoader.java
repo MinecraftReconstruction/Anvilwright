@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Loads the material render info from resource packs. Loaded independently of materials loaded in data packs, so a resource needs to exist in both lists to be used.
@@ -169,5 +170,20 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
   @Override
   public ResourceLocation getFabricId() {
     return TConstruct.getResource("");
+  }
+
+  /* Helpers */
+
+  /** Checks if the given material has any of the given fallbacks. Used by {@link slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier} and {@link slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel} */
+  public boolean hasFallback(MaterialVariantId material, Set<String> fallbacks) {
+    MaterialRenderInfo info = getRenderInfo(material).orElse(null);
+    if (info != null) {
+      for (String fallback : info.fallbacks()) {
+        if (fallbacks.contains(fallback)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

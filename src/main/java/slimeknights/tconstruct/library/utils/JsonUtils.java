@@ -20,6 +20,7 @@ import slimeknights.tconstruct.common.network.TinkerNetwork;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonElement;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.ApiStatus.Internal;
 

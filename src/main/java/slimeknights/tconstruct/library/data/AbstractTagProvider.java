@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.impl.datagen.FabricTagBuilder;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagBuilder;

@@ -33,6 +33,7 @@ import slimeknights.tconstruct.shared.command.subcommand.StatsCommand;
 import java.util.function.Consumer;
 import slimeknights.tconstruct.common.registration.ArgumentTypeDeferredRegister;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.minecraft.network.chat.Component;
 
 public class TConstructCommand {
   public static final DynamicCommandExceptionType COMPONENT_ERROR = new DynamicCommandExceptionType(error -> (Component)error);

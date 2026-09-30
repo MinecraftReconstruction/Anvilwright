@@ -54,7 +54,6 @@ public class TinkerClient implements ClientModInitializer {
     TinkerBook.initBook();
     // needs to register listeners early enough for minecraft to load
     ModifierIconManager.init();
-    MaterialRenderInfoLoader.init();
 
     // add the recipe cache invalidator to the client
     Consumer<RecipeManager> recipesUpdated = event -> RecipeCacheInvalidator.reload(true);
@@ -76,10 +75,6 @@ public class TinkerClient implements ClientModInitializer {
     ToolClientEvents.clientSetupEvent();
     WorldClientEvents.clientSetup();
     ClientInteractionHandler.init();
-
-    var attributes = TinkerFluids.potion.get().createAttributes();
-    FluidRenderHandlerRegistry.INSTANCE.register(TinkerFluids.potion.get(), new FluidAttributeClientHandler(attributes));
-    FluidVariantAttributes.register(TinkerFluids.potion.get(), new FluidAttributeHandler(attributes));
 
     // client mod compat checks
     if (FabricLoader.getInstance().isModLoaded("inventorytabs") && Config.CLIENT.inventoryTabsCompat.get()) {

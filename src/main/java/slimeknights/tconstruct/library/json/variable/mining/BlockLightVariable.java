@@ -34,9 +34,9 @@ public record BlockLightVariable(@Nullable LightLayer lightLayer, float fallback
       // use block position if possible player position otherwise
       BlockPos pos = player.blockPosition();
       if (event != null && sideHit != null) {
-        Optional<BlockPos> eventPos = event.getPosition();
-        if (eventPos.isPresent()) {
-          pos = eventPos.get().relative(sideHit);
+        BlockPos eventPos = event.getPos();
+        if (eventPos != null) {
+          pos = eventPos.relative(sideHit);
         }
       }
       return EntityLightVariable.getLightLevel(player.level(), lightLayer, pos);

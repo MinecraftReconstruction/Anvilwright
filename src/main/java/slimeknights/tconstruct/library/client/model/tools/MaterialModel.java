@@ -17,6 +17,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -172,6 +173,21 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
       }
     }
     return new TintedSprite(spriteGetter.apply(texture), -1, 0);
+  }
+
+  /**
+   * Gets quads for the given material variant of the texture
+   * @param spriteGetter    Sprite getter instance
+   * @param texture         Base texture
+   * @param material        Material variant
+   * @param tintIndex       Tint index for quads
+   * @param transformation  Transformation to apply
+   * @param pixels          Pixels to prevent z-fighting for multiple layers
+   * @return  Quad list
+   */
+  public static List<BakedQuad> getQuadsForMaterial(Function<Material, TextureAtlasSprite> spriteGetter, Material texture, MaterialVariantId material, int tintIndex, Transformation transformation, @Nullable ItemLayerPixels pixels) {
+    TintedSprite sprite = getMaterialSprite(spriteGetter, texture, material);
+    return MantleItemLayerModel.getQuadsForSprite(sprite.color(), tintIndex, sprite.sprite(), transformation, sprite.emissivity(), pixels);
   }
 
   /**

@@ -26,8 +26,8 @@ public record BlockTemperatureVariable(float fallback) implements MiningSpeedVar
       // use block position if possible player position otherwise
       BlockPos pos = player.blockPosition();
       if (event != null) {
-        Optional<BlockPos> eventPos = event.getPosition();
-        if (eventPos.isPresent()) {
+        BlockPos eventPos = event.getPos();
+        if (eventPos != null) {
           pos = eventPos.get();
         }
       }

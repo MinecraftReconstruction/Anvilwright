@@ -75,7 +75,7 @@ public final class TinkerMaterials extends TinkerModule {
     // Fabric's API is a single registry, so they are all registered here instead.
     CustomIngredientSerializer.register(MaterialValueIngredient.Serializer.INSTANCE);
     CustomIngredientSerializer.register(NoContainerIngredient.Serializer.INSTANCE);
-    CustomIngredientSerializer.register(BlockTagIngredient.Serializer.INSTANCE);
+    CustomIngredientSerializer.register(BlockTagIngredient.SERIALIZER);
     CustomIngredientSerializer.register(InstrumentIngredient.SERIALIZER);
     CustomIngredientSerializer.register(ToolHookIngredient.Serializer.INSTANCE);
   }
