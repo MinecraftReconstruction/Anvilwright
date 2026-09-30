@@ -8,6 +8,7 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.client.model.util.MantleItemLayerModel;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.library.client.modifiers.model.SimpleModifierModel;
@@ -69,12 +70,12 @@ public class DyedModifierModel implements SimpleModifierModel {
 
   @Override
   public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
-    Material texture = textures[(isLarge ? 2 : 0) | (tool.isBroken() ? 1 : 0)];
+    Material texture = isLarge ? large : small;
     if (texture != null) {
       IModDataView data = tool.getPersistentData();
       ResourceLocation key = modifier.getId();
       if (data.contains(key, Tag.TAG_INT)) {
-        quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(0xFF000000 | data.getInt(key), -1, spriteGetter.apply(texture), transforms, 0, pixels));
+        return ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(0xFF000000 | data.getInt(key), -1, spriteGetter.apply(texture), transforms, 0, pixels));
       }
     }
     return EMPTY_MESH;

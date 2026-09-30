@@ -415,6 +415,9 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 | `e9328fb090` | **177** | 代理储罐的流体视图、爆炸事件（Porting Lib `ExplosionEvents`）、`TinkerDamageTypes.source`、配置字段补回 |
 | `ba45575de6` | **160** | datagen 构造函数、条件求值（`ResourceConditions`）、材料谓词序列化器、JsonUtils/Util |
 | `52992e8b15` | **147** | 客户端 loader helper、材料贴图 quad、block tag 原料、书里头盔槽位 |
+| `6db0fea7f7` | **139** | 战利品表 helper（`COPY_NAME`/`COPY_MATERIAL`/`ADD_ANVIL`）、`Target.DATA_PACK`、DynamicTextureLoader |
+| `3fa173e336` | **131** | gadget 配方（叶子蛋糕用 `FoliageType`）、`ItemFrameRenderer.blockRenderer` 的 AW |
+| （本轮结束） | **123** | 旧版装饰模型（染液/破损/材料）改 mesh + `ColorLoadable.parseString` |
 
 **新发现的坑**
 - Mantle 1.11 的 `Loadable` 用 `convert(JsonElement, String)` / `getIfPresent(JsonObject, String)`，

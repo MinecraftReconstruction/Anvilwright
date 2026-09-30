@@ -28,7 +28,7 @@ public record BlockTemperatureVariable(float fallback) implements MiningSpeedVar
       if (event != null) {
         BlockPos eventPos = event.getPos();
         if (eventPos != null) {
-          pos = eventPos.get();
+          pos = eventPos;
         }
       }
       return player.level().getBiome(pos).value().getTemperature(pos);

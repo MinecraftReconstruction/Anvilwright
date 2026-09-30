@@ -35,8 +35,8 @@ public record EffectiveMiningSpeedVariable(MiningSpeedVariable ifTrue, MiningSpe
   public float getValue(IToolStackView tool, @Nullable BreakSpeed event, @Nullable Player player, @Nullable Direction sideHit) {
     MiningSpeedVariable variable = ifTrue;
     if (event != null && player != null) {
-      Optional<BlockPos> pos = event.getPosition();
-      if (pos.isEmpty() || !IsEffectiveToolHook.isEffective(tool, player.level().getBlockState(pos.get()))) {
+      BlockPos pos = event.getPos();
+      if (pos == null || !IsEffectiveToolHook.isEffective(tool, player.level().getBlockState(pos))) {
         variable = ifFalse;
       }
     }
