@@ -3,7 +3,6 @@ package slimeknights.tconstruct.tools.modules.armor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
-import io.github.fabricators_of_create.porting_lib.block.CustomSoundTypeBlock;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +19,7 @@ import slimeknights.tconstruct.library.modifiers.modules.armor.ArmorWalkRadiusMo
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.utils.SoundTypeHelper;
 import slimeknights.tconstruct.shared.TinkerCommons;
 
 /** Module that places glow blocks at low light levels */
@@ -47,7 +47,7 @@ public record GlowWalkerModule(LevelingValue radius, int minLight, int damage) i
         // NOTE(porting): upstream calls Forge's IForgeBlock#getSoundType; Porting Lib exposes the same override hook
         //  as CustomSoundTypeBlock, and its default is the plain block state sound type
         BlockState state = world.getBlockState(target);
-        SoundType sound = state.getBlock() instanceof CustomSoundTypeBlock custom ? custom.getSoundType(state, world, target, living) : state.getSoundType();
+        SoundType sound = SoundTypeHelper.getSoundType(state, world, target, living);
         world.playSound(null, target, sound.getPlaceSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
         ToolDamageUtil.damageAnimated(tool, damage, living, EquipmentSlot.FEET, entry.getId());
         // only run a single success, gives the lighting engine time to update before we place a ton of unneeded glows

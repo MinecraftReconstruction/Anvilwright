@@ -46,7 +46,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   private final Map<ResourceLocation,SerializeLayout> allLayouts = new HashMap<>();
 
   public AbstractStationSlotLayoutProvider(FabricDataOutput output) {
-    super(output, PackType.SERVER_DATA, StationSlotLayoutLoader.FOLDER, StationSlotLayoutLoader.GSON);
+    super(output, Target.DATA_PACK, StationSlotLayoutLoader.FOLDER, StationSlotLayoutLoader.GSON);
   }
 
   /**
@@ -83,11 +83,16 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
     return defineModifiable(item.get());
   }
 
+  /** Defines the given ID as a layout using the pattern as both the id and the icon */
+  protected StationSlotLayout.Builder definePattern(Pattern id) {
+    return define(id).icon(id);
+  }
+
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addLayouts();
     List<CompletableFuture<?>> futures = new ArrayList<>();
-    allLayouts.forEach((id, layout) -> futures.add(saveThing(cache, id, layout.serialize())));
+    allLayouts.forEach((id, layout) -> futures.add(saveJson(cache, id, layout.serialize())));
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
   }
 

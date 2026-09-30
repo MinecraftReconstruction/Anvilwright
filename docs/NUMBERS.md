@@ -148,3 +148,45 @@ Mantle 侧记在行为差异 #24，TCon 侧记在 #19。
    `DirtType → SlimeType` 19 条、反向 12 条，都是这一件事。
 2. **JEI 版本**：把 `jei_version` 提到上游的 `15.59.0.210`（Fabric 侧是否有对应版本需要联网确认），
    可以一次性消掉 ~16 条；不升级就要改写那 16 处调用。
+
+---
+
+## 2026-09-30 中午：`--gen` 口径从 1 → 0 的路上（本轮交接）
+
+**口径提醒（本轮实测到的第二个坑）**：整树 `--gen` 会**少报**。例：`TinkerGadgets` 有 5 条实体注册错误，
+在只改过 `ToolContainerMenu` 那一版的整树日志里**一条都没出现**，单独编译该文件才报出来。所以
+"total: N" 只能当"至少 N 条"，每轮都要用"单文件编译"复核刚碰过的文件。
+
+| 步骤 | `--gen` 整树 | 说明 |
+|---|---|---|
+| 会话开始（HEAD `9a1a4ffc`） | **1** | 真错是 `ToolContainerMenu:257`：`ToolFluidHandler` 不是 `Storage<FluidVariant>`（不是 Handoff 里写的 Mantle 缺方法——那两个方法在 `0f373c6d` 里已经有了） |
+| `SimpleFluidTank extends Storage<FluidVariant>` | **11** | 修掉那 1 条后立刻暴露 10 条（`TinkerTools` 的实体注册 + 弩/弓构造器） |
+| 实体注册改用 Mantle 新增的 Fabric builder 重载 + 弩/弓 tab 参数 | 1→0 | 之后进入"一轮只留 1 条"的连锁 |
+| 连续 12 轮单点修复（见下） | 1 | 领域从 tools/item 走到 fluid hook、再到 datagen |
+| 本轮结束 | **6** | 全部集中在铸造配方的 long 化（`AbstractMaterialCastingRecipe` / `PartSwapCastingRecipe`） |
+
+### 本轮修掉的东西（按领域）
+
+- **流体链**：`SimpleFluidTank` 现在是 `Storage<FluidVariant>`（Fabric 的 `IFluidHandler` 对应物），带事务化
+  默认实现；`TankModule` / `SmashingModule` 改成 Fabric 版 hook 签名（`FluidVariant` + `long` + `TransactionContext`）；
+  `ToolFluidCapability` 的匿名默认 hook 与接口签名对齐；`FluidModifierHookIterator.drain` 删掉残留的 FluidStack 收缩代码。
+- **新增工具类**：`library/tools/nbt/ToolNbtSnapshots`（事务中止时回滚工具持久 NBT；库存 / 罐 / smashing 三处共用）、
+  `library/utils/SoundTypeHelper`（Forge `IForgeBlock#getSoundType` → Porting Lib `CustomSoundTypeBlock` + 原版回退）。
+- **物品/实体**：`ModifiableLauncherItem` 用 `getItemStackLimit`（Porting Lib 名字）、去掉四个 Forge-only hook 的 `@Override`；
+  `ModifiableArrowItem implements InfiniteArrowItem`；`ModifiableBowItem`/`ModifiableCrossbowItem` 补 `ResourceKey<CreativeModeTab>`；
+  `IndestructibleItemEntity` 改成 `age = Integer.MIN_VALUE`（既不会消失、又保留客户端旋转）；`war_pick` 加入工具创造栏。
+- **Forge 钩子替换**：`getSoundType`（5 处）、`EnchantmentHelper.getTagEnchantmentLevel`、`BucketItem.getFluid`、
+  `collisionExtendsVertically`、`TntBlock#onCaughtFire`、`ForgeHooks.getProjectile`、`LogicHelper.orElseNull(LazyOptional)`。
+- **datagen**：`AbstractStationSlotLayoutProvider` 的 `PackType.SERVER_DATA` → `Target.DATA_PACK`、`saveThing` → `saveJson`、
+  补回上游的 `definePattern(Pattern)`。
+- **accesswidener 新增**：`ItemEntity.age`（+mutable）、`ItemEntity.pickupDelay`、`IntegerProperty.min/max`
+  （对应上游 `accesstransformer.cfg`；改完**必须**重跑 `printCompileCp`）。
+
+### Mantle 侧（都已 push）
+
+| 版本 | 内容 |
+|---|---|
+| `1.11.DEV.78ffdf1a` | `EntityTypeDeferredRegister` 新增收 `FabricEntityTypeBuilder` 实例的重载（原版 builder 表达不了 `forceTrackedVelocityUpdates`，行为差异 #26） |
+| `1.11.DEV.292ad3e8` | `LogicHelper.orElseNull` 增加 `LazyOptional` 重载（上游 Forge Mantle 本来就只有这一版；1.11 移植只留了 `Optional`，下游上游形状的调用点编不过） |
+
+TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生成过。

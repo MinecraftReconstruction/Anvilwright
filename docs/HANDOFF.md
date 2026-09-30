@@ -385,3 +385,48 @@ Mantle 的 `FluidTransferHelper` 缺 `interactWithStack(...)` 与 `handleUIResul
 - **改 accesswidener 之后必须重新生成 classpath**，否则测得的是旧 MC jar。
 - 本轮为了编译通过，有几处是"先让它能编译"的保守处理（例如 `Modifier.getModule(Class)` 返回 null、
   若干 Forge 专属钩子退化成普通方法），**这些都需要在冒烟测试里逐条确认**，必要时补行为差异条目。
+
+---
+
+## 14. 2026-09-30 中午：`--gen` 只剩 6 条，但都是在"铸造配方 long 化"上（本轮交接）
+
+> 数字与逐项清单见 [NUMBERS.md](NUMBERS.md) 最后一节。HEAD 见 `git log -1`。
+
+### 14.1 一句话
+
+Handoff 第 13 节说的"缺 Mantle 的 `interactWithStack` / `handleUIResult`"**是误判**——那两个方法在已发布的
+`1.11.DEV.0f373c6d` 里就有；当时真正的 1 条错误是 TCon 侧 `ToolContainerMenu:257` 把 `ToolFluidHandler`
+传给了要 `Storage<FluidVariant>` 的方法。修好它之后是一连串"每轮只暴露 1 条"的连锁（共 12 轮），
+现在 `--gen` 剩 **6 条**，全部集中在铸造配方的 `long` 化。
+
+### 14.2 这一轮做了什么
+
+见 [NUMBERS.md](NUMBERS.md) 的"本轮修掉的东西"：流体 hook 全面改到 Fabric 签名、新增 `ToolNbtSnapshots`
+与 `SoundTypeHelper`、物品/实体/附魔/声音/桶/TNT 的 Forge 钩子逐个换掉、datagen 基类对齐。
+Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已跟到后者。
+
+### 14.3 下一个 agent 从哪继续
+
+1. **继续"单点连锁"**：`scripts/port/fastcompile.sh --gen .port/gen_cur.txt`，修当前那一条（现在在
+   `library/recipe/casting/**` 的 `getFluidAmount` 返回类型上），再跑一次。**每轮都要跑**，因为一次只会暴露
+   一小批。⚠️ 别只看总数：整树 `--gen` **会漏报**（`TinkerGadgets` 的 5 条实体错误在只改过别的文件的日志里
+   根本没出现），所以刚碰过的文件要单独编译复核：
+   ```bash
+   out=$(mktemp -d); javac -nowarn -proc:full -Xmaxerrs 100000 \
+     -processorpath "$(cat .port/ap-cp.txt)" -cp "$(cat .port/compile-cp.txt)" \
+     -sourcepath src/main/java -d "$out" <文件.java> 2>&1 | grep "error:"
+   ```
+2. **long 化是成片的**：`IOreRate`、`FluidStack#getAmount()`、`MeltingFuel#getAmount`、`ICastingRecipe#getFluidAmount`
+   这些接口在本移植里都是 `long`，上游那些把它们当 `int` 的调用点会一条条冒出来。判据是"下游用得上的量"：
+   流体用 long（droplet），物品/伤害/时长仍用 int；溢出风险点加显式 `(int)` 转换并留注释。
+3. **改 `tinkers.accesswidener` 后必须重跑** `./gradlew -I scripts/port/printcp.gradle printCompileCp --offline`，
+   否则测的是旧 MC jar（本轮加过 `ItemEntity.age/pickupDelay`、`IntegerProperty.min/max`）。
+4. 之后才是第 13.4 节的 2→4 步：真 Gradle 构建、冒烟测试、canonical 仓库两分支。
+
+### 14.4 本轮新增的行为差异（都在 docs/BEHAVIOUR-DIFFERENCES.md）
+
+- #27 `SimpleFluidTank` 现在是 `Storage<FluidVariant>`（API 结构改动，语义等价）
+- #28 物品创造栏用 `ItemGroupEvents`（构造器多一个 tab 参数）
+- #29 `Config.COMMON.toolTweaks` 恒为空（上游两条附魔槽位扩展需要给 `Enchantment.slots` 加 AW）
+- #30 弩炮的 `ArrowNockEvent` 扩展点丢失（与 #10 同源）
+- #31 灵魂疾行用 `isFaceSturdy(..., UP)` 取代 `collisionExtendsVertically`

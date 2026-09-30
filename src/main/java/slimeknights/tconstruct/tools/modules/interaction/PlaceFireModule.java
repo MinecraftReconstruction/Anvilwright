@@ -102,7 +102,8 @@ public enum PlaceFireModule implements ModifierModule, EntityInteractionModifier
 
     // ignite the TNT
     if (state.getBlock() instanceof TntBlock tnt) {
-      tnt.onCaughtFire(state, world, pos, sideHit, player);
+      // NOTE(porting): upstream calls Forge's IForgeBlock#onCaughtFire, whose TNT implementation is exactly this
+      TntBlock.explode(world, pos, player);
       world.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
       return true;
     }
