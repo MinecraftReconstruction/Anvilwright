@@ -228,3 +228,17 @@ TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生
 补法（下一位接力）：把这 8 个 `ResourceKey.create(Registries.DAMAGE_TYPE, TConstruct.getResource(...))` 常量、
 它们的 `DamageType` 注册，以及 `src/generated/resources/data/tconstruct/damage_type/{player,mob}_attack_*.json`
 一并从 fork 取回来（fork 里都有），然后重跑 `--gen`；这一步之后应该就摸到 0 了。
+
+### 2026-09-30 夜：伤害类型补齐，翻到 `ModifierRecipeProvider`
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 8（全在 `DamageSpillingEffect`） |
+| 补回 8 个 `PLAYER/MOB_ATTACK_*` 伤害类型常量 + 8 个 `damage_type/*.json` | 5 |
+| 删掉 fork 遗留的 `SpillingFluidProvider` / `AbstractSpillingFluidProvider`（无任何引用；本树已用 3.12 的 `FluidEffectProvider` 生成 `tinkering/fluid_effects/*.json`，上游也没有这两个文件） | **81** |
+
+新集群（`tools/data/ModifierRecipeProvider.java`）：`TinkerModifiers.bronzeReinforcement` 之类的常量没了、
+`modResource(...)` 之类的 fork helper 仍在用。**这正是上一轮 `ToolsRecipeProvider` 的翻版**——建议直接上
+`python3 scripts/port/upstreamtake.py --apply src/main/java/slimeknights/tconstruct/tools/data/ModifierRecipeProvider.java`
+（该脚本会自己比较该文件的错误数并回滚）。之后大概率还有 `MaterialRecipeProvider` / `TableRecipeProvider` /
+`SmeltryRecipeProvider` 等几个同源 datagen 文件排队。

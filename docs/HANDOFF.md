@@ -460,3 +460,15 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
   引用了 8 个本树不存在的伤害类型常量。细节与补法见 [NUMBERS.md](NUMBERS.md) 最后一节。
 - 修完这 8 条后按第 13.4 节继续：真 Gradle 构建（`./gradlew build --offline`，datagen 建议再跑一次
   `runData`）→ `runServer` → `runClient` 热测试。
+
+---
+
+## 17. 2026-09-30 夜：伤害类型已补，队列里还有一批"同源 datagen 文件"（本轮交接）
+
+- `--gen`：8 → 5 → **81**。前两步是收尾（补 8 个伤害类型常量与 JSON；删掉两个 fork 遗留的 spilling provider），
+  第三步是"javac 走得更远"暴露出的新集群：`tools/data/ModifierRecipeProvider.java` 81 条。
+- 处理方式照抄上一轮验证过的配方：`scripts/port/upstreamtake.py --apply <文件>`（KEPT/REVERTED 自判），
+  然后按 `NUMBERS.md` 的方式补 Fabric 管线（Porting Lib `Tags`、`DefaultCustomIngredients`、
+  `DefaultResourceConditions`、`FabricDataOutput`、`buildRecipes` 公开、`modResource`→`location`）。
+- ⚠️ 每修完一个 datagen 文件都会再翻出一批同级文件，**数字先涨后落是正常的**；判据始终是"文件自身的错误数"，
+  不要看整树总数。最后才轮到 `./gradlew build --offline` → `runData` → `runServer` → `runClient`。
