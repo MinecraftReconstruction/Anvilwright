@@ -50,7 +50,7 @@ public class EntityModifierCapability implements EntityComponentInitializer {
 
   /** Gets the capability for the entity or an empty instance if missing */
   public static EntityModifiers getCapability(Entity entity) {
-    return entity.getCapability(CAPABILITY).orElse(EMPTY);
+    return CAPABILITY.maybeGet(entity).orElse(EMPTY);
   }
 
   /** Gets the data or an empty instance if missing */

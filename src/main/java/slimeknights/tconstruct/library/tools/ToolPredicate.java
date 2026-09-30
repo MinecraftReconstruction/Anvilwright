@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import com.google.gson.JsonSyntaxException;
 
 /** Variant of ItemPredicate for matching Tinker tools */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -140,7 +141,11 @@ public class ToolPredicate extends ItemPredicate {
     // item
     Item item = null;
     if (json.has("item")) {
-      item = RecipeHelper.deserializeItem(GsonHelper.getAsString(json, "item"), "item", Item.class);
+      ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(json, "item"));
+      if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
+        throw new JsonSyntaxException("Unknown item " + itemName);
+      }
+      item = BuiltInRegistries.ITEM.get(itemName);
     }
     // tag
     TagKey<Item> tag = null;

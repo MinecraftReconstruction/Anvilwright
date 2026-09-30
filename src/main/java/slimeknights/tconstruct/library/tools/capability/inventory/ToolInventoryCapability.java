@@ -669,6 +669,27 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
     return tryOpenContainer(stack, tool, tool.getDefinition(), player, slotType);
   }
 
+  /**
+   * Opens the tool inventory container for a tool in the player's inventory, given the inventory slot index
+   * (upstream passes the index straight through; this port keeps the menu keyed by equipment slot, so translate)
+   */
+  public static InteractionResult tryOpenContainer(ItemStack stack, @Nullable IToolStackView tool, ToolDefinition definition, Player player, int slotIndex) {
+    EquipmentSlot slotType;
+    if (slotIndex == Inventory.SLOT_OFFHAND) {
+      slotType = EquipmentSlot.OFFHAND;
+    } else if (slotIndex >= Inventory.INVENTORY_SIZE && slotIndex < Inventory.SLOT_OFFHAND) {
+      slotType = switch (slotIndex - Inventory.INVENTORY_SIZE) {
+        case 0 -> EquipmentSlot.FEET;
+        case 1 -> EquipmentSlot.LEGS;
+        case 2 -> EquipmentSlot.CHEST;
+        default -> EquipmentSlot.HEAD;
+      };
+    } else {
+      slotType = EquipmentSlot.MAINHAND;
+    }
+    return tryOpenContainer(stack, tool, definition, player, slotType);
+  }
+
   /** Opens the tool inventory container if an inventory is present on the given tool */
   public static InteractionResult tryOpenContainer(ItemStack stack, @Nullable IToolStackView tool, ToolDefinition definition, Player player, EquipmentSlot slotType) {
     Storage<ItemVariant> handler = ItemItemStorages.ITEM.find(stack, ContainerItemContext.withConstant(stack));
