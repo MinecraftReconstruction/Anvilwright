@@ -19,6 +19,7 @@ import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSou
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.tools.logic.InteractionHandler;
 import slimeknights.tconstruct.tools.network.InteractWithAirPacket;
+import slimeknights.tconstruct.TConstruct;
 
 /**
  * Client side interaction hooks

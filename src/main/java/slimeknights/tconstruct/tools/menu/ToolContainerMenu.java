@@ -35,6 +35,10 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.world.entity.EquipmentSlot;
+import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 /** Container for a tool inventory */
 public class ToolContainerMenu extends AbstractContainerMenu {

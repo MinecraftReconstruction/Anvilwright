@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import java.util.Iterator;
+import javax.annotation.Nonnull;
 
 /**
  * Fluid handler wrapper that only allows filling

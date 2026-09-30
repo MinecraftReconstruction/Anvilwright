@@ -1,8 +1,9 @@
 package slimeknights.tconstruct.common.data.tags;
 
-import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.FluidTagsProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -19,14 +20,14 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
-public class FluidTagProvider extends FluidTagsProvider {
+public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
 
-  public FluidTagProvider(PackOutput packOutput, CompletableFuture<Provider> lookupProvider, ExistingFileHelper helper) {
-    super(packOutput, lookupProvider, TConstruct.MOD_ID, helper);
+  public FluidTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+    super(output, registriesFuture);
   }
 
   @Override
-  protected void addTags(Provider pProvider) {
+  protected void addTags(HolderLookup.Provider pProvider) {
     // first, register common tags
     // slime
     fluidTag(TinkerFluids.earthSlime);

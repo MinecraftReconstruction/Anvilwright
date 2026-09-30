@@ -23,6 +23,14 @@ import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.library.tools.helper.ArmorUtil;
 import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 import slimeknights.tconstruct.tools.client.SlimeskullArmorModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ArmorItem;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.armor.ArmorModelManager.ArmorModelDispatcher;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 /** This item is mainly to return the proper model for a slimeskull */
 public class SlimeskullItem extends SlimesuitItem {

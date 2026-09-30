@@ -38,6 +38,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 /** Base logic for containers with tabs on the menu */
 public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMultiModuleContainerMenu<TILE> {
@@ -162,7 +163,7 @@ public class TabbedContainerMenu<TILE extends BlockEntity> extends TriggeringMul
   @SuppressWarnings("deprecation")  // your tag utils are overkill
   private static boolean isUsable(BlockEntity tileEntity, Player player) {
     // must not be blacklisted and be usable
-    return !RegistryHelper.contains(BuiltInRegistries.BLOCK_ENTITY_TYPE, TinkerTags.TileEntityTypes.CRAFTING_STATION_BLACKLIST, tileEntity.getType())
+    return (Config.COMMON.disableSideInventoryWhitelist.get() || RegistryHelper.contains(BuiltInRegistries.BLOCK_ENTITY_TYPE, TinkerTags.TileEntityTypes.SIDE_INVENTORIES, tileEntity.getType()))
            && (!(tileEntity instanceof Container) || ((Container)tileEntity).stillValid(player));
   }
 

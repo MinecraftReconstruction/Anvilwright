@@ -91,6 +91,7 @@ import slimeknights.tconstruct.tools.modules.ranged.RestrictAngleModule;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 
 /**
  * Events to implement modifier specific behaviors, such as those defined by {@link TinkerDataKeys}. General hooks will typically be in {@link ToolEvents}

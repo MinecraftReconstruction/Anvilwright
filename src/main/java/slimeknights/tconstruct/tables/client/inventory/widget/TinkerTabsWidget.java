@@ -166,7 +166,7 @@ public class TinkerTabsWidget implements Renderable, GuiEventListener, Narratabl
     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     int sel = this.tabs.selected;
     this.tabs.update(mouseX, mouseY);
-    this.tabs.draw(graphics, this.tabs.tabsResource);
+    this.tabs.draw(graphics);
 
     // new selection
     if (sel != this.tabs.selected) {

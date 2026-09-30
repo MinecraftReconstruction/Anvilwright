@@ -52,6 +52,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.function.Predicate;
+import net.minecraft.world.item.ItemUtils;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 /** Capability for a tool with an inventory */
 @RequiredArgsConstructor

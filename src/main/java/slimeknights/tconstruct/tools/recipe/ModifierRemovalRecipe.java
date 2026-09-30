@@ -47,6 +47,9 @@ import java.util.function.Consumer;
 import lombok.Getter;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.StringLoadable;
 
 public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   public static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "remove_modifier");

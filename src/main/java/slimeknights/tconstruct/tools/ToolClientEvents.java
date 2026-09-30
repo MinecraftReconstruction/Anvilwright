@@ -80,6 +80,13 @@ import slimeknights.tconstruct.tools.network.TinkerControlPacket;
 import java.util.Map;
 
 import static slimeknights.tconstruct.library.client.model.tools.ToolModel.registerItemColors;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.Mth;
+import slimeknights.mantle.data.listener.ISafeManagerReloadListener;
+import java.util.function.Consumer;
+import static slimeknights.tconstruct.TConstruct.getResource;
 
 @SuppressWarnings("unused")
 public class ToolClientEvents extends ClientEventBase {

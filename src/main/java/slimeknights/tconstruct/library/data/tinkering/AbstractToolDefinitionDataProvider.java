@@ -26,6 +26,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 
 /** Base datagenerator to generate tool definition data */
 public abstract class AbstractToolDefinitionDataProvider extends GenericDataProvider {

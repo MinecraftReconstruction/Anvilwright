@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import java.util.function.Predicate;
 
 /** Cache of details related to materials */
 public class MaterialRecipeCache {

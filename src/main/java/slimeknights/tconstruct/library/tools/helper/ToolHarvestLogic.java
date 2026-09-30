@@ -31,6 +31,15 @@ import slimeknights.tconstruct.library.utils.BlockSideHitListener;
 
 import java.util.Collections;
 import java.util.Objects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.LevelEvent;
+import slimeknights.tconstruct.library.modifiers.hook.mining.HarvestEnchantmentsModifierHook;
+import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveToolHook;
+import slimeknights.tconstruct.library.utils.Util;
+import javax.annotation.Nullable;
 
 /**
  * External logic for the ToolCore that handles mining calculations and breaking blocks.

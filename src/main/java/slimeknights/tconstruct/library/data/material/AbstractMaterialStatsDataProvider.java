@@ -23,6 +23,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 
 /** Base data generator for use in addons, depends on the regular material provider */
 public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvider {

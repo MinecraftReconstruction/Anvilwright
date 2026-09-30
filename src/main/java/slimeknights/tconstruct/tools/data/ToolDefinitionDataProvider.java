@@ -93,6 +93,9 @@ import static slimeknights.tconstruct.tools.TinkerToolParts.toolBinding;
 import static slimeknights.tconstruct.tools.TinkerToolParts.toolHandle;
 import static slimeknights.tconstruct.tools.TinkerToolParts.toughBinding;
 import static slimeknights.tconstruct.tools.TinkerToolParts.toughHandle;
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.data.PackOutput;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
 
 public class ToolDefinitionDataProvider extends AbstractToolDefinitionDataProvider {
   public ToolDefinitionDataProvider(FabricDataOutput output) {

@@ -22,6 +22,8 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.world.level.ItemLike;
+import static slimeknights.mantle.Mantle.commonResource;
+import slimeknights.mantle.recipe.helper.ItemOutput;
 
 /**
  * Interface for tool and part crafting recipes

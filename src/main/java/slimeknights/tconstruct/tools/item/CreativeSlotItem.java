@@ -33,6 +33,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.sounds.SoundEvents;
 
 public class CreativeSlotItem extends Item {
   private static final String NBT_KEY = "slot";

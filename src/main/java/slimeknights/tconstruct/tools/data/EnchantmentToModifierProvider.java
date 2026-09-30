@@ -7,6 +7,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.data.tinkering.AbstractEnchantmentToModifierProvider;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.tools.TinkerModifiers;
+import net.minecraft.data.PackOutput;
 
 public class EnchantmentToModifierProvider extends AbstractEnchantmentToModifierProvider {
   public EnchantmentToModifierProvider(FabricDataOutput output) {

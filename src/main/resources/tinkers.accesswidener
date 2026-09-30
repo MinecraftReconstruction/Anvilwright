@@ -28,6 +28,13 @@ transitive-extendable method net/minecraft/world/entity/projectile/ThrownTrident
 # changing despawn duration for thrown tools
 transitive-accessible field net/minecraft/world/entity/projectile/AbstractArrow life I
 
+# Material recipes copy the result out of a vanilla shaped/shapeless recipe
+# (upstream has these in META-INF/accesstransformer.cfg)
+transitive-accessible field net/minecraft/world/item/crafting/ShapedRecipe result Lnet/minecraft/world/item/ItemStack;
+transitive-accessible field net/minecraft/world/item/crafting/ShapedRecipe width I
+transitive-accessible field net/minecraft/world/item/crafting/ShapedRecipe height I
+transitive-accessible field net/minecraft/world/item/crafting/ShapelessRecipe result Lnet/minecraft/world/item/ItemStack;
+
 # Tile entity type injection
 transitive-accessible field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
 
@@ -171,3 +178,6 @@ accessible method net/minecraft/world/level/block/TntBlock explode (Lnet/minecra
 
 # Datagen helpers need the tag appender type used by vanilla tag providers
 transitive-accessible class net/minecraft/data/tags/IntrinsicHolderTagsProvider$IntrinsicTagAppender
+
+# Id parsing helpers reuse the vanilla error message (upstream: accesstransformer.cfg)
+transitive-accessible field net/minecraft/resources/ResourceLocation ERROR_INVALID Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;

@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
+import net.minecraft.world.level.Level;
+import slimeknights.mantle.util.CombatHelper;
 
 public class ToolAttackUtil {
   private static final float DEGREE_TO_RADIANS = (float)Math.PI / 180F;

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import slimeknights.tconstruct.library.modifiers.Modifier;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 
 /** Datagen for dynamic modifiers */
 @SuppressWarnings("SameParameterValue")

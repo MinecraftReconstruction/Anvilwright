@@ -43,6 +43,8 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNullElse;
 import slimeknights.tconstruct.library.modifiers.Modifier;
+import lombok.Setter;
+import net.minecraft.world.item.Rarity;
 
 /**
  * Loads the material data from datapacks and provides them to whatever needs them.

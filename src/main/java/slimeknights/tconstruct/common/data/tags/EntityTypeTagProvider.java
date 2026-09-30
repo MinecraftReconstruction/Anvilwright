@@ -10,6 +10,7 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.concurrent.CompletableFuture;
+import static slimeknights.mantle.Mantle.commonResource;
 
 @SuppressWarnings("unchecked")
 public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvider {

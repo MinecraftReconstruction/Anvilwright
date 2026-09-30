@@ -99,7 +99,12 @@ public final class TinkerGadgets extends TinkerModule {
 
   // foods
   private static final BlockBehaviour.Properties CAKE = builder(SoundType.WOOL).pushReaction(PushReaction.DESTROY).strength(0.5F);
-  public static final EnumObject<SlimeType,FoodCakeBlock> cake = BLOCKS_DEFFERED.registerEnum(SlimeType.LIQUID, "cake", type -> new FoodCakeBlock(CAKE, TinkerFood.getCake(type)), UNSTACKABLE_BLOCK_ITEM);
+  public static final EnumObject<FoliageType,FoodCakeBlock> cake = BLOCKS_DEFFERED.registerEnum(FoliageType.values(), "cake", type -> {
+    if (type == FoliageType.ICHOR) {
+      return new InvertedCakeBlock(CAKE, TinkerFood.ICHOR_CAKE, EffectCombination.BLOCK);
+    }
+    return new FoodCakeBlock(CAKE, TinkerFood.getCake(type), type == FoliageType.ENDER ? EffectCombination.ADD : EffectCombination.BLOCK);
+  }, UNSTACKABLE_BLOCK_ITEM);
   public static final ItemObject<FoodCakeBlock> magmaCake = BLOCKS_DEFFERED.register("magma_cake", () -> new FoodCakeBlock(CAKE, TinkerFood.MAGMA_CAKE), UNSTACKABLE_BLOCK_ITEM);
 
   // Shurikens

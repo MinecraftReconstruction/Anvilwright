@@ -5,6 +5,10 @@ import net.minecraft.data.DataGenerator;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.data.material.AbstractMaterialDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
+import net.minecraft.data.PackOutput;
+import net.minecraft.tags.FluidTags;
+import slimeknights.mantle.recipe.condition.TagFilledCondition;
+import static slimeknights.mantle.Mantle.commonResource;
 
 public class MaterialDataProvider extends AbstractMaterialDataProvider {
   public MaterialDataProvider(FabricDataOutput output) {

@@ -27,6 +27,7 @@ import slimeknights.tconstruct.library.utils.Util;
 import javax.annotation.Nullable;
 import java.util.List;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.ChatFormatting;
 
 /**
  * Represents an item that has a Material associated with it. The NBT of the itemstack identifies which material the
@@ -133,15 +134,52 @@ public class MaterialItem extends Item implements IMaterialItem {
     return Component.translatable(key);
   }
 
+  /** Helper to append the material ID to the tool part. */
+  public static void appendHoverText(IMaterialItem self, ItemStack stack, List<Component> tooltip, TooltipFlag flag) {
+    if (flag.isAdvanced() && !TooltipUtil.isDisplay(stack)) {
+      MaterialVariantId materialVariant = self.getMaterial(stack);
+      if (!materialVariant.equals(MaterialId.UNKNOWN)) {
+        tooltip.add((Component.translatable(ToolPartItem.MATERIAL_KEY, materialVariant.toString())).withStyle(ChatFormatting.DARK_GRAY));
+      }
+    }
+  }
+
+  @Override
+  public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    appendHoverText(this, stack, tooltip, flag);
+  }
+
+  /** Gets the creator mod ID based on the material. */
+  @SuppressWarnings("deprecation")  // deprecation? more like not deprecation
+  public static String getCreatorModId(IMaterialItem self, ItemStack stack) {
+    MaterialVariantId material = self.getMaterial(stack);
+    if (!MaterialId.UNKNOWN.equals(material)) {
+      String namespace = material.getId().getNamespace();
+      // skip if it's a tinkers material; we want addon tool parts to prefer showing their mod ID as end users mistake those for us
+      if (!TConstruct.MOD_ID.equals(namespace)) {
+        return namespace;
+      }
+    }
+    return BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace();
+  }
+
   @Nullable
   @Override
   public String getCreatorModId(ItemStack stack) {
-    MaterialVariantId material = getMaterial(stack);
-    if (!IMaterial.UNKNOWN_ID.equals(material)) {
-      return material.getId().getNamespace();
+    return getCreatorModId(this, stack);
+  }
+
+  /** Resolves the material in the given NBT, updating it if the material was redirected to another ID */
+  public static void verifyTag(CompoundTag nbt) {
+    // if the material exists and was changed, update it
+    MaterialVariantId id = getMaterialId(nbt);
+    if (!id.equals(MaterialId.UNKNOWN)) {
+      MaterialId original = id.getId();
+      MaterialId resolved = MaterialRegistry.getInstance().resolve(original);
+      if (original != resolved) {
+        nbt.putString(MATERIAL_TAG, MaterialVariantId.create(resolved, id.getVariant()).toString());
+      }
     }
-    ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
-    return id == null ? null : id.getNamespace();
   }
 
 

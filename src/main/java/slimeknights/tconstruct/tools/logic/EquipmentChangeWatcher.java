@@ -30,6 +30,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Capability to make it easy for modifiers to store common data on the player, primarily used for armor

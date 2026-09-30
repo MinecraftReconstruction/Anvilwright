@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 
 import static slimeknights.mantle.Mantle.commonResource;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.data.PackOutput;
 
 /** Data provider for spilling fluids */
 @SuppressWarnings("deprecation")  // fluid registry is ours to use, not yours forge

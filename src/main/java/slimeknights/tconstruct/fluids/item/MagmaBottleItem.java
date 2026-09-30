@@ -22,6 +22,7 @@ import slimeknights.tconstruct.library.recipe.FluidValues;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import slimeknights.tconstruct.library.utils.Util;
 
 /** Magma bottle instance, which lights the drinker on fire */
 public class MagmaBottleItem extends Item {
@@ -63,7 +64,7 @@ public class MagmaBottleItem extends Item {
   @Override
   public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity living) {
     living.setSecondsOnFire(fireTime);
-    ItemStack container = stack.getCraftingRemainingItem();
+    ItemStack container = Util.getCraftingRemainingItem(stack);
     Player player = living instanceof Player p ? p : null;
     if (player == null || !player.getAbilities().instabuild) {
       stack.shrink(1);

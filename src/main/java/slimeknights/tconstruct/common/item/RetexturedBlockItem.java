@@ -36,7 +36,7 @@ public class RetexturedBlockItem extends BlockTooltipItem {
 
   /** Adds the retextured variants to the creative tab */
   public void fillItemCategory(CreativeModeTab.Output items) {
-    addTagVariants(this.getBlock(), textureTag, items, true);
+    addTagVariants(this, textureTag, items, true);
   }
 
   @Override

@@ -36,6 +36,8 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.utils.BlockSideHitListener;
 
 import java.util.Iterator;
+import net.minecraft.client.renderer.LevelRenderer;
+import slimeknights.tconstruct.TConstruct;
 
 @SuppressWarnings("unused")
 public class ToolRenderEvents {

@@ -4,6 +4,9 @@ import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.tools.data.ModifierIds;
 
 /** Event fired when an entity teleports using the enderporting modifier */
 public class EnderdodgingTeleportEvent extends EntityEvents.Teleport.EntityTeleportEvent {

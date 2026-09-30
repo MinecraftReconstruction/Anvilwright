@@ -51,6 +51,7 @@ import slimeknights.tconstruct.library.utils.Util;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.EnumMap;
 
 /**
  * This class handles interaction based event hooks

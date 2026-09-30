@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 /** Base logic for scaling chest inventories */
 public abstract class ScalingChestItemHandler extends ItemStackHandler implements IChestItemHandler, Transaction.CloseCallback {

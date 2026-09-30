@@ -73,6 +73,7 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import net.minecraft.data.DataGenerator;
 
 /**
  * Handles all the table for tool creation

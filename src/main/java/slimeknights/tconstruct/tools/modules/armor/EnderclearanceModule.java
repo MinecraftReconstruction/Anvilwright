@@ -27,6 +27,7 @@ import slimeknights.tconstruct.library.utils.TeleportHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import slimeknights.tconstruct.library.events.teleport.EnderclearanceTeleportEvent;
 
 /** Module making the target teleport */
 public record EnderclearanceModule(LevelingValue chance, LevelingInt diameter, LevelingInt teleportChances) implements ModifierModule, ProjectileHitModifierHook, MeleeHitModifierHook, MonsterMeleeHitModifierHook.RedirectAfter, OnAttackedModifierHook {

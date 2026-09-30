@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 
 /** Casting recipe that takes a fluid and optional cast and outputs an item. */
 @Getter

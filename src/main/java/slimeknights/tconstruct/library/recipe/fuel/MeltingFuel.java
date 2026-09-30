@@ -17,6 +17,8 @@ import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType
 
 import java.util.List;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 
 /**
  * Recipe for a fuel for the melter or smeltery

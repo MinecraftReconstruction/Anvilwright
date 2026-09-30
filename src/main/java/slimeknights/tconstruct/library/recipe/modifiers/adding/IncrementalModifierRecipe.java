@@ -33,6 +33,11 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.library.json.IntRange;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
+import com.google.common.math.IntMath;
+import net.minecraft.network.chat.Component;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 
 /** Modifier that incrementally fills the entry, allowing partial application. */
 public class IncrementalModifierRecipe extends AbstractModifierRecipe {

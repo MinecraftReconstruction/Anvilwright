@@ -42,6 +42,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.joml.Matrix4f;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.Icons;
+import slimeknights.tconstruct.library.utils.Orientation2D;
+import slimeknights.tconstruct.library.utils.Orientation2D.Orientation1D;
+import slimeknights.tconstruct.library.utils.Util;
 
 /** Modifier event hooks that run client side */
 public class ModifierClientEvents {

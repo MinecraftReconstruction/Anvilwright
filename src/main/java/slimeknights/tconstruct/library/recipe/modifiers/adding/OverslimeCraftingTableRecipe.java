@@ -23,6 +23,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
+import slimeknights.tconstruct.library.utils.Util;
 
 /** Recipe for applying overslime in the crafting table */
 @Getter
@@ -123,8 +124,8 @@ public class OverslimeCraftingTableRecipe extends CustomRecipe {
         }
         repairNeeded -= repairPerItem;
       }
-      if (stack.hasCraftingRemainingItem()) {
-        list.set(i, stack.getCraftingRemainingItem());
+      if (Util.hasCraftingRemainingItem(stack)) {
+        list.set(i, Util.getCraftingRemainingItem(stack));
       }
     }
     return list;

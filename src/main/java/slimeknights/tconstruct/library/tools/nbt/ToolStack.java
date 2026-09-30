@@ -293,7 +293,7 @@ public class ToolStack implements IToolStackView {
       stack.tag = nbt;
     }
     // ensure the damage value is set on the stack for the sake of stacking, since bypassing the vanilla setter skips that
-    if (!stack.tag.contains(TAG_DAMAGE, Tag.TAG_ANY_NUMERIC) && stack.getItem().isDamageable(stack)) {
+    if (!stack.tag.contains(TAG_DAMAGE, Tag.TAG_ANY_NUMERIC) && stack.isDamageableItem()) {
       stack.tag.putInt(TAG_DAMAGE, 0);
     }
     return stack;

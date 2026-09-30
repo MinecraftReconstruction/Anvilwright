@@ -14,6 +14,7 @@ import slimeknights.tconstruct.TConstruct;
 
 import java.util.List;
 import java.util.Map;
+import slimeknights.mantle.data.listener.ISafeManagerReloadListener;
 
 /**
  * Harvest level display names

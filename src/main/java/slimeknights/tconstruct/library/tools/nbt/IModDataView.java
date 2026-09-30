@@ -11,7 +11,7 @@ import java.util.function.BiFunction;
 /**
  * Read only view of {@link ModDataNBT}
  */
-public interface IModDataView {
+public interface IModDataView extends INamespacedNBTView {
   /** Empty variant of tool data */
   IModDataView EMPTY = new IModDataView() {
     @Override
@@ -28,6 +28,13 @@ public interface IModDataView {
     public boolean contains(ResourceLocation name, int type) {
       return false;
     }
+
+    /* CCA component contract, the empty view has nothing to load or save */
+    @Override
+    public void readFromNbt(CompoundTag compoundTag) {}
+
+    @Override
+    public void writeToNbt(CompoundTag compoundTag) {}
   };
 
   /**

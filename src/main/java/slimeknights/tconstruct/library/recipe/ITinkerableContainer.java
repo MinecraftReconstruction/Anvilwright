@@ -4,6 +4,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import slimeknights.mantle.recipe.container.IRecipeContainer;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.library.utils.Util;
 
 /** Container that contains a tinkerable stack and a number of inputs after */
 public interface ITinkerableContainer extends IRecipeContainer {
@@ -122,7 +123,7 @@ public interface ITinkerableContainer extends IRecipeContainer {
     default void shrinkInput(int slot, int amount) {
       ItemStack stack = getInput(slot);
       if (!stack.isEmpty()) {
-        ItemStack container = stack.getCraftingRemainingItem();
+        ItemStack container = Util.getCraftingRemainingItem(stack);
         if (container.isEmpty() && stack.getItem() == Items.POTION) {
           container = new ItemStack(Items.GLASS_BOTTLE);
         }

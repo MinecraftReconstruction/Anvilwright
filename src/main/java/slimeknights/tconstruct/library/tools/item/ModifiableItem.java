@@ -88,6 +88,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import net.minecraft.world.item.CreativeModeTab;
+import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
 
 /**
  * A standard modifiable item which implements melee hooks

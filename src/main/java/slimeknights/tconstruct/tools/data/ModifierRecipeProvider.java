@@ -90,6 +90,9 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import net.minecraft.data.PackOutput;
+import static slimeknights.mantle.Mantle.COMMON;
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 @SuppressWarnings("removal")
 public class ModifierRecipeProvider extends BaseRecipeProvider {

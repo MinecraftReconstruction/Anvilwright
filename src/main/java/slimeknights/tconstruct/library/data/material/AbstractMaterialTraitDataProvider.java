@@ -25,6 +25,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
+import java.util.Collections;
 
 /** Base data generator for use in addons */
 @SuppressWarnings({"unused", "SameParameterValue"})  // API

@@ -34,6 +34,7 @@ import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 
 import java.awt.*;
 import java.util.List;
+import java.awt.Color;
 
 /**
  * Entity melting display in JEI

@@ -21,6 +21,8 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import java.util.List;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 
 /**
  * Recipe to convert an entity into a head or other item for the severing modifier

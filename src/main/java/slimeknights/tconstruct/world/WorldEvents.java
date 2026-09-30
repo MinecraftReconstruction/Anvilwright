@@ -49,7 +49,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Predicate;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.world.block.FoliageType;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
+import java.util.Collections;
 
 @SuppressWarnings("unused")
 public class WorldEvents {
@@ -135,13 +137,13 @@ public class WorldEvents {
   }
 
   /** Makes a seed injection loot entry */
-  private static LootPoolEntryContainer makeSeed(SlimeType type, int weight) {
+  private static LootPoolEntryContainer makeSeed(FoliageType type, int weight) {
     return LootItem.lootTableItem(TinkerWorld.slimeGrassSeeds.get(type)).setWeight(weight)
                     .apply(SetItemCountFunction.setCount(UniformGenerator.between(2, 4))).build();
   }
 
   /** Makes a sapling injection loot entry */
-  private static LootPoolEntryContainer makeSapling(SlimeType type, int weight) {
+  private static LootPoolEntryContainer makeSapling(FoliageType type, int weight) {
     return LootItem.lootTableItem(TinkerWorld.slimeSapling.get(type)).setWeight(weight).build();
   }
 
@@ -151,25 +153,25 @@ public class WorldEvents {
         // sky
         case "chests/simple_dungeon":
           if (Config.COMMON.slimyLootChests.get()) {
-            injectInto(manager.getLootTable(name), "pool1", makeSeed(SlimeType.EARTH, 3), makeSeed(SlimeType.SKY, 7));
-            injectInto(manager.getLootTable(name), "main", makeSapling(SlimeType.EARTH, 3), makeSapling(SlimeType.SKY, 7));
+            injectInto(manager.getLootTable(name), "pool1", makeSeed(FoliageType.EARTH, 3), makeSeed(FoliageType.SKY, 7));
+            injectInto(manager.getLootTable(name), "main", makeSapling(FoliageType.EARTH, 3), makeSapling(FoliageType.SKY, 7));
           }
           break;
         // ichor
         case "chests/nether_bridge":
           if (Config.COMMON.slimyLootChests.get()) {
-            injectInto(manager.getLootTable(name), "main", makeSeed(SlimeType.BLOOD, 5));
+            injectInto(manager.getLootTable(name), "main", makeSeed(FoliageType.BLOOD, 5));
           }
           break;
         case "chests/bastion_bridge":
           if (Config.COMMON.slimyLootChests.get()) {
-            injectInto(manager.getLootTable(name), "pool2", makeSapling(SlimeType.BLOOD, 1));
+            injectInto(manager.getLootTable(name), "pool2", makeSapling(FoliageType.BLOOD, 1));
           }
           break;
         // ender
         case "chests/end_city_treasure":
           if (Config.COMMON.slimyLootChests.get()) {
-            injectInto(manager.getLootTable(name), "main", makeSeed(SlimeType.ENDER, 5), makeSapling(SlimeType.ENDER, 3));
+            injectInto(manager.getLootTable(name), "main", makeSeed(FoliageType.ENDER, 5), makeSapling(FoliageType.ENDER, 3));
           }
           break;
 

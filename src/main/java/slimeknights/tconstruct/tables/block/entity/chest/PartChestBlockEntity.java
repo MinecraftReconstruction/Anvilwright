@@ -35,7 +35,7 @@ public class PartChestBlockEntity extends AbstractChestBlockEntity {
           return i == slot; // only allowed in the same slot
         }
       }
-      return stack.is(TinkerTags.Items.CHEST_PARTS);
+      return stack.toStack(1).is(TinkerTags.Items.CHEST_PARTS);
     }
   }
 }

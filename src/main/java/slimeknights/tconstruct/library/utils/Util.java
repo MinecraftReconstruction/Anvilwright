@@ -37,9 +37,28 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import java.util.Optional;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class Util {
   public static final Marker TCONSTRUCT = MarkerManager.getMarker("TCONSTRUCT");
+
+  /**
+   * Vanilla only exposes the crafting remainder on {@link net.minecraft.world.item.Item}; Forge (and
+   * so upstream Tinkers) also had it on {@link ItemStack}. This gives the stack form, which is what
+   * the crafting handlers want. Note Forge's version could look at the stack contents, vanilla's
+   * item form cannot.
+   */
+  public static ItemStack getCraftingRemainingItem(ItemStack stack) {
+    Item item = stack.getItem().getCraftingRemainingItem();
+    return item == null ? ItemStack.EMPTY : new ItemStack(item);
+  }
+
+  /** @see #getCraftingRemainingItem(ItemStack) */
+  public static boolean hasCraftingRemainingItem(ItemStack stack) {
+    return stack.getItem().hasCraftingRemainingItem();
+  }
 
   public static final DecimalFormat COMMA_FORMAT = new DecimalFormat("#,###,###.##", DecimalFormatSymbols.getInstance(Locale.US));
   public static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("#%");
