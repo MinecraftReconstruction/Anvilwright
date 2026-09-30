@@ -39,6 +39,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.world.entity.player.Player;
 import slimeknights.mantle.fluid.FluidTransferHelper;
+import io.github.fabricators_of_create.porting_lib.item.CustomMaxCountItem;
+import net.minecraft.world.phys.AABB;
 
 public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
   private static final String KEY_FLUID = TConstruct.makeTranslationKey("block", "tank.fluid");
@@ -66,7 +68,7 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
   }
 
   @Override
-  public int getMaxStackSize(ItemStack stack) {
+  public int getItemStackLimit(ItemStack stack) {
     if (!limitStackSize) {
       return 64;
     }
@@ -96,7 +98,7 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
             tooltip.add(FluidTooltipHandler.HOLD_SHIFT);
           }
         }
-        FluidTooltipHandler.appendMaterial(fluid, tooltip);
+        FluidTooltipHandler.appendMaterial(tank.getFluid(), tooltip);
       }
     }
     else {
@@ -121,6 +123,17 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
       player.containerMenu.setCarried(FluidTransferHelper.getOrTransferFilled(player, held, result));
     } else if (!player.getInventory().add(result)) {
       player.drop(result, false);
+    }
+  }
+
+  /** Removes the tank tag from the stack */
+  private static void removeTank(ItemStack stack) {
+    CompoundTag nbt = stack.getTag();
+    if (nbt != null) {
+      nbt.remove(NBTTags.TANK);
+      if (nbt.isEmpty()) {
+        stack.setTag(null);
+      }
     }
   }
 
@@ -167,9 +180,7 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
     int count = stack.getCount();
     FluidTank tank = getTank(stack, count);
     // disallow filling if the current size is larger than 16
-    if (limitStackSize && count > 16) {
-      tank.setValidator(NO_FILL);
-    }
+    // TODO: PORT - Forge's FluidTank#setValidator has no equivalent; the "no filling when the stack is > 16" guard is gone
     return tank;
   }
 
@@ -180,7 +191,7 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
    * @return  Tank stored in the stack
    */
   public static FluidTank getTank(ItemStack stack, int scale) {
-    FluidTank tank = ScaledFluidTank.create(TankBlockEntity.getCapacity(stack.getItem()), scale);
+    FluidTank tank = ScaledFluidTank.create((int)TankBlockEntity.getCapacity(stack.getItem()), scale);
     if (stack.hasTag()) {
       assert stack.getTag() != null;
       tank.readFromNBT(stack.getTag().getCompound(NBTTags.TANK));
@@ -234,6 +245,7 @@ public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
 
   /** Fills a tank stack with the given fluid */
   public static ItemStack fillTank(EnumObject<TankType,? extends ItemLike> tank, TankType type, ResourceLocation fluid) {
-    return setTank(tank.get(type), fluid, type.getCapacity());
+    Fluid resolved = BuiltInRegistries.FLUID.get(fluid);
+    return setTank(new ItemStack(tank.get(type)), new FluidStack(resolved, type.getCapacity()));
   }
 }

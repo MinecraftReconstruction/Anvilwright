@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.data.PackOutput;
 import slimeknights.mantle.data.loadable.Loadables;
+import net.minecraft.data.PackOutput.Target;
+import net.minecraft.util.GsonHelper;
 
 /** Generates the file that tells the part generator command which parts are needed for your tools */
 public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
@@ -38,7 +40,7 @@ public class GeneratorPartTextureJsonGenerator extends GenericDataProvider {
   private final String modId;
   private final AbstractPartSpriteProvider spriteProvider;
   public GeneratorPartTextureJsonGenerator(FabricDataOutput output, String modId, AbstractPartSpriteProvider spriteProvider) {
-    super(output, PackType.CLIENT_RESOURCES, "tinkering", GSON);
+    super(output, Target.RESOURCE_PACK, "tinkering", GSON);
     this.modId = modId;
     this.spriteProvider = spriteProvider;
   }

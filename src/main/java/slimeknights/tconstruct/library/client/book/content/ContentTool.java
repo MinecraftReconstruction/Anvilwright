@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class ContentTool extends PageContent {
   public static final ResourceLocation ID = TConstruct.getResource("tool");
@@ -119,7 +120,7 @@ public class ContentTool extends PageContent {
     } else {
       this.tool = new Fallback(item);
     }
-    this.text = new TextData[] { new TextData(ForgeI18n.getPattern(tool.asItem().getDescriptionId() + ".description"))};
+    this.text = new TextData[] { new TextData(I18n.get(tool.asItem().getDescriptionId() + ".description"))};
   }
 
   @SuppressWarnings("removal")
