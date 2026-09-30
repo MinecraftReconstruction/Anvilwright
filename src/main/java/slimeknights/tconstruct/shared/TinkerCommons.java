@@ -84,18 +84,15 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import static slimeknights.tconstruct.TConstruct.getResource;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
 import net.minecraft.world.item.CreativeModeTab;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
+import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
+import slimeknights.mantle.data.predicate.entity.MobTypePredicate;
 
 /**
  * Contains items and blocks and stuff that is shared by multiple modules, but might be required individually
  */
 @SuppressWarnings("unused")
 public final class TinkerCommons extends TinkerModule {
-  /** Creative tab for general items, or those that lack another tab */
-  public static final RegistryObject<CreativeModeTab> tabGeneral = CREATIVE_TABS.register(
-    "general", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "general"))
-                                    .icon(() -> new ItemStack(TinkerCommons.materialsAndYou))
-                                    .displayItems(TinkerCommons::addTabItems)
-                                    .build());
 
   /*
    * Blocks
