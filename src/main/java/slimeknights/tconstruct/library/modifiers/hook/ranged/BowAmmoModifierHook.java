@@ -210,7 +210,10 @@ public interface BowAmmoModifierHook {
       standardAmmo = predicate == null ? ItemStack.EMPTY : findMatchingAmmo(ItemStack.EMPTY, living, predicate);
     } else if (predicate == null) {
       // no predicate means we just want the event result to start, used for ballista
-      standardAmmo = ForgeHooks.getProjectile(living, bow, ItemStack.EMPTY);
+      // NOTE(porting): upstream asks Forge's ArrowNockEvent through ForgeHooks.getProjectile here, which returns the
+      //  passed default (empty) unless a mod intervenes. Fabric has no equivalent event, so the modifier hook alone
+      //  decides. Disclosed in docs/BEHAVIOUR-DIFFERENCES.md.
+      standardAmmo = ItemStack.EMPTY;
     } else {
       standardAmmo = living.getProjectile(bow);
     }

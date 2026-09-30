@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.tools.item;
 
+import io.github.fabricators_of_create.porting_lib.item.InfiniteArrowItem;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -43,7 +44,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /** Modifiable item that is usable as arrows in a bow */
-public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay {
+public class ModifiableArrowItem extends ArrowItem implements IModifiableDisplay, InfiniteArrowItem {
   /** Tool definition for the given tool */
   @Getter
   private final ToolDefinition toolDefinition;

@@ -4,6 +4,11 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -55,8 +60,11 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolNbtSnapshots;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -101,7 +109,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   /** Gets the capacity for the given fluid */
   private static int getAmount(Fluid fluid) {
     FluidEffects effects = FluidEffectManager.INSTANCE.find(fluid);
-    return effects.hasEffects() ? effects.ingredient().getAmount(fluid) : 0;
+    return effects.hasEffects() ? (int)effects.ingredient().getAmount(fluid) : 0;
   }
 
   /** Gets the capacity for the given fluid */
@@ -149,8 +157,8 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   /* Tank filling/draining */
 
   @Override
-  public int fill(IToolStackView tool, ModifierEntry modifier, FluidStack resource, FluidAction action) {
-    if (resource.isEmpty()) {
+  public long fill(ContainerItemContext context, IToolStackView tool, ModifierEntry modifier, FluidVariant resource, long maxAmount, TransactionContext tx) {
+    if (resource.isBlank()) {
       return 0;
     }
     ModDataNBT data = tool.getPersistentData();
@@ -160,72 +168,50 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
     }
     int amount = getAmount(modifier, resource.getFluid());
     // if the fluid is invalid, or not enough fluid is offered, give up
-    if (amount == 0 || resource.getAmount() < amount) {
+    if (amount == 0 || maxAmount < amount) {
       return 0;
     }
     // success! we can fill
-    if (action.execute()) {
-      // we don't actually store the amount, its up to the modifier to determine that
-      data.putString(KEY_FLUID, Loadables.FLUID.getString(resource.getFluid()));
-      // we want to store a fixed size, but its possible part swapping changes our capacity, so keep track of our capacity at the time of storing
-      data.putFloat(KEY_VALIDATE, getValidationAmount(tool, modifier));
-      CompoundTag tag = resource.getTag();
-      if (tag != null) {
-        data.put(KEY_FLUID_TAG, tag.copy());
-      }
+    ToolNbtSnapshots.updateSnapshots(tool, tx);
+    // we don't actually store the amount, its up to the modifier to determine that
+    data.putString(KEY_FLUID, Loadables.FLUID.getString(resource.getFluid()));
+    // we want to store a fixed size, but its possible part swapping changes our capacity, so keep track of our capacity at the time of storing
+    data.putFloat(KEY_VALIDATE, getValidationAmount(tool, modifier));
+    CompoundTag tag = resource.copyNbt();
+    if (tag != null) {
+      data.put(KEY_FLUID_TAG, tag);
     }
     return amount;
   }
 
   @Override
-  public FluidStack drain(IToolStackView tool, ModifierEntry modifier, int maxDrain, FluidAction action) {
-    if (maxDrain > 0) {
-      ModDataNBT data = tool.getPersistentData();
-      Fluid fluid = getFluid(data);
-      if (fluid != Fluids.EMPTY) {
-        int amount = getAmount(modifier, fluid);
-        if (amount <= 0) {
-          // 0 amount with a fluid means datapacks changed, best we can do is delete what we have
-          clearFluid(data);
-          // ensure we requested enough
-        } else if (amount <= maxDrain) {
-          FluidStack result = new FluidStack(fluid, amount, getFluidTag(data));
-          if (action.execute()) {
-            clearFluid(data);
-          }
-          return result;
-        }
-      }
+  public long drain(ContainerItemContext context, IToolStackView tool, ModifierEntry modifier, FluidVariant resource, long maxAmount, TransactionContext tx) {
+    if (maxAmount <= 0) {
+      return 0;
     }
-    return FluidStack.EMPTY;
-  }
-
-  @Override
-  public FluidStack drain(IToolStackView tool, ModifierEntry modifier, FluidStack resource, FluidAction action) {
-    if (!resource.isEmpty()) {
-      ModDataNBT data = tool.getPersistentData();
-      Fluid fluid = getFluid(data);
-      // ensure we have a valid fluid
-      if (fluid != Fluids.EMPTY && resource.getFluid() == fluid) {
-        int amount = getAmount(modifier, fluid);
-        if (amount <= 0) {
-          // 0 amount with a fluid means datapacks changed, best we can do is delete what we have
-          clearFluid(data);
-          // ensure we requested enough
-        } else if (amount <= resource.getAmount()) {
-          // ensure the tag matches
-          CompoundTag storedTag = getFluidTag(data);
-          if (Objects.equals(storedTag, resource.getTag())) {
-            FluidStack result = new FluidStack(fluid, amount, storedTag);
-            if (action.execute()) {
-              clearFluid(data);
-            }
-            return result;
-          }
-        }
-      }
+    ModDataNBT data = tool.getPersistentData();
+    Fluid fluid = getFluid(data);
+    if (fluid == Fluids.EMPTY) {
+      return 0;
     }
-    return FluidStack.EMPTY;
+    // the module stores the whole fluid at once, so it can only be drained all at once
+    int amount = getAmount(modifier, fluid);
+    if (amount <= 0) {
+      // 0 amount with a fluid means datapacks changed, best we can do is delete what we have
+      ToolNbtSnapshots.updateSnapshots(tool, tx);
+      clearFluid(data);
+      return 0;
+    }
+    if (amount > maxAmount || (!resource.isBlank() && resource.getFluid() != fluid)) {
+      return 0;
+    }
+    // ensure the tag matches
+    if (!resource.isBlank() && !Objects.equals(getFluidTag(data), resource.copyNbt())) {
+      return 0;
+    }
+    ToolNbtSnapshots.updateSnapshots(tool, tx);
+    clearFluid(data);
+    return amount;
   }
 
 
@@ -248,18 +234,69 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   }
 
   @Override
-  public int getTankCapacity(IToolStackView tool, ModifierEntry modifier, int tank) {
+  public long getTankCapacity(IToolStackView tool, ModifierEntry modifier, int tank) {
     Fluid fluid = getFluid(tool.getPersistentData());
     if (fluid != Fluids.EMPTY) {
       return getAmount(modifier, fluid);
     }
     // TODO: should we return something else? this number when empty is really meaningless
-    return (int) FluidValues.BOTTLE;
+    return FluidValues.BOTTLE;
   }
 
   @Override
   public boolean isFluidValid(IToolStackView tool, ModifierEntry modifier, int tank, FluidStack fluid) {
     return getAmount(fluid.getFluid()) > 0;
+  }
+
+  @Override
+  public SingleSlotStorage<FluidVariant> getSlot(IToolStackView tool, ModifierEntry modifier, int tank) {
+    return new FluidSlot(tool, modifier);
+  }
+
+  /** Live view of the module's tank, used when something needs a {@link SingleSlotStorage} instead of the tool */
+  private class FluidSlot implements SingleSlotStorage<FluidVariant> {
+    private final IToolStackView tool;
+    private final ModifierEntry modifier;
+
+    private FluidSlot(IToolStackView tool, ModifierEntry modifier) {
+      this.tool = tool;
+      this.modifier = modifier;
+    }
+
+    @Override
+    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return fill(null, tool, modifier, resource, maxAmount, transaction);
+    }
+
+    @Override
+    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return drain(null, tool, modifier, resource, maxAmount, transaction);
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+      return getResource().isBlank();
+    }
+
+    @Override
+    public FluidVariant getResource() {
+      return getFluidInTank(tool, modifier, 0).getType();
+    }
+
+    @Override
+    public long getAmount() {
+      return getFluidInTank(tool, modifier, 0).getAmount();
+    }
+
+    @Override
+    public long getCapacity() {
+      return getTankCapacity(tool, modifier, 0);
+    }
+
+    @Override
+    public Iterator<StorageView<FluidVariant>> iterator() {
+      return Collections.<StorageView<FluidVariant>>singletonList(this).iterator();
+    }
   }
 
 

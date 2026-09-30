@@ -3,6 +3,16 @@ accessWidener v2 named
 # Item Frames
 transitive-extendable method net/minecraft/world/entity/decoration/ItemFrame setRotation (IZ)V
 
+# Crop age bounds - harvesting replants at the lowest age (upstream: accesstransformer.cfg)
+transitive-accessible field net/minecraft/world/level/block/state/properties/IntegerProperty min I
+transitive-accessible field net/minecraft/world/level/block/state/properties/IntegerProperty max I
+
+# Indestructible item entities copy the pickup delay and stop their despawn timer
+# (upstream: accesstransformer.cfg exposes ItemEntity.pickupDelay, and Forge's lifespan field is written directly)
+transitive-accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
+transitive-accessible field net/minecraft/world/entity/item/ItemEntity age I
+transitive-mutable field net/minecraft/world/entity/item/ItemEntity age I
+
 # Reflecting modifier
 transitive-accessible field net/minecraft/world/entity/projectile/Projectile leftOwner Z
 

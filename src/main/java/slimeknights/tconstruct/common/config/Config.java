@@ -86,7 +86,9 @@ public class Config {
 //        DamageSource.FALLING_STALACTITE.setProjectile();
 //      }));
 //      actions.add(new ConfigurableAction(builder, "lightning", true, "Makes lightning count as fire damage", ((DamageSourceAccessor)DamageSource.LIGHTNING_BOLT)::port_lib$setFireDamage));
-      damageSourceTweaks = actions.build();
+      // upstream 3.12.1 fills this list with the fire/blast protection slot extensions; both need Forge's
+      // writable Enchantment.slots (private and final in vanilla), see docs/BEHAVIOUR-DIFFERENCES.md #29
+      toolTweaks = actions.build();
 
       this.repairKitAmount = builder
         .comment("Amount of durability restored by a repair kit in terms of ingots. Does not affect the cost to create the kit, that is controlled by JSON.")

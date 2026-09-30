@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.tools.item.ranged;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -59,13 +61,13 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
   /** If true, adds the item data to the drawback model. It's a bit less efficient but produces better models. False will just set a boolean. */
   private final boolean storeDrawingItem;
 
-  public ModifiableBowItem(Properties properties, ToolDefinition toolDefinition, boolean storeDrawingItem) {
-    super(properties, toolDefinition);
+  public ModifiableBowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab, boolean storeDrawingItem) {
+    super(properties, toolDefinition, tab);
     this.storeDrawingItem = storeDrawingItem;
   }
 
-  public ModifiableBowItem(Properties properties, ToolDefinition toolDefinition) {
-    this(properties, toolDefinition, false);
+  public ModifiableBowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab) {
+    this(properties, toolDefinition, tab, false);
   }
 
 

@@ -88,7 +88,7 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
   }
 
   @Override
-  public int applyOreBoost(OreRateType rate, int amount) {
+  public long applyOreBoost(OreRateType rate, long amount) {
     return switch (rate) {
       case METAL -> amount * nuggetsPerMetal.compute(level) / 9;
       case GEM -> amount * shardsPerGem.compute(level) / 9;
@@ -221,7 +221,7 @@ public record MeltingModule(LevelingInt temperature, LevelingInt nuggetsPerMetal
           if (damageDealt < damagePerOutput * 2) {
             fluidAmount = (int)(output.getAmount() * damageDealt / damagePerOutput);
           } else {
-            fluidAmount = output.getAmount() * 2;
+            fluidAmount = (int)(output.getAmount() * 2);
           }
 
           // fluid must match that which is stored in the tank

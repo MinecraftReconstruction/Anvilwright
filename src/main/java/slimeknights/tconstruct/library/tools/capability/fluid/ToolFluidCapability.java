@@ -36,10 +36,10 @@ public class ToolFluidCapability extends FluidModifierHookIterator<ModifierEntry
   /** Modifier hook instance to make an inventory modifier */
   public static final ModuleHook<FluidModifierHook> HOOK = ModifierHooks.register(TConstruct.getResource("fluid"), FluidModifierHook.class, FluidModifierHookMerger::new, new FluidModifierHook() {
     @Override
-    public int getTanks(IToolContext tool, Modifier modifier) {
-      IFluidModifier hook = modifier.getModule(IFluidModifier.class);
+    public int getTanks(IModDataView volatileData, ModifierEntry modifier) {
+      IFluidModifier hook = modifier.getModifier().getModule(IFluidModifier.class);
       if (hook != null) {
-        return hook.getTanks(tool.getVolatileData());
+        return hook.getTanks(volatileData);
       }
       return 0;
     }
@@ -177,7 +177,7 @@ public class ToolFluidCapability extends FluidModifierHookIterator<ModifierEntry
     return 0;
   }
 
-  /** @deprecated use {@link #addTanks(IToolContext, Modifier, ModDataNBT, FluidModifierHook)} */
+  /** @deprecated use {@link #addTanks(ModifierEntry, ModDataNBT, FluidModifierHook)} */
   @Deprecated
   public static void addTanks(ModDataNBT volatileData, IFluidModifier modifier) {
     volatileData.putInt(TOTAL_TANKS, modifier.getTanks(volatileData) + volatileData.getInt(TOTAL_TANKS));

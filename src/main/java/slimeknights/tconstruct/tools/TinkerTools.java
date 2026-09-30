@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -226,7 +225,7 @@ public final class TinkerTools extends TinkerModule {
 
   // ancient tools, added in the 3.11 update
   public static final ItemObject<ModifiableItem> meltingPan = ITEMS.register("melting_pan", () -> new ModifiableItem(TOOL, ToolDefinitions.MELTING_PAN, TinkerTabs.TAB_TOOLS));
-  public static final ItemObject<ModifiableCrossbowItem> warPick = ITEMS.register("war_pick", () -> new ModifiableCrossbowItem(TOOL, ToolDefinitions.WAR_PICK));
+  public static final ItemObject<ModifiableCrossbowItem> warPick = ITEMS.register("war_pick", () -> new ModifiableCrossbowItem(TOOL, ToolDefinitions.WAR_PICK, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableItem> battlesign = ITEMS.register("battlesign", () -> new ModifiableItem(TOOL, ToolDefinitions.BATTLESIGN, TinkerTabs.TAB_TOOLS));
   public static final ItemObject<ModifiableItem> swasher = ITEMS.register("swasher", () -> new ModifiableItem(TOOL, ToolDefinitions.SWASHER, TinkerTabs.TAB_TOOLS));
   /** Registered only when Twilight Forest is present, which also keeps it out of JEI */
@@ -235,7 +234,8 @@ public final class TinkerTools extends TinkerModule {
     if (FabricLoader.getInstance().isModLoaded("twilightforest")) {
       minotaurAxe = ITEMS.register("minotaur_axe", () -> new ModifiableItem(TOOL, ToolDefinitions.MINOTAUR_AXE, TinkerTabs.TAB_TOOLS));
     } else {
-      minotaurAxe = new ItemObject<>(RegistryObject.create(getResource("minotaur_axe"), BuiltInRegistries.ITEM));
+      // not registered: keep the id for the data providers, mirroring Forge's RegistryObject.create fallback
+      minotaurAxe = new ItemObject<ModifiableItem>(() -> null, getResource("minotaur_axe"));
     }
   }
 
@@ -263,33 +263,33 @@ public final class TinkerTools extends TinkerModule {
   public static final RegistryObject<SimpleParticleType> bonkAttackParticle = PARTICLE_TYPES.register("bonk", () -> FabricParticleTypes.simple(true));
 
   /* Entities */
-  public static final RegistryObject<EntityType<IndestructibleItemEntity>> indestructibleItem = ENTITIES.register("indestructible_item", () ->
+  public static final RegistryObject<EntityType<IndestructibleItemEntity>> indestructibleItem = ENTITIES.register("indestructible_item",
     FabricEntityTypeBuilder.<IndestructibleItemEntity>create(MobCategory.MISC, IndestructibleItemEntity::new)
                       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
                       .fireImmune());
-  public static final RegistryObject<EntityType<CrystalshotEntity>> crystalshotEntity = ENTITIES.register("crystalshot", () ->
+  public static final RegistryObject<EntityType<CrystalshotEntity>> crystalshotEntity = ENTITIES.register("crystalshot",
     FabricEntityTypeBuilder.<CrystalshotEntity>create(MobCategory.MISC, CrystalshotEntity::new)
                       .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
                       .trackRangeChunks(4)
                       .trackedUpdateRate(20));
-  public static final RegistryObject<EntityType<CombatFishingHook>> fishingHook = ENTITIES.register("fishing_bobber", () ->
+  public static final RegistryObject<EntityType<CombatFishingHook>> fishingHook = ENTITIES.register("fishing_bobber",
     FabricEntityTypeBuilder.<CombatFishingHook>create(MobCategory.MISC, CombatFishingHook::new)
                       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
                       .disableSaving()
                       .disableSummon()
                       .trackRangeChunks(4)
                       .trackedUpdateRate(5));
-  public static final RegistryObject<EntityType<ModifiableArrow>> materialArrow = ENTITIES.register("arrow", () ->
+  public static final RegistryObject<EntityType<ModifiableArrow>> materialArrow = ENTITIES.register("arrow",
     FabricEntityTypeBuilder.<ModifiableArrow>create(MobCategory.MISC, ModifiableArrow::new)
                       .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
                       .trackRangeChunks(4)
                       .trackedUpdateRate(20));
-  public static final RegistryObject<EntityType<ThrownShuriken>> thrownShuriken = ENTITIES.register("thrown_shuriken", () ->
+  public static final RegistryObject<EntityType<ThrownShuriken>> thrownShuriken = ENTITIES.register("thrown_shuriken",
     FabricEntityTypeBuilder.<ThrownShuriken>create(MobCategory.MISC, ThrownShuriken::new)
                       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
                       .trackRangeChunks(4)
                       .trackedUpdateRate(10));
-  public static final RegistryObject<EntityType<ThrownTool>> thrownTool = ENTITIES.register("thrown_tool", () ->
+  public static final RegistryObject<EntityType<ThrownTool>> thrownTool = ENTITIES.register("thrown_tool",
     FabricEntityTypeBuilder.<ThrownTool>create(MobCategory.MISC, ThrownTool::new)
                       .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
                       .trackRangeChunks(4)
@@ -307,7 +307,7 @@ public final class TinkerTools extends TinkerModule {
     EquipmentChangeWatcher.register();
     ToolCapabilityProvider.register(ToolFluidCapability.Provider::new);
     ToolCapabilityProvider.register(ToolInventoryCapability.Provider::new);
-    for (ConfigurableAction action : Config.COMMON.damageSourceTweaks) {
+    for (ConfigurableAction action : Config.COMMON.toolTweaks) {
       action.run();
     }
     ModifierHooks.init();
