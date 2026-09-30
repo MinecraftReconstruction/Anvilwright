@@ -139,8 +139,8 @@ public class ModifierRecipeCategory implements TinkersCategory<ModifierRecipeDis
     if (slots == null) {
       drawSlotType(graphics, null, 110, 58);
     } else {
-      drawSlotType(graphics, slots.getType(), 110, 58);
-      String text = Integer.toString(slots.getCount());
+      drawSlotType(graphics, slots.type(), 110, 58);
+      String text = Integer.toString(slots.count());
       int x = 111 - fontRenderer.width(text);
       graphics.drawString(fontRenderer, text, x, 63, Color.GRAY.getRGB(), false);
     }
@@ -158,11 +158,11 @@ public class ModifierRecipeCategory implements TinkersCategory<ModifierRecipeDis
       // slot tooltip over icon
       SlotCount slots = display.getSlots();
       if (slots != null) {
-        int count = slots.getCount();
+        int count = slots.count();
         if (count == 1) {
-          return Collections.singletonList(Component.translatable(KEY_SLOT, slots.getType().getDisplayName()));
+          return Collections.singletonList(Component.translatable(KEY_SLOT, slots.type().getDisplayName()));
         } else if (count > 1) {
-          return Collections.singletonList(Component.translatable(KEY_SLOTS, slots, slots.getType().getDisplayName()));
+          return Collections.singletonList(Component.translatable(KEY_SLOTS, slots, slots.type().getDisplayName()));
         }
       } else {
         return TEXT_FREE;

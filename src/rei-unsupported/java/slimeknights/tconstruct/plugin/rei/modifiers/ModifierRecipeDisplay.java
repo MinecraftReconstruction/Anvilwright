@@ -9,6 +9,10 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.plugin.rei.TConstructREIConstants;
@@ -34,9 +38,17 @@ public class ModifierRecipeDisplay implements Display {
         EntryIngredients.ofItemStacks(recipe.getDisplayItems(3)),
         EntryIngredients.ofItemStacks(recipe.getDisplayItems(4))
       ), List.of(EntryIngredient.of(EntryStack.of(TConstructREIConstants.MODIFIER_TYPE, recipe.getDisplayResult()))),
-      recipe.hasRequirements(), recipe.isIncremental(), recipe.getMaxLevel(),
-      recipe.getSlots(), recipe.getRequirementsError(), EntryIngredients.ofItemStacks(recipe.getToolWithoutModifier()), EntryIngredients.ofItemStacks(recipe.getToolWithModifier())
+      requirementsError(recipe) != null, recipe.isIncremental(), recipe.getLevel().max(),
+      recipe.getSlots(), requirementsError(recipe) == null ? "" : requirementsError(recipe).getString(),
+      EntryIngredients.ofItemStacks(recipe.getToolWithoutModifier()), EntryIngredients.ofItemStacks(recipe.getToolWithModifier())
     );
+  }
+
+  /** Gets the requirements error for the given recipe, or null if it has no requirements */
+  @Nullable
+  private static Component requirementsError(IDisplayModifierRecipe recipe) {
+    ModifierEntry result = recipe.getDisplayResult();
+    return result.getHook(ModifierHooks.REQUIREMENTS).requirementsError(result);
   }
 
   public ModifierRecipeDisplay(List<EntryIngredient> inputEntries, List<EntryIngredient> outputEntries, boolean hasRequirements, boolean isIncremental, int maxLevel, SlotType.SlotCount slots, String requirementsError, EntryIngredient toolWithoutModifier, EntryIngredient toolWithModifier) {
@@ -91,9 +103,13 @@ public class ModifierRecipeDisplay implements Display {
       tag.putBoolean("hasRequirements", display.hasRequirements());
       tag.putBoolean("isIncremental", display.isIncremental());
       tag.putInt("maxLevel", display.getMaxLevel());
-      CompoundTag slotsTag = new CompoundTag();
-      display.getSlots().write(slotsTag);
-      tag.put("slots", slotsTag);
+      SlotType.SlotCount slots = display.getSlots();
+      if (slots != null) {
+        CompoundTag slotsTag = new CompoundTag();
+        slotsTag.putString("slot_type", slots.type().getName());
+        slotsTag.putInt("count", slots.count());
+        tag.put("slots", slotsTag);
+      }
       tag.putString("requirements_error", display.getRequirementsError());
       tag.put("tool_without_modifier", display.toolWithoutModifier.saveIngredient());
       tag.put("tool_with_modifier", display.toolWithModifier.saveIngredient());
@@ -107,7 +123,12 @@ public class ModifierRecipeDisplay implements Display {
       boolean hasRequirements = tag.getBoolean("hasRequirements");
       boolean isIncremental = tag.getBoolean("isIncremental");
       int maxLevel = tag.getInt("maxLevel");
-      SlotType.SlotCount slots = SlotType.SlotCount.read(tag.getCompound("slots"));
+      SlotType.SlotCount slots = null;
+      if (tag.contains("slots")) {
+        CompoundTag slotsTag = tag.getCompound("slots");
+        SlotType type = SlotType.getOrCreate(slotsTag.getString("slot_type"));
+        slots = new SlotType.SlotCount(type, slotsTag.getInt("count"));
+      }
       String requirementsError = tag.getString("requirements_error");
       EntryIngredient toolWithoutModifier = EntryIngredient.read(tag.getList("tool_without_modifier", Tag.TAG_LIST));
       EntryIngredient toolWithModifier = EntryIngredient.read(tag.getList("tool_with_modifier", Tag.TAG_LIST));

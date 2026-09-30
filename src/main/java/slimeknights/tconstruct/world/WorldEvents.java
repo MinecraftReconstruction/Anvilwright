@@ -44,6 +44,9 @@ import slimeknights.mantle.loot.function.SetFluidLootFunction;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.world.logic.AncientToolItemListing;
+import slimeknights.tconstruct.tools.stats.HandleMaterialStats;
+import slimeknights.tconstruct.tools.stats.HeadMaterialStats;
+import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -193,7 +196,7 @@ public class WorldEvents {
           if (weight > 0) {
             RandomMaterial randomHead = RandomMaterial.random(HeadMaterialStats.ID).tier(1).build();
             RandomMaterial firstHandle = RandomMaterial.firstWithStat(HandleMaterialStats.ID); // should be wood
-            RandomMaterial randomBinding = RandomMaterial.random(ExtraMaterialStats.ID).tier(1).build();
+            RandomMaterial randomBinding = RandomMaterial.random(StatlessMaterialStats.BINDING.getIdentifier()).tier(1).build();
             injectInto(manager.getLootTable(name), "main", LootItem.lootTableItem(TinkerTools.handAxe.get())
                                               .setWeight(weight)
                                               .apply(AddToolDataFunction.builder()

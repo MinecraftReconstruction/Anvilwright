@@ -24,6 +24,7 @@ import slimeknights.tconstruct.library.recipe.partbuilder.IDisplayPartBuilderRec
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.layout.Patterns;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.plugin.jei.material.MaterialTitleIngredientRenderer;
 import slimeknights.tconstruct.tables.TinkerTables;
 
@@ -53,7 +54,7 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayPartBuilderRecipe recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(66, 15);
+    builder.addRecipeArrow().setPosition(66, 15);
     Component title = recipe.getDisplayTitle();
     if (title != null && recipe.getMaterials().isEmpty()) {
       ITextWidget widget = builder.addText(title, 118, 9)
@@ -62,7 +63,7 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
         .setShadow(true);
       List<Component> tooltip = recipe.getTooltip();
       if (!tooltip.isEmpty()) {
-        widget.setTooltip(tooltip);
+        TooltipWidget.addArea(builder, 3, 2, 118, 9, tooltip);
       }
     }
   }

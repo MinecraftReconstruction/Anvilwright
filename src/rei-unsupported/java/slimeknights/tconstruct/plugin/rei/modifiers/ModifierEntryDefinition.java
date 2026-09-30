@@ -104,11 +104,11 @@ public class ModifierEntryDefinition implements EntryDefinition<ModifierEntry>, 
 
   @Override
   public CompoundTag save(EntryStack<ModifierEntry> entry, ModifierEntry value) {
-    return value.toNbt();
+    return value.serializeToNBT();
   }
 
   @Override
   public ModifierEntry read(CompoundTag tag) {
-    return ModifierEntry.fromNbt(tag);
+    return ModifierEntry.readFromNBT(tag);
   }
 }
