@@ -28,6 +28,10 @@ import java.util.stream.Stream;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 
 /**
  * Recipe to melt an ingredient into a specific fuel.
@@ -113,7 +117,7 @@ public class MeltingRecipe implements IMeltingRecipe, IDisplayableMeltingRecipe 
   @Override
   public void handleByproducts(IMeltingContainer inv, SlottedStorage<FluidVariant> handler) {
     // fill byproducts until we run out of space or byproducts
-    for (FluidStack fluidStack : byproducts) {
+    for (FluidOutput fluidStack : byproducts) {
       TransferUtil.insertFluid(handler, fluidStack.copy());
     }
   }

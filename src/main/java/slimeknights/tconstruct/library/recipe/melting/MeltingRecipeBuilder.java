@@ -39,7 +39,44 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
   private List<OreRateType> byproductRates = List.of();
   @Nullable
   private long[] unitSizes;
-  private final List<FluidStack> byproducts = new ArrayList<>();
+  private final List<FluidOutput> byproducts = new ArrayList<>();
+
+  /**
+   * Creates a new builder instance using a specific temperature
+   * @param input        Recipe input
+   * @param output       Recipe output
+   * @param temperature  Temperature required
+   * @param time         Time this recipe takes
+   * @return  Builder instance
+   */
+  public static MeltingRecipeBuilder melting(Ingredient input, FluidOutput output, int temperature, int time) {
+    if (temperature < 0) throw new IllegalArgumentException("Invalid temperature " + temperature + ", must be greater than zero");
+    if (time <= 0) throw new IllegalArgumentException("Invalid time " + time + ", must be greater than zero");
+    return new MeltingRecipeBuilder(input, output, temperature, time);
+  }
+
+  /**
+   * Creates a new builder instance using a factored time
+   * @param input        Recipe input
+   * @param output       Recipe output
+   * @param temperature  Temperature required
+   * @param timeFactor   Factor this recipe takes compared to the standard of ingots
+   * @return  Builder instance
+   */
+  public static MeltingRecipeBuilder melting(Ingredient input, FluidOutput output, int temperature, float timeFactor) {
+    return melting(input, output, temperature, IMeltingRecipe.calcTime(temperature, timeFactor));
+  }
+
+  /**
+   * Creates a new builder instance using a specific temperature
+   * @param input        Recipe input
+   * @param fluid        Recipe result
+   * @param amount       Result amount
+   * @return  Builder instance
+   */
+  public static MeltingRecipeBuilder melting(Ingredient input, FluidObject<?> fluid, long amount) {
+    return melting(input, fluid, amount, IMeltingRecipe.calcTimeFactor(amount));
+  }
 
   /**
    * Creates a new builder instance using a specific temperature
@@ -61,7 +98,7 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
    * @param timeFactor   Factor this recipe takes compared to the standard of ingots
    * @return  Builder instance
    */
-  public static MeltingRecipeBuilder melting(Ingredient input, FluidObject<?> fluid, int amount, float timeFactor) {
+  public static MeltingRecipeBuilder melting(Ingredient input, FluidObject<?> fluid, long amount, float timeFactor) {
     int temperature = getTemperature(fluid);
     return melting(input, fluid.result(amount), temperature, IMeltingRecipe.calcTime(temperature, timeFactor));
   }
@@ -74,7 +111,7 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
    * @return  Builder instance
    */
   public static MeltingRecipeBuilder melting(Ingredient input, FluidStack output, float timeFactor) {
-    int temperature = FluidVariantAttributes.getTemperature(output.getType()) - 300;
+    int temperature = getTemperature(output);
     return melting(input, output, temperature, IMeltingRecipe.calcTime(temperature, timeFactor));
   }
 
@@ -142,7 +179,7 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
   @SuppressWarnings("deprecation")
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, BuiltInRegistries.FLUID.getKey(output.getFluid()));
+    save(consumer, BuiltInRegistries.FLUID.getKey(output.get().getFluid()));
   }
 
   @Override
@@ -159,7 +196,7 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
         OreMeltingRecipe.LOADER, advancementId));
     } else if (unitSizes != null) {
       consumer.accept(new LoadableFinishedRecipe<>(
-        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))),
+        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, (int) unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))),
         DamageableMeltingRecipe.LOADER, advancementId));
     } else {
       consumer.accept(new LoadableFinishedRecipe<>(

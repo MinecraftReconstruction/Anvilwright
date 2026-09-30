@@ -23,6 +23,10 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import java.util.Comparator;
 import java.util.List;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 
 /**
  * Recipe to melt all castable tool parts of a given material
