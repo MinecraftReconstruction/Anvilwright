@@ -53,6 +53,16 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.block.FoliageType;
+import slimeknights.tconstruct.library.materials.RandomMaterial;
+import slimeknights.tconstruct.library.recipe.FluidValues;
+import slimeknights.tconstruct.fluids.TinkerFluids;
+import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
+import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.json.loot.AddToolDataFunction;
 import net.fabricmc.fabric.api.object.builder.v1.trade.TradeOfferHelper;
 import java.util.Collections;
 
@@ -194,9 +204,10 @@ public class WorldEvents {
         case "chests/spawn_bonus_chest": {
           int weight = Config.COMMON.tinkerToolBonusChest.get();
           if (weight > 0) {
-            RandomMaterial randomHead = RandomMaterial.random(HeadMaterialStats.ID).tier(1).build();
-            RandomMaterial firstHandle = RandomMaterial.firstWithStat(HandleMaterialStats.ID); // should be wood
-            RandomMaterial randomBinding = RandomMaterial.random(StatlessMaterialStats.BINDING.getIdentifier()).tier(1).build();
+            // the stat types come from the tool definition at build time now, so the material pickers no longer take one
+            RandomMaterial randomHead = RandomMaterial.random().tier(1).build();
+            RandomMaterial firstHandle = RandomMaterial.firstWithStat(); // should be wood
+            RandomMaterial randomBinding = RandomMaterial.random().tier(1).build();
             injectInto(manager.getLootTable(name), "main", LootItem.lootTableItem(TinkerTools.handAxe.get())
                                               .setWeight(weight)
                                               .apply(AddToolDataFunction.builder()

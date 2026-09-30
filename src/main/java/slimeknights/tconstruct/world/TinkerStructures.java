@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacerType;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
@@ -23,11 +24,19 @@ import slimeknights.tconstruct.world.data.StructureRepalleter;
 import slimeknights.tconstruct.world.worldgen.islands.IslandPiece;
 import slimeknights.tconstruct.world.worldgen.islands.IslandStructure;
 import slimeknights.tconstruct.world.worldgen.trees.ExtraRootVariantPlacer;
+import slimeknights.tconstruct.world.worldgen.trees.SupplierBlockStateProvider;
 import slimeknights.tconstruct.world.worldgen.trees.LeaveVineDecorator;
 import slimeknights.tconstruct.world.worldgen.trees.config.SlimeFungusConfig;
 import slimeknights.tconstruct.world.worldgen.trees.config.SlimeTreeConfig;
 import slimeknights.tconstruct.world.worldgen.trees.feature.SlimeFungusFeature;
 import slimeknights.tconstruct.world.worldgen.trees.feature.SlimeTreeFeature;
+import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.features.FeatureUtils;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.world.block.SlimeVineBlock;
+import slimeknights.tconstruct.world.block.SlimeVineBlock.VineStage;
 
 /**
  * Contains any logic relevant to structure generation, including trees and islands
@@ -40,6 +49,7 @@ public final class TinkerStructures extends TinkerModule {
   private static final LazyRegistrar<StructurePieceType> STRUCTURE_PIECE = LazyRegistrar.create(Registries.STRUCTURE_PIECE, TConstruct.MOD_ID);
   private static final LazyRegistrar<TreeDecoratorType<?>> TREE_DECORATORS = LazyRegistrar.create(Registries.TREE_DECORATOR_TYPE, TConstruct.MOD_ID);
   private static final LazyRegistrar<RootPlacerType<?>> ROOT_PLACERS = LazyRegistrar.create(Registries.ROOT_PLACER_TYPE, TConstruct.MOD_ID);
+  private static final LazyRegistrar<BlockStateProviderType<?>> BLOCK_STATE_PROVIDERS = LazyRegistrar.create(Registries.BLOCK_STATE_PROVIDER_TYPE, TConstruct.MOD_ID);
 
 
   public TinkerStructures() {
@@ -49,6 +59,7 @@ public final class TinkerStructures extends TinkerModule {
     STRUCTURE_PIECE.register(bus);
     TREE_DECORATORS.register(bus);
     ROOT_PLACERS.register(bus);
+    BLOCK_STATE_PROVIDERS.register(bus);
   }
 
 
@@ -57,6 +68,8 @@ public final class TinkerStructures extends TinkerModule {
    */
   public static final RegistryObject<TreeDecoratorType<LeaveVineDecorator>> leaveVineDecorator = TREE_DECORATORS.register("leave_vines", () -> new TreeDecoratorType<>(LeaveVineDecorator.CODEC));
   public static final RegistryObject<RootPlacerType<ExtraRootVariantPlacer>> extraRootVariantPlacer = ROOT_PLACERS.register("extra_root_variants", () -> new RootPlacerType<>(ExtraRootVariantPlacer.CODEC));
+  /** Fork content: block state provider used by the slime geodes (upstream removed the feature) */
+  public static final RegistryObject<BlockStateProviderType<SupplierBlockStateProvider>> supplierBlockstateProvider = BLOCK_STATE_PROVIDERS.register("supplier", () -> new BlockStateProviderType<>(SupplierBlockStateProvider.CODEC));
 
   /*
    * Features
@@ -108,4 +121,70 @@ public final class TinkerStructures extends TinkerModule {
 
   // NOTE(porting): upstream registers StructureRepalleter through Forge's GatherDataEvent here. Fabric drives
   // datagen through TConstructData/FabricDataGenerator instead, so this listener is not needed.
+
+  public static void bootstrapConfigured(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
+    BlockPredicate blockPredicate = BlockPredicate.matchesTag(TinkerTags.Blocks.PLANT_REPLACEABLE);
+    FeatureUtils.register(bootstapContext, earthSlimeTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .planted()
+        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState())
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.EARTH).defaultBlockState())
+        .baseHeight(4).randomHeight(3)
+        .build());
+    FeatureUtils.register(bootstapContext, earthSlimeIslandTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState())
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.EARTH).defaultBlockState())
+        .baseHeight(4).randomHeight(3)
+        .build());
+    FeatureUtils.register(bootstapContext, skySlimeTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .planted().canDoubleHeight()
+        .trunk(() -> TinkerWorld.skyroot.getLog().defaultBlockState())
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.SKY).defaultBlockState())
+        .build());
+    FeatureUtils.register(bootstapContext, skySlimeIslandTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .canDoubleHeight()
+        .trunk(() -> TinkerWorld.skyroot.getLog().defaultBlockState())
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.SKY).defaultBlockState())
+        .vines(() -> TinkerWorld.skySlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
+        .build());
+    FeatureUtils.register(bootstapContext, enderSlimeTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .planted()
+        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState()) // TODO: temporary until we have proper green trees and ender shrooms
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.ENDER).defaultBlockState())
+        .build());
+    FeatureUtils.register(bootstapContext, enderSlimeIslandTree, slimeTree.get(),
+      new SlimeTreeConfig.Builder()
+        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState()) // TODO: temporary until we have proper green trees and ender shrooms
+        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.ENDER).defaultBlockState())
+        .vines(() -> TinkerWorld.enderSlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
+        .build());
+    FeatureUtils.register(bootstapContext, bloodSlimeFungus, slimeFungus.get(),
+      new SlimeFungusConfig(
+        TinkerTags.Blocks.SLIMY_SOIL,
+        TinkerWorld.bloodshroom.getLog().defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(SlimeType.BLOOD).defaultBlockState(),
+        TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
+        blockPredicate,
+        true));
+    FeatureUtils.register(bootstapContext, bloodSlimeIslandFungus, slimeFungus.get(),
+      new SlimeFungusConfig(
+        TinkerTags.Blocks.SLIMY_NYLIUM,
+        TinkerWorld.bloodshroom.getLog().defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(SlimeType.BLOOD).defaultBlockState(),
+        TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
+        blockPredicate,
+        false));
+    FeatureUtils.register(bootstapContext, ichorSlimeFungus, slimeFungus.get(),
+      new SlimeFungusConfig(
+        TinkerTags.Blocks.SLIMY_SOIL,
+        TinkerWorld.bloodshroom.getLog().defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(SlimeType.ICHOR).defaultBlockState(),
+        TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
+        blockPredicate,
+        false));
+  }
 }

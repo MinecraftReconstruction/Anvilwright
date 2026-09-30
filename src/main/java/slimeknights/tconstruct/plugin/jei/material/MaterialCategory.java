@@ -38,6 +38,8 @@ import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.library.utils.SimpleCache;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.melting.AbstractMeltingCategory;
+import slimeknights.tconstruct.plugin.jei.util.FluidIngredients;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tools.TinkerToolParts;
 import slimeknights.tconstruct.tools.data.material.MaterialIds;
@@ -65,7 +67,7 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
   /** Tooltip for the fluid value */
   private static final Component AMOUNT_TOOLTIP = TConstruct.makeTranslation("jei", "materials.amount.tooltip");
   /** Texture for drawables */
-  protected static final ResourceLocation BACKGROUND_LOC = AbstractMeltingCategory.BACKGROUND_LOC;
+  private static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
   /** Name of the fluid slot to find for the amount string */
   private static final String FLUID_SLOT = "fluid";
 
@@ -144,7 +146,7 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     // draw fluids
     if (!fluids.isEmpty()) {
       builder.addInputSlot(4, 2)
-        .addIngredients(FabricTypes.FLUID_STACK, fluids)
+        .addIngredients(FabricTypes.FLUID_STACK, fluids.stream().map(FluidIngredients::of).toList())
         .setFluidRenderer(100, false, 12, fluidHeight)
         .setSlotName(FLUID_SLOT);
     }
@@ -175,8 +177,9 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     int value = recipe.getValue();
     if (value > 0) {
       builder.addText(Component.translatable(KEY_VALUE, value), 111, 9)
-        .setPosition(21, 11).setColor(Color.GRAY.getRGB())
-        .setTooltip(VALUE_TOOLTIP);
+        .setPosition(21, 11).setColor(Color.GRAY.getRGB());
+      // JEI 15.20 text widgets cannot carry tooltips, so overlay one from the shared helper
+      TooltipWidget.addArea(builder, 21, 11, 111, 9, List.of(VALUE_TOOLTIP));
     } else {
       IRecipeSlotView fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
       if (fluid != null) {
@@ -186,9 +189,9 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     // craftable icon
     if (!recipe.getDisplayItems().isEmpty()) {
       if (recipe.getMaterial().get().isCraftable()) {
-        builder.addDrawableWidget(partBuilder).setPosition(21, 20).setTooltip(CRAFTABLE);
+        TooltipWidget.add(builder, partBuilder, 21, 20, List.of(CRAFTABLE));
       } else {
-        builder.addDrawableWidget(castingTable).setPosition(21, 20).setTooltip(UNCRAFTABLE);
+        TooltipWidget.add(builder, castingTable, 21, 20, List.of(UNCRAFTABLE));
       }
     }
   }
@@ -201,13 +204,8 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     }
 
     @Override
-    public @Nullable ScreenRectangle getScreenRectangle() {
-      return rectangle;
-    }
-
-    @Override
     public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-      FluidStack fluid = fluidSlot.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fluidSlot.getDisplayedIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         Component string = Component.translatable(KEY_AMOUNT, fluid.getAmount());
         graphics.drawString(font, string, 0, 0, Color.GRAY.getRGB(), false);

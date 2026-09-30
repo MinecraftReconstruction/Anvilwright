@@ -81,14 +81,6 @@ public class MaterialIngredientHelper implements IIngredientHelper<MaterialVaria
   }
 
   @Override
-  public Object getUid(MaterialVariant material, UidContext context) {
-    if (context == UidContext.Recipe) {
-      return material.getId();
-    }
-    return material.getVariant();
-  }
-
-  @Override
   public String getWildcardId(MaterialVariant material) {
     return material.getId().toString();
   }

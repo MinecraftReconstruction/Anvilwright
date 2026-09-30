@@ -17,7 +17,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IPlatformFluidHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.category.IRecipeCategory;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 /** Shared base logic for the two casting recipe types */
-public abstract class AbstractCastingCategory implements IRecipeCategory<IDisplayableCastingRecipe>, IRecipeTooltipReplacement {
+public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDisplayableCastingRecipe> implements IRecipeTooltipReplacement {
   private static final String KEY_COOLING_TIME = TConstruct.makeTranslationKey("jei", "time");
   private static final String KEY_CAST_KEPT = TConstruct.makeTranslationKey("jei", "casting.cast_kept");
   private static final String KEY_CAST_CONSUMED = TConstruct.makeTranslationKey("jei", "casting.cast_consumed");
@@ -62,17 +62,15 @@ public abstract class AbstractCastingCategory implements IRecipeCategory<IDispla
 
   @Getter
   private final IDrawable background;
-  @Getter
-  private final IDrawable icon;
   private final IDrawable tankOverlay;
   private final IDrawable castConsumed;
   private final IDrawable castKept;
   private final IDrawable block;
   private final LoadingCache<Integer,IDrawableAnimated> cachedArrows;
 
-  protected AbstractCastingCategory(IGuiHelper guiHelper, Block icon, IDrawable block) {
+  protected AbstractCastingCategory(IGuiHelper guiHelper, mezz.jei.api.recipe.RecipeType<IDisplayableCastingRecipe> recipeType, Component title, Block icon, IDrawable block) {
+    super(recipeType, title, guiHelper.createDrawableItemLike(icon), 117, 54);
     this.background = guiHelper.createDrawable(BACKGROUND_LOC, 0, 0, 117, 54);
-    this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(icon));
     this.tankOverlay = guiHelper.createDrawable(BACKGROUND_LOC, 133, 0, 32, 32);
     this.castConsumed = guiHelper.createDrawable(BACKGROUND_LOC, 141, 32, 13, 11);
     this.castKept = guiHelper.createDrawable(BACKGROUND_LOC, 141, 43, 13, 11);

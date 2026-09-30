@@ -3,6 +3,7 @@ package slimeknights.tconstruct.plugin.jei.casting;
 import lombok.Getter;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -28,7 +29,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
   public CastingRecipeManager(IIngredientManager ingredientManager, List<IDisplayableCastingRecipe> recipes) {
     this.allRecipes = FilteredRecipe.alwaysVisible(recipes);
     IIngredientHelper<ItemStack> itemHelper = ingredientManager.getIngredientHelper(VanillaTypes.ITEM_STACK);
-    IIngredientHelper<FluidStack> fluidHelper = ingredientManager.getIngredientHelper(FabricTypes.FLUID_STACK);
+    IIngredientHelper<IJeiFluidIngredient> fluidHelper = ingredientManager.getIngredientHelper(FabricTypes.FLUID_STACK);
     inputItemCache = new ItemRecipeCache<>(itemHelper, recipes, false);
     outputItemCache = new ItemRecipeCache<>(itemHelper, recipes, true);
     fluidCache = new FluidRecipeCache<>(fluidHelper, recipes, false);
@@ -51,7 +52,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
     if (itemOpt.isPresent()) {
       return inputItemCache.filterRecipes(itemOpt.get());
     }
-    Optional<FluidStack> fluidOpt = input.getIngredient(FabricTypes.FLUID_STACK);
+    Optional<IJeiFluidIngredient> fluidOpt = input.getIngredient(FabricTypes.FLUID_STACK);
     if (fluidOpt.isPresent()) {
       return fluidCache.filterRecipes(fluidOpt.get());
     }

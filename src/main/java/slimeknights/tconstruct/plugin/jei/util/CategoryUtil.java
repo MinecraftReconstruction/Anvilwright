@@ -9,6 +9,7 @@ import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
+import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -81,6 +82,17 @@ public final class CategoryUtil {
   /** Converts Porting Lib fluid stacks into the ingredient type JEI for Fabric expects */
   private static List<IJeiFluidIngredient> toJeiFluids(List<FluidStack> stacks) {
     return stacks.stream().map(FluidIngredients::of).toList();
+  }
+
+  /**
+   * Legacy overload taking the old tooltip callback type.
+   * @deprecated use the {@link IRecipeSlotRichTooltipCallback} overload
+   */
+  @Deprecated(forRemoval = true)
+  @SuppressWarnings("removal")
+  public static <T> int drawMultipleFluidsLegacy(IRecipeLayoutBuilder builder, Function<T,RecipeIngredientRole> role, int x, int y, int totalWidth, int height, List<T> fluids, int minAmount, Function<T,List<FluidStack>> mapper, Function<T,IRecipeSlotTooltipCallback> tooltip, Consumer<IRecipeSlotBuilder> slotConsumer) {
+    Function<T,IRecipeSlotRichTooltipCallback> richTooltip = ingredient -> tooltip.apply(ingredient)::onRichTooltip;
+    return drawMultipleFluids(builder, role, x, y, totalWidth, height, fluids, minAmount, mapper, richTooltip, slotConsumer);
   }
 
   /** Finds the slot with the given name, or null if the slot is missing */

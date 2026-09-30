@@ -237,9 +237,9 @@ public final class TinkerWorld extends TinkerModule {
     Function<FoliageType,BlockBehaviour.Properties> props = type -> {
       BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(type.getMapColor());
       if (type.isNether()) {
-        properties.sound(SoundType.ROOTS).offsetType(BlockBehaviour.BlockStateBase.OffsetType.XZ);
+        properties.sound(SoundType.ROOTS).offsetType(BlockBehaviour.OffsetType.XZ);
       } else {
-        properties.sound(SoundType.GRASS).offsetType(BlockBehaviour.BlockStateBase.OffsetType.XYZ);
+        properties.sound(SoundType.GRASS).offsetType(BlockBehaviour.OffsetType.XYZ);
       }
       return properties.replaceable().instabreak().noCollission().pushReaction(PushReaction.DESTROY);
     };
@@ -300,25 +300,25 @@ public final class TinkerWorld extends TinkerModule {
    * Entities
    */
   // our own copy of the slime to make spawning a bit easier
-  public static final RegistryObject<EntityType<EarthSlimeEntity>> earthSlimeEntity = ENTITIES.registerWithEgg("earth_slime",
+  public static final EntityObject<EarthSlimeEntity> earthSlimeEntity = ENTITIES.registerWithEgg("earth_slime",
     FabricEntityTypeBuilder.create(MobCategory.MONSTER, EarthSlimeEntity::new)
                       .forceTrackedVelocityUpdates(true)
                       .trackRangeChunks(10)
                       .dimensions(EntityDimensions.scalable(2.04F, 2.04F))
                       /*.entityFactory((spawnEntity, world) -> TinkerWorld.earthSlimeEntity.get().create(world))*/, 0x51a03e, 0x7ebf6e);
-  public static final RegistryObject<EntityType<SkySlimeEntity>> skySlimeEntity = ENTITIES.registerWithEgg("sky_slime",
+  public static final EntityObject<SkySlimeEntity> skySlimeEntity = ENTITIES.registerWithEgg("sky_slime",
     FabricEntityTypeBuilder.create(MobCategory.MONSTER, SkySlimeEntity::new)
                       .forceTrackedVelocityUpdates(true)
                       .trackRangeChunks(20)
                       .dimensions(EntityDimensions.scalable(2.04F, 2.04F))
                       /*.setCustomClientFactory((spawnEntity, world) -> TinkerWorld.skySlimeEntity.get().create(world))*/, 0x47eff5, 0xacfff4);
-  public static final RegistryObject<EntityType<EnderSlimeEntity>> enderSlimeEntity = ENTITIES.registerWithEgg("ender_slime",
+  public static final EntityObject<EnderSlimeEntity> enderSlimeEntity = ENTITIES.registerWithEgg("ender_slime",
     FabricEntityTypeBuilder.create(MobCategory.MONSTER, EnderSlimeEntity::new)
                       .forceTrackedVelocityUpdates(true)
                       .trackRangeChunks(32)
                       .dimensions(EntityDimensions.scalable(2.04F, 2.04F))
                       /*.setCustomClientFactory((spawnEntity, world) -> TinkerWorld.enderSlimeEntity.get().create(world))*/, 0x6300B0, 0xD37CFF);
-  public static final RegistryObject<EntityType<TerracubeEntity>> terracubeEntity = ENTITIES.registerWithEgg("terracube",
+  public static final EntityObject<TerracubeEntity> terracubeEntity = ENTITIES.registerWithEgg("terracube",
     FabricEntityTypeBuilder.create(MobCategory.MONSTER, TerracubeEntity::new)
                       .forceTrackedVelocityUpdates(true)
                       .trackRangeChunks(8)
@@ -468,8 +468,9 @@ public final class TinkerWorld extends TinkerModule {
 //    event.enqueueWork(() -> {
       FireBlock fireblock = (FireBlock)Blocks.FIRE;
       // plants
-      BiConsumer<SlimeType, Block> plantFireInfo = (type, block) -> {
-        if (type != SlimeType.BLOOD && type != SlimeType.ICHOR) {
+      // the leaves/grass maps are keyed by foliage type now
+      BiConsumer<FoliageType, Block> plantFireInfo = (type, block) -> {
+        if (type != FoliageType.BLOOD && type != FoliageType.ICHOR) {
           fireblock.setFlammable(block, 30, 60);
         }
       };

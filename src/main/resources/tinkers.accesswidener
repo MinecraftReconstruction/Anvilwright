@@ -206,3 +206,6 @@ transitive-accessible method net/minecraft/client/renderer/entity/FishingHookRen
 # Custom sprite source registration is public on Forge, private in vanilla (upstream: acceptstransformer.cfg via Forge patch)
 transitive-accessible method net/minecraft/client/renderer/texture/atlas/SpriteSources register (Ljava/lang/String;Lcom/mojang/serialization/Codec;)Lnet/minecraft/client/renderer/texture/atlas/SpriteSourceType;
 
+# Slime tree root variant placer copies the vanilla mangrove placement (upstream: accesstransformer.cfg)
+transitive-accessible field net/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacer mangroveRootPlacement Lnet/minecraft/world/level/levelgen/feature/rootplacers/MangroveRootPlacement;
+

@@ -50,6 +50,17 @@ public class Config {
     public final BooleanValue slimyLootChests;
     public final BooleanValue dropDragonScales;
     public final IntValue wandererAncientToolWeight;
+    /** Fork content: weight of blazing blood in piglin bartering, 0 disables it */
+    public final IntValue barterBlazingBlood;
+    /** Fork content: weight of tinker tools in the vanilla spawn bonus chest, 0 disables it */
+    public final IntValue tinkerToolBonusChest;
+
+    // worldgen (fork content, upstream removed these options)
+    public final BooleanValue generateCobalt;
+    public final BooleanValue earthGeodes;
+    public final BooleanValue skyGeodes;
+    public final BooleanValue ichorGeodes;
+    public final BooleanValue enderGeodes;
 
     public final OreRate melterOreRate;
     public final OreRate smelteryOreRate;
@@ -178,7 +189,37 @@ public class Config {
       wandererAncientToolWeight = builder
         .comment("Weight of the ancient tool trade for the wandering trader. All traders randomly choose 1 rare trade, so this is roughly the chance the trade occurs compared to the vanilla options (of which there are 6).")
         .defineInRange("wanderer_ancient_tool_weight", 6, 0, 100);
+      // fork content, kept as options so packs can turn it off
+      barterBlazingBlood = builder
+        .comment("Weight of blazing blood in the piglin bartering tables. Set to 0 to disable")
+        .worldRestart()
+        .defineInRange("barter_blazing_blood", 20, 0, 100);
+      tinkerToolBonusChest = builder
+        .comment("Weight of tinker tools in the vanilla spawn bonus chest, randomly replacing the vanilla axe or shovel. Tool will have a random tier 1 head and binding, plus a wooden handle. Set to 0 to disable.")
+        .worldRestart()
+        .defineInRange("tinker_tool_bonus_chest", 2, 0, 25);
 
+      builder.pop();
+
+      builder.comment("Everything to do with world generation").push("worldgen");
+      {
+        this.generateCobalt = builder
+          .comment("Generate cobalt ore")
+          .worldRestart()
+          .define("generateCobalt", true);
+        this.earthGeodes = builder
+          .comment("If true, earthslime geodes generate deep in the world as another way to get slime")
+          .define("earth", true);
+        this.skyGeodes = builder
+          .comment("If true, skyslime geodes generate above amethyst as another way to get skyslime")
+          .define("sky", true);
+        this.ichorGeodes = builder
+          .comment("If true, ichor geodes generate high in the nether. Strongly encouraged to keep enabled even if you disable the other geodes, as ichor crystals have some unique recipes and the fallbacks kinda suck for gameplay.")
+          .define("ichor", true);
+        this.enderGeodes = builder
+          .comment("If true, enderslime geodes generate as additional islands in the end")
+          .define("ender", true);
+      }
       builder.pop();
 
       builder.comment("Configuration related to integration with other mods").push("compatability");

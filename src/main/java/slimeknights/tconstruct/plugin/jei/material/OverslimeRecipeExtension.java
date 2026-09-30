@@ -22,6 +22,7 @@ import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeCrafting
 import slimeknights.tconstruct.library.recipe.modifiers.adding.OverslimeModifierRecipe;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.awt.Color;
@@ -102,7 +103,8 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension {
   public void createRecipeExtras(IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
     int restoreAmount = recipe.getRestoreAmount();
     builder.addText(Component.translatable(KEY_AMOUNT, restoreAmount), 57, 9)
-      .setPosition(60, 44).setColor(Color.GRAY.getRGB())
-      .setTooltip(Component.translatable(KEY_TOOLTIP, restoreAmount));
+      .setPosition(60, 44).setColor(Color.GRAY.getRGB());
+    // JEI 15.20 text widgets cannot carry a tooltip; use the shared tooltip widget over the same area
+    TooltipWidget.addArea(builder, 60, 44, 57, 9, List.of(Component.translatable(KEY_TOOLTIP, restoreAmount)));
   }
 }
