@@ -45,7 +45,7 @@ public class DynamicTextureLoader extends ResourceValidator {
   /** Registers this manager */
   public static void init() {
     // clear cache on texture stitch, no longer need it then as its too late to lookup textures
-    TextureStitchCallback.POST.register(e -> clear());
+    TextureStitchCallback.POST.register(e -> INSTANCE.clear());
   }
 
   /**

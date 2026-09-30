@@ -49,7 +49,7 @@ public abstract class AbstractTagProvider<T> extends GenericDataProvider {
   protected final Map<ResourceLocation, TagBuilder> builders = Maps.newLinkedHashMap();
 
   protected AbstractTagProvider(FabricDataOutput output, String modId, String folder, Function<T,ResourceLocation> keyGetter, Predicate<ResourceLocation> staticValuePredicate, ExistingFileHelper existingFileHelper) {
-    super(output, Target.SERVER_DATA, folder);
+    super(output, Target.DATA_PACK, folder);
     this.modId = modId;
     this.keyGetter = keyGetter;
     this.staticValuePredicate = staticValuePredicate;

@@ -404,3 +404,22 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 - `TagAppender`/`FabricTagBuilder` 的**静态类型**决定链式调用能不能继续：`getOrCreateTagBuilder(...)`
   返回 `FabricTagBuilder`，而 `tag(...)` 返回 vanilha 的 `TagAppender`（没有 `add(T...)`）。
   想继续链式必须用前者，且 `add(...)` 要放在 `addTag(...)`/`addTags(...)` **之前**。
+
+### 2026-10-01 凌晨（四）：继续推平 292 → 147
+
+| 检查点 commit | 条数 | 修的东西 |
+|---|---|---|
+| `0a591fa729` | **254** | 书本内容（材料页取上游 + Fabric 适配）、谓词注册表去掉 `AND/OR/INVERTED`（Mantle 自己注册） |
+| `f1d62a23b0` | **224** | 客户端模型 helper、`ClampedItemPropertyFunction`、储罐光照、melter 菜单的 `FluidTransferHelper` |
+| `d631ec1bac` | **208** | 流体储罐/管道改 Transfer API、容量 long 化、drain 的 `getListenerPos` |
+| `e9328fb090` | **177** | 代理储罐的流体视图、爆炸事件（Porting Lib `ExplosionEvents`）、`TinkerDamageTypes.source`、配置字段补回 |
+| `ba45575de6` | **160** | datagen 构造函数、条件求值（`ResourceConditions`）、材料谓词序列化器、JsonUtils/Util |
+| `52992e8b15` | **147** | 客户端 loader helper、材料贴图 quad、block tag 原料、书里头盔槽位 |
+
+**新发现的坑**
+- Mantle 1.11 的 `Loadable` 用 `convert(JsonElement, String)` / `getIfPresent(JsonObject, String)`，
+  老代码里的 `JsonHelper.parseColor/getJson/convertToItemStack` 这些垫片都要换成
+  `ColorLoadable.ALPHA.parseString(...)` / `JsonHelper.getJson(resource, location)` / `ItemStackLoadable.*`。
+- `PackOutput.Target` 在 Fabric 侧是 `DATA_PACK` / `RESOURCE_PACK`（不是 `SERVER_DATA`）。
+- `Ingredient#isSimple/isVanilla` 是 Forge 补丁，Fabric 侧要改用 `CustomIngredient#requiresTesting()`
+  和 `instanceof CustomIngredient` 判断。
