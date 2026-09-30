@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<ContainerFillingRecipeBuilder> {
   private final ResourceLocation result;
-  private final int fluidAmount;
+  private final long fluidAmount;
   private final TypeAwareRecipeSerializer<? extends ContainerFillingRecipe> recipeSerializer;
 
   /**
@@ -32,7 +32,7 @@ public class ContainerFillingRecipeBuilder extends AbstractRecipeBuilder<Contain
    * @param recipeSerializer  Serializer
    * @return  Builder instance
    */
-  public static ContainerFillingRecipeBuilder castingRecipe(ItemLike result, int fluidAmount, TypeAwareRecipeSerializer<? extends ContainerFillingRecipe> recipeSerializer) {
+  public static ContainerFillingRecipeBuilder castingRecipe(ItemLike result, long fluidAmount, TypeAwareRecipeSerializer<? extends ContainerFillingRecipe> recipeSerializer) {
     return new ContainerFillingRecipeBuilder(Loadables.ITEM.getKey(result.asItem()), fluidAmount, recipeSerializer);
   }
 

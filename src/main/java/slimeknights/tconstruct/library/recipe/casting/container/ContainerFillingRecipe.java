@@ -129,10 +129,10 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   @Override
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
-      List<ItemStack> casts = Collections.singletonList(new ItemStack(container));
+      List<ItemStack> casts = List.of(new ItemStack(container));
       displayRecipes = BuiltInRegistries.FLUID.stream()
                                              .filter(fluid -> fluid.getBucket() != Items.AIR && fluid.isSource(fluid.defaultFluidState()))
-                                             .map(fluid -> {
+                                             .<IDisplayableCastingRecipe>map(fluid -> {
                                                FluidStack fluidStack = new FluidStack(fluid, fluidAmount);
                                                ItemStack stack = new ItemStack(container);
                                                ContainerItemContext context = ContainerItemContext.withInitial(stack);
@@ -143,7 +143,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
                                                  }
                                                  return context.getItemVariant().toStack((int) context.getAmount());
                                                }).orElse(stack);
-                                               return new DisplayCastingRecipe(getType(), casts, Collections.singletonList(fluidStack), stack, 5, true);
+                                               return new DisplayCastingRecipe(getType(), casts, List.of(fluidStack), stack, 5, true);
                                              })
                                              .toList();
     }

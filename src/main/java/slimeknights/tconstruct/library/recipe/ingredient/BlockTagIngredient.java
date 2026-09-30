@@ -27,6 +27,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import slimeknights.mantle.recipe.helper.LoadableIngredientSerializer;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /** Item ingredient matching items with a block form in the given tag */
 @RequiredArgsConstructor
@@ -59,8 +61,7 @@ public class BlockTagIngredient extends AbstractIngredient {
   /** Gets the ordered matching items set */
   @SuppressWarnings("deprecation")
   private Set<Item> getMatchingItems() {
-    if (matchingItems == null || checkInvalidation()) {
-      markValid();
+    if (matchingItems == null) {
       matchingItems = RegistryHelper.getTagValueStream(BuiltInRegistries.BLOCK, tag)
                                     .map(Block::asItem)
                                     .filter(item -> item != Items.AIR)
@@ -71,8 +72,7 @@ public class BlockTagIngredient extends AbstractIngredient {
 
   @Override
   public ItemStack[] getItems() {
-    if (items == null || checkInvalidation()) {
-      markValid();
+    if (items == null) {
       items = getMatchingItems().stream().map(ItemStack::new).toArray(ItemStack[]::new);
     }
     return items;
@@ -81,8 +81,7 @@ public class BlockTagIngredient extends AbstractIngredient {
   @SuppressWarnings("deprecation")
   @Override
   public IntList getStackingIds() {
-    if (stackingIds == null || checkInvalidation()) {
-      markValid();
+    if (stackingIds == null) {
       Set<Item> items = getMatchingItems();
       stackingIds = new IntArrayList(items.size());
       for (Item item : items) {
@@ -94,39 +93,20 @@ public class BlockTagIngredient extends AbstractIngredient {
   }
 
   @Override
-  public CustomIngredientSerializer<?> getSerializer() {
-    return Serializer.INSTANCE;
-  }
-
-  @Override
   public JsonElement toJson() {
     JsonObject json = new JsonObject();
-    json.addProperty("fabric:type", Serializer.ID.toString());
+    json.addProperty("fabric:type", ID.toString());
     json.add("tag", Loadables.BLOCK_TAG.serialize(tag));
     return json;
   }
 
   /** Serializer instance */
-  public enum Serializer implements CustomIngredientSerializer<Ingredient> {
-    INSTANCE;
+  public static final ResourceLocation ID = TConstruct.getResource("block_tag");
+  public static final LoadableIngredientSerializer<BlockTagIngredient> SERIALIZER = new LoadableIngredientSerializer<>(ID,
+    RecordLoadable.create(Loadables.BLOCK_TAG.requiredField("tag", i -> i.tag), BlockTagIngredient::new));
 
-    public static final ResourceLocation ID = TConstruct.getResource("block_tag");
-
-    @Override
-    public Ingredient read(JsonObject json) {
-      return new BlockTagIngredient(Loadables.BLOCK_TAG.getIfPresent(json, "tag"));
-    }
-
-    @Override
-    public void write(FriendlyByteBuf buffer, Ingredient ingredient) {
-      // just write the item list, will become a vanilla ingredient client side
-      buffer.writeCollection(Arrays.asList(ingredient.getItems()), FriendlyByteBuf::writeItem);
-    }
-
-    @Override
-    public Ingredient read(FriendlyByteBuf buffer) {
-      int size = buffer.readVarInt();
-      return Ingredient.fromValues(Stream.generate(() -> new Ingredient.ItemValue(buffer.readItem())).limit(size));
-    }
+  @Override
+  public LoadableIngredientSerializer<BlockTagIngredient> getSerializer() {
+    return SERIALIZER;
   }
 }

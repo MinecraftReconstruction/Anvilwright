@@ -40,7 +40,6 @@ public abstract class NestedIngredient extends AbstractIngredient {
   @Override
   protected void invalidate() {
     super.invalidate();
-    nested.checkInvalidation();
   }
 
   @Override

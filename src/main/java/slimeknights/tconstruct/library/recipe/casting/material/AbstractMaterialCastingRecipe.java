@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.recipe.casting.ICastingContainer;
 import slimeknights.tconstruct.library.recipe.casting.ICastingRecipe;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Casting recipe that takes an arbitrary fluid of a given amount and set the material on the output based on that fluid
@@ -45,6 +46,12 @@ public abstract class AbstractMaterialCastingRecipe extends AbstractCastingRecip
   /** Gets the material fluid recipe for the given recipe */
   protected MaterialFluidRecipe getFluidRecipe(ICastingContainer inv) {
     return MaterialCastingLookup.getCastingFluid(inv.getFluid(), materials);
+  }
+
+  /** Gets the material fluid recipe for the given recipe, empty if the fluid is not usable */
+  protected Optional<MaterialFluidRecipe> getCachedMaterialFluid(ICastingContainer inv) {
+    MaterialFluidRecipe recipe = getFluidRecipe(inv);
+    return recipe == MaterialFluidRecipe.EMPTY ? Optional.empty() : Optional.of(recipe);
   }
 
   @Override
