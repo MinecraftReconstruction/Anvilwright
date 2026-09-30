@@ -23,6 +23,7 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.List;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 
 /** Slime that spawns wearing travelers gear or plate gear */
 public abstract class TravelersPlateSlimeEntity extends ArmoredSlimeEntity {
@@ -45,9 +46,9 @@ public abstract class TravelersPlateSlimeEntity extends ArmoredSlimeEntity {
       // start by randomly choosing plate or travelers. Starts at a 35% chance of plate but plate becomes more common with difficulty
       IModifiable helmetItem;
       if (this.random.nextFloat() < 0.35f * multiplier) {
-        helmetItem = TinkerTools.plateArmor.get(ArmorItem.Type.HELMET);
+        helmetItem = TinkerTools.plateArmor.get(ArmorSlotType.HELMET);
       } else {
-        helmetItem = TinkerTools.travelersGear.get(ArmorItem.Type.HELMET);
+        helmetItem = TinkerTools.travelersGear.get(ArmorSlotType.HELMET);
       }
       // next select materials; first is always fixed
       ToolDefinition definition = helmetItem.getToolDefinition();

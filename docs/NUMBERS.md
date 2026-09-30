@@ -315,3 +315,45 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 `TagEmptyCondition.SERIALIZER::test`（语义反了）。TCon 生成的数据里有 **342 个** JSON 用这个条件，
 兼容材料会在标签**不存在**时反而加载。已修、已 push、已 `publishToMavenLocal` 为
 `1.11.DEV.1e53afad`，TCon 的 `mantle_version` 已同步（classpath 也已重新生成）。
+
+### 2026-10-01 凌晨：JEI 15.20 与 world 模块清完，隐藏队列仍在（本轮交接）
+
+本轮的 checkpoint（每个都 push + `git ls-remote` 复核过）：
+
+| commit | 内容 |
+|---|---|
+| `32f391871f` | datagen 家族 8 个文件取上游 + 补管线（81 → 36） |
+| `ca2544e034` | MaterialRecipeProvider / client model Mesh / AW 两条 |
+| `05a08b41f1` | 停用 REI（移到 `src/rei-unsupported`）、JEI 15.20 适配开始 |
+| `8044d90de8` | JEI 流体类型、TankBlockEntity/SearedTankBlock、ModifierManager tags |
+| `7207abf7c7` | JEI 15.20 收尾 + world 模块（Config 选项、worldgen bootstrap） |
+
+**口径提醒（最重要的一条）**：整树 `--gen` 现在在 **1～20 之间来回跳**，但那是假象 ——
+每修好一个文件，javac 就"多归因一个文件"，于是又冒出新错误。真实剩余量看分块口径
+（`scripts/port/truecount.sh`），本轮中途的完整快照是 **170 个包 / 1620 条**（约 3 小时前的数据，
+之后又修了 ~60 处）。**不要用整树数字判断进度。**
+
+本阶段验证过的"等价替换"清单（可直接脚本化，附错误签名）：
+
+| 错误签名 | 替换 |
+|---|---|
+| `ForgeMod.BLOCK_REACH.get()` 之类 | `PortingLibAttributes.BLOCK_REACH`（字段，无 `.get()`） |
+| `FluidType.BUCKET_VOLUME` | `FluidConstants.BUCKET` |
+| `IIngredientHelper#getUid(...)` | `getUniqueId(...)` |
+| `ITypedIngredient#cast(TYPE)` | `getIngredient(TYPE)`（返回 `Optional`） |
+| `addRecipeArrowWidget().setPosition(x,y)` | `addRecipeArrow().setPosition(x,y)` |
+| `addDrawableWidget(D).setPosition(x,y)[.setTooltip(t)]` | `builder.addDrawable(D,x,y)`（tooltip 用 `plugin/jei/util/TooltipWidget`） |
+| `addIngredients(FabricTypes.FLUID_STACK, List<FluidStack>)` | 先 `stream().map(FluidIngredients::of).toList()` |
+| `PackOutput`（datagen provider ctor） | `FabricDataOutput` |
+| `BlockBehaviour.BlockStateBase.OffsetType` | `BlockBehaviour.OffsetType` |
+| `Holder::get` | `Holder::value` |
+| `getData().getTraits()` | `ToolTraitHook.getTraits(definition, MaterialNBT.EMPTY)` |
+| 旧 fork 的枚举 key（`slimeLeaves.get(SlimeType.X)`） | 新 key（`FoliageType.X`，必要时 `.asSlime()` / `.asDirt()`） |
+
+**下一步（按顺序）**：
+1. 重跑 `scripts/port/truecount.sh` 拿最新完整清单（约 20 分钟），按包推平；
+2. 还剩的已知簇：`BlockModelSkullRenderer.renderModelLists`（AW 可解）、`BuddingCrystalBlock`、
+   `FluidEffectManager`（`CraftingHelper.processConditions` → Fabric 条件判断）、`GenericNBTProvider` 的
+   `DataGenerator#getPackOutput`（已把该 ctor 删掉，需确认调用点）；
+3. 全树 0 之后：`./gradlew build --offline` → `runData` → **把 `src/generated` 与上游 3.12.1 逐文件 diff**
+   （这是最能抓语义错误的闸门）→ `runServer` → `runClient`。

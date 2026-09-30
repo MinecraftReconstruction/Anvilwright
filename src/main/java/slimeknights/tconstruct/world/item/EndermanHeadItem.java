@@ -13,7 +13,11 @@ public class EndermanHeadItem extends StandingAndWallBlockItem {
     super(pBlock, pWallBlock, pProperties, pAttachmentDirection);
   }
 
-  @Override
+  /**
+   * Forge hook that has no Porting Lib interface; kept for API compatibility.
+   * Vanilla hardcodes the carved pumpkin check, so this needs a mixin to actually take effect.
+   * Tracked in docs/BEHAVIOUR-DIFFERENCES.md.
+   */
   public boolean isEnderMask(ItemStack stack, Player player, EnderMan endermanEntity) {
     return true;
   }

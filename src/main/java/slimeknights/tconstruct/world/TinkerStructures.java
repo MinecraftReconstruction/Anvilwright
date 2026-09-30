@@ -37,6 +37,7 @@ import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.block.SlimeVineBlock;
 import slimeknights.tconstruct.world.block.SlimeVineBlock.VineStage;
+import slimeknights.tconstruct.world.block.FoliageType;
 
 /**
  * Contains any logic relevant to structure generation, including trees and islands
@@ -53,13 +54,13 @@ public final class TinkerStructures extends TinkerModule {
 
 
   public TinkerStructures() {
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-    FEATURES.register(bus);
-    STRUCTURE_TYPE.register(bus);
-    STRUCTURE_PIECE.register(bus);
-    TREE_DECORATORS.register(bus);
-    ROOT_PLACERS.register(bus);
-    BLOCK_STATE_PROVIDERS.register(bus);
+    // Fabric has no mod event bus: register() with no arguments installs into the vanilla registries
+    FEATURES.register();
+    STRUCTURE_TYPE.register();
+    STRUCTURE_PIECE.register();
+    TREE_DECORATORS.register();
+    ROOT_PLACERS.register();
+    BLOCK_STATE_PROVIDERS.register();
   }
 
 
@@ -123,50 +124,50 @@ public final class TinkerStructures extends TinkerModule {
   // datagen through TConstructData/FabricDataGenerator instead, so this listener is not needed.
 
   public static void bootstrapConfigured(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-    BlockPredicate blockPredicate = BlockPredicate.matchesTag(TinkerTags.Blocks.PLANT_REPLACEABLE);
+    BlockPredicate blockPredicate = BlockPredicate.replaceable();
     FeatureUtils.register(bootstapContext, earthSlimeTree, slimeTree.get(),
       new SlimeTreeConfig.Builder()
         .planted()
-        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState())
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.EARTH).defaultBlockState())
+        .trunk(TinkerWorld.greenheart.getLog())
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.EARTH))
         .baseHeight(4).randomHeight(3)
         .build());
     FeatureUtils.register(bootstapContext, earthSlimeIslandTree, slimeTree.get(),
       new SlimeTreeConfig.Builder()
-        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState())
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.EARTH).defaultBlockState())
+        .trunk(TinkerWorld.greenheart.getLog())
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.EARTH))
         .baseHeight(4).randomHeight(3)
         .build());
     FeatureUtils.register(bootstapContext, skySlimeTree, slimeTree.get(),
       new SlimeTreeConfig.Builder()
         .planted().canDoubleHeight()
-        .trunk(() -> TinkerWorld.skyroot.getLog().defaultBlockState())
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.SKY).defaultBlockState())
+        .trunk(TinkerWorld.skyroot.getLog())
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.SKY))
         .build());
     FeatureUtils.register(bootstapContext, skySlimeIslandTree, slimeTree.get(),
       new SlimeTreeConfig.Builder()
         .canDoubleHeight()
-        .trunk(() -> TinkerWorld.skyroot.getLog().defaultBlockState())
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.SKY).defaultBlockState())
-        .vines(() -> TinkerWorld.skySlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
+        .trunk(TinkerWorld.skyroot.getLog())
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.SKY))
+        .vines(TinkerWorld.skySlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
         .build());
     FeatureUtils.register(bootstapContext, enderSlimeTree, slimeTree.get(),
       new SlimeTreeConfig.Builder()
         .planted()
-        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState()) // TODO: temporary until we have proper green trees and ender shrooms
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.ENDER).defaultBlockState())
+        .trunk(TinkerWorld.greenheart.getLog()) // TODO: temporary until we have proper green trees and ender shrooms
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.ENDER))
         .build());
-    FeatureUtils.register(bootstapContext, enderSlimeIslandTree, slimeTree.get(),
+    FeatureUtils.register(bootstapContext, enderSlimeTreeTall, slimeTree.get(),
       new SlimeTreeConfig.Builder()
-        .trunk(() -> TinkerWorld.greenheart.getLog().defaultBlockState()) // TODO: temporary until we have proper green trees and ender shrooms
-        .leaves(() -> TinkerWorld.slimeLeaves.get(SlimeType.ENDER).defaultBlockState())
-        .vines(() -> TinkerWorld.enderSlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
+        .trunk(TinkerWorld.greenheart.getLog()) // TODO: temporary until we have proper green trees and ender shrooms
+        .leaves(TinkerWorld.slimeLeaves.get(FoliageType.ENDER))
+        .vines(TinkerWorld.enderSlimeVine.get().defaultBlockState().setValue(SlimeVineBlock.STAGE, VineStage.MIDDLE))
         .build());
     FeatureUtils.register(bootstapContext, bloodSlimeFungus, slimeFungus.get(),
       new SlimeFungusConfig(
         TinkerTags.Blocks.SLIMY_SOIL,
         TinkerWorld.bloodshroom.getLog().defaultBlockState(),
-        TinkerWorld.slimeLeaves.get(SlimeType.BLOOD).defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(FoliageType.BLOOD).defaultBlockState(),
         TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
         blockPredicate,
         true));
@@ -174,7 +175,7 @@ public final class TinkerStructures extends TinkerModule {
       new SlimeFungusConfig(
         TinkerTags.Blocks.SLIMY_NYLIUM,
         TinkerWorld.bloodshroom.getLog().defaultBlockState(),
-        TinkerWorld.slimeLeaves.get(SlimeType.BLOOD).defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(FoliageType.BLOOD).defaultBlockState(),
         TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
         blockPredicate,
         false));
@@ -182,7 +183,7 @@ public final class TinkerStructures extends TinkerModule {
       new SlimeFungusConfig(
         TinkerTags.Blocks.SLIMY_SOIL,
         TinkerWorld.bloodshroom.getLog().defaultBlockState(),
-        TinkerWorld.slimeLeaves.get(SlimeType.ICHOR).defaultBlockState(),
+        TinkerWorld.slimeLeaves.get(FoliageType.ICHOR).defaultBlockState(),
         TinkerWorld.congealedSlime.get(SlimeType.ICHOR).defaultBlockState(),
         blockPredicate,
         false));

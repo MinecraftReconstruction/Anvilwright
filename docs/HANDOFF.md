@@ -529,3 +529,36 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
    `printCompileCp`**（本轮已做过）。
 5. 本轮新增两条 accesswidener（对应上游 `accesstransformer.cfg`）：
    `FishingHookRenderer.stringVertex`、`SpriteSources.register`；**改 AW 必须重跑 `printCompileCp`**。
+
+---
+
+## 20. 2026-10-01 凌晨：整树数字已经彻底不可信，请用分块口径（本轮交接）
+
+**本轮最重要的一句话**：整树 `--gen` 在 1～20 之间来回跳，**不代表进度**。javac 每归因成功一个文件，
+就会把下一个"从没被检查过"的文件暴露出来。要看真实剩余量必须跑
+`scripts/port/truecount.sh`（分块编译，约 20 分钟）。
+
+**本轮结束时的状态**：
+- 已 push 的 checkpoint：`32f391871f` → `ca2544e034` → `05a08b41f1` → `8044d90de8` → `7207abf7c7`
+- 目录：`src/rei-unsupported/java/**`（停用的 REI 插件，见行为差异 #32）
+- Mantle 版本：`1.11.DEV.1e53afad`（修了 `mantle:tag_filled` 反相）
+- AW 新增：`FishingHookRenderer.stringVertex`、`SpriteSources.register`、
+  `MangroveRootPlacer.mangroveRootPlacement`
+- 当前阻塞的簇（接手时直接从这里开始）：`BlockModelSkullRenderer`（`renderModelLists` 私有 → AWS）、
+  `BuddingCrystalBlock`（多余的 `@Override`）、`FluidEffectManager`（`CraftingHelper.processConditions`
+  → Fabric 的 `ResourceConditions`）、`GenericNBTProvider`（已删掉用 `DataGenerator#getPackOutput` 的 ctor，
+  要检查还有没有人调用那种构造）
+
+**给接手的你（或下一个 agent）的最小流程**：
+1. `scripts/port/truecount.sh .port/true_now.txt`（拿全量清单）
+2. 按清单逐包修；每修完一轮跑 `scripts/port/fastcompile.sh --gen`（只看"有没有新增"）
+3. 每 1～2 个簇 commit + push（用 `git ls-remote` 复核，别信管道退出码）
+4. 非语义等价改动 → `docs/BEHAVIOUR-DIFFERENCES.md`
+5. 编译 0 之后：`./gradlew build --offline` → `runData` → 与上游 3.12.1 的 `src/generated` 做 diff
+   （**这是最能抓语义错误的验收手段**）→ `runServer` → `runClient`
+
+**已知的、必须靠"看"而不是靠"编译"确认的地方**（信心最低的三块）：
+- 流体单位：本移植是 droplet（1 桶 = 81000），上游是 mB（1000），行为差异 #20/#23
+- 渲染链路：`IBakedModifierModel` 是 fork 的 `Mesh getQuads(...)`，本轮把若干 `addQuads` 改回 `getQuads`
+  并用 `ToolModel.ofQuads` 包 vanilla quads —— 编译过 ≠ 画面对
+- 那些 fork 独有内容（血史莱姆、geode、bonus chest、REI、JEI 自写 tooltip widget）与上游数据集的一致性

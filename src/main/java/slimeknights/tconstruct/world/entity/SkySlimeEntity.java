@@ -14,6 +14,17 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.tools.data.material.MaterialIds;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
+import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
+import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import slimeknights.tconstruct.library.modifiers.ModifierEntry;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
+import slimeknights.tconstruct.tools.data.ModifierIds;
 
 public class SkySlimeEntity extends TravelersPlateSlimeEntity {
   private double bounceAmount = 0f;
@@ -78,9 +89,8 @@ public class SkySlimeEntity extends TravelersPlateSlimeEntity {
 
       // for plate, just init stats
       ToolStack tool = ToolStack.from(helmet);
-      tool.ensureSlotsBuilt();
       ModifierNBT modifiers = tool.getUpgrades();
-      ModDataNBT persistentData = tool.getPersistentData();
+      ToolDataNBT persistentData = tool.getPersistentData();
       if (!isPlate) {
         // travelers dyes a random color
         persistentData.putInt(TinkerModifiers.dyed.getId(), this.random.nextInt(0xFFFFFF+1));
@@ -112,15 +122,20 @@ public class SkySlimeEntity extends TravelersPlateSlimeEntity {
 
   private static ModifierId randomDefense(int index) {
     return switch (index) {
-      default -> TinkerModifiers.meleeProtection.getId();
-      case 1 -> TinkerModifiers.projectileProtection.getId();
-      case 2 -> TinkerModifiers.fireProtection.getId();
-      case 3 -> TinkerModifiers.magicProtection.getId();
-      case 4 -> TinkerModifiers.blastProtection.getId();
+      default -> ModifierIds.meleeProtection;
+      case 1 -> ModifierIds.projectileProtection;
+      case 2 -> ModifierIds.fireProtection;
+      case 3 -> ModifierIds.magicProtection;
+      case 4 -> ModifierIds.blastProtection;
       case 5 -> TinkerModifiers.golden.getId();
     };
   }
 
   @Override
   protected void populateDefaultEquipmentEnchantments(RandomSource randomSource, DifficultyInstance difficulty) {}
+
+  @Override
+  protected MaterialId getPlating() {
+    return MaterialIds.steel;
+  }
 }

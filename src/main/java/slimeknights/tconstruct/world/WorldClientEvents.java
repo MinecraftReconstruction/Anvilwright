@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.model.PiglinHeadModel;
+import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
 
 @SuppressWarnings("unused")
 public class WorldClientEvents extends ClientEventBase {
@@ -78,7 +79,7 @@ public class WorldClientEvents extends ClientEventBase {
     registerLayerDefinition(TinkerHeadType.CAVE_SPIDER, spiderHead);
 
     // piglin
-    Supplier<LayerDefinition> piglinHead = Lazy.of(SkullModelHelper::createPiglinHead);
+    Supplier<LayerDefinition> piglinHead = Lazy.of(() -> LayerDefinition.create(PiglinHeadModel.createHeadModel(), 64, 64));
     registerLayerDefinition(TinkerHeadType.PIGLIN_BRUTE, piglinHead);
     registerLayerDefinition(TinkerHeadType.ZOMBIFIED_PIGLIN, piglinHead);
   }
@@ -88,7 +89,7 @@ public class WorldClientEvents extends ClientEventBase {
   }
 
   static void registerRenderersSlime() {
-    EntityRendererRegistry.register(TinkerWorld.earthSlimeEntity.get(), TinkerSlimeRenderer.EARTH_SLIME_FACTORY);
+    EntityRendererRegistry.register(TinkerWorld.earthSlimeEntity.get(), TinkerSlimeRenderer.SLIME_FACTORY);
     EntityRendererRegistry.register(TinkerWorld.skySlimeEntity.get(), TinkerSlimeRenderer.SKY_SLIME_FACTORY);
     EntityRendererRegistry.register(TinkerWorld.enderSlimeEntity.get(), TinkerSlimeRenderer.ENDER_SLIME_FACTORY);
     EntityRendererRegistry.register(TinkerWorld.terracubeEntity.get(), TerracubeRenderer::new);
@@ -120,7 +121,8 @@ public class WorldClientEvents extends ClientEventBase {
     // render types - slime blocks
     RenderType translucent = RenderType.translucent();
     for (FoliageType type : FoliageType.VISIBLE) {
-      BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slime.get(type), translucent);
+      // the slime block map is keyed by slime type, so translate the foliage type
+      BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slime.get(type.asSlime()), translucent);
     }
 
     // doors

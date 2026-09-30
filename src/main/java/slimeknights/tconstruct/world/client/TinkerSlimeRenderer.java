@@ -13,6 +13,8 @@ import slimeknights.tconstruct.world.entity.ArmoredSlimeEntity;
 public class TinkerSlimeRenderer extends SlimeRenderer {
   public static final Factory SKY_SLIME_FACTORY = new Factory(TConstruct.getResource("textures/entity/sky_slime.png"), TConstruct.getResource("textures/entity/steel_slime.png"));
   public static final Factory ENDER_SLIME_FACTORY = new Factory(TConstruct.getResource("textures/entity/ender_slime.png"), TConstruct.getResource("textures/entity/knightmetal_slime.png"));
+  /** Earth slimes use the vanilla slime texture, with iron for the metal variant */
+  public static final Factory SLIME_FACTORY = new Factory(new ResourceLocation("textures/entity/slime/slime.png"), TConstruct.getResource("textures/entity/slime.png"));
 
   private final ResourceLocation slime, metal;
   public TinkerSlimeRenderer(EntityRendererProvider.Context context, ResourceLocation slime, ResourceLocation metal) {
