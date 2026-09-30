@@ -94,14 +94,10 @@ public class DuctItemHandler extends SingleItemHandler<DuctBlockEntity> {
       if (stack.isEmpty()) {
         fluid = FluidStack.EMPTY;
       } else {
-        fluid = FluidUtil.getFluidHandler(stack)
-          .map(handler -> handler.getFluidInTank(0))
-          .orElse(FluidStack.EMPTY);
+        Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+        fluid = storage == null ? FluidStack.EMPTY : TransferUtil.firstOrEmpty(storage);
       }
     }
-    Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
-    if (storage == null)
-      return FluidStack.EMPTY;
-    return TransferUtil.firstOrEmpty(storage);
+    return fluid;
   }
 }

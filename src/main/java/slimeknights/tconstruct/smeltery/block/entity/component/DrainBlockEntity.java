@@ -9,12 +9,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.mantle.util.RetexturedHelper;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutputBlockEntity.SmelteryFluidIO;
 import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
 
 import javax.annotation.Nonnull;
 import slimeknights.mantle.client.model.ModelData;
+import java.util.Objects;
 
 /**
  * Fluid IO extension to display controller fluid
@@ -48,6 +51,11 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
     }
   }
 
+  @Override
+  public BlockPos getListenerPos() {
+    return worldPosition;
+  }
+
 
   /* Updating */
 
@@ -61,11 +69,7 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
 
   @Override
   public void handleUpdateTag(CompoundTag tag) {
-    BlockPos oldMaster = getMasterPos();
     CustomUpdateTagHandlingBlockEntity.super.handleUpdateTag(tag);
-    if (!Objects.equals(oldMaster, getMasterPos())) {
-      attachFluidListener();
-    }
   }
 
   @Override

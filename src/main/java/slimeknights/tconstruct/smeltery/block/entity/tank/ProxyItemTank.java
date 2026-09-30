@@ -4,6 +4,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -37,10 +38,11 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
 
   @SuppressWarnings("deprecation")
   @Override
-  protected boolean isItemValid(ItemStack stack) {
+  protected boolean isItemValid(ItemVariant variant) {
     // can only store items that are fluid handlers, though allow blacklist in case something is really broken
     // blacklist is mostly used for items that don't support incremental filling, as this block really isn't good at working with them
     // we check the container item so we don't have to put every bucket in the tag. Not bothering with complex container items; odds are item stack sensitive just returns the same item
+    ItemStack stack = variant.toStack();
     Item craftRemainingItem = stack.getItem().getCraftingRemainingItem();
     return !stack.is(TinkerTags.Items.PROXY_TANK_BLACKLIST)
       && (craftRemainingItem == null || !RegistryHelper.contains(TinkerTags.Items.PROXY_TANK_BLACKLIST, craftRemainingItem))
