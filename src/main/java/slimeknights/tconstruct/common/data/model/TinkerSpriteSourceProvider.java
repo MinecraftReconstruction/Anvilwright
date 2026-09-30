@@ -37,7 +37,7 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
   private static final String TRIM_FOLDER = "trims/models/armor/";
 
   public TinkerSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-    super(output, fileHelper, TConstruct.MOD_ID);
+    super(output, TConstruct.MOD_ID);
   }
 
   @SuppressWarnings("removal")

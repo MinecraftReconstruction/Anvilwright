@@ -6,6 +6,8 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.util.BlockEntityHelper;
@@ -70,6 +72,11 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
   @Override
   public void handleUpdateTag(CompoundTag tag) {
     CustomUpdateTagHandlingBlockEntity.super.handleUpdateTag(tag);
+  }
+
+  @Override
+  public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) {
+    // vanilla handles the update tag itself; nothing extra is needed for drain sync
   }
 
   @Override

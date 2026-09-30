@@ -37,13 +37,13 @@ public class SearedLanternBlock extends LanternBlock implements ITankBlock, Enti
   public SearedLanternBlock(Properties properties, int capacity) {
     super(properties);
     this.capacity = capacity;
-    registerDefaultState(defaultBlockState().setValue(LIGHT, 0));
+    registerDefaultState(defaultBlockState().setValue(SearedTankBlock.LIGHT, 0));
   }
 
   @Override
   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
     super.createBlockStateDefinition(builder);
-    builder.add(LIGHT);
+    builder.add(SearedTankBlock.LIGHT);
   }
 
   @Nullable
@@ -60,7 +60,7 @@ public class SearedLanternBlock extends LanternBlock implements ITankBlock, Enti
       FluidStack fluid = tank.getTank().getFluid();
       return FluidVariantAttributes.getLuminance(fluid.getType());
     }
-    return null;
+    return state.getLightEmission();
   }
 
   @Override

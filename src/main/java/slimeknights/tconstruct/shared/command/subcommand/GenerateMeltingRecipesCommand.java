@@ -151,7 +151,7 @@ public class GenerateMeltingRecipesCommand {
 
     // iterate all recipes and try adding a melting recipe
     MeltingCache cache = new MeltingCache();
-    for (Recipe<?> recipe : level.getRecipeManager().getAllRecipesFor((RecipeType<T>) recipeType.get())) {
+    for (Recipe<?> recipe : level.getRecipeManager().getAllRecipesFor((RecipeType<T>) recipeType.value())) {
       // skip any recipes that are specifically blacklisted
       if (skipRecipes.contains(recipe.getId())) {
         continue;
@@ -309,7 +309,7 @@ public class GenerateMeltingRecipesCommand {
     }
 
     /** Creates a copy of this with the given amount */
-    private MeltingResult withAmount(int amount) {
+    private MeltingResult withAmount(long amount) {
       if (amount <= 0) {
         return EMPTY;
       }
@@ -353,8 +353,8 @@ public class GenerateMeltingRecipesCommand {
 
     /** Takes the smaller of two results. Precondition is {@link #matches(MeltingResult, MeltingResult)} is true. */
     public static MeltingResult min(MeltingResult first, MeltingResult second) {
-      int firstAmount = first.fluid.getAmount();
-      int secondAmount = second.fluid.getAmount();
+      long firstAmount = first.fluid.getAmount();
+      long secondAmount = second.fluid.getAmount();
       // same amounts? no extra work to do
       if (firstAmount == secondAmount) {
         return simpler(first, second);
@@ -427,19 +427,12 @@ public class GenerateMeltingRecipesCommand {
       IFluidContainerTransfer transfer = FluidContainerTransferManager.INSTANCE.getTransfer(stack, FluidStack.EMPTY);
       if (transfer != null) {
         FluidTank tank = new FluidTank(10000);
-        TransferResult transferResult = transfer.transfer(stack, FluidStack.EMPTY, tank, TransferDirection.EMPTY_ITEM);
+        TransferResult transferResult = transfer.transfer(stack, FluidStack.EMPTY, tank);
         if (transferResult != null) {
           return MeltingResult.from(transferResult.fluid());
         }
       }
-      // handle buckets directly as its faster
-      if (item instanceof BucketItem bucket) {
-        Fluid fluid = bucket.getFluid();
-        if (fluid != Fluids.EMPTY) {
-          return MeltingResult.from(new FluidStack(fluid, FluidConstants.BUCKET));
-        }
-      }
-      // fluid capability check
+      // fluid capability check (covers buckets and any other container with a fluid storage)
       try {
         // Forge asked the item stack for its fluid handler capability; Fabric looks it up through the item context
         Storage<FluidVariant> capability = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));

@@ -299,6 +299,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
 
         // actual recipe result
         ItemStack output = currentRecipe.assemble(castingInventory, level.registryAccess());
+        boolean consumed = currentRecipe.isConsumed(castingInventory);
         if (currentRecipe.switchSlots() != lastRedstone) {
           if (!consumed) {
             setItem(OUTPUT, getItem(INPUT));

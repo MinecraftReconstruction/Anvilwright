@@ -32,8 +32,14 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
   }
 
   @Override
-  public ResourceLocation getID() {
+  public ResourceLocation getConditionId() {
     return NAME;
+  }
+
+  @Override
+  public void writeParameters(JsonObject json) {
+    json.addProperty("registry", tag.registry().location().toString());
+    json.addProperty("tag", tag.location().toString());
   }
 
   @Override
@@ -70,8 +76,8 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
       return read(json);
     }
 
-    @Override
-    public ResourceLocation getID() {
+    /** Registers no condition of its own, kept for API parity with upstream's condition serializer */
+    public ResourceLocation getConditionId() {
       return NAME;
     }
   }

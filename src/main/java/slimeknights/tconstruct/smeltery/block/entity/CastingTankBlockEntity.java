@@ -51,7 +51,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
-public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer {
+public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer, net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity {
   /** Max capacity for the tank */
   public static final long DEFAULT_CAPACITY = FluidConstants.BUCKET * 4;
   // slots
@@ -252,7 +252,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return ModelData.builder()
       .with(ModelProperties.FLUID_STACK, tank.getFluid())
       .with(ModelProperties.TANK_CAPACITY, tank.getCapacity()).build();

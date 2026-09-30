@@ -92,7 +92,7 @@ public class AlloyerScreen extends AbstractContainerScreen<AlloyerContainerMenu>
       } else {
         FUEL_TANK.draw(graphics, leftPos + 152, topPos + 31);
       }
-      fuel.draw(graphics);
+      fuel.draw(graphics, BACKGROUND);
     }
 
     // draw tank contents last, reduces bind calls

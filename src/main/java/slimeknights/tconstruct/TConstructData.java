@@ -8,7 +8,7 @@ import net.minecraft.core.registries.Registries;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.shared.TinkerCommons;
-import slimeknights.tconstruct.common.TinkerDamageTypes;
+import slimeknights.tconstruct.common.data.DamageTypeProvider;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tools.TinkerModifiers;
@@ -37,7 +37,7 @@ public class TConstructData implements DataGeneratorEntrypoint {
 
   @Override
   public void buildRegistry(RegistrySetBuilder registryBuilder) {
-    registryBuilder.add(Registries.DAMAGE_TYPE, TinkerDamageTypes::bootstrap);
+    DamageTypeProvider.register(registryBuilder);
     // NOTE(porting): upstream also drives biome modifiers from here; Fabric covers those in code in WorldEvents,
     // and WorldgenProvider only emits the vanilla-worldgen registries.
     WorldgenProvider.register(registryBuilder);

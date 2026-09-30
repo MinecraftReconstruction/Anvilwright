@@ -19,14 +19,15 @@ import java.util.function.Supplier;
 public class MobEffectLiquidBlock extends LiquidBlock {
   private final Supplier<MobEffectInstance> effect;
   public MobEffectLiquidBlock(Supplier<? extends FlowingFluid> supplier, Properties properties, Supplier<MobEffectInstance> effect) {
-    super(supplier, properties);
+    super(supplier.get(), properties);
     this.effect = effect;
   }
 
   @Deprecated
   @Override
   public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-    if (entity.getFluidTypeHeight(getFluid().getFluidType()) > 0 && entity instanceof LivingEntity living) {
+    // Forge asked the fluid type for the entity's height in the fluid; the vanilla equivalent is the block's own fluid state
+    if (!state.getFluidState().isEmpty() && entity instanceof LivingEntity living) {
       MobEffectInstance effect = this.effect.get();
       effect.setCurativeItems(new ArrayList<>());
       living.addEffect(effect);

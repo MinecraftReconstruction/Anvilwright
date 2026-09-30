@@ -30,6 +30,7 @@ import slimeknights.tconstruct.smeltery.menu.SingleItemContainerMenu;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import slimeknights.mantle.client.model.ModelData;
+import slimeknights.mantle.util.RetexturedHelper;
 
 /**
  * Filtered drain tile entity
