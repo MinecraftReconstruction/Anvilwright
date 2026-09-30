@@ -562,3 +562,30 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 - 渲染链路：`IBakedModifierModel` 是 fork 的 `Mesh getQuads(...)`，本轮把若干 `addQuads` 改回 `getQuads`
   并用 `ToolModel.ofQuads` 包 vanilla quads —— 编译过 ≠ 画面对
 - 那些 fork 独有内容（血史莱姆、geode、bonus chest、REI、JEI 自写 tooltip widget）与上游数据集的一致性
+
+---
+
+## 21. 2026-10-01 凌晨（二）：第二轮清理（本轮交接）
+
+**已 push 的 checkpoint（全部用 `git ls-remote` 复核）**：
+`32f391871f` → `ca2544e034` → `05a08b41f1` → `8044d90de8` → `7207abf7c7` → `18827a42d8` → `6e70c5aa8b` → `324e8879e5` → `33e4f3da59`
+
+**Mantle 又推进了两版**（都要 publish + bump + 重跑 `printCompileCp`）：
+- `1.11.DEV.1e53afad`：修 `mantle:tag_filled` 注册反相（342 个 JSON 受影响）
+- `1.11.DEV.31f6e9eb`：`RecipeHelper.readItem/writeItem`（Forge 的 `RegistryHelper` 那套）
+
+**这一轮换掉的 Forge 独占钩子（都有注释 + 部分记入行为差异）**：
+`curePotionEffects`（两处 → 内联 vanilla 牛奶疗法）、`doesSneakBypassUse`、`onItemUseFirst`、
+`invalidateCaps`、`BlockPlaceContext(任意 LivingEntity)`、`ItemRenderer.renderModelLists`（→ AW）、
+`Enchantment.slots`（→ AW）、`LivingEntity.spawnItemParticles`（→ AW）、
+`ForgeHooks.getCriticalHit`（→ Porting Lib 事件）、`Holder#get`（→ `#value`）。
+
+**新发现的坑（重要）**：分块口径里有很多**级联错误**。比如 `common/data/tags` 这个 chunk 单编译时报 81 条，
+其中 `ToolStack` 的 10 条、`ModifierNBT`/`ModDataNBT` 的二十多条都是"根因类缺成员"的连带噪声。
+⇒ 修完根因务必重跑同一个 chunk 验证，不要按条数排优先级。
+
+**下一步的推荐顺序（基于第二轮快照）**：
+1. `common/data/tags`（`ItemTagProvider` 48 + `BlockTagProvider` 22；都是 tag provider 管线，套路已成熟）
+2. `library/recipe/casting/*`（PotionCastingRecipe / 材料铸造 / 铸造 builder，约 80 条）
+3. `shared`、`library/client/model/block`、`library/recipe/ingredient`
+4. 全树 0 → `./gradlew build --offline` → `runData` → 与上游 `src/generated` diff → `runServer` → `runClient`

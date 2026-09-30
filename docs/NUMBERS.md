@@ -357,3 +357,26 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
    `DataGenerator#getPackOutput`（已把该 ctor 删掉，需确认调用点）；
 3. 全树 0 之后：`./gradlew build --offline` → `runData` → **把 `src/generated` 与上游 3.12.1 逐文件 diff**
    （这是最能抓语义错误的闸门）→ `runServer` → `runClient`。
+
+### 2026-10-01 凌晨（二）：第二次分块口径 + "级联" 的发现
+
+第二次 `truecount`（`.port/true_now2.txt`，22:09 启动）跑到 100/299 包时的快照：**793 条**，
+最重的包：
+
+| 包 | 条数 |
+|---|---|
+| `common/data/tags` | 81 |
+| `library/recipe/casting/material` | 52 |
+| `shared` | 50 |
+| `library/client/model/block` | 36 |
+| `library/recipe/ingredient` | 35 |
+| `library/recipe/casting` | 29 |
+| `library/data/recipe` | 24 |
+| `library/utils` | 21 |
+
+⚠️ **注意这些数字里有相当一部分是"级联"**：例如 `common/data/tags` 这个 chunk 单独编译时，
+`ToolStack` 会因为 `IToolContext#getDefinition` 未实现而报 10 条、`ModifierNBT`/`ModDataNBT` 各报十几条 ——
+这些**不是各自独立的问题**，而是"根因文件坏了，javac 找不到成员"的连带噪声。
+**判据：修完根因后要重跑同一个 chunk，看这些连带的数字是否一起消失。**
+
+本阶段（22:00–23:00）修完并已 push 的内容见 `HANDOFF.md` 第 21 节。
