@@ -29,6 +29,7 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.ArrayList;
 import java.util.List;
+import slimeknights.tconstruct.world.block.FoliageType;
 
 public class TinkerTabs {
   /** Creative tab for items that do not fit in another tab */
@@ -154,7 +155,6 @@ public class TinkerTabs {
     output.accept(TinkerMaterials.debrisNugget);
 
     output.accept(TinkerMaterials.necroticBone);
-    output.accept(TinkerMaterials.bloodbone);
     output.accept(TinkerMaterials.blazingBone);
     output.accept(TinkerMaterials.necroniumBone);
 
@@ -177,7 +177,7 @@ public class TinkerTabs {
     output.accept(TinkerModifiers.searedReinforcement);
     output.accept(TinkerModifiers.goldReinforcement);
     output.accept(TinkerModifiers.emeraldReinforcement);
-    output.accept(TinkerModifiers.bronzeReinforcement);
+    output.accept(TinkerModifiers.obsidianReinforcement);
     output.accept(TinkerModifiers.cobaltReinforcement);
   }
 
@@ -474,9 +474,9 @@ public class TinkerTabs {
     output.accept(TinkerSmeltery.toolBindingCast);
     output.accept(TinkerSmeltery.toolBindingCast.getSand());
     output.accept(TinkerSmeltery.toolBindingCast.getRedSand());
-    output.accept(TinkerSmeltery.roundPlateCast);
-    output.accept(TinkerSmeltery.roundPlateCast.getSand());
-    output.accept(TinkerSmeltery.roundPlateCast.getRedSand());
+    output.accept(TinkerSmeltery.plateCast);
+    output.accept(TinkerSmeltery.plateCast.getSand());
+    output.accept(TinkerSmeltery.plateCast.getRedSand());
     output.accept(TinkerSmeltery.largePlateCast);
     output.accept(TinkerSmeltery.largePlateCast.getSand());
     output.accept(TinkerSmeltery.largePlateCast.getRedSand());
