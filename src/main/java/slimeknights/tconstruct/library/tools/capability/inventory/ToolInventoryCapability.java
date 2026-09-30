@@ -54,6 +54,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.function.Predicate;
 import net.minecraft.world.item.ItemUtils;
 import slimeknights.mantle.inventory.EmptyItemHandler;
+import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 
 /** Capability for a tool with an inventory */
 @RequiredArgsConstructor
@@ -684,9 +687,14 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
   /** Called when a tool item entity is destroyed to drop its inventory items. */
   public static void onDestroyed(ItemEntity entity) {
     if (!entity.level().isClientSide) {
-      IItemHandler handler = entity.getItem().getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(EmptyItemHandler.INSTANCE);
-      if (handler.getSlots() > 0) {
-        ItemUtils.onContainerDestroyed(entity, IntStream.range(0, handler.getSlots()).mapToObj(handler::getStackInSlot).filter(stack -> !stack.isEmpty()));
+      // the tool itself is the item handler, same as when the item is in a slot
+      ItemStack stack = entity.getItem();
+      ToolInventoryCapability inventory = getCap(ContainerItemContext.withConstant(stack), stack);
+      if (inventory != null) {
+        int slots = inventory.getSlotCount();
+        if (slots > 0) {
+          ItemUtils.onContainerDestroyed(entity, IntStream.range(0, slots).mapToObj(inventory::getStackInSlot).filter(item -> !item.isEmpty()));
+        }
       }
     }
   }

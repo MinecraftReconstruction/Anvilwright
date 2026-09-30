@@ -89,6 +89,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import net.minecraft.world.item.CreativeModeTab;
 import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
+import slimeknights.tconstruct.common.TinkerTabs;
 
 /**
  * A standard modifiable item which implements melee hooks
@@ -106,8 +107,13 @@ public class ModifiableItem extends Item implements IModifiableDisplay, UseFirst
   private ItemStack toolForRendering;
 
   public ModifiableItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab) {
+    this(properties, toolDefinition, tab, 1);
+  }
+
+  public ModifiableItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab, int maxStackSize) {
     super(properties);
     this.toolDefinition = toolDefinition;
+    this.maxStackSize = maxStackSize;
     ((FabricItemSettings)properties).customDamage(this::damageItem);
     ItemGroupEvents.modifyEntriesEvent(tab).register(this::fillItemCategory);
     FluidStorage.ITEM.registerForItems((itemStack, context) -> new ToolFluidCapability(context, Lazy.of(() -> ToolStack.from(itemStack))), this);
@@ -115,25 +121,23 @@ public class ModifiableItem extends Item implements IModifiableDisplay, UseFirst
   }
 
   public ModifiableItem(Properties properties, ToolDefinition toolDefinition, int maxStackSize) {
-    super(TinkerTier.INSTANCE, properties);
-    this.toolDefinition = toolDefinition;
-    this.maxStackSize = maxStackSize;
+    this(properties, toolDefinition, TinkerTabs.TAB_TOOLS, maxStackSize);
   }
 
   @Override
-  public int getMaxStackSize(ItemStack stack) {
+  public int getItemStackLimit(ItemStack stack) {
     return stack.isDamaged() ? 1 : maxStackSize;
   }
 
   /* Basic properties */
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public boolean isNotReplaceableByPickAction(ItemStack stack, Player player, int inventorySlot) {
     return true;
   }
 
   @Nullable
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public EquipmentSlot getEquipmentSlot(ItemStack stack) {
     if (stack.is(TinkerTags.Items.HELD_ARMOR)) {
       return EquipmentSlot.OFFHAND;
@@ -158,12 +162,12 @@ public class ModifiableItem extends Item implements IModifiableDisplay, UseFirst
     return enchantment.isCurse() && CustomEnchantingBehaviorItem.super.canApplyAtEnchantingTable(stack, enchantment);
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
     return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public Map<Enchantment,Integer> getAllEnchantments(ItemStack stack) {
     return EnchantmentModifierHook.getAllEnchantments(stack);
   }
@@ -485,7 +489,7 @@ public class ModifiableItem extends Item implements IModifiableDisplay, UseFirst
     hook.onStoppedUsing(tool, activeModifier, entityLiving, timeLeft);
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public void onStopUsing(ItemStack stack, LivingEntity entity, int timeLeft) {
     // triggers on scroll away and all that
     ToolStack tool = ToolStack.from(stack);

@@ -188,3 +188,5 @@ transitive-accessible method net/minecraft/client/gui/GuiGraphics innerBlit (Lne
 transitive-accessible field net/minecraft/world/entity/projectile/FishingHook life I
 # Boot walk hooks need the previous block position (upstream: accesstransformer.cfg)
 transitive-accessible field net/minecraft/world/entity/LivingEntity lastPos Lnet/minecraft/core/BlockPos;
+# Tool container menu reuses the vanilla crafting grid update (upstream: accesstransformer.cfg)
+transitive-accessible method net/minecraft/world/inventory/CraftingMenu slotChangedCraftingGrid (Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/inventory/CraftingContainer;Lnet/minecraft/world/inventory/ResultContainer;)V

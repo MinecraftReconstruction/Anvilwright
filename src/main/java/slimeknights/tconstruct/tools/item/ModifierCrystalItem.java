@@ -45,7 +45,7 @@ public class ModifierCrystalItem extends Item {
   /** Port helper: Fabric has no forge-style creative tab builder, so the item registers its variants on the tab's entries event */
   public ModifierCrystalItem(Properties props, ResourceKey<CreativeModeTab> tab) {
     super(props);
-    ItemGroupEvents.modifyEntriesEvent(tab).register(this::fillItemCategory);
+    ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> addVariants(entries::accept));
   }
 
   @Override
