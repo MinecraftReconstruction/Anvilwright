@@ -472,3 +472,32 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
   `DefaultResourceConditions`、`FabricDataOutput`、`buildRecipes` 公开、`modResource`→`location`）。
 - ⚠️ 每修完一个 datagen 文件都会再翻出一批同级文件，**数字先涨后落是正常的**；判据始终是"文件自身的错误数"，
   不要看整树总数。最后才轮到 `./gradlew build --offline` → `runData` → `runServer` → `runClient`。
+
+---
+
+## 18. 2026-09-30 深夜：datagen 家族按"取上游"策略连消（81 → 36，本轮交接）
+
+**关键结论（省时间的那个）**：本树的这批 datagen 文件是 **1.18 时代的旧 fork 代码**（`bronzeReinforcement`、
+`MaterialIds.bloodbone`、`ArmorItem.Type`、`modResource(...)`、`saveThing(...)` 全是那个时代的），
+而 `--gen` 报出的错误条数与"与上游 3.12.1 的 diff 行数"高度相关。所以
+**`git checkout v3.12.1.231 -- <file>` 再补 Fabric 管线**，比在 fork 版上逐个改快得多，也和
+`ToolsRecipeProvider` 那一轮的结论一致。本轮按这个策略连消了 8 个文件（明细见 [NUMBERS.md](NUMBERS.md) 最后一节）。
+
+本轮修完（全部已编译验证）：`ModifierRecipeProvider`、`AbstractEnchantmentToModifierProvider`、
+`ArmorModelProvider`、`TrimMaterialPaletteGenerator`(+`Tinker…`)、`ToolItemModelProvider`(+`AbstractToolItemModelProvider`)、
+`ModifierModelMapProvider`、`ModifierModel.EMPTY`、`AbstractMaterialDataProvider`、`MaterialDataProvider`、
+`AbstractMaterialStatsDataProvider`。
+
+**顺手修掉一个真 bug**：Forge `CompoundIngredient` 是 OR，不是 AND；上一轮把它映射成了
+`DefaultCustomIngredients.all`。映射应为 `CompoundIngredient`→`any`、`IntersectionIngredient`→`all`、
+`DifferenceIngredient`→`difference`。`ToolsRecipeProvider` 两处已改。
+
+**下一步**：`--gen` 现在 **36 条全在 `tools/data/material/MaterialRecipeProvider.java`**（同一个套路），
+之后大概率还有 `tables/data/TableRecipeProvider`、`smeltery/data/SmelteryRecipeProvider` 等。全部到 0 之后才是
+第 13.4 节的 `./gradlew build --offline` → `runData` → `runServer` → `runClient`。
+
+⚠️ 另外记一笔**待补的注册**（编译不会报，但 datagen 会少文件）：`TinkerTools.gatherData` 目前只注册了
+8 个 provider，上游注册了 13 个 —— 缺 `ToolItemModelProvider`、`MaterialPaletteDebugGenerator`、
+`ArmorModelProvider`、`TinkerTrimMaterialPaletteGenerator`、`ModifierModelMapProvider`；
+`MaterialRenderInfoProvider` 也少了 `existingFileHelper` 参数（上游是 3 参）。这些类本轮都已经能编译，
+补注册本身是几行的事，但要等 `runData` 才能验证产物。

@@ -1,18 +1,16 @@
 package slimeknights.tconstruct.tools.data.material;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.data.DataGenerator;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.data.material.AbstractMaterialDataProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
-import net.minecraft.data.PackOutput;
-import net.minecraft.tags.FluidTags;
-import slimeknights.mantle.recipe.condition.TagFilledCondition;
+
 import static slimeknights.mantle.Mantle.commonResource;
 
 public class MaterialDataProvider extends AbstractMaterialDataProvider {
-  public MaterialDataProvider(FabricDataOutput output) {
-    super(output);
+  public MaterialDataProvider(FabricDataOutput packOutput) {
+    super(packOutput);
   }
 
   @Override
@@ -23,107 +21,155 @@ public class MaterialDataProvider extends AbstractMaterialDataProvider {
   @Override
   protected void addMaterials() {
     // tier 1
-    addMaterial(MaterialIds.wood,   1, ORDER_GENERAL, true);
-    addMaterial(MaterialIds.rock,   1, ORDER_HARVEST, true);
-    addMaterial(MaterialIds.flint,  1, ORDER_WEAPON,  true);
-    addMaterial(MaterialIds.copper, 1, ORDER_SPECIAL, true);
-    addMaterial(MaterialIds.bone,   1, ORDER_SPECIAL, true);
-    addMaterial(MaterialIds.bamboo, 1, ORDER_RANGED,  true);
+    material(MaterialIds.wood  ).tier(0).sort(ORDER_GENERAL).craftable();
+    material(MaterialIds.rock  ).tier(1).sort(ORDER_HARVEST).craftable();
+    material(MaterialIds.flint ).tier(1).sort(ORDER_WEAPON ).craftable();
+    material(MaterialIds.copper).tier(1).sort(ORDER_SPECIAL).craftable();
+    material(MaterialIds.bone  ).tier(1).sort(ORDER_SPECIAL).craftable();
+    material(MaterialIds.bamboo).tier(1).sort(ORDER_RANGED ).craftable();
     // tier 1 - end
-    addMaterial(MaterialIds.chorus, 1, ORDER_END,     true);
+    material(MaterialIds.chorus).tier(1).sort(ORDER_END).craftable();
     // tier 1 - binding
-    addMaterial(MaterialIds.string,  1, ORDER_BINDING, true);
-    addMaterial(MaterialIds.leather, 1, ORDER_BINDING, true);
-    addMaterial(MaterialIds.vine,    1, ORDER_BINDING, true);
+    material(MaterialIds.string ).tier(0).sort(ORDER_GENERAL).craftable();
+    material(MaterialIds.leather).tier(0).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.vine   ).tier(1).sort(ORDER_BINDING).craftable();
+    // tier 1 - shield cores
+    material(MaterialIds.cactus).tier(1).sort(ORDER_BINDING).craftable();
+    // tier 1 - ammo
+    material(MaterialIds.feather).tier(0).sort(ORDER_GENERAL).craftable();
+    material(MaterialIds.wool   ).tier(1).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.leaves ).tier(1).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.paper  ).tier(1).sort(ORDER_BINDING).craftable();
 
     // tier 2
-    addMaterial(MaterialIds.iron,        2, ORDER_GENERAL, false);
-    addMaterial(MaterialIds.searedStone, 2, ORDER_HARVEST, false);
-    addMaterial(MaterialIds.bloodbone,   2, ORDER_WEAPON,  true);
-    addMaterial(MaterialIds.slimewood,   2, ORDER_SPECIAL, true);
+    material(MaterialIds.iron        ).tier(2).sort(ORDER_GENERAL);
+    material(MaterialIds.searedStone ).tier(2).sort(ORDER_HARVEST);
+    material(MaterialIds.venombone   ).tier(2).sort(ORDER_WEAPON ).craftable();
+    material(MaterialIds.slimewood   ).tier(2).sort(ORDER_SPECIAL).craftable();
+    material(MaterialIds.slimeskin   ).tier(2).sort(ORDER_BINDING);
+    material(MaterialIds.skyslimeskin).tier(2).sort(ORDER_BINDING);
+    material(MaterialIds.gold        ).tier(2).sort(ORDER_REPAIR );
     // tier 2 - nether
-    addMaterial(MaterialIds.scorchedStone, 2, ORDER_NETHER, false);
-    addMaterial(MaterialIds.necroticBone,  2, ORDER_NETHER, true);
+    material(MaterialIds.scorchedStone).tier(2).sort(ORDER_NETHER);
+    material(MaterialIds.necroticBone ).tier(2).sort(ORDER_NETHER).craftable();
     // tier 2 - end
-    addMaterial(MaterialIds.whitestone, 2, ORDER_END, true);
+    material(MaterialIds.whitestone).tier(2).sort(ORDER_END).craftable();
     // tier 2 - binding
-    addMaterial(MaterialIds.chain,        2, ORDER_BINDING, true);
-    addMaterial(MaterialIds.skyslimeVine, 2, ORDER_BINDING, true);
+    material(MaterialIds.skyslimeVine).tier(2).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.weepingVine ).tier(2).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.twistingVine).tier(2).sort(ORDER_BINDING).craftable();
+    // slimesuit
+    material(MaterialIds.turtle  ).tier(2).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.nautilus).tier(2).sort(ORDER_BINDING).craftable();
+    // tier 2 - ammo
+    material(MaterialIds.amethyst  ).tier(2).sort(ORDER_REPAIR);
+    material(MaterialIds.prismarine).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.earthslime).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.skyslime  ).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.glass     ).tier(2).sort(ORDER_REPAIR);
+    material(MaterialIds.slimeball ).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.gunpowder ).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.redstone  ).tier(2).sort(ORDER_REPAIR).craftable();
 
     // tier 3
-    addMaterial(MaterialIds.slimesteel,     3, ORDER_GENERAL, false);
-    addMaterial(MaterialIds.amethystBronze, 3, ORDER_HARVEST, false);
-    addMaterial(MaterialIds.nahuatl,        3, ORDER_WEAPON,  false);
-    addMaterial(MaterialIds.roseGold,       3, ORDER_SPECIAL, false);
-    addMaterial(MaterialIds.pigIron,        3, ORDER_SPECIAL, false);
+    material(MaterialIds.slimesteel    ).tier(3).sort(ORDER_GENERAL);
+    material(MaterialIds.amethystBronze).tier(3).sort(ORDER_HARVEST);
+    material(MaterialIds.nahuatl       ).tier(3).sort(ORDER_WEAPON ).craftable();
+    material(MaterialIds.obsidian      ).tier(3).sort(ORDER_WEAPON );
+    material(MaterialIds.roseGold      ).tier(3).sort(ORDER_SPECIAL);
+    material(MaterialIds.pigIron       ).tier(3).sort(ORDER_SPECIAL);
     // tier 3 (nether)
-    addMaterial(MaterialIds.cobalt, 3, ORDER_NETHER, false);
+    material(MaterialIds.steel ).tier(3).sort(ORDER_NETHER);
+    material(MaterialIds.cobalt).tier(3).sort(ORDER_NETHER);
     // tier 3 - binding
-    addMaterial(MaterialIds.darkthread, 3, ORDER_BINDING, false);
+    material(MaterialIds.darkthread).tier(3).sort(ORDER_BINDING);
+    material(MaterialIds.ichorskin ).tier(3).sort(ORDER_BINDING);
+    // tier 3 - ammo
+    material(MaterialIds.enderPearl).tier(3).sort(ORDER_REPAIR);
+    material(MaterialIds.magnetite ).tier(3).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.quartz    ).tier(3).sort(ORDER_REPAIR + ORDER_NETHER);
+    material(MaterialIds.glowstone ).tier(3).sort(ORDER_REPAIR + ORDER_NETHER).craftable();
+    material(MaterialIds.ichor     ).tier(3).sort(ORDER_REPAIR + ORDER_NETHER).craftable();
+    material(MaterialIds.kobold    ).tier(3).sort(ORDER_REPAIR + ORDER_NETHER).craftable();
+    material(MaterialIds.blaze     ).tier(3).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.magma     ).tier(3).sort(ORDER_REPAIR + ORDER_NETHER).craftable();
+    // tier 3 - misc
+    material(MaterialIds.ice    ).tier(3).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.jadeite).tier(3).sort(ORDER_BINDING).craftable();
 
     // tier 4
-    addMaterial(MaterialIds.queensSlime, 4, ORDER_GENERAL, false);
-    addMaterial(MaterialIds.hepatizon,   4, ORDER_HARVEST, false);
-    addMaterial(MaterialIds.manyullyn,   4, ORDER_WEAPON,  false);
-    addMaterial(MaterialIds.blazingBone, 4, ORDER_SPECIAL, true);
-    //addMetalMaterial(MaterialIds.soulsteel, 4, ORDER_SPECIAL, false, 0x6a5244);
+    material(MaterialIds.queensSlime).tier(4).sort(ORDER_GENERAL);
+    material(MaterialIds.cinderslime).tier(4).sort(ORDER_GENERAL);
+    material(MaterialIds.hepatizon  ).tier(4).sort(ORDER_HARVEST);
+    material(MaterialIds.manyullyn  ).tier(4).sort(ORDER_WEAPON );
+    material(MaterialIds.blazingBone).tier(4).sort(ORDER_SPECIAL).craftable();
+    material(MaterialIds.knightmetal).tier(4).sort(ORDER_END    );
+    material(MaterialIds.knightslime).tier(4).sort(ORDER_END    );
     // tier 4 - binding
-    addMaterial(MaterialIds.ancientHide, 4, ORDER_BINDING, false);
+    material(MaterialIds.jeweledHide   ).tier(4).sort(ORDER_BINDING);
+    material(MaterialIds.ancientHide   ).tier(4).sort(ORDER_BINDING).hidden();
+    material(MaterialIds.blazewood     ).tier(4).sort(ORDER_BINDING).craftable();
+    material(MaterialIds.enderslimeskin).tier(4).sort(ORDER_BINDING);
+    material(MaterialIds.enderslimeVine).tier(4).sort(ORDER_BINDING).craftable();
+    // tier 4 - ammo
+    material(MaterialIds.shulker    ).tier(4).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.dragonScale).tier(4).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.enderslime ).tier(4).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.knightly   ).tier(4).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.endRod     ).tier(4).sort(ORDER_REPAIR).craftable();
 
-    // tier 5 binding, temporarily in book 4
-    addMaterial(MaterialIds.enderslimeVine, 4, ORDER_BINDING, true);
+    // tier 5 - really just makes this show as epic
+    material(MaterialIds.ancient    ).tier(5).sort(ORDER_NETHER ).hidden();
 
-    // tier 2 (end)
-    //addMaterialNoFluid(MaterialIds.endstone, 2, ORDER_END, true, 0xe0d890);
+    // slimesuit
+    material(MaterialIds.clay ).tier(2).sort(ORDER_REPAIR + 5).craftable();
+    material(MaterialIds.honey).tier(2).sort(ORDER_REPAIR + 5).craftable();
+    material(MaterialIds.venom).tier(2).sort(ORDER_REPAIR + 5);
+    material(MaterialIds.blood).tier(2).sort(ORDER_REPAIR).hidden();
+    // slimesuit parts
+    material(MaterialIds.horn   ).tier(1).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.cheese ).tier(2).sort(ORDER_REPAIR).craftable();
+    material(MaterialIds.phantom).tier(2).sort(ORDER_REPAIR + 5).craftable();
 
     // tier 2 (mod integration)
-    addCompatMetalMaterial(MaterialIds.osmium,     2, ORDER_COMPAT + ORDER_GENERAL);
-    addCompatMetalMaterial(MaterialIds.tungsten,   2, ORDER_COMPAT + ORDER_HARVEST);
-    addCompatMetalMaterial(MaterialIds.platinum,   2, ORDER_COMPAT + ORDER_HARVEST);
-    addCompatMetalMaterial(MaterialIds.silver,     2, ORDER_COMPAT + ORDER_WEAPON);
-    addCompatMetalMaterial(MaterialIds.lead,       2, ORDER_COMPAT + ORDER_WEAPON);
-    addCompatMetalMaterial(MaterialIds.aluminum,   2, ORDER_COMPAT + ORDER_RANGED);
+    material(MaterialIds.osmium  ).tier(2).sort(ORDER_COMPAT + ORDER_GENERAL).compatMetal();
+    material(MaterialIds.lead    ).tier(2).sort(ORDER_COMPAT + ORDER_HARVEST).compatMetal();
+    material(MaterialIds.silver  ).tier(2).sort(ORDER_COMPAT + ORDER_WEAPON ).compatMetal();
+    material(MaterialIds.aluminum).tier(2).sort(ORDER_COMPAT + ORDER_RANGED ).compatMetal();
+    // ironwood works in a part builder even though its ingots
+    material(MaterialIds.ironwood).tier(2).sort(ORDER_COMPAT + ORDER_GENERAL).craftable().compatMetal();
+    // treated wood comes from treated wood or creosote oil
+    material(MaterialIds.treatedWood).tier(2).sort(ORDER_COMPAT + ORDER_GENERAL).craftable()
+      .compat(tagExistsCondition("treated_wood"), fluidTagExistsCondition("creosote"));
     // tier 3 (mod integration)
-    addCompatMetalMaterial(MaterialIds.steel,           3, ORDER_COMPAT + ORDER_GENERAL);
-    addCompatMetalMaterial(MaterialIds.bronze,          3, ORDER_COMPAT + ORDER_HARVEST);
-    addCompatMetalMaterial(MaterialIds.constantan,      3, ORDER_COMPAT + ORDER_HARVEST);
-    addCompatMetalMaterial(MaterialIds.invar,           3, ORDER_COMPAT + ORDER_WEAPON);
-    addCompatMaterial     (MaterialIds.necronium,       3, ORDER_COMPAT + ORDER_WEAPON, "uranium_ingots", true);
-    addCompatMetalMaterial(MaterialIds.electrum,        3, ORDER_COMPAT + ORDER_SPECIAL);
-    addCompatMetalMaterial(MaterialIds.platedSlimewood, 3, ORDER_COMPAT + ORDER_SPECIAL, "brass");
+    material(MaterialIds.electrum       ).tier(3).sort(ORDER_COMPAT + ORDER_GENERAL).compatAlloy("silver");
+    material(MaterialIds.bronze         ).tier(3).sort(ORDER_COMPAT + ORDER_HARVEST).compatAlloy("tin");
+    material(MaterialIds.constantan     ).tier(3).sort(ORDER_COMPAT + ORDER_HARVEST).compatAlloy("nickel");
+    material(MaterialIds.invar          ).tier(3).sort(ORDER_COMPAT + ORDER_WEAPON ).compatAlloy("nickel");
+    material(MaterialIds.pewter         ).tier(3).sort(ORDER_COMPAT + ORDER_WEAPON ).compatAlloy("tin", "lead");
+    material(MaterialIds.platedSlimewood).tier(3).sort(ORDER_COMPAT + ORDER_SPECIAL).compatAlloy("zinc");
+    material(MaterialIds.necronium      ).tier(3).sort(ORDER_COMPAT + ORDER_WEAPON ).compatMetal("uranium").craftable();
+    material(MaterialIds.steeleaf       ).tier(3).sort(ORDER_COMPAT + ORDER_SPECIAL).compatMetal();
+    // tier 4 (mod integration)
+    material(MaterialIds.fiery   ).tier(4).sort(ORDER_COMPAT + ORDER_END   ).compatMetal();
+    material(MaterialIds.nicrosil).tier(4).sort(ORDER_COMPAT + ORDER_WEAPON).compatAlloy("tin", "nickel", "chromium");
 
-    // plate
-    addMaterial(MaterialIds.obsidian,  3, ORDER_REPAIR, false);
-    addMaterial(MaterialIds.debris,    3, ORDER_REPAIR, false);
-    addMaterial(MaterialIds.netherite, 4, ORDER_REPAIR, false);
-    addCompatMetalMaterial(MaterialIds.nickel,   2, ORDER_REPAIR);
-    addCompatMetalMaterial(MaterialIds.tin,      2, ORDER_REPAIR);
-    addCompatMetalMaterial(MaterialIds.zinc,     2, ORDER_REPAIR);
-    addCompatMetalMaterial(MaterialIds.brass,    3, ORDER_REPAIR);
-    addCompatMetalMaterial(MaterialIds.uranium,  2, ORDER_REPAIR);
-    // slimeskull - put in the most appropriate tier
-    addMaterial(MaterialIds.gold,        2, ORDER_REPAIR, false);
-    addMaterial(MaterialIds.glass,       2, ORDER_REPAIR, false);
-    addMaterial(MaterialIds.rottenFlesh, 1, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.enderPearl,  2, ORDER_REPAIR, false);
-    // slimesuit - textures
-    addMaterial(MaterialIds.earthslime, 1, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.skyslime,   1, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.blood,      2, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.ichor,      3, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.enderslime, 4, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.clay,       1, ORDER_REPAIR, true);
-    addMaterial(MaterialIds.honey,      1, ORDER_REPAIR, true);
-    //addMaterial(MaterialIds.venom,      3, ORDER_REPAIR, true);
-    // slimesuit - repair
-    addMaterial(MaterialIds.phantom,    1, ORDER_REPAIR, true);
+    // redirects
+    // rose gold is most comparable to chain as you can use the extra slot for reinforced
+    material("chain").redirect(MaterialIds.roseGold);
+    // bloodbone reworked into venombone
+    material("bloodbone").redirect(MaterialIds.venombone);
+    // zombies now use leather instead of flesh for their skull
+    material("rotten_flesh").redirect(MaterialIds.leather);
+    material("platinum").redirect(MaterialIds.searedStone);
+    material("tungsten")
+      .redirect(MaterialIds.lead, tagExistsCondition("ingots/lead"))
+      .redirect(MaterialIds.invar, DefaultResourceConditions.or(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel")))
+      .redirect(MaterialIds.iron);
+  }
 
-    // legacy
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "stone"),     redirect(MaterialIds.rock));
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "gunpowder"), redirect(MaterialIds.glass));
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "spider"),    redirect(MaterialIds.string));
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "venom"),     redirect(MaterialIds.darkthread));
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "rabbit"),    redirect(MaterialIds.leather));
-    addRedirect(new MaterialId(TConstruct.MOD_ID, "tinkers_bronze"), conditionalRedirect(MaterialIds.bronze, tagExistsCondition("bronze_ingots")), redirect(MaterialIds.copper));
+  /** Makes a material under our mod ID */
+  private MaterialBuilder material(String name) {
+    return material(new MaterialId(TConstruct.MOD_ID, name));
   }
 }

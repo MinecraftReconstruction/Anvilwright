@@ -2,8 +2,8 @@ package slimeknights.tconstruct.library.client.data.material;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.library.client.data.GenericTextureGenerator;
@@ -25,7 +25,7 @@ public class TrimMaterialPaletteGenerator extends GenericTextureGenerator {
   private final String name;
   private final MaterialId[] materials;
   private final AbstractMaterialSpriteProvider materialProvider;
-  public TrimMaterialPaletteGenerator(PackOutput packOutput, String name, ExistingFileHelper existingFileHelper, AbstractMaterialSpriteProvider materialProvider, MaterialId... materials) {
+  public TrimMaterialPaletteGenerator(FabricDataOutput packOutput, String name, ExistingFileHelper existingFileHelper, AbstractMaterialSpriteProvider materialProvider, MaterialId... materials) {
     super(packOutput, existingFileHelper, "");
     this.name = name;
     this.materialProvider = materialProvider;

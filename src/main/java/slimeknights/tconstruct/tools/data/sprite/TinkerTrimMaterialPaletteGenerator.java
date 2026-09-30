@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.tools.data.sprite;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialSpriteProvider;
@@ -12,7 +12,7 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.tools.data.material.MaterialIds;
 
 public class TinkerTrimMaterialPaletteGenerator extends TrimMaterialPaletteGenerator {
-  public TinkerTrimMaterialPaletteGenerator(PackOutput packOutput, ExistingFileHelper existingFileHelper, AbstractMaterialSpriteProvider materialProvider) {
+  public TinkerTrimMaterialPaletteGenerator(FabricDataOutput packOutput, ExistingFileHelper existingFileHelper, AbstractMaterialSpriteProvider materialProvider) {
     super(packOutput, TConstruct.MOD_ID, existingFileHelper, materialProvider, MaterialIds.TRIM_MATERIALS);
   }
 

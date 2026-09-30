@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.tools.data.client;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.world.item.ArmorItem;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
@@ -13,7 +13,7 @@ import slimeknights.tconstruct.tools.data.ModifierIds;
 
 /** Provider for modifier models on tools */
 public class ModifierModelMapProvider extends AbstractModifierModelMapProvider {
-  public ModifierModelMapProvider(PackOutput output) {
+  public ModifierModelMapProvider(FabricDataOutput output) {
     super(output, TConstruct.MOD_ID);
   }
 

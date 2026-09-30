@@ -242,3 +242,31 @@ TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生
 `python3 scripts/port/upstreamtake.py --apply src/main/java/slimeknights/tconstruct/tools/data/ModifierRecipeProvider.java`
 （该脚本会自己比较该文件的错误数并回滚）。之后大概率还有 `MaterialRecipeProvider` / `TableRecipeProvider` /
 `SmeltryRecipeProvider` 等几个同源 datagen 文件排队。
+
+### 2026-09-30 深夜：datagen 家族继续消队（81 → 36）
+
+技巧确认：**凡是"整树只报几条、且与上游 3.12.1 只差几十行"的文件，一律 `git checkout v3.12.1.231 -- <file>`
+再补 Forge→Fabric 管线**，比逐个改 fork 版快一个数量级（fork 版是 1.18 时代的旧 TConstruct 代码，
+用的是 `bronzeReinforcement`、`MaterialIds.bloodbone`、`ArmorItem.Type` 这些已经不存在的东西）。
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 81（全在 `tools/data/ModifierRecipeProvider`） |
+| 取上游 `ModifierRecipeProvider` + 管线（2 处 `CompoundIngredient`、6 处 `DifferenceIngredient`、15 处 `IntersectionIngredient`、2 处 `modLoaded`、`Fluids.MILK`+`FluidType.BUCKET_VOLUME`→`Milk.STILL_MILK`+`FluidConstants.BUCKET`） | 3 |
+| 3 处 `FluidContainerIngredient` 需要 `.toVanilla()`（Fabric 下它是 `CustomIngredient`，不是 `Ingredient`） | 3（转到 `AbstractEnchantmentToModifierProvider`） |
+| 取上游 `AbstractEnchantmentToModifierProvider`（`Target.DATA_PACK` + `saveJson`） | 2（转到 `ArmorModelProvider`） |
+| `ArmorModelProvider`：`FabricDataOutput` + `SlimeskullItem.MODEL_LOCATION`→`TConstruct.getResource("slimeskull")`（本树的 `SlimeskullItem` 是 fork 的 Porting Lib 渲染实现，没有该常量） | 1（转到 `TrimMaterialPaletteGenerator`） |
+| `TrimMaterialPaletteGenerator` / `TinkerTrimMaterialPaletteGenerator` 改成 `FabricDataOutput` | 8（转到 `ToolItemModelProvider`） |
+| `ToolItemModelProvider` + `AbstractToolItemModelProvider.armor(...)`：`ArmorItem.Type` → 本移植的 `ArmorSlotType` | 1（转到 `ModifierModelMapProvider`） |
+| `ModifierModelMapProvider` 改成 `FabricDataOutput` | 16（转到 `ModifierModel` / `AbstractMaterialDataProvider` / `MaterialDataProvider`） |
+| `ModifierModel.EMPTY`：接口是 fork 的 `Mesh getQuads(...)`，上游文件还在覆写 `addQuads` → 改回 `getQuads` 返回 `EMPTY_MESH` | 16 |
+| `AbstractMaterialDataProvider`：`JsonRedirect` 第三个参数（`Predicate<JsonObject>`）、`MaterialJson` 需要 `JsonCondition` 包装、新增 `fluidTagExistsCondition`（`FluidTags.create` 是 Forge 对 `FluidTags` 的补丁 API） | 10（转到 `MaterialDataProvider`）+ 2 |
+| 取上游 `MaterialDataProvider`（`material(...)` builder API） | 2（转到 `AbstractMaterialStatsDataProvider`） |
+| `AbstractMaterialStatsDataProvider`：`super(output, Target.DATA_PACK, ...)` + `saveJson(...serialize())`（fork 版的 `saveThing`/`convert` 都不存在） | **36**（全在 `MaterialRecipeProvider`） |
+
+**顺手修掉一个真 bug**：上一轮把 Forge `CompoundIngredient.of` 映射成了 `DefaultCustomIngredients.all`
+（= AND／交集），但 Forge 的 `CompoundIngredient` 是 **OR**（任一子项匹配即可），语义对应 `DefaultCustomIngredients.any`。
+证据：上游 `ModifierRecipeProvider` 用 `ingredientFromTags(TinkerTags.Items.MELEE, ...HARVEST, ...LAUNCHERS, ...LEGGINGS)`
+表示"任一工具类都行"；AND 的话这个 ingredient 永远为空。`ToolsRecipeProvider` 的过路人材质（`fakeIngot`）和
+箭矢图案（图案 **或** 铸模）同理。已在 `ToolsRecipeProvider` 两处改成 `.any(...)`。
+映射表：`CompoundIngredient`→`any`、`IntersectionIngredient`→`all`、`DifferenceIngredient`→`difference`。

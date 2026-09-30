@@ -183,7 +183,8 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
     String travelersFolder = armorFolder + "travelers/";
     Consumer<FinishedRecipe> shapedMaterial = MaterialsConsumerBuilder.shaped("cl").build(consumer);
     // fake ingot allows things like bronze and pewter to craft it even if their ingot form is not registered
-    Function<MaterialStatsId,Ingredient> travelersMaterial = type -> DefaultCustomIngredients.all(
+    // Forge's CompoundIngredient is an OR (any child matching is enough), matching Fabric's DefaultCustomIngredients.any
+    Function<MaterialStatsId,Ingredient> travelersMaterial = type -> DefaultCustomIngredients.any(
       MaterialValueIngredient.of(MaterialPredicate.and(MaterialPredicate.or(MaterialPredicate.CASTABLE, MaterialPredicate.COMPOSITE), new MaterialStatTypePredicate(type)), 1),
       MaterialIngredient.of(TinkerToolParts.fakeIngot, new MaterialStatTypePredicate(type))
     );
@@ -489,7 +490,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
     uncastablePart(consumer, TinkerToolParts.shell.get(), 4, null, partFolder);
     uncastablePart(consumer, TinkerToolParts.laces.get(), 2, null, partFolder);
     // arrow parts are just part builder, no composite currently
-    Ingredient arrowPattern = DefaultCustomIngredients.all(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(TinkerSmeltery.arrowCast));
+    Ingredient arrowPattern = DefaultCustomIngredients.any(Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS), Ingredient.of(TinkerSmeltery.arrowCast));
     PartRecipeBuilder.partRecipe(TinkerToolParts.arrowHead.get())
       .setPattern(TinkerToolParts.arrowHead)
       .setPatternItem(arrowPattern)

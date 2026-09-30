@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.tools.data;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.resources.ResourceLocation;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier;
 import slimeknights.tconstruct.library.client.armor.texture.DyedArmorTextureSupplier;
 import slimeknights.tconstruct.library.client.armor.texture.FirstArmorTextureSupplier;
@@ -17,7 +18,7 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.tools.item.SlimeskullItem;
 
 public class ArmorModelProvider extends AbstractArmorModelProvider {
-  public ArmorModelProvider(PackOutput packOutput) {
+  public ArmorModelProvider(FabricDataOutput packOutput) {
     super(packOutput);
   }
 
@@ -53,7 +54,7 @@ public class ArmorModelProvider extends AbstractArmorModelProvider {
       ),
       TrimArmorTextureSupplier.INSTANCE
     );
-    addModel(SlimeskullItem.MODEL_LOCATION,
+    addModel(TConstruct.getResource("slimeskull"),
       new MaterialArmorTextureSupplier.Material(slime, "/", 1),
       TrimArmorTextureSupplier.INSTANCE
     );
