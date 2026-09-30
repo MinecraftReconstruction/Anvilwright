@@ -1,14 +1,19 @@
 package slimeknights.tconstruct.smeltery.block.entity.inventory;
 
 import com.google.common.collect.Iterators;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.AllArgsConstructor;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import slimeknights.tconstruct.library.fluid.IMultitankListChange;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 @AllArgsConstructor
 public class DuctTankWrapper implements SlottedStorage<FluidVariant> { // Fabric has FilteringStorage but in order to not create merge conflicts we use our own class

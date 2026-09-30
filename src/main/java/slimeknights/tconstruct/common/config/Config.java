@@ -298,6 +298,11 @@ public class Config {
     public final ModConfigSpec.IntValue itemFrameYOffset;
     public final ModConfigSpec.EnumValue<Orientation2D> itemFrameLocation;
     public final ModConfigSpec.IntValue itemsPerRow;
+    // minimap modifier
+    public final ModConfigSpec.IntValue mapXOffset;
+    public final ModConfigSpec.IntValue mapYOffset;
+    public final ModConfigSpec.DoubleValue mapScale;
+    public final ModConfigSpec.EnumValue<Orientation2D> mapLocation;
 
     // compat
     public final ModConfigSpec.BooleanValue inventoryTabsCompat;

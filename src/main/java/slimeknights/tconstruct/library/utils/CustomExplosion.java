@@ -180,7 +180,7 @@ public class CustomExplosion extends Explosion {
             entity.setDeltaMovement(entity.getDeltaMovement().add(velocity));
             if (entity instanceof Player player) {
               if (!player.isCreative() || !player.getAbilities().flying) {
-                hitPlayers.put(player, velocity);
+                getHitPlayers().put(player, velocity);
               }
             }
           }
@@ -193,7 +193,7 @@ public class CustomExplosion extends Explosion {
   public void handleServer() {
     // based on ServerLevel#explode
     if (!level.isClientSide) {
-      if (!ForgeEventFactory.onExplosionStart(level, this)) {
+      if (!ExplosionEvents.START.invoker().onExplosionStart(level, this)) {
         explode();
         finalizeExplosion(false);
         syncToClient();
@@ -203,7 +203,7 @@ public class CustomExplosion extends Explosion {
 
   /** Runs the logic on both sides */
   public void doDualSide(Level level, boolean spawnParticles) {
-    if (!ForgeEventFactory.onExplosionStart(level, this)) {
+    if (!ExplosionEvents.START.invoker().onExplosionStart(level, this)) {
       explode();
       finalizeExplosion(spawnParticles);
     }
@@ -217,7 +217,7 @@ public class CustomExplosion extends Explosion {
       Vec3 position = new Vec3(this.x, this.y, this.z);
       for (ServerPlayer player : server.players()) {
         if (player.distanceToSqr(position) < 4096.0D) {
-          player.connection.send(new ClientboundExplodePacket(x, y, z, radius, toBlow, hitPlayers.get(player)));
+          player.connection.send(new ClientboundExplodePacket(x, y, z, radius, toBlow, getHitPlayers().get(player)));
         }
       }
     }
