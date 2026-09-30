@@ -15,6 +15,7 @@ import net.minecraft.tags.EntityTypeTags;
 import static slimeknights.tconstruct.common.TinkerTags.EntityTypes.TRIDENTS;
 import net.minecraft.resources.ResourceLocation;
 import static slimeknights.tconstruct.common.TinkerTags.EntityTypes.NECROTIC_BLACKLIST;
+import net.minecraft.core.registries.Registries;
 
 @SuppressWarnings("unchecked")
 public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvider {
@@ -52,14 +53,12 @@ public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvid
     // villager
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.VILLAGERS).add(EntityType.VILLAGER, EntityType.WANDERING_TRADER, EntityType.ZOMBIE_VILLAGER);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.ILLAGERS).add(EntityType.EVOKER, EntityType.ILLUSIONER, EntityType.PILLAGER, EntityType.VINDICATOR, EntityType.WITCH);
-    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.KILLAGERS).addTag(TinkerTags.EntityTypes.VILLAGERS).addTag(TinkerTags.EntityTypes.ILLAGERS).add(EntityType.IRON_GOLEM, EntityType.RAVAGER);
+    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.KILLAGERS).add(EntityType.IRON_GOLEM, EntityType.RAVAGER).addTag(TinkerTags.EntityTypes.ILLAGERS).addTag(TinkerTags.EntityTypes.VILLAGERS);
 
     // melting
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTING_SHOW).add(EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.VILLAGER, EntityType.PLAYER);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTING_HIDE)
-      .add(EntityType.GIANT)
-      .addTag(TinkerTags.EntityTypes.MELTING_BLACKLIST)
-      .addOptionalTag(TinkerTags.HIDDEN_FROM_RECIPE_VIEWERS);
+      .addOptionalTag(TinkerTags.HIDDEN_FROM_RECIPE_VIEWERS).add(EntityType.GIANT).addTag(TinkerTags.EntityTypes.MELTING_BLACKLIST);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTING_BLACKLIST);
 
     // meltable
@@ -71,7 +70,7 @@ public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvid
       EntityType.COD, EntityType.SALMON, EntityType.TROPICAL_FISH);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_ZOMBIE).add(EntityType.ZOMBIE, EntityType.HUSK, EntityType.ZOMBIE_HORSE);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_DROWNED).add(EntityType.DROWNED);
-    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SKELETON).addTag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON_HORSE);
+    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SKELETON).add(EntityType.SKELETON_HORSE).addTag(EntityTypeTags.SKELETONS);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_ENDER).add(EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.ENDER_DRAGON);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SLIME).add(EntityType.SLIME);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_MAGMA).add(EntityType.MAGMA_CUBE);
@@ -94,7 +93,7 @@ public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvid
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.REUSABLE_AMMO).addTag(TRIDENTS);
 
     // modifiers
-    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.KILLAGERS).addTags(TinkerTags.EntityTypes.VILLAGERS, TinkerTags.EntityTypes.ILLAGERS).add(EntityType.IRON_GOLEM, EntityType.RAVAGER);
+    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.KILLAGERS).add(EntityType.IRON_GOLEM, EntityType.RAVAGER).addTags(TinkerTags.EntityTypes.VILLAGERS, TinkerTags.EntityTypes.ILLAGERS);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.BACON_PRODUCER).add(EntityType.PIG, EntityType.PIGLIN, EntityType.HOGLIN);
     // in theory this could just be reusable ammo, but it seems better to keep separate
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.ENDERFERENCE_ARROW_BLACKLIST).addTag(TRIDENTS);
@@ -104,11 +103,10 @@ public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvid
       .addOptionalTag(commonResource(NECROTIC_BLACKLIST.location().getPath()));
 
     // collecting - TODO 1.21: remove legacy tags
-    this.getOrCreateTagBuilder(COLLECTABLES).add(
+    this.getOrCreateTagBuilder(COLLECTABLES).addOptionalTag(commonResource(COLLECTABLES.location().getPath())).add(
         EntityType.ITEM, TinkerTools.indestructibleItem.get(),
         EntityType.EXPERIENCE_ORB
-      ).addTags(TRIDENTS, DISCARDABLE_COLLECTABLES)
-      .addOptionalTag(commonResource(COLLECTABLES.location().getPath()));
+      ).addTags(TRIDENTS, DISCARDABLE_COLLECTABLES);
     this.getOrCreateTagBuilder(DISCARDABLE_COLLECTABLES).add(EntityType.ARROW, EntityType.SPECTRAL_ARROW, TinkerTools.materialArrow.get())
       .addOptionalTag(commonResource(DISCARDABLE_COLLECTABLES.location().getPath()));
 

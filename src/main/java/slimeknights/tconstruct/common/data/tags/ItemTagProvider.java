@@ -222,8 +222,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // piglins like gold and dislike zombie piglin heads
     this.getOrCreateTagBuilder(ItemTags.PIGLIN_LOVED)
-        .add(TinkerModifiers.goldReinforcement.get(), TinkerGadgets.itemFrame.get(FrameType.GOLD), TinkerGadgets.itemFrame.get(FrameType.REVERSED_GOLD), TinkerFluids.moltenGold.asItem(), TinkerCommons.goldBars.asItem(), TinkerCommons.goldPlatform.asItem())
-        .addTag(TinkerTags.Items.GOLD_CASTS);
+        .add(TinkerModifiers.goldReinforcement.get(), TinkerGadgets.itemFrame.get(FrameType.GOLD), TinkerGadgets.itemFrame.get(FrameType.REVERSED_GOLD), TinkerFluids.moltenGold.asItem(), TinkerCommons.goldBars.asItem(), TinkerCommons.goldPlatform.asItem()).addTag(TinkerTags.Items.GOLD_CASTS);
     this.getOrCreateTagBuilder(ItemTags.PIGLIN_REPELLENTS).add(TinkerWorld.headItems.get(TinkerHeadType.ZOMBIFIED_PIGLIN));
 
     // beacons are happy to accept any expensive ingots
@@ -466,8 +465,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // carrots and potatoes are not seeds in vanilla, so make a tag with them
     this.getOrCreateTagBuilder(TinkerTags.Items.SEEDS)
-        .addTag(Tags.Items.SEEDS)
-        .add(Items.CARROT, Items.POTATO, Items.NETHER_WART, Items.SWEET_BERRIES);
+        .add(Items.CARROT, Items.POTATO, Items.NETHER_WART, Items.SWEET_BERRIES).addTag(Tags.Items.SEEDS);
 
     // tags for modifiers
     copy(TinkerTags.Blocks.CHRYSOPHILITE_ORES, TinkerTags.Items.CHRYSOPHILITE_ORES);
@@ -493,19 +491,14 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
           TinkerToolParts.maille.get(), TinkerToolParts.shieldCore.get())
         .add(TinkerToolParts.plating.values().toArray(new Item[0]));
     // tag for the part chest items
-    this.getOrCreateTagBuilder(TinkerTags.Items.CHEST_PARTS).addTag(TinkerTags.Items.TOOL_PARTS).add(TinkerSmeltery.dummyPlating.values().toArray(new Item[0]));
+    this.getOrCreateTagBuilder(TinkerTags.Items.CHEST_PARTS).add(TinkerSmeltery.dummyPlating.values().toArray(new Item[0])).addTag(TinkerTags.Items.TOOL_PARTS);
 
     FabricTagBuilder slimySeeds = this.getOrCreateTagBuilder(TinkerTags.Items.SLIMY_SEEDS);
     TinkerWorld.slimeGrassSeeds.values().forEach(slimySeeds::add);
 
     // contains any ground stones
     this.getOrCreateTagBuilder(TinkerTags.Items.STONESHIELDS)
-        .addTag(Tags.Items.STONE)
-        .addTag(Tags.Items.COBBLESTONE)
-        .addTag(Tags.Items.SANDSTONE)
-        .addTag(Tags.Items.END_STONES)
-        .addTag(Tags.Items.GRAVEL) // for shovels and axes to use
-        .add(Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE);
+        .add(Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE).addTag(Tags.Items.STONE).addTag(Tags.Items.COBBLESTONE).addTag(Tags.Items.SANDSTONE).addTag(Tags.Items.END_STONES).addTag(Tags.Items.GRAVEL);
     this.getOrCreateTagBuilder(TinkerTags.Items.FIREBALLS).add(Items.FIRE_CHARGE);
     this.getOrCreateTagBuilder(TinkerTags.Items.TOOL_INVENTORY_BLACKLIST)
         .add(Items.BUNDLE, Items.SHULKER_BOX,
@@ -514,9 +507,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
              Items.LIGHT_GRAY_SHULKER_BOX, Items.CYAN_SHULKER_BOX, Items.PURPLE_SHULKER_BOX, Items.BLUE_SHULKER_BOX,
              Items.BROWN_SHULKER_BOX, Items.GREEN_SHULKER_BOX, Items.RED_SHULKER_BOX, Items.BLACK_SHULKER_BOX);
     this.getOrCreateTagBuilder(TinkerTags.Items.THROWABLE)
-      .add(Items.SNOWBALL, Items.EGG, Items.ENDER_PEARL, Items.SPLASH_POTION, Items.LINGERING_POTION, Items.EXPERIENCE_BOTTLE, Items.ENDER_EYE, Items.FIREWORK_ROCKET)
-      .add(TinkerGadgets.efln.get(), TinkerGadgets.flintShuriken.get(), TinkerGadgets.quartzShuriken.get(), TinkerGadgets.glowBall.get())
-      .addTag(THROWN_AMMO);
+      .add(Items.SNOWBALL, Items.EGG, Items.ENDER_PEARL, Items.SPLASH_POTION, Items.LINGERING_POTION, Items.EXPERIENCE_BOTTLE, Items.ENDER_EYE, Items.FIREWORK_ROCKET).add(TinkerGadgets.efln.get(), TinkerGadgets.flintShuriken.get(), TinkerGadgets.quartzShuriken.get(), TinkerGadgets.glowBall.get()).addTag(THROWN_AMMO);
     this.getOrCreateTagBuilder(TinkerTags.Items.WHITESTONE_INGOTS)
       .addOptionalTag(commonResource("ingots/aluminum"))
       .addOptionalTag(commonResource("ingots/tin"))
@@ -526,8 +517,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
       .addOptionalTag(commonResource("ingots/cadmium"));
 
     this.getOrCreateTagBuilder(TinkerTags.Items.VARIANT_PLANKS)
-        .add(Items.CRIMSON_PLANKS, Items.WARPED_PLANKS)
-        .addTag(TinkerTags.Items.SLIMY_PLANKS);
+        .add(Items.CRIMSON_PLANKS, Items.WARPED_PLANKS).addTag(TinkerTags.Items.SLIMY_PLANKS);
     // the logs have "variants" as they have their own recipes
     this.getOrCreateTagBuilder(TinkerTags.Items.VARIANT_LOGS).addTags(ItemTags.OAK_LOGS, ItemTags.SPRUCE_LOGS, ItemTags.BIRCH_LOGS, ItemTags.JUNGLE_LOGS, ItemTags.DARK_OAK_LOGS, ItemTags.ACACIA_LOGS, ItemTags.MANGROVE_LOGS, ItemTags.CHERRY_LOGS, ItemTags.CRIMSON_STEMS, ItemTags.WARPED_STEMS, TinkerTags.Items.SLIMY_LOGS);
 
@@ -535,8 +525,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     this.getOrCreateTagBuilder(TinkerTags.Items.DEFAULT_PATTERNS).add(TinkerTables.pattern.get());
     this.getOrCreateTagBuilder(TinkerTags.Items.REUSABLE_PATTERNS).addTag(TinkerTags.Items.GOLD_CASTS);
     this.getOrCreateTagBuilder(TinkerTags.Items.PATTERNS)
-        .addTags(TinkerTags.Items.DEFAULT_PATTERNS, TinkerTags.Items.REUSABLE_PATTERNS, TinkerTags.Items.SAND_CASTS, TinkerTags.Items.RED_SAND_CASTS)
-        .add(Items.SAND, Items.RED_SAND, TinkerFluids.venomBottle.get());
+        .add(Items.SAND, Items.RED_SAND, TinkerFluids.venomBottle.get()).addTags(TinkerTags.Items.DEFAULT_PATTERNS, TinkerTags.Items.REUSABLE_PATTERNS, TinkerTags.Items.SAND_CASTS, TinkerTags.Items.RED_SAND_CASTS);
 
     // stone
     this.copy(TinkerTags.Blocks.STONE,      TinkerTags.Items.STONE);
@@ -548,9 +537,9 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     this.copy(TinkerTags.Blocks.BASALT,     TinkerTags.Items.BASALT);
 
     // twilight forest
-    this.getOrCreateTagBuilder(BANNED_UNCRAFTABLE).addTag(MODIFIABLE).addTag(TOOL_PARTS).add(
+    this.getOrCreateTagBuilder(BANNED_UNCRAFTABLE).add(
       TinkerTables.tinkersAnvil.asItem(), TinkerTables.scorchedAnvil.asItem(), TinkerTables.modifierWorktable.asItem()
-    );
+    ).addTag(MODIFIABLE).addTag(TOOL_PARTS);
     String tf = "twilightforest";
     Function<String,ResourceLocation> trophy = name -> new ResourceLocation(tf, name + "_trophy");
     this.getOrCreateTagBuilder(TinkerTags.Items.BOSS_TROPHIES)
@@ -580,17 +569,13 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // smeltery and foundry structure blocks
     this.getOrCreateTagBuilder(TinkerTags.Items.SMELTERY)
-        .addTag(TinkerTags.Items.SEARED_BLOCKS)
-        .addTag(TinkerTags.Items.SEARED_TANKS)
         .add(TinkerSmeltery.smelteryController.asItem(), TinkerSmeltery.searedLadder.asItem(),
              TinkerSmeltery.searedDrain.asItem(), TinkerSmeltery.searedChute.asItem(), TinkerSmeltery.searedDuct.asItem(),
-             TinkerSmeltery.searedGlass.asItem(), TinkerSmeltery.searedSoulGlass.asItem(), TinkerSmeltery.searedTintedGlass.asItem());
+             TinkerSmeltery.searedGlass.asItem(), TinkerSmeltery.searedSoulGlass.asItem(), TinkerSmeltery.searedTintedGlass.asItem()).addTag(TinkerTags.Items.SEARED_BLOCKS).addTag(TinkerTags.Items.SEARED_TANKS);
     this.getOrCreateTagBuilder(TinkerTags.Items.FOUNDRY)
-        .addTag(TinkerTags.Items.SCORCHED_BLOCKS)
-        .addTag(TinkerTags.Items.SCORCHED_TANKS)
         .add(TinkerSmeltery.foundryController.asItem(), TinkerSmeltery.scorchedLadder.asItem(),
              TinkerSmeltery.scorchedDrain.asItem(), TinkerSmeltery.scorchedChute.asItem(), TinkerSmeltery.scorchedDuct.asItem(),
-             TinkerSmeltery.scorchedGlass.asItem(), TinkerSmeltery.scorchedSoulGlass.asItem(), TinkerSmeltery.scorchedTintedGlass.asItem());
+             TinkerSmeltery.scorchedGlass.asItem(), TinkerSmeltery.scorchedSoulGlass.asItem(), TinkerSmeltery.scorchedTintedGlass.asItem()).addTag(TinkerTags.Items.SCORCHED_BLOCKS).addTag(TinkerTags.Items.SCORCHED_TANKS);
     // structure debug
     this.getOrCreateTagBuilder(TinkerTags.Items.GENERAL_STRUCTURE_DEBUG);
     this.getOrCreateTagBuilder(TinkerTags.Items.SMELTERY_DEBUG).addTag(TinkerTags.Items.GENERAL_STRUCTURE_DEBUG).addTag(TinkerTags.Items.SMELTERY);
@@ -676,8 +661,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // blacklist for proxy tank - mostly to encourage you to use the better suited casting tank
     this.getOrCreateTagBuilder(TinkerTags.Items.PROXY_TANK_BLACKLIST)
-      .add(Items.BUCKET, Items.GLASS_BOTTLE, Items.BOWL, TinkerSmeltery.copperCan.get())
-      .addTag(TinkerTags.Items.AMMO); // ammo has exact size tanks, unlike other modifiable items that have variable sized
+      .add(Items.BUCKET, Items.GLASS_BOTTLE, Items.BOWL, TinkerSmeltery.copperCan.get()).addTag(TinkerTags.Items.AMMO); // ammo has exact size tanks, unlike other modifiable items that have variable sized
 
     // melting tags //
     // ores
@@ -744,8 +728,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     this.getOrCreateTagBuilder(ItemTags.NON_FLAMMABLE_WOOD)
         .add(object.asItem(), object.getSlab().asItem(), object.getStairs().asItem(),
              object.getFence().asItem(), object.getFenceGate().asItem(), object.getDoor().asItem(), object.getTrapdoor().asItem(),
-             object.getPressurePlate().asItem(), object.getButton().asItem())
-        .addTag(object.getLogItemTag());
+             object.getPressurePlate().asItem(), object.getButton().asItem()).addTag(object.getLogItemTag());
   }
 
   /**

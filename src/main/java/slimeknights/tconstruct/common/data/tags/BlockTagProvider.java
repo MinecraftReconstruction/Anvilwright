@@ -56,6 +56,7 @@ import static io.github.fabricators_of_create.porting_lib.tags.Tags.Blocks.NEEDS
 import static slimeknights.mantle.Mantle.commonResource;
 import static slimeknights.tconstruct.common.TinkerTags.Blocks.MINEABLE_MELTING_BLACKLIST;
 import static slimeknights.tconstruct.common.TinkerTags.Blocks.UNREPLACABLE_BY_LIQUID;
+import net.minecraft.core.registries.Registries;
 
 @SuppressWarnings({"unchecked", "SameParameterValue", "removal"})
 public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
@@ -131,14 +132,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     Function<String,ResourceLocation> createId = name -> new ResourceLocation("create", name);
     Function<String,ResourceLocation> quarkId = name -> new ResourceLocation("quark", name);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.WORKSTATION_ROCK)
-      .addTags(TinkerTags.Blocks.STONE, TinkerTags.Blocks.BLACKSTONE, TinkerTags.Blocks.GRANITE, TinkerTags.Blocks.DIORITE, TinkerTags.Blocks.ANDESITE, TinkerTags.Blocks.DEEPSLATE, TinkerTags.Blocks.BASALT)
-      .add(Blocks.TUFF, Blocks.DRIPSTONE_BLOCK, Blocks.CALCITE)
-      // create stones
-      .addOptional(createId.apply("asurine")).addOptional(createId.apply("crimsite")).addOptional(createId.apply("limestone")).addOptional(createId.apply("ochrum"))
-      .addOptional(createId.apply("scoria")).addOptional(createId.apply("scorchia")).addOptional(createId.apply("veridium"))
-      // quark stones
-      .addOptional(quarkId.apply("jasper")).addOptional(quarkId.apply("limestone")).addOptional(quarkId.apply("permafrost"))
-      .addOptional(quarkId.apply("shale")).addOptional(quarkId.apply("myalite"));
+      .addOptional(createId.apply("asurine")).addOptional(createId.apply("crimsite")).addOptional(createId.apply("limestone")).addOptional(createId.apply("ochrum")).addOptional(createId.apply("scoria")).addOptional(createId.apply("scorchia")).addOptional(createId.apply("veridium")).addOptional(quarkId.apply("jasper")).addOptional(quarkId.apply("limestone")).addOptional(quarkId.apply("permafrost")).addOptional(quarkId.apply("shale")).addOptional(quarkId.apply("myalite")).add(Blocks.TUFF, Blocks.DRIPSTONE_BLOCK, Blocks.CALCITE).addTags(TinkerTags.Blocks.STONE, TinkerTags.Blocks.BLACKSTONE, TinkerTags.Blocks.GRANITE, TinkerTags.Blocks.DIORITE, TinkerTags.Blocks.ANDESITE, TinkerTags.Blocks.DEEPSLATE, TinkerTags.Blocks.BASALT);
 
     FabricTagBuilder builder = this.getOrCreateTagBuilder(TinkerTags.Blocks.ANVIL_METAL)
         // tier 3
@@ -162,13 +156,10 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
 
     // allow using wood variants to make tables
     this.getOrCreateTagBuilder(TinkerTags.Blocks.PLANKLIKE)
-        .addTag(BlockTags.PLANKS)
-        .add(TinkerMaterials.blazewood.get(), TinkerMaterials.nahuatl.get());
+        .add(TinkerMaterials.blazewood.get(), TinkerMaterials.nahuatl.get()).addTag(BlockTags.PLANKS);
     // things the platform connects to on the sides
     this.getOrCreateTagBuilder(TinkerTags.Blocks.PLATFORM_CONNECTIONS)
-      .add(Blocks.LEVER, Blocks.LADDER, Blocks.IRON_BARS, TinkerCommons.goldBars.get(), Blocks.TRIPWIRE_HOOK, Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.REDSTONE_WIRE)
-      .addTags(Tags.Blocks.GLASS_PANES, BlockTags.BUTTONS, Tags.Blocks.FENCES, BlockTags.WALLS, BlockTags.WALL_SIGNS)
-      .addOptionalTag(new ResourceLocation("architects_palette:nubs"));
+      .addOptionalTag(new ResourceLocation("architects_palette:nubs")).add(Blocks.LEVER, Blocks.LADDER, Blocks.IRON_BARS, TinkerCommons.goldBars.get(), Blocks.TRIPWIRE_HOOK, Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.REDSTONE_WIRE).addTags(Tags.Blocks.GLASS_PANES, BlockTags.BUTTONS, Tags.Blocks.FENCES, BlockTags.WALLS, BlockTags.WALL_SIGNS);
 
     // copper platforms
     FabricTagBuilder copperPlatforms = this.getOrCreateTagBuilder(TinkerTags.Blocks.COPPER_PLATFORMS);
@@ -191,20 +182,15 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_STACKABLE)
         .add(Blocks.SUGAR_CANE, Blocks.KELP_PLANT);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_CROPS)
-        .add(Blocks.NETHER_WART, Blocks.SWEET_BERRY_BUSH) // berry bushes prefer interact, but can do crops if missing player
-        .addTag(BlockTags.CROPS)
-        .addOptionalTag(commonResource("crops"));
+        .addOptionalTag(commonResource("crops")).add(Blocks.NETHER_WART, Blocks.SWEET_BERRY_BUSH).addTag(BlockTags.CROPS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_INTERACT)
         .add(Blocks.SWEET_BERRY_BUSH, Blocks.CAVE_VINES, Blocks.CAVE_VINES_PLANT);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE)
-        .add(Blocks.PUMPKIN, Blocks.BEEHIVE, Blocks.BEE_NEST)
-        .addTag(TinkerTags.Blocks.HARVESTABLE_CROPS)
-        .addTag(TinkerTags.Blocks.HARVESTABLE_INTERACT)
-        .addTag(TinkerTags.Blocks.HARVESTABLE_STACKABLE);
+        .add(Blocks.PUMPKIN, Blocks.BEEHIVE, Blocks.BEE_NEST).addTag(TinkerTags.Blocks.HARVESTABLE_CROPS).addTag(TinkerTags.Blocks.HARVESTABLE_INTERACT).addTag(TinkerTags.Blocks.HARVESTABLE_STACKABLE);
     // just logs for lumber axe, but modpack makers can add more
     this.getOrCreateTagBuilder(TinkerTags.Blocks.TREE_LOGS).addTag(BlockTags.LOGS);
     // blocks that drop gold and should drop more gold
-    this.getOrCreateTagBuilder(TinkerTags.Blocks.CHRYSOPHILITE_ORES).addTag(Tags.Blocks.ORES_GOLD).add(Blocks.GILDED_BLACKSTONE);
+    this.getOrCreateTagBuilder(TinkerTags.Blocks.CHRYSOPHILITE_ORES).add(Blocks.GILDED_BLACKSTONE).addTag(Tags.Blocks.ORES_GOLD);
   }
 
 
@@ -215,11 +201,11 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     this.getOrCreateTagBuilder(Tags.Blocks.ORES_IN_GROUND_NETHERRACK).add(TinkerWorld.cobaltOre.get());
     this.getOrCreateTagBuilder(Tags.Blocks.ORE_RATES_SINGULAR).add(TinkerWorld.cobaltOre.get());
     this.getOrCreateTagBuilder(TinkerTags.Blocks.RAW_BLOCK_COBALT).add(TinkerWorld.rawCobaltBlock.get());
-    this.getOrCreateTagBuilder(Tags.Blocks.STORAGE_BLOCKS).addTag(TinkerTags.Blocks.RAW_BLOCK_COBALT).add(TinkerToolParts.fakeStorageBlock.get());
+    this.getOrCreateTagBuilder(Tags.Blocks.STORAGE_BLOCKS).add(TinkerToolParts.fakeStorageBlock.get()).addTag(TinkerTags.Blocks.RAW_BLOCK_COBALT);
 
     // allow the enderman to hold more blocks
     FabricTagBuilder endermanHoldable = this.getOrCreateTagBuilder(BlockTags.ENDERMAN_HOLDABLE);
-    endermanHoldable.addTag(TinkerTags.Blocks.CONGEALED_SLIME).add(TinkerSmeltery.grout.get(), TinkerSmeltery.netherGrout.get());
+    endermanHoldable.add(TinkerSmeltery.grout.get(), TinkerSmeltery.netherGrout.get()).addTag(TinkerTags.Blocks.CONGEALED_SLIME);
 
     // wood
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SLIMY_LOGS)
@@ -289,17 +275,15 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     this.getOrCreateTagBuilder(TinkerTags.Blocks.ENDERBARK_LOGS_CAN_GROW_THROUGH)
         .addTags(TinkerTags.Blocks.SLIMY_VINES, TinkerTags.Blocks.SLIMY_SAPLINGS, TinkerTags.Blocks.CONGEALED_SLIME, TinkerTags.Blocks.ENDERBARK_ROOTS, TinkerTags.Blocks.SLIMY_LEAVES, TinkerTags.Blocks.SLIMY_LOGS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.ENDERBARK_ROOTS_CAN_GROW_THROUGH)
-        .addTags(TinkerTags.Blocks.SLIMY_VINES, TinkerTags.Blocks.SLIMY_SAPLINGS, TinkerTags.Blocks.CONGEALED_SLIME, TinkerTags.Blocks.ENDERBARK_ROOTS)
-        .add(Blocks.SNOW);
+        .add(Blocks.SNOW).addTags(TinkerTags.Blocks.SLIMY_VINES, TinkerTags.Blocks.SLIMY_SAPLINGS, TinkerTags.Blocks.CONGEALED_SLIME, TinkerTags.Blocks.ENDERBARK_ROOTS);
     // copy of the list of blocks used in vanilla fungus, which really should have been a tag in the first place
     // we use tags so it works with our slimy foliage too
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SLIMY_FUNGUS_CAN_GROW_THROUGH)
-      .addTags(BlockTags.SAPLINGS, BlockTags.FLOWERS, BlockTags.CROPS, BlockTags.CAVE_VINES)
-        .add(Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.SUGAR_CANE, Blocks.LILY_PAD, Blocks.NETHER_WART, Blocks.COCOA, Blocks.CHORUS_PLANT, Blocks.CHORUS_FLOWER,
+      .add(Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.SUGAR_CANE, Blocks.LILY_PAD, Blocks.NETHER_WART, Blocks.COCOA, Blocks.CHORUS_PLANT, Blocks.CHORUS_FLOWER,
              Blocks.SWEET_BERRY_BUSH, Blocks.WARPED_FUNGUS, Blocks.CRIMSON_FUNGUS, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT,
              Blocks.SPORE_BLOSSOM, Blocks.MOSS_CARPET, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SMALL_DRIPLEAF,
              TinkerWorld.slimeTallGrass.get(FoliageType.ICHOR), TinkerWorld.slimeTallGrass.get(FoliageType.BLOOD),
-             TinkerWorld.slimeFern.get(FoliageType.ICHOR), TinkerWorld.slimeFern.get(FoliageType.BLOOD));
+             TinkerWorld.slimeFern.get(FoliageType.ICHOR), TinkerWorld.slimeFern.get(FoliageType.BLOOD)).addTags(BlockTags.SAPLINGS, BlockTags.FLOWERS, BlockTags.CROPS, BlockTags.CAVE_VINES);
 
 
     // slime spawns
@@ -333,8 +317,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
       TinkerSmeltery.searedFancyBricks.get(),
       TinkerSmeltery.searedTriangleBricks.get());
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SEARED_BLOCKS)
-        .add(TinkerSmeltery.searedStone.get(), TinkerSmeltery.searedCrackedBricks.get(), TinkerSmeltery.searedCobble.get(), TinkerSmeltery.searedPaver.get())
-        .addTag(TinkerTags.Blocks.SEARED_BRICKS);
+        .add(TinkerSmeltery.searedStone.get(), TinkerSmeltery.searedCrackedBricks.get(), TinkerSmeltery.searedCobble.get(), TinkerSmeltery.searedPaver.get()).addTag(TinkerTags.Blocks.SEARED_BRICKS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SMELTERY_BRICKS).addTag(TinkerTags.Blocks.SEARED_BLOCKS);
     this.getOrCreateTagBuilder(BlockTags.WALLS).add(TinkerSmeltery.searedBricks.getWall(), TinkerSmeltery.searedCobble.getWall());
 
@@ -366,15 +349,11 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HEATER_CONTROLLERS)
         .add(TinkerSmeltery.searedMelter.get(), TinkerSmeltery.scorchedAlloyer.get());
     this.getOrCreateTagBuilder(TinkerTags.Blocks.FUEL_TANKS)
-        .add(TinkerSmeltery.searedHeater.get())
-        .addTag(TinkerTags.Blocks.SEARED_TANKS)
-        .addTag(TinkerTags.Blocks.SCORCHED_TANKS);
+        .add(TinkerSmeltery.searedHeater.get()).addTag(TinkerTags.Blocks.SEARED_TANKS).addTag(TinkerTags.Blocks.SCORCHED_TANKS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SMELTERY_TANKS).addTag(TinkerTags.Blocks.SEARED_TANKS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.FOUNDRY_TANKS).addTag(TinkerTags.Blocks.SCORCHED_TANKS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.ALLOYER_TANKS)
-        .add(TinkerSmeltery.scorchedAlloyer.get(), TinkerSmeltery.searedMelter.get())
-        .addTag(TinkerTags.Blocks.SEARED_TANKS)
-        .addTag(TinkerTags.Blocks.SCORCHED_TANKS);
+        .add(TinkerSmeltery.scorchedAlloyer.get(), TinkerSmeltery.searedMelter.get()).addTag(TinkerTags.Blocks.SEARED_TANKS).addTag(TinkerTags.Blocks.SCORCHED_TANKS);
 
     // blocks to ignore like air
     this.getOrCreateTagBuilder(TinkerTags.Blocks.STRUCTURE_AIR).add(Blocks.LIGHT, TinkerCommons.glowBlock.get());
@@ -382,15 +361,12 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     // smeltery blocks
     // floor allows any basic seared blocks and all IO blocks
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SMELTERY_FLOOR)
-        .addTag(TinkerTags.Blocks.SEARED_BLOCKS)
-        .add(TinkerSmeltery.searedLamp.get(), TinkerSmeltery.searedDrain.get(), TinkerSmeltery.searedChute.get(), TinkerSmeltery.searedDuct.get());
+        .add(TinkerSmeltery.searedLamp.get(), TinkerSmeltery.searedDrain.get(), TinkerSmeltery.searedChute.get(), TinkerSmeltery.searedDuct.get()).addTag(TinkerTags.Blocks.SEARED_BLOCKS);
     // wall allows seared blocks, tanks, glass, and IO
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SMELTERY_WALL)
-        .addTag(TinkerTags.Blocks.SEARED_BLOCKS)
-        .addTag(TinkerTags.Blocks.SMELTERY_TANKS)
         .add(TinkerSmeltery.searedGlass.get(), TinkerSmeltery.searedSoulGlass.get(), TinkerSmeltery.searedTintedGlass.get(),
              TinkerSmeltery.searedLadder.get(), TinkerSmeltery.searedLamp.get(),
-             TinkerSmeltery.searedDrain.get(), TinkerSmeltery.searedChute.get(), TinkerSmeltery.searedDuct.get());
+             TinkerSmeltery.searedDrain.get(), TinkerSmeltery.searedChute.get(), TinkerSmeltery.searedDuct.get()).addTag(TinkerTags.Blocks.SEARED_BLOCKS).addTag(TinkerTags.Blocks.SMELTERY_TANKS);
     // smeltery allows any of the three
     this.getOrCreateTagBuilder(TinkerTags.Blocks.SMELTERY)
         .addTag(TinkerTags.Blocks.SMELTERY_WALL)
@@ -400,15 +376,12 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     // foundry blocks
     // floor allows any basic seared blocks and all IO blocks
     this.getOrCreateTagBuilder(TinkerTags.Blocks.FOUNDRY_FLOOR)
-        .addTag(TinkerTags.Blocks.SCORCHED_BLOCKS)
-        .add(TinkerSmeltery.scorchedLamp.get(), TinkerSmeltery.scorchedDrain.get(), TinkerSmeltery.scorchedChute.get(), TinkerSmeltery.scorchedDuct.get());
+        .add(TinkerSmeltery.scorchedLamp.get(), TinkerSmeltery.scorchedDrain.get(), TinkerSmeltery.scorchedChute.get(), TinkerSmeltery.scorchedDuct.get()).addTag(TinkerTags.Blocks.SCORCHED_BLOCKS);
     // wall allows seared blocks, tanks, glass, and IO
     this.getOrCreateTagBuilder(TinkerTags.Blocks.FOUNDRY_WALL)
-        .addTag(TinkerTags.Blocks.SCORCHED_BLOCKS)
-        .addTag(TinkerTags.Blocks.FOUNDRY_TANKS)
         .add(TinkerSmeltery.scorchedGlass.get(), TinkerSmeltery.scorchedSoulGlass.get(), TinkerSmeltery.scorchedTintedGlass.get(),
              TinkerSmeltery.scorchedLadder.get(), TinkerSmeltery.scorchedLamp.get(),
-             TinkerSmeltery.scorchedDrain.get(), TinkerSmeltery.scorchedChute.get(), TinkerSmeltery.scorchedDuct.get());
+             TinkerSmeltery.scorchedDrain.get(), TinkerSmeltery.scorchedChute.get(), TinkerSmeltery.scorchedDuct.get()).addTag(TinkerTags.Blocks.SCORCHED_BLOCKS).addTag(TinkerTags.Blocks.FOUNDRY_TANKS);
     // foundry allows any of the three
     this.getOrCreateTagBuilder(TinkerTags.Blocks.FOUNDRY)
         .addTag(TinkerTags.Blocks.FOUNDRY_WALL)
@@ -505,12 +478,12 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
 
     // custom tool harvest
     // mattock works on all shovel and natural axe
-    getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_MATTOCK).addTags(MINEABLE_WITH_SHOVEL, BlockTags.LOGS).add(
+    getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_MATTOCK).add(
       Blocks.AZALEA, Blocks.BAMBOO, Blocks.GLOW_LICHEN, Blocks.VINE,
       Blocks.BEE_NEST, Blocks.BEEHIVE,
       Blocks.CARVED_PUMPKIN, Blocks.JACK_O_LANTERN, Blocks.PUMPKIN,
       Blocks.CHORUS_FLOWER, Blocks.CHORUS_PLANT, Blocks.COCOA,
-      Blocks.BROWN_MUSHROOM_BLOCK, Blocks.MUSHROOM_STEM, Blocks.RED_MUSHROOM_BLOCK);
+      Blocks.BROWN_MUSHROOM_BLOCK, Blocks.MUSHROOM_STEM, Blocks.RED_MUSHROOM_BLOCK).addTags(MINEABLE_WITH_SHOVEL, BlockTags.LOGS);
     // pickadze is shovel or pickaxe
     getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_PICKADZE).addTags(MINEABLE_WITH_SHOVEL, MINEABLE_WITH_PICKAXE);
     // hand axe has a leaf bonus
@@ -518,26 +491,22 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     // scythe/kama does hoe or shear blocks
     getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_SHEARS)
       .add(Blocks.AZALEA, Blocks.COBWEB, Blocks.DRIED_KELP_BLOCK, Blocks.GLOW_LICHEN, Blocks.LILY_PAD, Blocks.REDSTONE_WIRE, Blocks.HANGING_ROOTS,
-           Blocks.TRIPWIRE, Blocks.TWISTING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.VINE, Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES)
-      .addTags(BlockTags.CAVE_VINES, BlockTags.LEAVES, BlockTags.WOOL, BlockTags.SAPLINGS, BlockTags.FLOWERS, BlockTags.CORAL_PLANTS);
+           Blocks.TRIPWIRE, Blocks.TWISTING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.VINE, Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES).addTags(BlockTags.CAVE_VINES, BlockTags.LEAVES, BlockTags.WOOL, BlockTags.SAPLINGS, BlockTags.FLOWERS, BlockTags.CORAL_PLANTS);
     // scythe/kama does hoe or shear blocks
     getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_SCYTHE)
-      .add(Blocks.KELP, Blocks.KELP_PLANT, Blocks.NETHER_WART, Blocks.SMALL_DRIPLEAF, Blocks.SUGAR_CANE)
-      .addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SHEARS, TinkerTags.Blocks.MINABLE_WITH_SWORD, BlockTags.CROPS)
-      // added by sword effective tag
-      .remove(Blocks.PUMPKIN, Blocks.CARVED_PUMPKIN, Blocks.MELON);
+      .add(Blocks.KELP, Blocks.KELP_PLANT, Blocks.NETHER_WART, Blocks.SMALL_DRIPLEAF, Blocks.SUGAR_CANE).addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SHEARS, TinkerTags.Blocks.MINABLE_WITH_SWORD, BlockTags.CROPS);
+      // added by sword effective tag;
     // sword list is filled to best ability, but will be a bit inexact as vanilla uses materials, hopefully putting this tag under forge will get people to tag their blocks
     getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_SWORD).add(Blocks.COBWEB, Blocks.MOSS_BLOCK).addTags(BlockTags.SWORD_EFFICIENT);
     // dagger does hoe or sword blocks plus glass
-    getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_DAGGER).addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SWORD, Tags.Blocks.GLASS, Tags.Blocks.GLASS_PANES)
-      .add(Blocks.GLOWSTONE, Blocks.REDSTONE_LAMP, Blocks.SEA_LANTERN, Blocks.BEACON);
+    getOrCreateTagBuilder(TinkerTags.Blocks.MINABLE_WITH_DAGGER).add(Blocks.GLOWSTONE, Blocks.REDSTONE_LAMP, Blocks.SEA_LANTERN, Blocks.BEACON).addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SWORD, Tags.Blocks.GLASS, Tags.Blocks.GLASS_PANES);
 
     // melting pan blacklist, basically anything that feels gross due to unsupported melting recipe
     tagBlocks(MINEABLE_MELTING_BLACKLIST, TinkerSmeltery.searedMelter, TinkerSmeltery.smelteryController, TinkerSmeltery.foundryController, TinkerSmeltery.searedLantern, TinkerSmeltery.scorchedLantern, TinkerSmeltery.searedFluidCannon, TinkerSmeltery.scorchedFluidCannon, TinkerSmeltery.endFluidCannon, TinkerSmeltery.searedCastingTank, TinkerSmeltery.scorchedProxyTank);
     tagBlocks(MINEABLE_MELTING_BLACKLIST, TinkerSmeltery.searedTank, TinkerSmeltery.scorchedTank);
 
     // copy of blocks list from FlowingFluid#canHoldFLuid
-    getOrCreateTagBuilder(UNREPLACABLE_BY_LIQUID).addTags(BlockTags.SIGNS, BlockTags.DOORS).add(Blocks.LADDER, Blocks.SUGAR_CANE, Blocks.BUBBLE_COLUMN, Blocks.NETHER_PORTAL, Blocks.END_PORTAL, Blocks.END_GATEWAY, Blocks.STRUCTURE_VOID);
+    getOrCreateTagBuilder(UNREPLACABLE_BY_LIQUID).add(Blocks.LADDER, Blocks.SUGAR_CANE, Blocks.BUBBLE_COLUMN, Blocks.NETHER_PORTAL, Blocks.END_PORTAL, Blocks.END_GATEWAY, Blocks.STRUCTURE_VOID).addTags(BlockTags.SIGNS, BlockTags.DOORS);
   }
 
   @Override
@@ -625,7 +594,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
         block.getSign(), block.getWallSign(), block.getHangingSign(), block.getWallHangingSign()
       };
       if (remove) {
-        getOrCreateTagBuilder(tag).remove(block.get(), update);
+        getOrCreateTagBuilder(tag);
       } else {
         getOrCreateTagBuilder(tag).add(block.get()).add(update);
       }
@@ -653,7 +622,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
   private void addGlass(EnumObject<GlassColor,? extends Block> blockObj, String tagPrefix, FabricTagBuilder blockTag) {
     blockObj.forEach((color, block) -> {
       blockTag.add(block);
-      this.getOrCreateTagBuilder(BlockTags.create(commonResource(tagPrefix + color.getSerializedName()))).add(block);
+      this.getOrCreateTagBuilder(TagKey.create(Registries.BLOCK, commonResource(tagPrefix + color.getSerializedName()))).add(block);
     });
   }
 
