@@ -73,7 +73,7 @@ public abstract class AbstractTagProvider<T> extends GenericDataProvider {
 //      if (!list.isEmpty()) { TODO: PORT?
 //        throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", id, list.stream().map(Objects::toString).collect(Collectors.joining(","))));
 //      } else {
-        futures.add(saveThing(cache, id, TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(tags, false)).getOrThrow(false, LOGGER::error)));
+        futures.add(saveJson(cache, id, TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(tags, false)).getOrThrow(false, LOGGER::error)));
 //      }
     });
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));

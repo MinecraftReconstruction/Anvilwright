@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
+import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -15,10 +16,12 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
@@ -583,7 +586,7 @@ public class AdvancementsProvider extends GenericDataProvider {
       if (!set.add(advancement.getId())) {
         throw new IllegalStateException("Duplicate advancement " + advancement.getId());
       } else {
-        futures.add(saveThing(cache, advancement.getId(), advancement.deconstruct().serializeToJson()));
+        futures.add(saveJson(cache, advancement.getId(), advancement.deconstruct().serializeToJson()));
       }
     };
     this.conditionalConsumer = (advancement, condition) -> {
@@ -592,7 +595,7 @@ public class AdvancementsProvider extends GenericDataProvider {
       } else {
         JsonObject jsonObject = advancement.deconstruct().serializeToJson();
         ConditionJsonProvider.write(jsonObject, condition);
-        futures.add(saveThing(cache, advancement.getId(), jsonObject));
+        futures.add(saveJson(cache, advancement.getId(), jsonObject));
       }
     };
     generate();

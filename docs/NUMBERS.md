@@ -380,3 +380,27 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 **判据：修完根因后要重跑同一个 chunk，看这些连带的数字是否一起消失。**
 
 本阶段（22:00–23:00）修完并已 push 的内容见 `HANDOFF.md` 第 21 节。
+
+### 2026-10-01 凌晨（三）：改用 Gradle 全量口径，791 → 292
+
+> 口径：`./gradlew compileJava -I scripts/port/maxerrs.gradle --offline`（javac 带 `-Xmaxerrs 100000`，
+> 不会提前停手），日志存 `.port/errors_gradleN.txt`。**这是当前唯一可信的进度条。**
+
+| 检查点 commit | 条数 | 本轮修的东西 |
+|---|---|---|
+| （接手） | **791** | — |
+| … | 431 | datagen/tag provider、JEI 15.20、Forge 钩子替换、客户端模型 |
+| `3138afa6d3` | **423** | `MaterialBlockModel`：FRAPI `emitBlockQuads` + `CustomParticleIconModel` |
+| `17f35d671e` | **390** | tag provider 家族：Fabric datagen 构造函数、builder 链式顺序、`CostTagAppender` 换类型 |
+| `5bd3fc3076` | **364** | 精灵/材质数据生成器：`FabricDataOutput`、补回上游 `outputPath`/overrides |
+| `7b2479ff84` | **307** | 装饰模型改 FRAPI mesh（`Mesh getQuads`）、烘焙 quad 上色/自发光 helper（行为差异 #34/#35） |
+| （本轮末） | **292** | 滑翔弹弓（补回 `IchorSlimeSlingItem`）、`saveThing`→`saveJson`、gadget 配方 provider |
+
+**踩坑记录（本轮新增）**
+- `MantleBakedModel.Builder` 无参 `build()`（Forge 版要传 `RenderTypeGroup`）。
+- Fabric `QuadTransform` 只能作用在发射期的 `MutableQuadView`，**没有** `toBakedQuad`，所以 Forge 的
+  `IQuadTransformer#processInPlace(List<BakedQuad>)` 在 Fabric 上要么改成 mesh 烘焙、要么直接改
+  `BakedQuad#getVertices()`（本移植两种都用，见行为差异 #34/#35）。
+- `TagAppender`/`FabricTagBuilder` 的**静态类型**决定链式调用能不能继续：`getOrCreateTagBuilder(...)`
+  返回 `FabricTagBuilder`，而 `tag(...)` 返回 vanilha 的 `TagAppender`（没有 `add(T...)`）。
+  想继续链式必须用前者，且 `add(...)` 要放在 `addTag(...)`/`addTags(...)` **之前**。
