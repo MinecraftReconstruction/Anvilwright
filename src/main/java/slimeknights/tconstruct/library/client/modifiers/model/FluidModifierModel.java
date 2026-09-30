@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.client.modifiers.model;
 
 import com.mojang.math.Transformation;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -11,24 +12,22 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
-import io.github.fabricators_of_create.porting_lib.models.QuadTransformers;
 import io.github.fabricators_of_create.porting_lib.models.geometry.SimpleModelState;
 import io.github.fabricators_of_create.porting_lib.models.UnbakedGeometryHelper;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.joml.Vector3f;
-import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.model.FluidContainerModel;
+import slimeknights.tconstruct.library.client.model.ModelHelper;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Model for a fluid in a tool. */
@@ -71,20 +70,21 @@ public record FluidModifierModel(@Nullable Material small, @Nullable Material la
   }
 
   @Override
-  public void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
+  public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     // ensure template exists
     Material template = isLarge ? large() : small();
     if (template != null) {
       // ensure we have fluid
       FluidStack fluid = tankHelper().getFluid(tool);
       if (!fluid.isEmpty()) {
-        addQuads(fluid, template, spriteGetter, transforms, quadConsumer);
+        return addQuads(fluid, template, spriteGetter, transforms);
       }
     }
+    return EMPTY_MESH;
   }
 
   /** Adds quads for the given fluid */
-  public static void addQuads(FluidStack fluid, Material template, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, Consumer<Collection<BakedQuad>> quadConsumer) {
+  public static Mesh addQuads(FluidStack fluid, Material template, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms) {
     // must have texture for the proper state
     // fluid properties
     // Forge asked the fluid type's client extensions for the texture; Fabric renders fluids through the variant
@@ -98,12 +98,12 @@ public record FluidModifierModel(@Nullable Material small, @Nullable Material la
     // apply brightness and color
     int luminosity = FluidVariantAttributes.getLuminance(fluid.getType());
     if (luminosity > 0) {
-      QuadTransformers.settingEmissivity(luminosity).processInPlace(fluidQuads);
+      ModelHelper.applyEmissivity(fluidQuads, luminosity);
     }
-    int color = attributes.getTintColor(fluid);
+    int color = FluidVariantRendering.getColor(fluid.getType());
     if (color != -1) {
-      ColoredBlockModel.applyColorQuadTransformer(color).processInPlace(fluidQuads);
+      ModelHelper.applyColor(fluidQuads, color);
     }
-    quadConsumer.accept(fluidQuads);
+    return ToolModel.ofQuads(fluidQuads);
   }
 }

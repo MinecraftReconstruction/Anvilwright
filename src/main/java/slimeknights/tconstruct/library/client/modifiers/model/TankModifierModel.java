@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.client.modifiers.model;
 
 import com.mojang.math.Transformation;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.nbt.CompoundTag;
@@ -16,8 +16,6 @@ import slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Model for a tank showing its fluid on the tool */
@@ -72,7 +70,7 @@ public class TankModifierModel implements ModifierModel {
   }
 
   @Override
-  public void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
+  public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     Material partial, full;
     if (isLarge) {
       partial = largePartial;
@@ -87,9 +85,10 @@ public class TankModifierModel implements ModifierModel {
       if (!fluid.isEmpty()) {
         Material mask = fluid.getAmount() + tolerance < helper.getCapacity(tool) ? partial : full;
         if (mask != null) {
-          FluidModifierModel.addQuads(fluid, mask, spriteGetter, transforms, quadConsumer);
+          return FluidModifierModel.addQuads(fluid, mask, spriteGetter, transforms);
         }
       }
     }
+    return EMPTY_MESH;
   }
 }

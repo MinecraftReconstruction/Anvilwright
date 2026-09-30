@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.client.modifiers.model;
 
 import com.mojang.math.Transformation;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -18,6 +19,7 @@ import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.nbt.IModDataView;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -25,9 +27,7 @@ import slimeknights.tconstruct.tools.modules.cosmetic.BannerModule;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Modifier model that renders all banner patterns on a tool */
@@ -64,7 +64,7 @@ public record BannerModifierModel(@Nullable ResourceLocation smallPrefix, @Nulla
   }
 
   @Override
-  public void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
+  public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     ResourceLocation prefix = isLarge ? largePrefix : smallPrefix;
     if (prefix != null) {
       IModDataView modData = tool.getPersistentData();
@@ -91,10 +91,9 @@ public record BannerModifierModel(@Nullable ResourceLocation smallPrefix, @Nulla
             });
           }
         }
-        if (!quads.isEmpty()) {
-          quadConsumer.accept(quads);
-        }
+        return ToolModel.ofQuads(quads);
       }
     }
+    return EMPTY_MESH;
   }
 }

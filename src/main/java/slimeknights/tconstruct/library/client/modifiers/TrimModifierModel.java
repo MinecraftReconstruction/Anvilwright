@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.client.modifiers;
 
 import com.mojang.math.Transformation;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
@@ -14,8 +14,6 @@ import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -55,13 +53,14 @@ public enum TrimModifierModel implements IBakedModifierModel {
   }
 
   @Override
-  public void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
+  public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     if (!isLarge && tool.getItem() instanceof ArmorItem armor) {
       int ordinal = armor.getType().ordinal();
       if (ordinal < 4) {
         Armor model = Armor.values()[ordinal];
-        model.addQuads(tool, modifier, spriteGetter, transforms, isLarge, startTintIndex, quadConsumer, pixels);
+        return model.getQuads(tool, modifier, spriteGetter, transforms, isLarge, startTintIndex, pixels);
       }
     }
+    return EMPTY_MESH;
   }
 }

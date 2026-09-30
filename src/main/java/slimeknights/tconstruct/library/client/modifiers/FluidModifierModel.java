@@ -74,31 +74,18 @@ public class FluidModifierModel extends NormalModifierModel {
   @Override
   public Mesh getQuads(IToolStackView tool, ModifierEntry entry, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
     // first, determine stored fluid
-    Mesh quads = super.getQuads(tool, entry, spriteGetter, transforms, isLarge, startTintIndex, pixels);
     // modifier must be tank
-    // TODO: is there anything that can be done about the fluid? to prevent weird offsets?
-    if (entry.getModifier() instanceof TankModifier tank) {
-      FluidStack fluid = tank.getFluid(tool);
-      // must have fluid
-      if (!fluid.isEmpty()) {
-        // must have texture for the proper state
-        Material template = getTemplate(tank, tool, fluid, isLarge);
-        if (template != null) {
-          // finally, build (mostly based on bucket model)
-//          ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
-//          builder.addAll(quads);
-          TextureAtlasSprite fluidSprite = FluidVariantRendering.getSprite(fluid.getType());
-          int color = FluidVariantRendering.getColor(fluid.getType());
-          int luminosity = FluidVariantAttributes.getLuminance(fluid.getType());
-          TextureAtlasSprite templateSprite = spriteGetter.apply(template);
-//          builder.addAll(ItemTextureQuadConverter.convertTexture(transforms, templateSprite, fluidSprite, 7.498f / 16f, Direction.NORTH, color, -1, luminosity)); TODO: PORT
-//          builder.addAll(ItemTextureQuadConverter.convertTexture(transforms, templateSprite, fluidSprite, 8.502f / 16f, Direction.SOUTH, color, -1, luminosity));
-//          quads = builder.build();
-        }
+    // first, show the fluid
+    FluidStack fluid = helper.getFluid(tool);
+    if (!fluid.isEmpty()) {
+      // must have texture for the proper state
+      Material template = getTemplate(tool, entry, fluid, isLarge);
+      if (template != null) {
+        return slimeknights.tconstruct.library.client.modifiers.model.FluidModifierModel.addQuads(fluid, template, spriteGetter, transforms);
       }
     }
     // add tank outline quads
-    super.addQuads(tool, entry, spriteGetter, transforms, isLarge, startTintIndex, quadConsumer, pixels);
+    return super.getQuads(tool, entry, spriteGetter, transforms, isLarge, startTintIndex, pixels);
   }
 
   /** Cache key for the model */

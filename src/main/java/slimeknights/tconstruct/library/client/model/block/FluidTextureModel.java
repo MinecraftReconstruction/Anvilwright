@@ -41,6 +41,7 @@ import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.client.model.util.ColoredBlockModel.ColorData;
 import slimeknights.mantle.client.model.util.DynamicBakedWrapper;
+import slimeknights.mantle.client.model.util.MantleBakedModel;
 import slimeknights.mantle.client.model.util.ModelHelper;
 import slimeknights.mantle.client.model.util.SimpleBlockModel;
 import slimeknights.mantle.util.JsonHelper;
@@ -157,14 +158,17 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
       // get fluid details if needed
       int luminosity = 0;
       if (!key.fluid.isEmpty()) {
-        color = FluidVariantRendering.getColor(key.fluid.getType());
+        int color = FluidVariantRendering.getColor(key.fluid.getType());
+        if (color != -1) {
+          fluidTransformer = ColoredBlockModel.mergeTransform(ColoredBlockModel.applyColorQuadTransformer(color), quadTransformer);
+        }
         luminosity = FluidVariantAttributes.getLuminance(key.fluid.getType());
         textured = new RetexturedModel.RetexturedContext(textured, this.fluids, FluidVariantRendering.getSprite(key.fluid.getType()).contents().name());
       }
 
       // start baking
       TextureAtlasSprite particle = spriteGetter.apply(textured.getMaterial("particle"));
-      SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(owner.hasAmbientOcclusion(), owner.getGuiLight().lightLikeBlock(), true, owner.getTransforms(), ItemOverrides.EMPTY).particle(particle);
+      MantleBakedModel.Builder builder = SimpleBlockModel.bakedBuilder(owner, ItemOverrides.EMPTY, false).particle(particle);
 
       boolean defaultUvLock = transform.isUvLocked();
       int size = elements.size();
@@ -175,11 +179,11 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
           ColoredBlockModel.bakePart(builder, textured, element, luminosity, spriteGetter, transform.getRotation(), fluidTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         } else {
           int partColor = colors.color();
-          QuadTransform partTransformer = partColor == -1 ? quadTransformer : ColoredBlockModel.applyColorQuadTransformer(partColor).andThen(quadTransformer);
+          QuadTransform partTransformer = partColor == -1 ? quadTransformer : ColoredBlockModel.mergeTransform(ColoredBlockModel.applyColorQuadTransformer(partColor), quadTransformer);
           ColoredBlockModel.bakePart(builder, textured, element, colors.luminosity(), spriteGetter, transform.getRotation(), partTransformer, colors.isUvLock(defaultUvLock), TankModel.BAKE_LOCATION);
         }
       }
-      return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
+      return builder.build();
     }
 
     /** Gets a retextured model for the given fluid, using the cached model if possible */
@@ -190,7 +194,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
       if(blockView instanceof RenderAttachedBlockView renderAttachedBlockView && renderAttachedBlockView.getBlockEntityRenderAttachment(pos) instanceof ModelData data) {
-        FluidStack fluid = fluids.isEmpty() ? FluidStack.EMPTY : data.get(IDisplayFluidListener.PROPERTY);
+        FluidStack fluid = fluids.isEmpty() ? FluidStack.EMPTY : data.get(ModelProperties.FLUID_STACK);
         if (fluid == null) {
         fluid = FluidStack.EMPTY;
       }
@@ -234,7 +238,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
   private static class Loader implements IGeometryLoader<FluidTextureModel> {
     @Override
     public FluidTextureModel read(JsonObject json, JsonDeserializationContext context) {
-      ColoredBlockModel model = ColoredBlockModel.deserialize(context, json);
+      ColoredBlockModel model = ColoredBlockModel.deserialize(json, context);
       Set<String> fluids = Collections.emptySet();
       if (json.has("fluids")) {
         fluids = ImmutableSet.copyOf(JsonHelper.parseList(json, "fluids", GsonHelper::convertToString));
@@ -244,30 +248,6 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
         retextured = ImmutableSet.copyOf(JsonHelper.parseList(json, "retextured", GsonHelper::convertToString));
       }
       return new FluidTextureModel(model, fluids, retextured);
-    }
-  }
-
-  /** Override list to swap the texture in from NBT */
-  private static class RetexturedOverride extends ItemOverrides {
-    private static final RetexturedOverride INSTANCE = new RetexturedOverride();
-
-    @Nullable
-    @Override
-    public BakedModel resolve(BakedModel originalModel, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int pSeed) {
-      if (stack.isEmpty() || !stack.hasTag()) {
-        return originalModel;
-      }
-
-      // get the block first, ensuring its valid
-      Block block = RetexturedBlockItem.getTexture(stack);
-      if (block == Blocks.AIR) {
-        return originalModel;
-      }
-
-      // if valid, use the block
-      if (originalModel instanceof Baked baked)
-        return baked.getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
-      return slimeknights.tconstruct.library.client.model.ModelHelper.unwrap(originalModel, Baked.class).getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
     }
   }
 }

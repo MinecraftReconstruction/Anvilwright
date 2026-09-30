@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.client.modifiers.model;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.math.Transformation;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
@@ -17,11 +17,9 @@ import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** Modifier model that swaps variant based on the material at the given index having the given fallback. */
@@ -73,8 +71,8 @@ public final class MaterialHasFallbackModifierModel implements ModifierModel, Fu
   }
 
   @Override
-  public void addQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
-    (hasFallback(tool) ? ifTrue : ifFalse).addQuads(tool, modifier, spriteGetter, transforms, isLarge, startTintIndex, quadConsumer, pixels);
+  public Mesh getQuads(IToolStackView tool, ModifierEntry modifier, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
+    return (hasFallback(tool) ? ifTrue : ifFalse).getQuads(tool, modifier, spriteGetter, transforms, isLarge, startTintIndex, pixels);
   }
 
   @Override
