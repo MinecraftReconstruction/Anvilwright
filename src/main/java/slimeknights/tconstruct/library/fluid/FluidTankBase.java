@@ -18,6 +18,16 @@ public class FluidTankBase<T extends MantleBlockEntity> extends FluidTank implem
     this.parent = parent;
   }
 
+  /**
+   * Both {@link SimpleFluidTank} and Porting Lib's {@code SingleSlotStorage} (via {@link FluidTank}) declare a default
+   * {@code iterator()}, so the inherited pair is ambiguous. Porting Lib's tank is a real transactional implementation,
+   * so defer to it instead of the interface default.
+   */
+  @Override
+  public java.util.Iterator<net.fabricmc.fabric.api.transfer.v1.storage.StorageView<net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant>> iterator() {
+    return super.iterator();
+  }
+
   /*
    * The fill/drain overrides below replace the interface defaults for one reason: they must fire
    * {@link #onContentsChanged()} at the exact moment the fluid changes, which is what drives the light

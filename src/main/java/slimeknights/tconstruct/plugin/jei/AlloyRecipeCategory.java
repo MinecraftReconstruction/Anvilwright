@@ -15,6 +15,7 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -35,9 +36,9 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
-import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
 import java.awt.Color;
@@ -51,6 +52,9 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   private static final Component CATALYST = TConstruct.makeTranslation("jei", "alloy.catalyst").withStyle(ChatFormatting.ITALIC);
   private static final String KEY_TEMPERATURE = TConstruct.makeTranslationKey("jei", "temperature");
 
+  /** Tooltip for catalyst (non consumed) inputs */
+  private static final IRecipeSlotRichTooltipCallback CATALYST_TOOLTIP = (slot, tooltip) -> tooltip.add(CATALYST);
+
   /** Tooltip for fluid inputs */
   private static final IRecipeTooltipReplacement FLUID_TOOLTIP = (slot, list) ->
     slot.getDisplayedIngredient(FabricTypes.FLUID_STACK).ifPresent(stack -> FluidTooltipHandler.appendMaterial(JEITypes.toFluidStack(stack), list));
@@ -59,8 +63,8 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   public static final IRecipeTooltipReplacement FUEL_TOOLTIP = (slot, tooltip) -> {
     //noinspection SimplifyOptionalCallChains  Not for int streams
     slot.getDisplayedIngredient(FabricTypes.FLUID_STACK)
-        .ifPresent(stack -> MeltingFuelHandler.getTemperature(stack.getFluid())
-                                              .ifPresent(temperature -> tooltip.add(Component.translatable(KEY_TEMPERATURE, temperature).withStyle(ChatFormatting.GRAY))));
+        .flatMap(stack -> Optional.ofNullable(MeltingFuelLookup.findFuel(JEITypes.toFluidStack(stack).getFluid())))
+        .ifPresent(fuel -> tooltip.add(Component.translatable(KEY_TEMPERATURE, fuel.getTemperature()).withStyle(ChatFormatting.GRAY)));
   };
 
   private final IDrawable background;
@@ -72,16 +76,6 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
     this.background = helper.createDrawable(BACKGROUND_LOC, 0, 0, 172, 62);
     this.arrow = helper.drawableBuilder(BACKGROUND_LOC, 172, 0, 24, 17).buildAnimated(200, StartDirection.LEFT, false);
     this.tank = helper.createDrawable(BACKGROUND_LOC, 172, 17, 16, 16);
-  }
-
-  @Override
-  public RecipeType<AlloyRecipe> getRecipeType() {
-    return TConstructJEIConstants.ALLOY;
-  }
-
-  @Override
-  public Component getTitle() {
-    return TITLE;
   }
 
   @Override
@@ -144,7 +138,10 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   @Override
   public void setRecipe(IRecipeLayoutBuilder builder, AlloyRecipe recipe, IFocusGroup focuses) {
     // inputs
-    long maxAmount = drawVariableFluids(builder, RecipeIngredientRole.INPUT, 19, 11, 48, 32, recipe.getDisplayInputs(), recipe.getOutput().getAmount(), FLUID_TOOLTIP);
+    long maxAmount = CategoryUtil.drawMultipleFluids(builder, ingredient -> ingredient.catalyst() ? RecipeIngredientRole.CATALYST : RecipeIngredientRole.INPUT,
+                                      19, 11, 48, 32, recipe.getInputs(), (int)recipe.getOutput().getAmount(),
+                                       ingredient -> ingredient.fluid().getFluids(),
+                                       ingredient -> ingredient.catalyst() ? CATALYST_TOOLTIP : FluidTooltipCallback.UNITS);
 
     // output
     builder.addOutputSlot(137, 11)

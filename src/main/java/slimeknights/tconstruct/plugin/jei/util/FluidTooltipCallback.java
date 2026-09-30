@@ -35,7 +35,7 @@ public interface FluidTooltipCallback extends mezz.jei.api.gui.ingredient.IRecip
       Component component = listIterator.next();
       if (component.getContents() instanceof TranslatableContents translatable && AMOUNT_KEY.equals(translatable.getKey())) {
         listIterator.remove();
-        FluidStack fluid = recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+        FluidStack fluid = recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
         List<Component> newTooltip = new ArrayList<>();
         onFluidTooltip(fluid, recipeSlotView, newTooltip);
         tooltip.addAll(listIterator.nextIndex(), newTooltip);
@@ -43,24 +43,16 @@ public interface FluidTooltipCallback extends mezz.jei.api.gui.ingredient.IRecip
       }
     }
     // failed to find the tooltip to replace, so just append our stuff at the end
-    FluidStack fluid = recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+    FluidStack fluid = recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
     onFluidTooltip(fluid, recipeSlotView, tooltip);
   }
 
   @Override
   default void onRichTooltip(IRecipeSlotView recipeSlotView, ITooltipBuilder tooltip) {
-    ListIterator<Either<FormattedText,TooltipComponent>> listIterator = tooltip.getLines().listIterator();
-    while (listIterator.hasNext()) {
-      FormattedText line = listIterator.next().left().orElse(null);
-      if (line instanceof Component component && component.getContents() instanceof TranslatableContents translatable && AMOUNT_KEY.equals(translatable.getKey())) {
-        listIterator.remove();
-        FluidStack fluid = recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
-        onFluidTooltip(fluid, recipeSlotView, tooltip);
-        return;
-      }
-    }
-    // failed to find the tooltip to replace, so just append our stuff at the end
+    // JEI 15.20 does not expose the lines of the rich tooltip, so the vanilla amount line cannot be replaced;
+    // the fluid info is appended instead (upstream replaces the line in place)
     recipeSlotView.getDisplayedIngredient(FabricTypes.FLUID_STACK)
+      .map(FluidIngredients::toStack)
       .ifPresent(fluid -> onFluidTooltip(fluid, recipeSlotView, tooltip));
   }
 

@@ -12,6 +12,7 @@ import slimeknights.tconstruct.library.recipe.display.FilteredItemRecipe;
 import slimeknights.tconstruct.library.recipe.display.FilteredRecipe;
 
 import java.util.List;
+import java.util.Optional;
 
 /** Recipe manager handling filtering recipes that use just items for inputs and outputs. Used notably in {@link slimeknights.tconstruct.plugin.jei.modifiers.ToolTinkeringCategory}. */
 public class SimpleItemRecipeManager<T extends FilteredItemRecipe> implements ISimpleRecipeManagerPlugin<T> {
@@ -38,18 +39,18 @@ public class SimpleItemRecipeManager<T extends FilteredItemRecipe> implements IS
 
   @Override
   public List<T> getRecipesForInput(ITypedIngredient<?> input) {
-    ITypedIngredient<ItemStack> item = input.cast(VanillaTypes.ITEM_STACK);
-    if (item != null) {
-      return inputItemCache.filterRecipes(item.getIngredient());
+    Optional<ItemStack> itemOpt = input.getIngredient(VanillaTypes.ITEM_STACK);
+    if (itemOpt.isPresent()) {
+      return inputItemCache.filterRecipes(itemOpt.get());
     }
     return List.of();
   }
 
   @Override
   public List<T> getRecipesForOutput(ITypedIngredient<?> output) {
-    ITypedIngredient<ItemStack> item = output.cast(VanillaTypes.ITEM_STACK);
-    if (item != null) {
-      return outputItemCache.filterRecipes(item.getIngredient());
+    Optional<ItemStack> itemOpt = output.getIngredient(VanillaTypes.ITEM_STACK);
+    if (itemOpt.isPresent()) {
+      return outputItemCache.filterRecipes(itemOpt.get());
     }
     return List.of();
   }

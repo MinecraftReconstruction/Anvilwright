@@ -30,6 +30,7 @@ import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 import slimeknights.tconstruct.plugin.jei.melting.MeltingFuelHandler;
+import slimeknights.tconstruct.plugin.jei.util.FluidIngredients;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 
 import java.awt.*;
@@ -90,14 +91,14 @@ public class EntityMeltingRecipeCategory extends AbstractRecipeCategory<EntityMe
     builder.addOutputSlot(115, 11)
            .setFluidRenderer(FluidValues.INGOT * 2, false, 16, 32)
            .addRichTooltipCallback(new FluidTooltip(recipe.getDamage()))
-           .addIngredient(FabricTypes.FLUID_STACK, recipe.getOutput());
+           .addIngredient(FabricTypes.FLUID_STACK, FluidIngredients.of(recipe.getOutput()));
 
     // show fuels that are valid for this recipe
     builder.addSlot(RecipeIngredientRole.CATALYST, 75, 43)
            .setFluidRenderer(1L, false, 16, 16)
            .setOverlay(tank, 0, 0)
            .addRichTooltipCallback(FluidTooltipCallback.NO_AMOUNT)
-           .addIngredients(FabricTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(1));
+           .addIngredients(FabricTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(1).stream().map(FluidIngredients::of).toList());
   }
 
   @Override

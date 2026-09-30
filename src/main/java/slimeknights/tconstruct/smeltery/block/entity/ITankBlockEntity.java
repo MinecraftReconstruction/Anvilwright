@@ -96,17 +96,9 @@ public interface ITankBlockEntity extends IFluidTankUpdater, FluidUpdatePacket.I
     tank.setRenderOffset(tank.getRenderOffset() + newAmount - oldAmount);
 
     // update the block model
-    EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
-      if (isFluidInModel()) {
-        // if the amount change is bigger than a single increment, or we changed whether we have a fluid, update the world renderer
-        BlockEntity te = getTE();
-        Baked<?> model = ModelHelper.getBakedModel(te.getBlockState(), Baked.class);
-        if (model != null && (Math.abs(newAmount - oldAmount) >= (tank.getCapacity() / model.getFluid().getIncrements()) || (oldAmount == 0) != (newAmount == 0))) {
-          //this.requestModelDataUpdate();
-          Minecraft.getInstance().levelRenderer.blockChanged(null, te.getBlockPos(), null, null, 3);
-        }
-      }
-    });
+    if (isFluidInModel()) {
+      SafeClient.updateFluidModel(getTE(), tank, (int)oldAmount, (int)newAmount);
+    }
   }
 
 

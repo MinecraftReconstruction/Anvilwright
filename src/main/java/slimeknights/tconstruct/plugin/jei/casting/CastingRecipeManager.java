@@ -16,6 +16,7 @@ import slimeknights.tconstruct.plugin.jei.util.manager.FluidRecipeCache;
 import slimeknights.tconstruct.plugin.jei.util.manager.ItemRecipeCache;
 
 import java.util.List;
+import java.util.Optional;
 
 /** Plugin handling filterable casting recipes. */
 public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplayableCastingRecipe> {
@@ -46,22 +47,22 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
 
   @Override
   public List<IDisplayableCastingRecipe> getRecipesForInput(ITypedIngredient<?> input) {
-    ITypedIngredient<ItemStack> item = input.cast(VanillaTypes.ITEM_STACK);
-    if (item != null) {
-      return inputItemCache.filterRecipes(item.getIngredient());
+    Optional<ItemStack> itemOpt = input.getIngredient(VanillaTypes.ITEM_STACK);
+    if (itemOpt.isPresent()) {
+      return inputItemCache.filterRecipes(itemOpt.get());
     }
-    ITypedIngredient<FluidStack> fluid = input.cast(FabricTypes.FLUID_STACK);
-    if (fluid != null) {
-      return fluidCache.filterRecipes(fluid.getIngredient());
+    Optional<FluidStack> fluidOpt = input.getIngredient(FabricTypes.FLUID_STACK);
+    if (fluidOpt.isPresent()) {
+      return fluidCache.filterRecipes(fluidOpt.get());
     }
     return List.of();
   }
 
   @Override
   public List<IDisplayableCastingRecipe> getRecipesForOutput(ITypedIngredient<?> output) {
-    ITypedIngredient<ItemStack> item = output.cast(VanillaTypes.ITEM_STACK);
-    if (item != null) {
-      return outputItemCache.filterRecipes(item.getIngredient());
+    Optional<ItemStack> itemOpt = output.getIngredient(VanillaTypes.ITEM_STACK);
+    if (itemOpt.isPresent()) {
+      return outputItemCache.filterRecipes(itemOpt.get());
     }
     return List.of();
   }

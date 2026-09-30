@@ -36,7 +36,7 @@ public abstract class AbstractRecipeCache<T,I> {
 
   /** Logic to compute the recipe list for the given cache key. */
   protected List<T> computeRecipes(Object cacheKey) {
-    Predicate<I> predicate = stack -> cacheKey.equals(helper.getUid(stack, UidContext.Recipe));
+    Predicate<I> predicate = stack -> cacheKey.equals(helper.getUniqueId(stack, UidContext.Recipe));
     List<T> filtered = new ArrayList<>(recipes.size());
     for (T recipe : recipes) {
       if (matches(recipe, predicate)) {
@@ -53,7 +53,7 @@ public abstract class AbstractRecipeCache<T,I> {
    * @see #filterRecipes(I)
    */
   public List<T> matchingRecipes(I focus) {
-    return cache.computeIfAbsent(helper.getUid(focus, UidContext.Recipe), computeRecipes);
+    return cache.computeIfAbsent(helper.getUniqueId(focus, UidContext.Recipe), computeRecipes);
   }
 
   /**

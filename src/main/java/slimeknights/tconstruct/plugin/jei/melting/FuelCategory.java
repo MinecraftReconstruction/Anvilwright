@@ -24,6 +24,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.FluidIngredients;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 
 import java.awt.Color;
@@ -51,7 +52,7 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
     // no fluids mean this is the solid fuel info
     if (!fluids.isEmpty()) {
       builder.addInputSlot(4, 4)
-        .addIngredients(FabricTypes.FLUID_STACK, fluids)
+        .addIngredients(FabricTypes.FLUID_STACK, fluids.stream().map(FluidIngredients::of).toList())
         .setFluidRenderer(100, false, 12, 32)
         .setBackground(fuelBar, -1, -1)
         .setSlotName(FUEL_SLOT);
@@ -101,7 +102,7 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
 
     @Override
     public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-      FluidStack fluid = fuel.getDisplayedIngredient(FabricTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fuel.getDisplayedIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         graphics.drawString(font, LASTS, 0, 0, Color.GRAY.getRGB(), false);
         Component string = Component.translatable(KEY_DURATION, duration, fluid.getAmount());

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
@@ -51,7 +52,7 @@ public final class CategoryUtil {
       for (T ingredient : fluids) {
         for (FluidStack input : mapper.apply(ingredient)) {
           if (input.getAmount() > maxAmount) {
-            maxAmount = input.getAmount();
+            maxAmount = (int)input.getAmount();
           }
         }
       }
@@ -64,7 +65,7 @@ public final class CategoryUtil {
         slotConsumer.accept(builder.addSlot(role.apply(ingredient), fluidX, y)
           .addRichTooltipCallback(tooltip.apply(ingredient))
           .setFluidRenderer(maxAmount, false, width, height)
-          .addIngredients(FabricTypes.FLUID_STACK, mapper.apply(ingredient)));
+          .addIngredients(FabricTypes.FLUID_STACK, toJeiFluids(mapper.apply(ingredient))));
       }
       // for the last, the width is the full remaining width
       int fluidX = x + last * width;
@@ -72,9 +73,14 @@ public final class CategoryUtil {
       slotConsumer.accept(builder.addSlot(role.apply(ingredient), fluidX, y)
         .addRichTooltipCallback(tooltip.apply(ingredient))
         .setFluidRenderer(maxAmount, false, totalWidth - (width * last), height)
-        .addIngredients(FabricTypes.FLUID_STACK, mapper.apply(ingredient)));
+        .addIngredients(FabricTypes.FLUID_STACK, toJeiFluids(mapper.apply(ingredient))));
     }
     return maxAmount;
+  }
+
+  /** Converts Porting Lib fluid stacks into the ingredient type JEI for Fabric expects */
+  private static List<IJeiFluidIngredient> toJeiFluids(List<FluidStack> stacks) {
+    return stacks.stream().map(FluidIngredients::of).toList();
   }
 
   /** Finds the slot with the given name, or null if the slot is missing */
