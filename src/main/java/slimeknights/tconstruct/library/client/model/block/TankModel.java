@@ -58,6 +58,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 import slimeknights.tconstruct.library.client.model.UniqueGuiModel;
+import slimeknights.mantle.client.model.util.MantleBakedModel;
 
 /**
  * This model contains a single scalable fluid that can either be statically rendered or rendered in the TESR. It also supports rendering fluids in the item model
@@ -188,7 +189,8 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       // setup for baking, using dynamic location and sprite getter
       Function<Material,TextureAtlasSprite> spriteGetter = Material::sprite;
       TextureAtlasSprite particle = spriteGetter.apply(owner.getMaterial("particle"));
-      SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(owner.hasAmbientOcclusion(), owner.getGuiLight().lightLikeBlock(), true, owner.getTransforms(), ItemOverrides.EMPTY).particle(particle);
+      MantleBakedModel.Builder builder = SimpleBlockModel.bakedBuilder(owner, ItemOverrides.EMPTY, true).particle(particle);
+      QuadTransform quadTransformer = SimpleBlockModel.applyTransform(originalTransforms, owner.getRootTransform());
       // first, add all regular elements
       for (BlockElement element : baseModel.getElements()) {
         SimpleBlockModel.bakePart(builder, owner, element, spriteGetter, originalTransforms, quadTransformer, BAKE_LOCATION);
@@ -196,7 +198,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       // next, add in the fluid
       QuadTransform fluidTransformer = color == -1 ? quadTransformer : ColoredBlockModel.mergeTransform(quadTransformer, ColoredBlockModel.applyColorQuadTransformer(color));
       ColoredBlockModel.bakePart(builder, owner, fluid, luminosity, spriteGetter, originalTransforms.getRotation(), fluidTransformer, originalTransforms.isUvLocked(), BAKE_LOCATION);
-      return builder.build(SimpleBlockModel.getRenderTypeGroup(owner));
+      return builder.build();
     }
 
     /**
@@ -206,16 +208,16 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
      */
     private BakedModel getModel(CacheKey key) {
       // fetch fluid data
-      var sprites = FluidVariantRendering.getSprites(stack.getType());
-      int color = FluidVariantRendering.getColor(stack.getType());
-      int luminosity = FluidVariantAttributes.getLuminance(stack.getType());
+      var sprites = FluidVariantRendering.getSprites(key.fluid().getType());
+      int color = FluidVariantRendering.getColor(key.fluid().getType());
+      int luminosity = FluidVariantAttributes.getLuminance(key.fluid().getType());
       Map<String,Material> textures = ImmutableMap.of(
         "fluid", new Material(sprites[0].atlasLocation(), sprites[0].contents().name()),
         "flowing_fluid", new Material(sprites[1].atlasLocation(), sprites[1].contents().name()));
-      BlockModel textured = new ExtraTextureConfiguration(owner, textures);
+      ExtraTextureContext textured = new ExtraTextureContext(owner, textures);
 
       // add fluid part
-      BlockElement fluid = original.fluid.getPart(stack.getAmount(), FluidVariantAttributes.isLighterThanAir(stack.getType()));
+      BlockElement fluid = original.fluid.getPart(key.fluid().getAmount(), FluidVariantAttributes.isLighterThanAir(key.fluid().getType()));
       // bake the model
       BakedModel baked = bakeWithFluid(textured, original.model, fluid, color, luminosity);
 
@@ -251,7 +253,8 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
      */
     private BakedModel getCachedModel(FluidStack fluid, long capacity) {
       int increments = original.fluid.getIncrements();
-      return getCachedModel(new FluidStack(fluid, ChannelBlockEntity.clampL(fluid.getAmount() * increments / capacity, 1, increments)));
+      long amount = ChannelBlockEntity.clampL(fluid.getAmount() * increments / capacity, 1, increments);
+      return getCachedModel(new CacheKey(new FluidStack(fluid, amount), (int)amount));
     }
 
 
@@ -295,15 +298,20 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
   }
 
 
+  /** Deserializes the model from JSON */
+  public static TankModel deserialize(JsonObject json, JsonDeserializationContext context) {
+    return LOADER.read(json, context);
+  }
+
   /** Loader for this model */
   public static class Loader implements IGeometryLoader<TankModel> {
 
     @Override
     public TankModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
-      SimpleBlockModel model = SimpleBlockModel.deserialize(deserializationContext, modelContents);
+      SimpleBlockModel model = SimpleBlockModel.deserialize(modelContents, deserializationContext);
       SimpleBlockModel gui = null;
       if (modelContents.has("gui")) {
-        gui = SimpleBlockModel.deserialize(deserializationContext, GsonHelper.getAsJsonObject(modelContents, "gui"));
+        gui = SimpleBlockModel.deserialize(GsonHelper.getAsJsonObject(modelContents, "gui"), deserializationContext);
       }
       IncrementalFluidCuboid fluid = IncrementalFluidCuboid.fromJson(GsonHelper.getAsJsonObject(modelContents, "fluid"));
       boolean forceModelFluid = GsonHelper.getAsBoolean(modelContents, "render_fluid_in_model", false);
