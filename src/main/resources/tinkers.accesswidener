@@ -117,6 +117,7 @@ transitive-accessible method net/minecraft/world/item/context/UseOnContext getHi
 transitive-accessible method net/minecraft/client/particle/BreakingItemParticle <init> (Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDDLnet/minecraft/world/item/ItemStack;)V
 transitive-accessible field net/minecraft/world/entity/decoration/ItemFrame DATA_ROTATION Lnet/minecraft/network/syncher/EntityDataAccessor;
 transitive-accessible field net/minecraft/world/level/Explosion level Lnet/minecraft/world/level/Level;
+transitive-accessible field net/minecraft/client/renderer/entity/ItemFrameRenderer blockRenderer Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;
 transitive-accessible field net/minecraft/world/level/Explosion source Lnet/minecraft/world/entity/Entity;
 transitive-accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
 

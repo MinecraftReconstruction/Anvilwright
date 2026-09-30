@@ -67,7 +67,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
     }
 
     // throw balls
-    folder = "gadgets/throwball/";
+    String folder = "gadgets/throwball/";
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerGadgets.efln.get())
                        .define('#', Tags.Items.GUNPOWDER)
                        .define('X', Items.FLINT)
@@ -154,16 +154,21 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                           .save(consumer, location(folder + "reversed_reversed_gold"));
 
     String cakeFolder = "gadgets/cake/";
-    TinkerGadgets.cake.forEach((slime, cake) -> {
-      Item bucket = TinkerFluids.slime.get(slime).asItem();
-      ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, cake)
-                         .define('M', bucket)
-                         .define('S', slime == SlimeType.BLOOD ? Ingredient.of(Tags.Items.DUSTS_GLOWSTONE) : Ingredient.of(Items.SUGAR))
-                         .define('E', Items.EGG)
-                         .define('W', TinkerWorld.slimeTallGrass.get(slime))
-                         .pattern("MMM").pattern("SES").pattern("WWW")
-                         .unlockedBy("has_slime", has(bucket))
-                         .save(consumer, commonResource(cakeFolder + slime.getSerializedName()));
+    TinkerGadgets.cake.forEach((foliage, cake) -> {
+      if (foliage != FoliageType.ICHOR) {
+        SlimeType slime = foliage.asSlime();
+        ItemLike grass = TinkerWorld.slimeTallGrass.get(foliage);
+        ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, cake)
+                           .define('M', slime != null ? TinkerFluids.slime.get(slime) : TinkerFluids.honey)
+                           .define('S', foliage.isNether()
+                             ? Ingredient.of(Tags.Items.DUSTS_GLOWSTONE)
+                             : foliage == FoliageType.ENDER ? Ingredient.of(Tags.Items.DUSTS_REDSTONE) : Ingredient.of(Items.SUGAR))
+                           .define('E', Items.EGG)
+                           .define('W', grass)
+                           .pattern("MMM").pattern("SES").pattern("WWW")
+                           .unlockedBy("has_slime", has(grass))
+                           .save(consumer, location(cakeFolder + foliage.getSerializedName()));
+      }
     });
     ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, TinkerGadgets.cake.get(FoliageType.ICHOR))
       .define('M', TinkerFluids.ichor)
