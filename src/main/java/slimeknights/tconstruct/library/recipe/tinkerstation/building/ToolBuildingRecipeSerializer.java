@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.tools.item.IModifiable;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ToolBuildingRecipeSerializer implements LoggingRecipeSerializer<ToolBuildingRecipe> {
 
@@ -22,8 +23,11 @@ public class ToolBuildingRecipeSerializer implements LoggingRecipeSerializer<Too
   public ToolBuildingRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
     String group = GsonHelper.getAsString(json, "group", "");
     // output fetch as a modifiable item, its an error if it does not implement that interface or does not have parts
-    IModifiable item = RecipeHelper.deserializeItem(GsonHelper.getAsString(json, "result"), "result", IModifiable.class);
-    if (!item.getToolDefinition().isMultipart()) {
+    ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(json, "result"));
+    if (!BuiltInRegistries.ITEM.containsKey(itemName) || !(BuiltInRegistries.ITEM.get(itemName) instanceof IModifiable item)) {
+      throw new JsonSyntaxException("Result must be a modifiable item with tool parts");
+    }
+    if (!item.getToolDefinition().hasMaterials()) {
       throw new JsonSyntaxException("Modifiable item must have tool parts to get a tool building recipe");
     }
     int resultCount = GsonHelper.getAsInt(json, "result_count", 1);
@@ -31,7 +35,7 @@ public class ToolBuildingRecipeSerializer implements LoggingRecipeSerializer<Too
     if (json.has("extra_requirements")) {
       extraRequirements = JsonHelper.parseList(json, "extra_requirements", jsonObject -> Ingredient.fromJson(jsonObject));
     }
-    return new ToolBuildingRecipe(recipeId, group, item, resultCount, extraRequirements);
+    return new ToolBuildingRecipe(recipeId, group, item, resultCount, null, extraRequirements);
   }
 
   @Nullable
@@ -45,7 +49,7 @@ public class ToolBuildingRecipeSerializer implements LoggingRecipeSerializer<Too
     for (int i = 0; i < size; i++) {
       ingredients.add(Ingredient.fromNetwork(buffer));
     }
-    return new ToolBuildingRecipe(recipeId, group, result, resultSize, ingredients.build());
+    return new ToolBuildingRecipe(recipeId, group, result, resultSize, null, ingredients.build());
   }
 
   @Override

@@ -173,6 +173,11 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
     return tags.getOrDefault(tag, List.of());
   }
 
+  /** Gets a stream of all tag ID to tag value mappings */
+  public Stream<Entry<TagKey<IMaterial>,List<IMaterial>>> getAllTags() {
+    return tags.entrySet().stream();
+  }
+
 
   /**
    * Recreates the fluid lookup and sorted list using the new materials list

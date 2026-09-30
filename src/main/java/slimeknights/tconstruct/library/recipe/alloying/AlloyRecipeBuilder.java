@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 import slimeknights.mantle.data.loadable.Loadables;
+import java.util.Objects;
 
 /** Builder for alloy recipes */
 @SuppressWarnings("unused")
@@ -47,7 +48,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
    * @return  Builder instance
    */
   public static AlloyRecipeBuilder alloy(FluidStack fluid) {
-    return alloy(fluid, FluidVariantAttributes.getTemperature(fluid.getType()) - 300);
+    return alloy(FluidOutput.fromStack(fluid), (int)(FluidVariantAttributes.getTemperature(fluid.getType()) - 300));
   }
 
   /**
@@ -117,7 +118,7 @@ public class AlloyRecipeBuilder extends AbstractRecipeBuilder<AlloyRecipeBuilder
 
   @Override
   public void save(Consumer<FinishedRecipe> consumer) {
-    save(consumer, Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(output.getFluid())));
+    save(consumer, Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(output.get().getFluid())));
   }
 
   @Override
