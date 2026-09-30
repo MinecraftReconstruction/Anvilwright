@@ -143,7 +143,7 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
   }
 
   @Override
-  public int getCapacity() {
+  public long getCapacity() {
     return CastingTankBlockEntity.DEFAULT_CAPACITY;
   }
 }

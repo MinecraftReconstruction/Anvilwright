@@ -70,12 +70,6 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   /** Transform matrix to apply to child parts */
   private final Vec2 offset;
 
-  /** @deprecated use {@link DynamicTextureLoader#getTextureAdder(Collection, boolean)} */
-  @Deprecated
-  public static Predicate<Material> getTextureAdder(Collection<Material> allTextures, boolean logMissingTextures) {
-    return DynamicTextureLoader.getTextureAdder(allTextures, logMissingTextures);
-  }
-
   /**
    * Checks that all unique material textures for the given part exist, logs any that are missing via the sprite getter function.
    * @param owner        Model owner
@@ -88,6 +82,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
 
     // if the texture is missing, stop here with a warning for the root
     if (!MissingTextureAtlasSprite.getLocation().equals(texture.texture())) {
+      Function<Material,TextureAtlasSprite> spriteGetter = Material::sprite;
       // if no specific material is set, load all materials as dependencies. If just one material, use just that one
       if (material == null) {
         MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos().forEach(info -> info.getSprite(texture, spriteGetter));
@@ -146,7 +141,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
         TintedSprite sprite = info.getSprite(texture, spriteGetter);
         finalSprite = sprite.sprite();
         color = sprite.color();
-        light = info.getLuminosity();
+        light = sprite.emissivity();
       }
     }
 
@@ -156,7 +151,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
     }
 
     // get quads
-    quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels));
+    quadConsumer.accept(ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels)));
 
     // return sprite
     return finalSprite;

@@ -48,24 +48,6 @@ public class DynamicTextureLoader extends ResourceValidator {
     TextureStitchCallback.POST.register(e -> clearCache());
   }
 
-  /** Checks if a texture exists */
-  public static boolean textureExists(ResourceManager manager, ResourceLocation location) {
-    Boolean found = EXISTING_TEXTURES.get(location);
-    if (found == null) {
-      found = manager.getResource(new ResourceLocation(location.getNamespace(), "textures/" + location.getPath() + ".png")).isPresent();
-      EXISTING_TEXTURES.put(location, found);
-    }
-    return found;
-  }
-
-  /** Logs that a dynamic texture is missing, config option to disable */
-  public static void logMissingTexture(ResourceLocation location) {
-    if (!SKIPPED_TEXTURES.contains(location)) {
-      SKIPPED_TEXTURES.add(location);
-      log.debug("Skipping loading texture '{}' as it does not exist in the resource pack", location);
-    }
-  }
-
   /**
    * Gets a consumer to add textures to the given collection
    *

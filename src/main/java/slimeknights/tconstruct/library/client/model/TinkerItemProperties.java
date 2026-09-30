@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.client.model;
 
 import com.google.common.collect.Maps;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +27,7 @@ public class TinkerItemProperties {
   /** ID for broken property */
   private static final ResourceLocation BROKEN_ID = TConstruct.getResource("broken");
   /** Property declaring broken */
-  private static final ItemPropertyFunction BROKEN = (stack, level, entity, seed) -> {
+  private static final ClampedItemPropertyFunction BROKEN = (stack, level, entity, seed) -> {
     return ToolDamageUtil.isBroken(stack) ? 1 : 0;
   };
 
@@ -35,7 +36,7 @@ public class TinkerItemProperties {
   /** ID of fireworks rocket for NBT check */
   private static final String FIREWORKS_ID = "minecraft:firework_rocket";
   /** Int declaring ammo type */
-  private static final ItemPropertyFunction AMMO = (stack, level, entity, seed) -> {
+  private static final ClampedItemPropertyFunction AMMO = (stack, level, entity, seed) -> {
     CompoundTag nbt = stack.getTag();
     if (nbt != null) {
       CompoundTag persistentData = nbt.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA);
@@ -53,7 +54,7 @@ public class TinkerItemProperties {
   /** ID for the pulling property */
   private static final ResourceLocation CHARGING_ID = TConstruct.getResource("charging");
   /** Boolean indicating the bow is pulling */
-  private static final ItemPropertyFunction CHARGING = (stack, level, holder, seed) -> {
+  private static final ClampedItemPropertyFunction CHARGING = (stack, level, holder, seed) -> {
     if (holder != null && holder.isUsingItem() && holder.getUseItem() == stack) {
       UseAnim anim = stack.getUseAnimation();
       if (anim == UseAnim.BLOCK) {
@@ -73,7 +74,7 @@ public class TinkerItemProperties {
   /** ID for the pull property */
   private static final ResourceLocation CHARGE_ID = TConstruct.getResource("charge");
   /** Property for bow pull amount */
-  private static final ItemPropertyFunction CHARGE = (stack, level, holder, seed) -> {
+  private static final ClampedItemPropertyFunction CHARGE = (stack, level, holder, seed) -> {
     if (holder == null || holder.getUseItem() != stack) {
       return 0.0F;
     }
@@ -83,7 +84,7 @@ public class TinkerItemProperties {
   /** ID for the cast fishing rods */
   private static final ResourceLocation CAST_ID = TConstruct.getResource("cast");
   /** Property for casting a fishing rod */
-  private static final ItemPropertyFunction CAST = (stack, level, holder, seed) -> {
+  private static final ClampedItemPropertyFunction CAST = (stack, level, holder, seed) -> {
     // must be a fishing rod, and the player must be fishing
     // does player check first since its the fastest, avoids NBT parsing
     if (holder instanceof Player player && player.fishing != null && stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) {
