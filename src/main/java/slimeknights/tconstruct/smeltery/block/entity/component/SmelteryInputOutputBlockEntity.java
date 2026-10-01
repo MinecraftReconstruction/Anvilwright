@@ -22,9 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.block.entity.IRetexturedBlockEntity;
-import slimeknights.mantle.client.model.data.IModelData;
-import slimeknights.mantle.client.model.data.ModelDataMap;
-import slimeknights.mantle.client.model.data.SinglePropertyData;
+import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
@@ -36,7 +34,6 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static slimeknights.mantle.util.RetexturedHelper.TAG_TEXTURE;
-import slimeknights.mantle.client.model.ModelData;
 
 /**
  * Shared logic between drains and ducts
@@ -182,8 +179,8 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
   }
 
   @Override
-  public IModelData getRenderData() {
-    return this.modelData;
+  public ModelData getRenderData() {
+    return getModelData();
   }
 
   /** Fluid implementation of smeltery IO */
@@ -211,13 +208,8 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
     }
 
     @Override
-    public IModelData getRenderData() {
+    public ModelData getRenderData() {
       return getModelData();
-    }
-
-    @Override
-    public IModelData getRetexturedModelData() {
-      return new ModelDataMap.Builder().withProperty(RetexturedHelper.BLOCK_PROPERTY).withProperty(IDisplayFluidListener.PROPERTY).build();
     }
 
     @Nullable

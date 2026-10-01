@@ -226,7 +226,6 @@ public class Config {
     public final ModConfigSpec.BooleanValue extraToolTips;
     public final ModConfigSpec.BooleanValue logMissingMaterialTextures;
     public final ModConfigSpec.BooleanValue logMissingModifierTextures;
-    public final ModConfigSpec.BooleanValue showModifiersInJEI;
     public final ModConfigSpec.BooleanValue renderShieldSlotItem;
     public final ModConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
     public final ModConfigSpec.IntValue maxSmelteryItemQuads;

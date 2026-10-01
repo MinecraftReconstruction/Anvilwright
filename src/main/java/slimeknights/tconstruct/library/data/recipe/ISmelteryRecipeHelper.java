@@ -220,16 +220,6 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
     metalMelting(builder, hasOre, hasDust);
   }
 
-  /** @deprecated use {@link SmelteryRecipeBuilder} via {@link SmelteryRecipeBuilder#fluid(Consumer, ResourceLocation, Fluid)} */
-  @Deprecated(forRemoval = true)
-  default void metalMelting(Consumer<FinishedRecipe> consumer, Fluid fluid, String name, boolean hasOre, boolean hasDust, String folder, boolean isOptional, IByproduct... byproducts) {
-    SmelteryRecipeBuilder builder = SmelteryRecipeBuilder.fluid(consumer, location(name), fluid).meltingFolder(folder).optional(isOptional);
-    if (hasOre) {
-      builder.ore(byproducts);
-    }
-    metalMelting(builder, hasOre, hasDust);
-  }
-
   /** Shared logic for gem melting */
   @Deprecated(forRemoval = true)
   private static void gemMelting(SmelteryRecipeBuilder builder, boolean hasOre, int blockSize) {
@@ -252,17 +242,6 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
     }
     gemMelting(builder, hasOre, blockSize);
   }
-
-  /** @deprecated use {@link SmelteryRecipeBuilder} via {@link SmelteryRecipeBuilder#fluid(Consumer, ResourceLocation, Fluid)} */
-  @Deprecated(forRemoval = true)
-  default void gemMelting(Consumer<FinishedRecipe> consumer, Fluid fluid, String name, boolean hasOre, int blockSize, String folder, boolean isOptional, IByproduct... byproducts) {
-    SmelteryRecipeBuilder builder = SmelteryRecipeBuilder.fluid(consumer, location(name), fluid).meltingFolder(folder).optional(isOptional);
-    if (hasOre) {
-      builder.ore(byproducts);
-    }
-    gemMelting(builder, hasOre, blockSize);
-  }
-
 
   /* Casting */
 

@@ -1,0 +1,8 @@
+// Raise javac's error cap so the log shows the real remaining error count.
+// javac silently truncates at 100 errors otherwise, which makes progress look
+// far better than it is.
+allprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs.addAll(["-Xmaxerrs", "100000", "-Xdiags:verbose"])
+    }
+}

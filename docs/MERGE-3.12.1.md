@@ -4,6 +4,102 @@
 > 合并本身由 AI agent 执行（人类设定目标、审查、验证），逐条决策日志见
 > [merge-3.12.1-decisions.txt](merge-3.12.1-decisions.txt)。
 
+---
+
+## 2026-09-29（第二轮）· 按"真错误"口径推进 —— 报告 462 → 362 / 真错误 319 → 224
+
+这一轮先定案了第 7 节的 Lombok 问题（结论见下一节），然后按家族推进，四个 checkpoint 都已 push：
+
+| commit | 内容 | 数字 |
+|---|---|---|
+| `ef51374b38` | Mantle 模型数据家族 + 14 处重复方法 + 新工具 | 462 → 426 |
+| `5cedfca395` | 删上游已删的死模型（`Casting/Melter/TableModel`）、`GenericRegistryEntrySerializer`；`AlloyRecipe` 补回 `record AlloyIngredient` | 426 → 401 |
+| `34ef2b472a` | `TinkerTools` 注册表按上游重写（工具定义模块/工具属性/谓词），删 4 个旧 harvest/aoe 类 | 401 → 375 |
+| `3b45a0462e` | 单罐流体抽象层改到 Fabric 形状（`SimpleFluidTank`/`FluidTankBase`/`EmptyFluidHandlerItem`/`ScaledFluidTank`） | 375 → 361 |
+
+**方法论更新（照这个来）**：
+
+1. **先分清真假**：默认日志和 `--gen` 日志取交集 = 真错误；差集 = 假错误。`python3 scripts/port/workqueue.py` 一次算完。
+2. **"上游已删 + 没有资源引用"就直接删**，这轮删掉 4 个类（模型 3 + 注册块 1）后又确认了 4 个（`harvest`/`aoe` 旧实现）。
+   判据：`git cat-file -e v3.12.1.231:<path>` 判"上游删没删"；`rg '"loader": *"[^"]+"' src/main/resources` 判"资源还用不用这个 loader"；
+   `rg -o '"type": *"tconstruct:[a-z_]+' src/generated/resources/...` 判"数据还用不用这个注册 id"。
+3. **合并留下的"文件尾部被截断"有一批**：`AlloyRecipe` 少了嵌套 record、`ToolInventoryCapability` 少了 `CraftingType` 枚举、
+   `ModifiableArmorItem`/`ToolAttackUtil` 尾部多了一整份重复实现。查法：`wc -l` 对比上游 + `git diff v3.12.1.231 -- <file>` 看尾部。
+4. **"运行时注册"仍然是最危险的一类**：`TinkerTools` 少了整块注册（工具定义/谓词），编译上只体现为几条 import 报错，
+   但运行时会变成"所有工具都是空定义"。改注册相关代码时，一定拿上游同名方法逐行对。
+
+### 顺带修掉的真 bug
+
+| 位置 | 问题 | 处理 |
+|---|---|---|
+| `HeatingStructureBlockEntity.updateDisplayFluid` | 合并时把 `this.displayFluid = ...` 换成了 `modelData.setData(...)`，而 `modelData` 字段已经不存在 ⇒ 冶炼炉显示的流体永远停在初始值 | 恢复上游赋值（`ModelData` 不可变，改走字段 + block update） |
+| `TinkerTools.registerRecipeSerializers` | 只剩旧 fork 的 5 条注册，上游 ~60 条全丢 ⇒ 工具定义/谓词在运行时找不到 loader | 按上游重写该段，并补上此前也漏掉的 `tconstruct:tool_stack` |
+| `RetexturedTableBlockEntity.textureUpdated` | 拿不可变的 `ModelData` 去 `setData`（还调了不存在的 `requestModelDataUpdate`） | 改成 Mantle 自己的 `RetexturedHelper.onTextureUpdated(this)`，与 `DefaultRetexturedBlockEntity` 一致 |
+| 6 个文件 14 处 | 重复的方法/字段声明（两版代码都在） | 删除后一半，并与上游对齐 |
+
+---
+
+## 2026-09-29 · 度量口径被推翻："Lombok 假错误"比想象的大得多，而且总数是**下界**
+
+这一轮把前面几轮一直没解开的"Lombok 假错误"查清楚了，结论**改变了统计口径**，先看这段再干活。
+
+### 1. 假错误不是 ~28 条，是 ~130 条
+
+同一棵树、同一个 classpath，只换 javac 的停止策略：
+
+| 运行方式 | 报错数 | getVariant/getId/isSuccess/"cannot be applied" 家族 |
+|---|---|---|
+| 默认（错误即停在 FLOW） | **462** | 有 |
+| `-XDshould-stop.ifError=GENERATE` | **319** | **0** |
+
+两次运行取差集：默认多出 **132 条**，它们**全部**是 `cannot find symbol`（缺 `getVariant()`/`isSuccess()`/`getId()`/
+`getCraftingResult()`）、`constructor X cannot be applied to given types`（缺 `@RequiredArgsConstructor` 生成的构造器）、
+`X is not abstract and does not override abstract method getId()`（缺 `@Getter` 生成的实现）这几类。
+⇒ **这些是 javac 在"已经编译失败"状态下的产物，不是代码缺陷。**
+
+### 2. 真因（不是 Lombok 坏了）
+
+Lombok **没有**问题：单独用 `javac` 编一个 `@Getter` + `@RequiredArgsConstructor` 的类，成员生成正常。
+问题在于 **javac 出错后会停在 FLOW 阶段，而在这个模式下 Lombok 注入的成员对其它编译单元的解析不可见**。
+旁证：`RecipeResult.java`（有 `@Getter boolean success` / `@RequiredArgsConstructor`）在自己的文件里**零错误**，
+但别的文件调用 `isSuccess()` 就报"找不到"；`PartRecipe`（与上游逐字节相同）也是同一现象。
+
+### 3. 新发现：**错误总数是下界，不是真值**
+
+`FluidTankBase.java` 里 `fill(FluidStack, FluidAction)` 的 `@Override` 根本不成立（Porting Lib 的 `FluidTank`
+只有 `insert/extract(TransactionContext)`），单文件编译报 5 条错——但**任何一次全量编译日志里都没有它**。
+验证方法：故意往 `FluidTankBase.java` 里塞一行 `private final int zzzProbe = "not an int";`，**全量编译依然 0 条报告**，
+总数纹丝不动（439 → 439）。
+
+原因还是那条老坑的放大版：javac 只对**它真正走到**的类做检查（`-verbose` 显示 2063 个源文件里只有 ~344 个
+`[checking]`）。`FluidTankBase` 的检查入口在上游（`TankBlockEntity` → `FluidTankAnimated`）本身就编译失败，
+于是它整棵子树都被跳过。
+
+**这意味着**：随着真错误被修掉，**以前被隐藏的文件会浮出来，总数会阶段性上涨**。别把"涨了"当成改坏了，
+要看 diff 是不是"新文件开始被检查"。
+
+### 4. 顺带挖出 14 处**真实的重复定义**（合并时把两版代码都留下了）
+
+这些错误只在 GENERATE 模式下才报（`method ... is already defined`），默认模式看不到：
+
+| 文件 | 重复的东西 |
+|---|---|
+| `SideButtonsWidget` | `setFocused` / `isFocused` 各两份（底部那份带 `// TODO: do I need to use these?`） |
+| `ToolAttackUtil` | `getAttributeAttackDamage` / `dealDefaultDamage` / `attackEntity` ×3 |
+| `ModifiableArmorItem` | `canWalkOnPowderedSnow` / `canPerformAction` / `getStatInformation` |
+| `MaterialMeltingRecipeBuilder` | `material(MaterialVariantId, FluidStack)` |
+| `ISmelteryRecipeHelper` | `metalMelting(...)` / `gemMelting(...)` 各两份 |
+| `common/config/Config$Client` | `showModifiersInJEI` 声明两次 |
+
+### 5. 新的工具与口径
+
+- `scripts/port/fastcompile.sh` —— 直接调用 javac 跑全量，**18 秒**一轮（Gradle 要 40 秒），错误列表可与 Gradle 对照；
+  加 `--gen` 则用 GENERATE 停止策略（**只用来找重复定义，不能当主口径**，它的检查覆盖只有 283 个类 vs 344 个）。
+- `scripts/port/summarize.py` —— 按"缺失的包 / 缺失的符号 / 错误种类 / 最差文件"归类，用来按家族干活。
+- 主口径仍然是 `scripts/port/errors.sh`（Gradle），但要记住它**是下界**。
+
+---
+
 ## 这次合并的基本事实
 
 | 项 | 值 |
@@ -534,4 +630,3 @@ $JDK17/bin/javac -encoding UTF-8 -proc:full -processorpath "$AP" -cp "src/main/j
 | JEI 插件（`mezz.jei.api.forge.ForgeTypes`） | ~10 | JEI Fabric 版是 `mezz.jei.api.fabric.constants.FabricTypes.FLUID_STACK`，但成分类型从 `FluidStack` 变成 `IJeiFluidIngredient`，**不是纯改名** |
 | **Lombok 假错误**（`getVariant`/`getId`/`getCraftingResult`） | ~28 | 见上面的调查，**别单独修** |
 | 其余零散 | ~310 | 每个文件 1–3 条 |
-

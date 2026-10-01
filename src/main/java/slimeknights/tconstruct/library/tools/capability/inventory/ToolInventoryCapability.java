@@ -729,4 +729,20 @@ public class ToolInventoryCapability extends InventoryModifierHookIterator<Modif
       this.capability.cachedStacks[index] = stack;
     }
   }
+
+  /** Crafting table type for the UI */
+  public enum CraftingType {
+    FULL, INVENTORY, NONE;
+
+    /** Gets the crafting type for the given stack */
+    public static CraftingType fromStack(ItemStack stack) {
+      if (ModifierUtil.checkVolatileFlag(stack, CRAFTING_TABLE)) {
+        return FULL;
+      }
+      if (ModifierUtil.checkVolatileFlag(stack, INVENTORY_CRAFTING)) {
+        return INVENTORY;
+      }
+      return NONE;
+    }
+  }
 }

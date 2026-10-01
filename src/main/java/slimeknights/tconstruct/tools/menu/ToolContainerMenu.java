@@ -294,7 +294,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void updateFluid(FluidStack updated, int change) {
+    public void updateFluid(FluidStack updated, long change) {
       if (change != 0) {
         setFluid(updated);
         if (player != null) {
@@ -304,7 +304,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public int getCapacity() {
+    public long getCapacity() {
       return ToolTankHelper.TANK_HELPER.getCapacity(tool);
     }
   }

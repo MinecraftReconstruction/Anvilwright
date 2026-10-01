@@ -36,8 +36,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import slimeknights.mantle.block.entity.IRetexturedBlockEntity;
 import slimeknights.mantle.block.entity.NameableBlockEntity;
-import slimeknights.mantle.client.model.data.IModelData;
-import slimeknights.mantle.client.model.data.ModelDataMap;
+import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
@@ -478,8 +477,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   private void updateDisplayFluid(FluidStack fluid) {
     if (level != null && level.isClientSide) {
       // update ourself
-      fluid = IDisplayFluidListener.normalizeFluid(fluid);
-      modelData.setData(IDisplayFluidListener.PROPERTY, fluid);
+      this.displayFluid = IDisplayFluidListener.normalizeFluid(fluid);
       BlockState state = getBlockState();
       level.sendBlockUpdated(worldPosition, state, state, 48);
       updateListeners(displayFluid);
@@ -683,7 +681,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   }
 
   @Override
-  public IModelData getRenderData() {
-    return modelData;
+  public ModelData getRenderData() {
+    return getModelData();
   }
 }

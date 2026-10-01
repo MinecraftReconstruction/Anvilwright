@@ -1,0 +1,16 @@
+// Dumps the compile classpath to .port/compile-cp.txt, which scripts/port/jarindex.py
+// turns into a class index. Used to decide whether an import can possibly resolve.
+allprojects {
+  afterEvaluate { p ->
+    if (p.configurations.findByName('compileClasspath') == null) return
+    p.tasks.register('printCompileCp') {
+      doLast {
+        p.file('.port').mkdirs()
+        p.file('.port/compile-cp.txt').text = p.configurations.compileClasspath.asPath
+        def ap = p.configurations.findByName('annotationProcessor')
+        p.file('.port/ap-cp.txt').text = ap == null ? '' : ap.asPath
+        println 'wrote .port/compile-cp.txt'
+      }
+    }
+  }
+}
