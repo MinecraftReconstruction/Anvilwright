@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.client.screen.book.element.ItemElement;
@@ -89,7 +90,7 @@ public class ContentMaterialSkull extends SingleMaterialStatContent {
       skullRecipe = RecipeHelper.getJEIRecipes(world.registryAccess(), world.getRecipeManager(), TinkerRecipeTypes.CASTING_BASIN.get(), IDisplayableCastingRecipe.class).stream()
         .filter(recipe -> {
           ItemStack output = recipe.getOutput();
-          return output.getItem() == TinkerTools.slimesuit.get(ArmorItem.Type.HELMET) && MaterialIdNBT.getMaterial(output, 0).getId().toString().equals(materialName);
+          return output.getItem() == TinkerTools.slimesuit.get(ArmorSlotType.HELMET) && MaterialIdNBT.getMaterial(output, 0).getId().toString().equals(materialName);
         })
         .findFirst().orElse(null);
       searchedSkullRecipe = true;

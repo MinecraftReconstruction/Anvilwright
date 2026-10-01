@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.TinkerItemDisplays;
+import slimeknights.tconstruct.library.client.model.block.ChannelModel;
+import slimeknights.tconstruct.smeltery.client.CopperCanModel;
 import slimeknights.tconstruct.library.client.model.block.FluidTextureModel;
 import slimeknights.tconstruct.library.client.model.block.TankModel;
 import slimeknights.tconstruct.library.client.model.tools.ToolModel;
@@ -49,7 +51,7 @@ public class SmelteryClientEvents extends ClientEventBase {
     BlockEntityRenderers.register(TinkerSmeltery.channel.get(), ChannelBlockEntityRenderer::new);
     BlockEntityRenderers.register(TinkerSmeltery.table.get(), CastingBlockEntityRenderer::new);
     BlockEntityRenderers.register(TinkerSmeltery.basin.get(), CastingBlockEntityRenderer::new);
-    BlockEntityRenderers.register(TinkerSmeltery.melter.get(), MelterBlockEntityRenderer::new);
+    BlockEntityRenderers.register(TinkerSmeltery.melter.get(), TankBlockEntityRenderer::new);
     BlockEntityRenderers.register(TinkerSmeltery.alloyer.get(), TankBlockEntityRenderer::new);
     BlockEntityRenderers.register(TinkerSmeltery.smeltery.get(), HeatingStructureBlockEntityRenderer::new);
     BlockEntityRenderers.register(TinkerSmeltery.foundry.get(), HeatingStructureBlockEntityRenderer::new);

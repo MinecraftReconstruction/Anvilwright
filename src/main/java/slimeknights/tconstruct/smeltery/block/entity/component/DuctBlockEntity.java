@@ -30,6 +30,7 @@ import slimeknights.tconstruct.smeltery.menu.SingleItemContainerMenu;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import slimeknights.mantle.client.model.ModelData;
+import slimeknights.mantle.util.RetexturedHelper;
 
 /**
  * Filtered drain tile entity
@@ -79,7 +80,7 @@ public class DuctBlockEntity extends SmelteryFluidIO implements MenuProvider, Si
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, itemHandler.getFluid().copy()).build();
   }
 

@@ -58,7 +58,7 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
       } else {
         FUEL_TANK.draw(graphics, leftPos + 152, topPos + 31);
       }
-      fuel.draw(graphics);
+      fuel.draw(graphics, BACKGROUND);
     }
 
     // fluids
@@ -81,7 +81,7 @@ public class MelterScreen extends AbstractContainerScreen<MelterContainerMenu> i
 
     // heat bars
     if (melting != null) {
-      melting.drawHeatBars(graphics);
+      melting.drawHeatBars(graphics, BACKGROUND);
     }
   }
 

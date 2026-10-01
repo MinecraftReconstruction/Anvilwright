@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fabric.transfer.InventoryStorage;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.mantle.util.BlockEntityHelper;
@@ -299,6 +300,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
 
         // actual recipe result
         ItemStack output = currentRecipe.assemble(castingInventory, level.registryAccess());
+        boolean consumed = currentRecipe.isConsumed(castingInventory);
         if (currentRecipe.switchSlots() != lastRedstone) {
           if (!consumed) {
             setItem(OUTPUT, getItem(INPUT));

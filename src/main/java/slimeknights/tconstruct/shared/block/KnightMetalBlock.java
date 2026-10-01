@@ -65,12 +65,6 @@ public class KnightMetalBlock extends Block implements SimpleWaterloggedBlock {
     builder.add(WATERLOGGED);
   }
 
-  @Nullable
-  @Override
-  public BlockPathTypes getBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob) {
-    return BlockPathTypes.DAMAGE_OTHER;
-  }
-
   @Override
   public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
     entity.hurt(CombatHelper.damageSource(level, TinkerDamageTypes.KNIGHTMETAL), BLOCK_DAMAGE);

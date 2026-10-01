@@ -23,7 +23,6 @@ import slimeknights.tconstruct.common.TinkerTabs;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.data.AdvancementsProvider;
-import slimeknights.tconstruct.common.data.TinkerRegistrySets;
 import slimeknights.tconstruct.common.data.loot.GlobalLootModifiersProvider;
 import slimeknights.tconstruct.common.data.loot.LootTableInjectionProvider;
 import slimeknights.tconstruct.common.data.loot.TConstructLootTableProvider;
@@ -165,7 +164,6 @@ public class TConstruct implements ModInitializer {
   }
 
   public static void gatherData(FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
-    pack.addProvider(TinkerRegistrySets::new);
     BlockTagProvider blockTags = pack.addProvider(BlockTagProvider::new);
     pack.addProvider((output, registriesFuture) -> new ItemTagProvider(output, registriesFuture, blockTags));
     pack.addProvider(FluidTagProvider::new);

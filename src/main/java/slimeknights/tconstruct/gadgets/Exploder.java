@@ -200,7 +200,7 @@ public class Exploder {
           if (f > 0.0F && (this.exploder == null || this.exploder.shouldBlockExplode(this.explosion, this.world, blockpos, blockState, (float) f))) {
             // block should be exploded
             count++;
-            this.explosion.addAffectedBlock(blockpos);
+            this.explosion.getToBlow().add(blockpos);
           }
         }
       }

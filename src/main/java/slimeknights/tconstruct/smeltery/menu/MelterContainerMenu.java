@@ -17,6 +17,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.inventory.SmartItemHandlerSlot;
+import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
 import slimeknights.mantle.util.sync.ValidZeroDataSlot;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -42,7 +45,7 @@ public class MelterContainerMenu extends TriggeringBaseContainerMenu<MelterBlock
 
     // create slots
     if (melter != null) {
-      MeltingModuleInventory inventory = melter.getMeltingInventory();
+      MeltingModuleInventory inventory = melter.getItemHandler();
       inputs = new Slot[inventory.getSlotCount()];
       for (int i = 0; i < inputs.length; i++) {
         inputs[i] = this.addSlot(new SmartItemHandlerSlot(inventory, i, 22, 16 + (i * 18)));

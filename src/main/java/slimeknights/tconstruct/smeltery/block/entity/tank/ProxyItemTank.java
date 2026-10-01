@@ -4,7 +4,9 @@ import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
@@ -21,6 +23,8 @@ import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Fluid storage that proxies to the tank inside the stored item stack (a bucket, a tank item, ...).
@@ -30,17 +34,46 @@ import javax.annotation.Nullable;
  * per operation because filling can replace the item (bucket to empty bucket) and the new stack has to be written
  * back into the slot - that write-back is what the upstream {@code getContainer()} call did.
  */
-public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> implements Storage<FluidVariant> {
+public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> {
+  /**
+   * Fluid view over the tank inside the stored item. A separate object is required since {@link SingleItemHandler}
+   * already implements {@code Storage<ItemVariant>} and Java forbids implementing the same interface with two
+   * different type arguments.
+   */
+  private final Storage<FluidVariant> fluidStorage = new Storage<>() {
+    @Override
+    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return ProxyItemTank.this.insert(resource, maxAmount, transaction);
+    }
+
+    @Override
+    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return ProxyItemTank.this.extract(resource, maxAmount, transaction);
+    }
+
+    @Override
+    public Iterator<StorageView<FluidVariant>> iterator() {
+      Storage<FluidVariant> tank = findItemTank(ContainerItemContext.withConstant(getStack()));
+      return tank == null ? Collections.emptyIterator() : tank.iterator();
+    }
+  };
+
   public ProxyItemTank(T parent) {
     super(parent, 1);
   }
 
+  /** Gets the fluid storage for the item in this slot */
+  public Storage<FluidVariant> getFluidStorage() {
+    return fluidStorage;
+  }
+
   @SuppressWarnings("deprecation")
   @Override
-  protected boolean isItemValid(ItemStack stack) {
+  protected boolean isItemValid(ItemVariant variant) {
     // can only store items that are fluid handlers, though allow blacklist in case something is really broken
     // blacklist is mostly used for items that don't support incremental filling, as this block really isn't good at working with them
     // we check the container item so we don't have to put every bucket in the tag. Not bothering with complex container items; odds are item stack sensitive just returns the same item
+    ItemStack stack = variant.toStack();
     Item craftRemainingItem = stack.getItem().getCraftingRemainingItem();
     return !stack.is(TinkerTags.Items.PROXY_TANK_BLACKLIST)
       && (craftRemainingItem == null || !RegistryHelper.contains(TinkerTags.Items.PROXY_TANK_BLACKLIST, craftRemainingItem))
@@ -110,7 +143,6 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     return tank == null ? 0 : TransferUtil.firstCapacity(tank);
   }
 
-  @Override
   public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
     ContainerItemContext context = ContainerItemContext.withInitial(getStack());
     Storage<FluidVariant> tank = findItemTank(context);
@@ -131,7 +163,6 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     return inserted;
   }
 
-  @Override
   public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
     ContainerItemContext context = ContainerItemContext.withInitial(getStack());
     Storage<FluidVariant> tank = findItemTank(context);

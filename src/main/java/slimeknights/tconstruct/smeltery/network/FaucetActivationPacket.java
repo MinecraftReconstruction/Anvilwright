@@ -23,7 +23,7 @@ public class FaucetActivationPacket implements BlockEntityPacket<FaucetBlockEnti
 
   public FaucetActivationPacket(FriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.fluid = buffer.readFluidStack();
+    this.fluid = FluidStack.readFromPacket(buffer);
     this.isPouring = buffer.readBoolean();
   }
 

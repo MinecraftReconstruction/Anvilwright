@@ -115,7 +115,7 @@ public final class TinkerCommons extends TinkerModule {
   public static final BuildingBlockObject lavawood = BLOCKS.registerBuilding("lavawood", woodBuilder(MapColor.COLOR_ORANGE).lightLevel(s -> 7), BLOCK_ITEM);
   // panes
   public static final ItemObject<IronBarsBlock> goldBars = BLOCKS.register("gold_bars", () -> new IronBarsBlock(BlockBehaviour.Properties.of().requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.METAL).noOcclusion()), TOOLTIP_BLOCK_ITEM);
-  public static final ItemObject<Block> obsidianPane = BLOCKS.register("obsidian_pane", () -> new BetterPaneBlock(builder(MapColor.PODZOL, SoundType.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().noOcclusion().strength(25.0F, 400.0F)), BLOCK_ITEM);
+  public static final ItemObject<BetterPaneBlock> obsidianPane = BLOCKS.register("obsidian_pane", () -> new BetterPaneBlock(builder(MapColor.PODZOL, SoundType.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().noOcclusion().strength(25.0F, 400.0F)), BLOCK_ITEM);
   // platforms
   public static final ItemObject<PlatformBlock> goldPlatform = BLOCKS.register("gold_platform", () -> new PlatformBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER).noOcclusion()), TOOLTIP_BLOCK_ITEM);
   public static final ItemObject<PlatformBlock> ironPlatform = BLOCKS.register("iron_platform", () -> new PlatformBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.COPPER).noOcclusion()), BLOCK_ITEM);

@@ -44,7 +44,7 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
   @Nullable
   @Override
   public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
-    return itemTank;
+    return itemTank.getFluidStorage();
   }
 
   @Nullable
@@ -61,11 +61,11 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
    * @return  Tank comparator strength
    */
   private int calculateComparatorStrength() {
-    int capacity = itemTank.getTankCapacity(0);
+    long capacity = itemTank.getCapacity();
     if (capacity == 0) {
       return 0;
     }
-    return 1 + 14 * itemTank.getFluidInTank(0).getAmount() / capacity;
+    return 1 + (int)(14 * itemTank.getFluid().getAmount() / capacity);
   }
 
   /** Gets the current comparator strength */
@@ -103,8 +103,8 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
     // if we have an active tank, try interacting
     if (!inventory.isEmpty()) {
       // must have a held item to interact
-      if (!held.isEmpty() && FluidTransferHelper.interactWithContainer(level, worldPosition, itemTank, player, hand).didTransfer()
-        || FluidTransferHelper.interactWithFilledBucket(level, worldPosition, itemTank, player, hand, getBlockState().getValue(HORIZONTAL_FACING)).didTransfer()) {
+      if (!held.isEmpty() && FluidTransferHelper.interactWithContainer(level, worldPosition, itemTank.getFluidStorage(), player, hand).didTransfer()
+        || FluidTransferHelper.interactWithFilledBucket(level, worldPosition, itemTank.getFluidStorage(), player, hand, getBlockState().getValue(HORIZONTAL_FACING)).didTransfer()) {
         return;
       }
       // if we clicked the tank, don't try and swap items unless we have no tank
@@ -116,7 +116,7 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
     // no fluid transfer? swap items around
     // inventory is empty means place item inside
     if (inventory.isEmpty()) {
-      if (!held.isEmpty() && itemTank.isItemValid(0, held)) {
+      if (!held.isEmpty() && itemTank.isItemValid(0, ItemVariant.of(held))) {
         // split the stack to place into inventory
         ItemStack stack = held.split(itemTank.getSlotLimit(0));
         player.setItemInHand(hand, held.isEmpty() ? ItemStack.EMPTY : held);

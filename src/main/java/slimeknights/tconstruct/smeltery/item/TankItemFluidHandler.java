@@ -22,7 +22,7 @@ public class TankItemFluidHandler implements SingleSlotStorage<FluidVariant> {
 
   /** Gets the tank on the stack */
   private FluidTank getTank() {
-    return TankItem.getFluidTank(container.getItemVariant().toStack());
+    return TankItem.getTank(container.getItemVariant().toStack(), 1);
   }
 
   /** Updates the container from the given tank */

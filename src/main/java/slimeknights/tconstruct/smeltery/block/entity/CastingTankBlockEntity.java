@@ -25,6 +25,8 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
@@ -49,7 +51,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
-public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer {
+public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer, net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity {
   /** Max capacity for the tank */
   public static final long DEFAULT_CAPACITY = FluidConstants.BUCKET * 4;
   // slots
@@ -73,7 +75,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
    * @param block  block
    * @return  Capacity
    */
-  public static int getCapacity(Block block) {
+  public static long getCapacity(Block block) {
     return DEFAULT_CAPACITY;
   }
 
@@ -82,7 +84,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
    * @param item  item
    * @return  Capacity
    */
-  public static int getCapacity(Item item) {
+  public static long getCapacity(Item item) {
     return DEFAULT_CAPACITY;
   }
 
@@ -160,7 +162,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
       return getItem(INPUT).isEmpty() && getItem(OUTPUT).isEmpty() && !pStack.isEmpty() && (
         // check the various options for some sort of fluid-containing stack
         FluidContainerTransferManager.INSTANCE.mayHaveTransfer(pStack)
-          || pStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()
+          || FluidStorage.ITEM.find(pStack, ContainerItemContext.withConstant(pStack)) != null
       );
     }
     return false;
@@ -250,7 +252,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return ModelData.builder()
       .with(ModelProperties.FLUID_STACK, tank.getFluid())
       .with(ModelProperties.TANK_CAPACITY, tank.getCapacity()).build();

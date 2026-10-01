@@ -13,6 +13,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
 import slimeknights.mantle.data.gson.ResourceLocationSerializer;
 import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.data.loadable.common.ColorLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.util.typed.TypedMapBuilder;
+import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;
 import slimeknights.tconstruct.library.client.data.spritetransformer.ISpriteTransformer;
@@ -30,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Loads the material render info from resource packs. Loaded independently of materials loaded in data packs, so a resource needs to exist in both lists to be used.
@@ -145,7 +150,7 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
     // parse color
     int color = 0xFFFFFFFF;
     if (json.getColor() != null) {
-      color = JsonHelper.parseColor(json.getColor());
+      color = ColorLoadable.ALPHA.parseString(json.getColor(), "color", TypedMap.EMPTY);
     }
 
     // texture fallback to ID if not told to skip
@@ -167,5 +172,39 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
   @Override
   public ResourceLocation getFabricId() {
     return TConstruct.getResource("");
+  }
+
+  /* Helpers */
+
+  /** Creates the context for the render info parser */
+  public static TypedMap createContext(MaterialVariantId id) {
+    return TypedMapBuilder.builder().put(MaterialVariantId.CONTEXT_KEY, id).put(ContextKey.DEBUG, "Material Render Info " + id).build();
+  }
+
+  /** Gets the variant for the given render info path */
+  public static MaterialVariantId variant(ResourceLocation location) {
+    String path = location.getPath();
+
+    // locate variant as a subfolder, and create final ID
+    String variant = "";
+    int slashIndex = path.lastIndexOf('/');
+    if (slashIndex >= 0) {
+      variant = path.substring(slashIndex + 1);
+      path = path.substring(0, slashIndex);
+    }
+    return MaterialVariantId.create(location.getNamespace(), path, variant);
+  }
+
+  /** Checks if the given material has any of the given fallbacks. Used by {@link slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier} and {@link slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel} */
+  public boolean hasFallback(MaterialVariantId material, Set<String> fallbacks) {
+    MaterialRenderInfo info = getRenderInfo(material).orElse(null);
+    if (info != null) {
+      for (String fallback : info.fallbacks()) {
+        if (fallbacks.contains(fallback)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

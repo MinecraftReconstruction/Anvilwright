@@ -51,7 +51,7 @@ public class CastingBlockEntityRenderer implements BlockEntityRenderer<CastingBl
       if (!fluids.isEmpty()) {
         CastingFluidHandler tank = casting.getTank();
         FluidStack fluidStack = tank.getFluid();
-        int capacity = tank.getCapacity();
+        int capacity = (int)tank.getCapacity();
         // if full, start rendering with opacity for progress
         if (fluidStack.getAmount() == capacity) {
           for (FluidCuboid fluid : fluids) {

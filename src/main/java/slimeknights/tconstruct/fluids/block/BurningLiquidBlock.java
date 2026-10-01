@@ -20,7 +20,7 @@ public class BurningLiquidBlock extends LiquidBlock {
   /** Damage from being in the fluid, lava uses 4 */
   private final float damage;
   public BurningLiquidBlock(Supplier<? extends FlowingFluid> supplier, Properties properties, int burnTime, float damage) {
-    super(supplier, properties);
+    super(supplier.get(), properties);
     this.burnTime = burnTime;
     this.damage = damage;
   }
@@ -28,7 +28,8 @@ public class BurningLiquidBlock extends LiquidBlock {
   @SuppressWarnings("deprecation")  // useless annotation on block methods
   @Override
   public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-    if (!entity.fireImmune() && entity.getFluidTypeHeight(getFluid().getFluidType()) > 0) {
+    // Forge asked the fluid type for the entity's height in the fluid; the vanilla equivalent is the block's own fluid state
+    if (!entity.fireImmune() && !state.getFluidState().isEmpty()) {
       entity.setSecondsOnFire(burnTime);
       if (entity.hurt(entity.damageSources().lava(), damage)) {
         entity.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + level.random.nextFloat() * 0.4F);

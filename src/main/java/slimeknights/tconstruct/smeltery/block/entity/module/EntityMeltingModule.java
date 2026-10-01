@@ -110,7 +110,7 @@ public class EntityMeltingModule {
    */
   private boolean canMeltEntity(LivingEntity entity) {
     // fire based mobs are absorbed instead of damaged
-    return !entity.isInvulnerableTo(entity.fireImmune() ? TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC) : TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_DAMAGE))
+    return !entity.isInvulnerableTo(entity.fireImmune() ? TinkerDamageTypes.source(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC) : TinkerDamageTypes.source(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_HEAT))
            // have to special case players because for some dumb reason creative players do not return true to invulnerable to
            && !(entity instanceof Player player && player.getAbilities().invulnerable)
            // also have to special case fire resistance, so a blaze with fire resistance is immune to the smeltery
@@ -168,7 +168,7 @@ public class EntityMeltingModule {
           }
 
           // if the entity is successfully damaged, fill the tank with fluid
-          if (entity.hurt(entity.fireImmune() ? TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC) : TinkerDamageTypes.getSource(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_DAMAGE), damage)) {
+          if (entity.hurt(entity.fireImmune() ? TinkerDamageTypes.source(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_MAGIC) : TinkerDamageTypes.source(entity.level().registryAccess(), TinkerDamageTypes.SMELTERY_HEAT), damage)) {
             // its fine if we don't fill it all, leftover fluid is just lost
             try (Transaction tx = TransferUtil.getTransaction()) {
               tank.insert(fluid.getType(), fluid.getAmount(), tx);

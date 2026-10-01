@@ -625,3 +625,76 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 
 **下一步**：继续按 Gradle 全量口径推平剩余 292 条（热点：`GadgetRecipeProvider` 尾巴、`shared`、
 `smeltery/*`、`library/client/book/content`、`fluids/data`）。
+
+## 23. 2026-10-01 凌晨（四）：292 → 147（本轮继续）
+
+**已 push 的 checkpoint（`git ls-remote` 复核）**：
+`0a591fa729`(254) → `f1d62a23b0`(224) → `d631ec1bac`(208) → `e9328fb090`(177) → `ba45575de6`(160) → `52992e8b15`(147) → `6db0fea7f7`(139) → `3fa173e336`(131) → 本轮结束 **123**
+
+**修完的簇（按 commit）**
+1. 书本内容：`AbstractMaterialContent` 直接取上游 3.12.1 版（fork 版少了 HTML 那几个方法），
+   只改 `ForgeI18n`/`FluidStack`/`fluid.getDisplayName()` 三处 Fabric 适配；
+   `ContentTool` 的 parts 逻辑改回上游的 `ToolPartsHook.parts(definition)`。
+2. 谓词注册表：Mantle 的 `PredicateRegistry` 自己注册 `and/or/inverted`，TCon 里那 6 行删掉。
+3. 客户端模型：`MaterialModel.getQuadsForMaterial(...)` 补回（fork 只有 `getPartQuads`）、
+   `MaterialRenderInfoLoader.hasFallback(...)` 补回、`DynamicTextureLoader` 清理、`ClampedItemPropertyFunction`。
+4. 流体链：`ProxyItemTank` 拆出独立的 `Storage<FluidVariant>` 视图（同一个类不能同时实现
+   `Storage<ItemVariant>` 和 `Storage<FluidVariant>`）、`ScaledFluidTank` 用 `SimpleFluidTank.super.fill/drain`
+   并显式 `iterator()`、`DuctTankWrapper`/`DuctItemHandler` 改 Transfer API。
+5. 杂项：`ExplosionEvents.START` 取代 `ForgeEventFactory.onExplosionStart`（`hitPlayers` 有公开 getter，
+   不需要 AW）、`TinkerDamageTypes.source(...)`/`SMELTERY_HEAT`、Config 的 minimap 字段、`Util.testConditions`
+   走 `ResourceConditions.conditionMatches`、`Util.isNeo/isForge` 在 Fabric 上恒 false
+   （这两条按规则 4 记入 `BEHAVIOUR-DIFFERENCES.md` 待办：**尚未登记，下轮补**）。
+
+**剩余 147 条的热点（下一轮从这里开始）**
+
+| 文件 | 条数 | 备注 |
+|---|---|---|
+| `gadgets/data/GadgetRecipeProvider` | 7 | `FoliageType`/`SlimeType` 混用、`SlimeType.TRUE_SLIME` 已删 |
+| `common/data/model/TinkerSpriteSourceProvider` | 4 | `PalettedPermutations` 构造器变私有、`SpriteSourceProvider` ctor |
+| `common/data/model/TinkerBlockStateProvider` | 1 | `paneBlock(...)` 参数表变了 |
+| `fluids/block/BurningLiquidBlock` + `MobEffectLiquidBlock` | 4 | `LiquidBlock` 构造器（Fabric 只有 `(Fluid, Properties)`） |
+| `fluids/data/FluidTooltipProvider` | 6 | 上游 tag 常量（`WATER_TOOLTIPS`/`SOUP_TOOLTIPS`）没有对应物 |
+| `gadgets/entity/*`（EFLN/Explosion/FancyArmorStand/FancyItemFrame） | 8 | `Explosion` 包名、`getExplosionResistance` 参数、AW `blockRenderer` |
+| `library/client/modifiers/*Model` | 8 | 仍有个别 `addQuads` 残留 + `parseColor` |
+| `common/data/loot/BlockLootTableProvider` | 5→? | 已补 `COPY_NAME/COPY_MATERIAL/ADD_ANVIL` 与 import，待重编译确认 |
+| `smeltery/*`、`shared/*` | ~40 | 长尾，多为 1–3 条/文件 |
+
+**下一步（严格按这个顺序）**
+1. 重跑 Gradle 全量，确认最新条数（预计 <147，因为上面还有几处已改未编译）。
+2. 按上表顺序推平；每修完一个文件簇就再跑一次全量确认没有级联回归。
+3. `Util.isNeo/isForge` 的状态要补进 `BEHAVIOUR-DIFFERENCES.md`（规则 4）。
+4. 全树 0 → `./gradlew build --offline`（datagen/资源/mixin/AW 校验）→ `runData` 与上游 `src/generated` 结构化 diff
+   → `runServer` → `runClient`。
+
+## 24. 2026-10-01：**javac 全量归零** ✅（下一棒的起点）
+
+`./gradlew compileJava -I scripts/port/maxerrs.gradle --offline` → **BUILD SUCCESSFUL，0 error**，
+`build/classes/java/main` 下 2830 个 class。逐检查点数字见 `NUMBERS.md` 的最末两节。
+
+**最后一轮修的东西（都是小尾巴）**
+- Config：补回 `syncKnockbackResistance` 的赋值，删掉没有任何赋值的 `extraToolTips` 字段。
+- `EFLNEntity`/`EFLNExplosion`：`Explosion.BlockInteraction.KEEP`（vanilla 枚举，不是 `Level.ExplosionInteraction`）、
+  爆炸抗性改走 Vanilla `Block#getExplosionResistance()` + Porting Lib `ExplosionResistanceBlock` 接口。
+- `FancyArmorStandEntity`：**删掉** Forge 独占的 `getPickedResult`/`brokenByPlayer`/`brokenByAnything`
+  （掉落改由 `entities/armor_stand` 战利品表负责，`src/generated` 里已有该表）→ **需要补进行为差异**。
+- `SlimesteelBlock`：`canStickTo` 是 Forge 方法，删掉；`isSlimeBlock` 走 Porting Lib `CustomSlimeBlock`。
+- `KnightMetalBlock`/`KnightMetalFluidCannonBlock`：Forge 的 `getBlockPathType(...)` 没有 Fabric 对应物，
+  **删掉覆写** → **需要补进行为差异**（怪物寻路不再把这两种方块当成伤害方块）。
+- 其它：`PiggyBackPackItem` 的 `ElementScreen#draw`、`GadgetRecipeProvider` 的 `folder` 变量、
+  `ModelSpriteProvider` 的 ctor、`FluidBucketModelProvider` 的桶流体查询、`SmelteryTank` 的 `IMultitankListChange` 实现等。
+
+**⚠️ 数字波动的解释（写下来免得下一棒怀疑自己）**：javac 分层报错。归属阶段的错误一消，解析阶段
+（构造函数不匹配、long/int 转换）才会冒出来；另外修坏一处会连带十几条（本轮出现过一次 2 → 117 → 39）。
+**只有"整树全量、改完再看"的数字可信。**
+
+**下一棒的顺序（按用户拍板的计划）**
+1. 规则 4 欠账先补：`BEHAVIOUR-DIFFERENCES.md` 追加
+   #36 精致的盔甲架掉落/拾取钩子（Forge 独占，改用战利品表）、
+   #37 `Util.isNeo/isForge` 在 Fabric 上恒 false、
+   #38 knightmetal 的 `getBlockPathType`（寻路伤害方块）被删除、
+   #39 `ClientGeneratePartTexturesCommand`/`MaterialRenderInfoLoader.createContext` 的调试上下文简化。
+2. `./gradlew build --offline`（真正闸门：datagen 注册、资源、mixin、AW 校验）。
+3. `runData` → 把 `src/generated` 与上游 3.12.1 做结构化 diff（最能抓语义错误）。
+4. `runServer`（验 `tinkering/tool_definitions`、冶炼炉方块实体）→ `runClient`（验盔甲/工具渲染、JEI）。
+5. 最后：canonical 非 fork 仓库 + 两条分支（细粒度 checkpoint / 压成 15–20 个逻辑提交，压缩版设默认分支）。

@@ -33,6 +33,7 @@ import slimeknights.tconstruct.shared.command.subcommand.StatsCommand;
 import java.util.function.Consumer;
 import slimeknights.tconstruct.common.registration.ArgumentTypeDeferredRegister;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.minecraft.network.chat.Component;
 
 public class TConstructCommand {
   public static final DynamicCommandExceptionType COMPONENT_ERROR = new DynamicCommandExceptionType(error -> (Component)error);
@@ -59,7 +60,7 @@ public class TConstructCommand {
   /** Event listener to register the Mantle command */
   private static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(TConstruct.MOD_ID);
-    CommandBuildContext context = event.getBuildContext();
+    CommandBuildContext context = registryAccess;
 
     // sub commands
     register(builder, "modifiers", ModifiersCommand::register);

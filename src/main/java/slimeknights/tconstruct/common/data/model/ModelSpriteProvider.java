@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
@@ -31,7 +32,7 @@ import static slimeknights.tconstruct.TConstruct.getResource;
 public class ModelSpriteProvider extends GenericTextureGenerator {
   private final List<CompletableFuture<?>> tasks = new ArrayList<>();
   private final DataGenSpriteReader spriteReader;
-  public ModelSpriteProvider(PackOutput packOutput, ExistingFileHelper existingFileHelper) {
+  public ModelSpriteProvider(FabricDataOutput packOutput, ExistingFileHelper existingFileHelper) {
     super(packOutput, existingFileHelper, "textures");
     spriteReader = new DataGenSpriteReader(existingFileHelper, "textures");
   }

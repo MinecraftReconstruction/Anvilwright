@@ -29,11 +29,11 @@ public class BreakableMaterialModifierModel implements IBakedModifierModel {
     Material baseTexture = textureGetter.apply(name);
     if (baseTexture != null) {
       for (MaterialRenderInfo info : MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos()) {
-        ResourceLocation texture = info.getTexture();
+        ResourceLocation texture = info.texture();
         if (texture != null) {
           textureGetter.apply(name + "_" + MaterialRenderInfo.getSuffix(texture));
         }
-        for (String fallback : info.getFallbacks()) {
+        for (String fallback : info.fallbacks()) {
           textureGetter.apply(name + "_" + fallback);
         }
       }

@@ -63,7 +63,7 @@ public class HeatingStructureScreen extends MultiModuleScreen<HeatingStructureCo
     if (te != null) {
       this.te = te;
       this.tank = new GuiSmelteryTank(this, te.getTank(), 8, 16, 106, 106, Objects.requireNonNull(BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(te.getType())));
-      int slots = te.getMeltingInventory().getSlots();
+      int slots = te.getMeltingInventory().getSlotCount();
       this.sideInventory = new HeatingStructureSideInventoryScreen(this, container.getSideInventory(), playerInventory, slots, HeatingStructureContainerMenu.calcColumns(slots));
       addModule(sideInventory);
       FuelModule fuelModule = te.getFuelModule();
@@ -95,14 +95,14 @@ public class HeatingStructureScreen extends MultiModuleScreen<HeatingStructureCo
     GuiUtil.drawBackground(graphics, this, BACKGROUND);
     // fuel
     if (fuel != null) {
-      fuel.draw(graphics);
+      fuel.draw(graphics, BACKGROUND);
     }
 
     // draw other components
     super.renderBg(graphics, partialTicks, mouseX, mouseY);
 
     // render fluids
-    if (tank != null) tank.renderFluids(graphics.pose());
+    if (tank != null) tank.renderFluids(graphics);
   }
 
   /** Checks if the bucket button is hovered */
@@ -139,7 +139,7 @@ public class HeatingStructureScreen extends MultiModuleScreen<HeatingStructureCo
     // while this might make sense to draw in the side inventory logic, slots are rendered by the parent screen it seems
     // so we get the most accurate offset rendering it here, as we offset the foreground of submodules but they don't draw their own slots
     // I hate the whole multimodule system right now
-    if (melting != null) melting.drawHeatBars(graphics);
+    if (melting != null) melting.drawHeatBars(graphics, BACKGROUND);
   }
 
   @Override

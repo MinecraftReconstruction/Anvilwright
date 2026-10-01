@@ -21,6 +21,8 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer.Builder;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
@@ -346,12 +348,17 @@ public class BlockLootTableProvider extends ModdedBlockLootSubProvider {
     return droppingSilkOrShears(blockIn, applyExplosionCondition(blockIn, LootItem.lootTableItem(saplingIn)).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, fortuneIn)));
   }
 
-  private LootTable.Builder randomDropSlimeBallOrSapling(SlimeType foliageType, Block blockIn, Block sapling, float... fortuneIn) {
-    return dropSapling(blockIn, sapling, fortuneIn)
+  private LootTable.Builder randomDropSlimeBallOrSapling(FoliageType foliageType, Block blockIn, Block sapling, float... fortuneIn) {
+    LootTable.Builder builder = dropSapling(blockIn, sapling, fortuneIn);
+    SlimeType slime = foliageType.asSlime();
+    if (slime == null) {
+      return builder;
+    }
+    return builder
       .withPool(LootPool.lootPool()
         .setRolls(ConstantValue.exactly(1))
         .when(HAS_NO_SHEARS_OR_SILK_TOUCH)
-        .add(applyExplosionCondition(blockIn, LootItem.lootTableItem(TinkerCommons.slimeball.get(foliageType)))
+        .add(applyExplosionCondition(blockIn, LootItem.lootTableItem(TinkerCommons.slimeball.get(slime)))
           .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 1/50f, 1/45f, 1/40f, 1/30f, 1/20f))));
 
   }
@@ -410,6 +417,14 @@ public class BlockLootTableProvider extends ModdedBlockLootSubProvider {
 
   private Function<Block, LootTable.Builder> ADD_TABLE = block -> droppingWithFunctions(block, (builder) ->
     builder.apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY)).apply(RetexturedLootFunction::new));
+
+  /** Copies a material block texture */
+  private final LootItemFunction.Builder COPY_NAME = CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY);
+  /** Copies the material from a block entity */
+  private final LootItemFunction.Builder COPY_MATERIAL = CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy(IMaterialItem.MATERIAL_TAG, IMaterialItem.MATERIAL_TAG);
+  /** Properties for a tinkers anvil table */
+  private final Function<Block, LootTable.Builder> ADD_ANVIL = block -> droppingWithFunctions(block, (builder) ->
+    builder.apply(COPY_NAME).apply(RetexturedLootFunction::new)).apply(COPY_MATERIAL);
 
   /** Registers a block that drops with its own texture stored in NBT */
   private void dropTable(Block table) {

@@ -10,6 +10,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.client.model.util.MantleItemLayerModel;
+import slimeknights.mantle.data.loadable.common.ColorLoadable;
+import slimeknights.mantle.util.typed.TypedMap;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -47,7 +50,7 @@ public class BreakableModifierModel implements IBakedModifierModel {
     // first get the cache index
     int index = (isLarge ? 2 : 0) | (tool.isBroken() ? 1 : 0);
     // then return the quads
-    return MantleItemLayerModel.getQuadsForSprite(color, -1, spriteGetter.apply(sprites[index]), transforms, luminosity, pixels);
+    return ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(color, -1, spriteGetter.apply(sprites[index]), transforms, luminosity, pixels));
   }
 
   @RequiredArgsConstructor
@@ -72,7 +75,7 @@ public class BreakableModifierModel implements IBakedModifierModel {
     @Override
     public IUnbakedModifierModel configure(JsonObject data) {
       // parse the two keys, if we ended up with something new create an instance
-      int color = JsonHelper.parseColor(GsonHelper.getAsString(data, "color", ""));
+      int color = ColorLoadable.ALPHA.parseString(GsonHelper.getAsString(data, "color", ""), "color", TypedMap.EMPTY);
       int luminosity = GsonHelper.getAsInt(data, "luminosity");
       if (color != this.color || luminosity != this.luminosity) {
         return new Unbaked(color, luminosity);

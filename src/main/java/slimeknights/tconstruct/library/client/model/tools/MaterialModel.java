@@ -17,6 +17,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -70,12 +71,6 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
   /** Transform matrix to apply to child parts */
   private final Vec2 offset;
 
-  /** @deprecated use {@link DynamicTextureLoader#getTextureAdder(Collection, boolean)} */
-  @Deprecated
-  public static Predicate<Material> getTextureAdder(Collection<Material> allTextures, boolean logMissingTextures) {
-    return DynamicTextureLoader.getTextureAdder(allTextures, logMissingTextures);
-  }
-
   /**
    * Checks that all unique material textures for the given part exist, logs any that are missing via the sprite getter function.
    * @param owner        Model owner
@@ -88,6 +83,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
 
     // if the texture is missing, stop here with a warning for the root
     if (!MissingTextureAtlasSprite.getLocation().equals(texture.texture())) {
+      Function<Material,TextureAtlasSprite> spriteGetter = Material::sprite;
       // if no specific material is set, load all materials as dependencies. If just one material, use just that one
       if (material == null) {
         MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos().forEach(info -> info.getSprite(texture, spriteGetter));
@@ -146,7 +142,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
         TintedSprite sprite = info.getSprite(texture, spriteGetter);
         finalSprite = sprite.sprite();
         color = sprite.color();
-        light = info.getLuminosity();
+        light = sprite.emissivity();
       }
     }
 
@@ -156,7 +152,7 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
     }
 
     // get quads
-    quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels));
+    quadConsumer.accept(ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(color, index, finalSprite, transform, light, pixels)));
 
     // return sprite
     return finalSprite;
@@ -177,6 +173,21 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
       }
     }
     return new TintedSprite(spriteGetter.apply(texture), -1, 0);
+  }
+
+  /**
+   * Gets quads for the given material variant of the texture
+   * @param spriteGetter    Sprite getter instance
+   * @param texture         Base texture
+   * @param material        Material variant
+   * @param tintIndex       Tint index for quads
+   * @param transformation  Transformation to apply
+   * @param pixels          Pixels to prevent z-fighting for multiple layers
+   * @return  Quad list
+   */
+  public static List<BakedQuad> getQuadsForMaterial(Function<Material, TextureAtlasSprite> spriteGetter, Material texture, MaterialVariantId material, int tintIndex, Transformation transformation, @Nullable ItemLayerPixels pixels) {
+    TintedSprite sprite = getMaterialSprite(spriteGetter, texture, material);
+    return MantleItemLayerModel.getQuadsForSprite(sprite.color(), tintIndex, sprite.sprite(), transformation, sprite.emissivity(), pixels);
   }
 
   /**

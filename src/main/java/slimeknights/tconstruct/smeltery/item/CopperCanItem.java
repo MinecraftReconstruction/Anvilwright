@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import java.util.Objects;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import slimeknights.tconstruct.library.recipe.FluidValues;
+import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;

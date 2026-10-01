@@ -130,24 +130,8 @@ public class FancyArmorStandEntity extends ArmorStand {
   }
 
   @Override
-  public ItemStack getPickedResult(HitResult target) {
-    return new ItemStack(getStandItem());
-  }
-
-  @Override
   protected Component getTypeName() {
     return Component.translatable(getStandItem().getDescriptionId());
-  }
-
-  @Override
-  protected void brokenByPlayer(DamageSource source) {
-    ItemStack stack = new ItemStack(getStandItem());
-    if (this.hasCustomName()) {
-      stack.setHoverName(this.getCustomName());
-    }
-    Block.popResource(this.level(), this.blockPosition(), stack);
-
-    this.brokenByAnything(source);
   }
 
 

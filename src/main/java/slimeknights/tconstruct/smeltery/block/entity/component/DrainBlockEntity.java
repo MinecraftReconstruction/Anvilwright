@@ -6,15 +6,20 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.util.BlockEntityHelper;
+import slimeknights.mantle.util.RetexturedHelper;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutputBlockEntity.SmelteryFluidIO;
 import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
 
 import javax.annotation.Nonnull;
 import slimeknights.mantle.client.model.ModelData;
+import java.util.Objects;
 
 /**
  * Fluid IO extension to display controller fluid
@@ -33,7 +38,7 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, displayFluid).build();
   }
 
@@ -46,6 +51,11 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
       BlockState state = getBlockState();
       level.sendBlockUpdated(worldPosition, state, state, 48);
     }
+  }
+
+  @Override
+  public BlockPos getListenerPos() {
+    return worldPosition;
   }
 
 
@@ -61,11 +71,12 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
 
   @Override
   public void handleUpdateTag(CompoundTag tag) {
-    BlockPos oldMaster = getMasterPos();
     CustomUpdateTagHandlingBlockEntity.super.handleUpdateTag(tag);
-    if (!Objects.equals(oldMaster, getMasterPos())) {
-      attachFluidListener();
-    }
+  }
+
+  @Override
+  public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) {
+    // vanilla handles the update tag itself; nothing extra is needed for drain sync
   }
 
   @Override

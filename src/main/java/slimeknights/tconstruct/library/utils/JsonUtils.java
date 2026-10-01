@@ -14,11 +14,13 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.network.packet.ISimplePacket;
 import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonElement;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -70,11 +72,11 @@ public class JsonUtils {
     return JsonHelper.getAsEntry(registry, parent, key);
   }
 
-  /** @deprecated use {@link JsonHelper#getJson(Resource)} */
+  /** @deprecated use {@link JsonHelper#getJson(Resource, ResourceLocation)} */
   @Deprecated
   @Nullable
   public static JsonObject getJson(Resource resource) {
-    return JsonHelper.getJson(resource);
+    return JsonHelper.getJson(resource, new ResourceLocation(resource.sourcePackId()));
   }
 
   /** @deprecated use {@link JsonHelper#convertToEnum(JsonElement, String, Class)} */
@@ -135,7 +137,7 @@ public class JsonUtils {
    * @throws com.google.gson.JsonSyntaxException If the syntax is invalid
    */
   public static ItemStack getAsItemStack(JsonObject parent, String name) {
-    return convertToItemStack(JsonHelper.getElement(parent, name), name);
+    return ItemStackLoadable.OPTIONAL_STACK_NBT.getIfPresent(parent, name);
   }
 
   /**

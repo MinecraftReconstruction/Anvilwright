@@ -3,8 +3,11 @@ package slimeknights.tconstruct.smeltery.item;
 import net.minecraft.nbt.CompoundTag;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 
 import javax.annotation.Nonnull;
+import java.util.Iterator;
 import slimeknights.tconstruct.library.fluid.FluidAction;
 import slimeknights.tconstruct.library.fluid.SimpleFluidTank;
 
@@ -67,19 +70,25 @@ public class ScaledFluidTank extends FluidTank implements SimpleFluidTank {
 
   @Override
   public long fill(FluidStack resource, FluidAction action) {
-    return super.fill(enforceScale(resource, true), action);
+    return SimpleFluidTank.super.fill(enforceScale(resource, true), action);
   }
 
   @Nonnull
   @Override
   public FluidStack drain(long maxDrain, FluidAction action) {
-    return super.drain(enforceScale(maxDrain), action);
+    return SimpleFluidTank.super.drain(enforceScale(maxDrain), action);
   }
 
   @Nonnull
   @Override
   public FluidStack drain(FluidStack resource, FluidAction action) {
-    return super.drain(enforceScale(resource, true), action);
+    return SimpleFluidTank.super.drain(enforceScale(resource, true), action);
+  }
+
+  @Override
+  public Iterator<StorageView<FluidVariant>> iterator() {
+    // SingleVariantStorage (via FluidTank) and SimpleFluidTank both implement Storage, resolve the clash with the inherited tank view
+    return super.iterator();
   }
 
 

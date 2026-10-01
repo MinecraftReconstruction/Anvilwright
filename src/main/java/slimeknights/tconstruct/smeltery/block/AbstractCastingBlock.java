@@ -90,7 +90,7 @@ public abstract class AbstractCastingBlock extends TableBlock {
   @Override
   public int getAnalogOutputSignal(BlockState blockState, Level world, BlockPos pos) {
     if (world.getBlockEntity(pos) instanceof CastingBlockEntity casting) {
-      return casting.getAnalogSignal();
+      return (int)casting.getAnalogSignal();
     }
     return 0;
   }

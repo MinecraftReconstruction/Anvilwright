@@ -466,7 +466,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, displayFluid).build();
   }
 
@@ -680,8 +680,4 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     return BlockEntityHelper.castTicker(expected, have, level.isClientSide ? CLIENT_TICKER : SERVER_TICKER);
   }
 
-  @Override
-  public ModelData getRenderData() {
-    return getModelData();
-  }
 }

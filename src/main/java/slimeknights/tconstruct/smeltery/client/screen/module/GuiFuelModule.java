@@ -76,11 +76,11 @@ public class GuiFuelModule implements IScreenWithFluidTank, ClickableTankModule 
 
   /** Gets the current height of the fluid */
   private int getFluidHeight() {
-    int capacity = fuelInfo.getCapacity();
+    long capacity = fuelInfo.getCapacity();
     if (capacity == 0) {
       return height;
     }
-    return height * fuelInfo.getTotalAmount() / capacity;
+    return (int)(height * fuelInfo.getTotalAmount() / capacity);
   }
 
   @Override
@@ -99,7 +99,7 @@ public class GuiFuelModule implements IScreenWithFluidTank, ClickableTankModule 
     int fuel = fuelModule.getFuel();
     int fuelQuality = fuelModule.getFuelQuality();
     if (fuel > 0 && fuelQuality > 0) {
-      FIRE.drawScaledYUp(graphics, texture, fireX + screen.leftPos, fireY + screen.topPos, 14 * fuel / fuelQuality);
+      fire.drawScaledYUp(graphics, fireX + screen.leftPos, fireY + screen.topPos, 14 * fuel / fuelQuality);
     }
 
     // draw tank second, it changes the image

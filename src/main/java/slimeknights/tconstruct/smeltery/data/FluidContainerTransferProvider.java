@@ -2,6 +2,9 @@ package slimeknights.tconstruct.smeltery.data;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -24,7 +27,7 @@ import slimeknights.tconstruct.shared.block.SlimeType;
 
 public class FluidContainerTransferProvider extends AbstractFluidContainerTransferProvider {
   public FluidContainerTransferProvider(FabricDataOutput output) {
-    super(output, TConstruct.MOD_ID);
+    super(output);
   }
 
   @Override
@@ -54,7 +57,8 @@ public class FluidContainerTransferProvider extends AbstractFluidContainerTransf
   @SuppressWarnings("removal")
   protected void addContainerlessEmpty(String name, String domain, FluidOutput fluid) {
     ResourceLocation id = new ResourceLocation(domain, name);
-    addTransfer(domain + '_' + name, new EmptyFluidContainerTransfer(ItemNameIngredient.from(id), ItemOutput.EMPTY, fluid), new ItemExistsCondition(id));
+    addTransfer(domain + '_' + name, new EmptyFluidContainerTransfer(ItemNameIngredient.from(id), ItemOutput.EMPTY, fluid),
+      DefaultResourceConditions.registryContains(Registries.ITEM, id));
   }
 
   @Override

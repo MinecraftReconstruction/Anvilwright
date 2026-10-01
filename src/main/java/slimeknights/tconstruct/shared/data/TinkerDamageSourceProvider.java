@@ -23,6 +23,6 @@ public class TinkerDamageSourceProvider extends FabricTagProvider<DamageType> {
 
     getOrCreateTagBuilder(DamageTypeTags.BYPASSES_EFFECTS).add(TinkerDamageTypes.BLEEDING).add(TinkerDamageTypes.PLAYER_ATTACK_MAGIC).add(TinkerDamageTypes.MOB_ATTACK_MAGIC);
 
-    getOrCreateTagBuilder(DamageTypeTags.IS_FIRE).add(TinkerDamageTypes.SMELTERY_DAMAGE).add(TinkerDamageTypes.PLAYER_ATTACK_FIRE).add(TinkerDamageTypes.MOB_ATTACK_FIRE);
+    getOrCreateTagBuilder(DamageTypeTags.IS_FIRE).add(TinkerDamageTypes.SMELTERY_HEAT).add(TinkerDamageTypes.PLAYER_ATTACK_FIRE).add(TinkerDamageTypes.MOB_ATTACK_FIRE);
   }
 }

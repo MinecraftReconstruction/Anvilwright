@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
-public class SlimesteelBlock extends Block {
+public class SlimesteelBlock extends Block implements io.github.fabricators_of_create.porting_lib.block.CustomSlimeBlock {
   public SlimesteelBlock(Properties properties) {
     super(properties);
   }
@@ -18,11 +18,6 @@ public class SlimesteelBlock extends Block {
   @Override
   public boolean isSlimeBlock(BlockState state) {
     return true;
-  }
-
-  @Override
-  public boolean canStickTo(BlockState state, BlockState other) {
-    return other.isSlimeBlock();
   }
 
   @Override

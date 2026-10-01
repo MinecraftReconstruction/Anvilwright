@@ -37,6 +37,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import java.util.Optional;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -255,10 +256,10 @@ public class Util {
     return new UseOnContext(context.getLevel(), context.getPlayer(), context.getHand(), context.getItemInHand(), offset(context.getHitResult(), offset));
   }
 
-  /** Tests the given list of conditions using {@link DataLoadedConditionContext#INSTANCE} to see if all pass. */
+  /** Tests the given list of conditions to see if all pass, evaluating them the same way datapack conditions are loaded */
   public static boolean testConditions(ConditionJsonProvider[] conditions) {
     for (ConditionJsonProvider condition : conditions) {
-      if (!condition.test(DataLoadedConditionContext.INSTANCE)) {
+      if (!ResourceConditions.conditionMatches(condition.toJson())) {
         return false;
       }
     }
@@ -270,19 +271,13 @@ public class Util {
     return new ClientboundBlockEntityDataPacket(be.getBlockPos(), be.getType(), tagFunction.apply(be));
   }
 
-  /** Cache of neo forge status, to make lookups faster in hot code */
-  private static Boolean IS_NEO_FORGE = null;
-
-  /** Checks if we are currently running on NeoForge as opposed to Forge. Allows branching solutions for each loader if needed */
+  /** Checks if we are currently running on NeoForge. Always false on Fabric, kept for API parity with upstream. */
   public static boolean isNeo() {
-    if (IS_NEO_FORGE == null) {
-      IS_NEO_FORGE = ModList.get().getModContainerById("forge").filter(mod -> mod.getModInfo().getDisplayName().equals("NeoForge")).isPresent();
-    }
-    return IS_NEO_FORGE;
+    return false;
   }
 
-  /** Checks if we are currently running on Forge as opposed to NeoForge. Allows branching solutions for each loader if needed */
+  /** Checks if we are currently running on Forge. Always false on Fabric, kept for API parity with upstream. */
   public static boolean isForge() {
-    return !isNeo();
+    return false;
   }
 }

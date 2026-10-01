@@ -15,6 +15,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import slimeknights.mantle.fabric.fluid.SimpleDirectionalFluid;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import slimeknights.tconstruct.world.block.FoliageType;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.SlimeGrassBlock;
 
@@ -43,7 +44,7 @@ public abstract class DirectionalSlimeFluid extends SimpleDirectionalFluid {
                 // we got a block we flowed from and the block we flowed from has slimedirt below
                 // change the dirt below us to slimedirt too
                 world.setBlockAndUpdate(pos.below(), dirt);
-              } else if (dirt.getBlock() == TinkerWorld.earthSlimeGrass.get(SlimeType.SKY)) {
+              } else if (dirt.getBlock() == TinkerWorld.earthSlimeGrass.get(FoliageType.SKY)) {
                 world.setBlockAndUpdate(pos.below(), SlimeGrassBlock.getDirtState(dirt));
               }
             }

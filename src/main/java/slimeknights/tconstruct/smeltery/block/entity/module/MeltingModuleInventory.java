@@ -31,6 +31,8 @@ import java.util.function.Consumer;
  * Inventory composite made of a set of melting module inventories
  */
 public class MeltingModuleInventory implements SlottedStackStorage {
+  /** Maximum number of slots, limited by the size of the slot index in the menu sync packet */
+  private static final int MAX_SIZE = (Short.MAX_VALUE - 7) / 3;
   private static final String TAG_SLOT = "slot";
   private static final String TAG_ITEMS = "items";
   private static final String TAG_SIZE = "size";

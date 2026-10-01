@@ -64,7 +64,7 @@ public class GenerateHiddenFluidsCommand {
       }
     }
     // save the new tag
-    saveTag(tagPath, tag, new TagFile(add, false, List.of()));
+    saveTag(tagPath, tag, new TagFile(add, false));
 
     // success
     source.sendSuccess(() -> Component.translatable(

@@ -33,9 +33,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 
 /** Loads the list of mob equipment replacements from JSON */
-public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
+public class MobEquipmentManager extends SimpleJsonResourceReloadListener implements net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener {
   public static final String FOLDER = "tinkering/mob_equipment";
   /** Singleton instance of the manager */
   private static final MobEquipmentManager INSTANCE = new MobEquipmentManager();
@@ -46,6 +47,11 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
   private Map<EntityType<?>,List<MobEquipment>> replacements = Map.of();
   private DataLoadedConditionContext context = DataLoadedConditionContext.INSTANCE;
 
+  @Override
+  public ResourceLocation getFabricId() {
+    return TConstruct.getResource("mob_equipment");
+  }
+
   private MobEquipmentManager() {
     super(JsonHelper.DEFAULT_GSON, FOLDER);
   }
@@ -53,7 +59,7 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
   /** @apiNote no need for addons to call this */
   @Internal
   public static void init() {
-    addDataPackListeners();
+    ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(INSTANCE);
     // TODO: PORT - Forge's MobSpawnEvent.FinalizeSpawn has no Fabric counterpart and Porting Lib has no spawn
     //  event either, so TCon's mob equipment replacements are not applied yet. The honest fix is a mixin into
     //  Mob#finalizeSpawn; see docs/BEHAVIOUR-DIFFERENCES.md #21.
@@ -72,7 +78,7 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
       try {
         JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), key.toString());
         // skip if conditions fail
-        if (!CraftingHelper.processConditions(json, "conditions", context)) {
+        if (json.has("conditions") && !ResourceConditions.conditionsMatch(json.getAsJsonArray("conditions"), true)) {
           continue;
         }
         // parse the object
@@ -124,8 +130,5 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
 
   /* Events */
 
-  /** Adds the managers as datapack listeners */
-  private void addDataPackListeners() {
-    ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
-  }
+
 }

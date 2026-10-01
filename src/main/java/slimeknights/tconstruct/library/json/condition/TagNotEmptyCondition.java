@@ -32,8 +32,14 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
   }
 
   @Override
-  public ResourceLocation getID() {
+  public ResourceLocation getConditionId() {
     return NAME;
+  }
+
+  @Override
+  public void writeParameters(JsonObject json) {
+    json.addProperty("registry", tag.registry().location().toString());
+    json.addProperty("tag", tag.location().toString());
   }
 
   @Override
@@ -50,28 +56,18 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
     }
 
     @Override
-    public void write(JsonObject json, TagNotEmptyCondition<?> value) {
+    public void serialize(JsonObject json, TagNotEmptyCondition<?> value, JsonSerializationContext context) {
       json.addProperty("registry", value.tag.registry().location().toString());
       json.addProperty("tag", value.tag.location().toString());
     }
 
     @Override
-    public void serialize(JsonObject json, TagNotEmptyCondition<?> value, JsonSerializationContext context) {
-      write(json, value);
-    }
-
-    @Override
-    public TagNotEmptyCondition<?> read(JsonObject json) {
+    public TagNotEmptyCondition<?> deserialize(JsonObject json, JsonDeserializationContext context) {
       return new TagNotEmptyCondition<>(createKey(json));
     }
 
-    @Override
-    public TagNotEmptyCondition<?> deserialize(JsonObject json, JsonDeserializationContext context) {
-      return read(json);
-    }
-
-    @Override
-    public ResourceLocation getID() {
+    /** Registers no condition of its own, kept for API parity with upstream's condition serializer */
+    public ResourceLocation getConditionId() {
       return NAME;
     }
   }

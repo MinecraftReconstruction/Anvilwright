@@ -1,10 +1,18 @@
 package slimeknights.tconstruct.fluids.data;
 
 import com.google.gson.JsonObject;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
 import slimeknights.mantle.data.GenericDataProvider;
 
 import java.util.concurrent.CompletableFuture;
@@ -25,8 +33,12 @@ public class FluidBucketModelProvider extends GenericDataProvider {
     json.addProperty("parent", "forge:item/bucket_drip");
     // using our own model as the forge one expects us to use item colors to handle tints, when we could just bake it in
     json.addProperty("loader", "tconstruct:fluid_container");
-    json.addProperty("flip_gas", bucket.getFluid().getFluidType().isLighterThanAir());
-    json.addProperty("fluid", BuiltInRegistries.FLUID.getKey(bucket.getFluid()).toString());
+    // Forge asked the bucket item for its fluid; Fabric looks the item's fluid storage up through the item context
+    ItemStack stack = new ItemStack(bucket);
+    Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+    FluidStack fluid = storage == null ? FluidStack.EMPTY : TransferUtil.firstOrEmpty(storage);
+    json.addProperty("flip_gas", FluidVariantAttributes.isLighterThanAir(fluid.getType()));
+    json.addProperty("fluid", BuiltInRegistries.FLUID.getKey(fluid.getFluid()).toString());
     return json;
   }
 
