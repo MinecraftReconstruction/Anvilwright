@@ -16,6 +16,7 @@ import slimeknights.tconstruct.common.network.InventorySlotSyncPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.library.fluid.EmptyFluidHandlerItem;
 import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
+import slimeknights.tconstruct.library.fluid.FluidAction;
 
 /** Fluid handler that proxies to an item stack tank */
 public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> implements IFluidHandler {

@@ -20,6 +20,8 @@ import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 
 /**
  * Extension of {@link MaterialItem} which adds stats to the tooltip and has a set stat type

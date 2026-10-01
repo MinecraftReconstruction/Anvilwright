@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionPowerVariable(PowerVariable ifTrue, PowerVariable ifFalse, ICondition... conditions) implements PowerVariable, ConditionalObject<PowerVariable> {
+public record LoadConditionPowerVariable(PowerVariable ifTrue, PowerVariable ifFalse, ConditionJsonProvider... conditions) implements PowerVariable, ConditionalObject<PowerVariable> {
   @Override
   public float getValue(ModifierNBT modifiers, ModDataNBT persistentData, ModifierEntry modifier, @Nullable Projectile projectile, @Nullable EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
     return (Util.testConditions(conditions) ? ifTrue : ifFalse).getValue(modifiers, persistentData, modifier, projectile, hit, attacker, target);

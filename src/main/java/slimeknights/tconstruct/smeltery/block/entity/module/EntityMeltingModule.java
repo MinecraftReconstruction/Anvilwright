@@ -21,13 +21,14 @@ import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipe;
 import slimeknights.tconstruct.library.recipe.entitymelting.EntityMeltingRecipeCache;
-import slimeknights.tconstruct.shared.TinkerDamageTypes;
+import slimeknights.tconstruct.common.TinkerDamageTypes;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.world.damagesource.DamageSource;
 
 /**
  * Module to handle fetching items from the bounds and interacting with entities in the structure

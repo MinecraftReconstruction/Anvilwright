@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.Block;
 import slimeknights.mantle.item.RetexturedBlockItem;
 
 import java.util.function.BooleanSupplier;
+import net.minecraft.world.item.Item.Properties;
 
 /** Retextured block that conditionally enables show all variants */
 public class TableBlockItem extends RetexturedBlockItem {

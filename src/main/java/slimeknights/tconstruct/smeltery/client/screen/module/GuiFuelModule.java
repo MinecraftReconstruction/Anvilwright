@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 /**
  * GUI component handling the fuel module

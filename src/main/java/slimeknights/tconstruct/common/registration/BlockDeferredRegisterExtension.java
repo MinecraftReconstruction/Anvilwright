@@ -13,8 +13,10 @@ import slimeknights.mantle.registration.deferred.BlockDeferredRegister;
 import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
 
 import java.util.Map;
-import slimeknights.mantle.registration.adapter.EnumRegistryAdapter.EnumObject;
+import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
+import java.util.function.Supplier;
+import net.minecraft.util.StringRepresentable;
 
 /** Additional methods in deferred register extension */
 @SuppressWarnings("UnusedReturnValue")

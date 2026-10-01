@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
+import javax.annotation.Nonnull;
 
 /**
  * Handler that works with a tank item to adjust its tank in NBT

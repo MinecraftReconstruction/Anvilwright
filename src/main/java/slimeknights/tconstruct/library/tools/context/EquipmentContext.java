@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static slimeknights.tconstruct.common.TinkerTags.Items.MODIFIABLE;
+import net.minecraft.world.level.Level;
 
 /** Context for a modifier hook that runs on multiple equipment slots */
 @RequiredArgsConstructor

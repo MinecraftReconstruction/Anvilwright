@@ -31,7 +31,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.casting.IDisplayableCastingRecipe;
-import slimeknights.tconstruct.plugin.jei.IRecipeTooltipReplacement;
+import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
 import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 
 import java.awt.*;

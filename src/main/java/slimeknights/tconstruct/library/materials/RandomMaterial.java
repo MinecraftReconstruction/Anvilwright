@@ -85,7 +85,7 @@ public abstract class RandomMaterial implements IHaveLoader {
   }
 
   /** Creates a new conditional random material for datagen. */
-  public static RandomMaterial conditional(RandomMaterial ifTrue, RandomMaterial ifFalse, ICondition... conditions) {
+  public static RandomMaterial conditional(RandomMaterial ifTrue, RandomMaterial ifFalse, ConditionJsonProvider... conditions) {
     return new Conditional(ifTrue, ifFalse, conditions);
   }
 

@@ -9,7 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.registries.VanillaRegistries;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.shared.TinkerDamageTypes;
+import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.TinkerWorld;
 

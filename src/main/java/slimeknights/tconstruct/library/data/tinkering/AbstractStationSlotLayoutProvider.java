@@ -56,7 +56,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   }
 
   /** Defines the given ID as a general layout with conditions. */
-  protected StationSlotLayout.Builder define(ResourceLocation id, ICondition... conditions) {
+  protected StationSlotLayout.Builder define(ResourceLocation id, ConditionJsonProvider... conditions) {
     SerializeLayout layout = allLayouts.computeIfAbsent(id, i -> new SerializeLayout());
     Collections.addAll(layout.conditions, conditions);
     return layout.builder;

@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
  * Class handling the loading of modifier models.

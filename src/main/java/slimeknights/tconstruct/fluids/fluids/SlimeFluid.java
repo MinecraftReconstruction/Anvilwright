@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraft.world.item.Item.Properties;
 
 public abstract class SlimeFluid extends ForgeFlowingFluid {
 

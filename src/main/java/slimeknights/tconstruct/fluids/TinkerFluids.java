@@ -73,6 +73,8 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import static slimeknights.mantle.Mantle.commonResource;
 import static slimeknights.tconstruct.fluids.block.BurningLiquidBlock.createBurning;
 import static slimeknights.tconstruct.fluids.block.MobEffectLiquidBlock.createEffect;
+import java.util.Map;
+import net.minecraft.network.syncher.EntityDataSerializer;
 
 /**
  * Contains all fluids used throughout the mod

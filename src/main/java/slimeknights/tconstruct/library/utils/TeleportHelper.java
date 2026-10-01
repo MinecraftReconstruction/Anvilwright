@@ -10,6 +10,7 @@ import slimeknights.tconstruct.common.Sounds;
 
 import java.util.EnumSet;
 import java.util.Set;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 public class TeleportHelper {
   private static final Set<RelativeMovement> PACKET_FLAGS = EnumSet.of(RelativeMovement.X, RelativeMovement.Y, RelativeMovement.Z, RelativeMovement.X_ROT, RelativeMovement.Y_ROT);

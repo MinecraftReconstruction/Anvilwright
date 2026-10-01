@@ -11,6 +11,7 @@ import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import com.google.gson.JsonObject;
 
 /**
  * Logic to read sprites from existing images and return native images which can later be modified

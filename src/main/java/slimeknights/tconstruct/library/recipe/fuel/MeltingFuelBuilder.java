@@ -14,6 +14,8 @@ import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * Builds a new recipe for a melter or smeltery fuel

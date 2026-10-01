@@ -11,6 +11,7 @@ import static slimeknights.tconstruct.library.recipe.display.FilteredRecipe.matc
 import slimeknights.tconstruct.library.recipe.display.FilteredFluidRecipe;
 import slimeknights.tconstruct.library.recipe.display.FilteredItemRecipe;
 import slimeknights.tconstruct.library.recipe.display.RecipeSlot;
+import net.minecraft.resources.ResourceLocation;
 
 /** Interface for casting recipes that are displayable in JEI */
 public interface IDisplayableCastingRecipe extends FilteredItemRecipe, FilteredFluidRecipe {

@@ -26,7 +26,7 @@ import slimeknights.mantle.fluid.tooltip.FluidTooltipHandler;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.GuiUtil;
 import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
-import slimeknights.tconstruct.plugin.jei.IRecipeTooltipReplacement;
+import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
 import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 
 import java.awt.*;

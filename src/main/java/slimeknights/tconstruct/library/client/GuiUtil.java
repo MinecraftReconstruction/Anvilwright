@@ -23,6 +23,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import org.joml.Matrix4f;
 import slimeknights.mantle.client.screen.ElementScreen;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
+import net.minecraft.network.chat.Component;
 
 @SuppressWarnings("removal")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

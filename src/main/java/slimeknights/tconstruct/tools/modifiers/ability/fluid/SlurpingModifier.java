@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.tools.modifiers.ability.fluid;
 
-import net.minecraftforge.fluids.FluidType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import slimeknights.tconstruct.library.json.LevelingInt;
 import slimeknights.tconstruct.library.json.LevelingValue;
 import slimeknights.tconstruct.library.modifiers.Modifier;
@@ -21,6 +21,6 @@ public class SlurpingModifier extends Modifier {
   protected void registerHooks(Builder hookBuilder) {
     hookBuilder.addModule(new SlurpingModule(LevelingValue.eachLevel(1), LevelingInt.flat(21)));
     hookBuilder.addModule(ToolTankHelper.TANK_HANDLER);
-    hookBuilder.addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME));
+    hookBuilder.addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET));
   }
 }

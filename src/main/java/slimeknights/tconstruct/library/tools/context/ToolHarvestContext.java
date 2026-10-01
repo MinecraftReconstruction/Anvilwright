@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.projectile.Projectile;
 
 /** Context for harvest related modifier hooks */
 @Getter

@@ -34,6 +34,8 @@ import slimeknights.tconstruct.tools.network.ToolContainerFluidUpdatePacket;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.minecraft.world.entity.EquipmentSlot;
 
 /** Container for a tool inventory */
 public class ToolContainerMenu extends AbstractContainerMenu {

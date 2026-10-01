@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.fluids;
 
 import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Event subscriber for modifier events

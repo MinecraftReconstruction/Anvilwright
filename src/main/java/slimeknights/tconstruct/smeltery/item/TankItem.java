@@ -33,6 +33,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
 
 public class TankItem extends BlockTooltipItem implements CustomMaxCountItem {
   private static final String KEY_FLUID = TConstruct.makeTranslationKey("block", "tank.fluid");

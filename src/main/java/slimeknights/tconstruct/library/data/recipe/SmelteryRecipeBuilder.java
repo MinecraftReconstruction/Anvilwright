@@ -197,7 +197,7 @@ public class SmelteryRecipeBuilder {
 
   /** Adds the given conditions to the given builder */
   @CheckReturnValue
-  private Consumer<FinishedRecipe> withCondition(ICondition... conditions) {
+  private Consumer<FinishedRecipe> withCondition(ConditionJsonProvider... conditions) {
     ConsumerWrapperBuilder builder = ConsumerWrapperBuilder.wrap();
     for (ConditionJsonProvider condition : conditions) {
       builder.addCondition(condition);

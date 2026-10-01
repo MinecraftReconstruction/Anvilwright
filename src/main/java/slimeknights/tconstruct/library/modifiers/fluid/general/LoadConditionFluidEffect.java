@@ -19,24 +19,24 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param <C> Context type
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionFluidEffect<C extends FluidEffectContext>(FluidEffect<? super C> ifTrue, FluidEffect<? super C> ifFalse, GenericLoaderRegistry<FluidEffect<? super C>> registry, ICondition... conditions) implements FluidEffect<C> {
+public record LoadConditionFluidEffect<C extends FluidEffectContext>(FluidEffect<? super C> ifTrue, FluidEffect<? super C> ifFalse, GenericLoaderRegistry<FluidEffect<? super C>> registry, ConditionJsonProvider... conditions) implements FluidEffect<C> {
   /** Creates a new load condition block effect */
-  public static LoadConditionFluidEffect<FluidEffectContext.Block> block(FluidEffect<? super FluidEffectContext.Block> ifTrue, FluidEffect<? super FluidEffectContext.Block> ifFalse, ICondition... conditions) {
+  public static LoadConditionFluidEffect<FluidEffectContext.Block> block(FluidEffect<? super FluidEffectContext.Block> ifTrue, FluidEffect<? super FluidEffectContext.Block> ifFalse, ConditionJsonProvider... conditions) {
     return new LoadConditionFluidEffect<>(ifTrue, ifFalse, FluidEffect.BLOCK_EFFECTS, conditions);
   }
 
   /** Creates a new load condition block effect */
-  public static LoadConditionFluidEffect<FluidEffectContext.Block> block(FluidEffect<? super FluidEffectContext.Block> ifTrue, ICondition... conditions) {
+  public static LoadConditionFluidEffect<FluidEffectContext.Block> block(FluidEffect<? super FluidEffectContext.Block> ifTrue, ConditionJsonProvider... conditions) {
     return block(ifTrue, FluidEffect.EMPTY, conditions);
   }
 
   /** Creates a new load condition entity effect */
-  public static LoadConditionFluidEffect<FluidEffectContext.Entity> entity(FluidEffect<? super FluidEffectContext.Entity> ifTrue, FluidEffect<? super FluidEffectContext.Entity> ifFalse, ICondition... conditions) {
+  public static LoadConditionFluidEffect<FluidEffectContext.Entity> entity(FluidEffect<? super FluidEffectContext.Entity> ifTrue, FluidEffect<? super FluidEffectContext.Entity> ifFalse, ConditionJsonProvider... conditions) {
     return new LoadConditionFluidEffect<>(ifTrue, ifFalse, FluidEffect.ENTITY_EFFECTS, conditions);
   }
 
   /** Creates a new load condition entity effect */
-  public static LoadConditionFluidEffect<FluidEffectContext.Entity> entity(FluidEffect<? super FluidEffectContext.Entity> ifTrue, ICondition... conditions) {
+  public static LoadConditionFluidEffect<FluidEffectContext.Entity> entity(FluidEffect<? super FluidEffectContext.Entity> ifTrue, ConditionJsonProvider... conditions) {
     return entity(ifTrue, FluidEffect.EMPTY, conditions);
   }
 

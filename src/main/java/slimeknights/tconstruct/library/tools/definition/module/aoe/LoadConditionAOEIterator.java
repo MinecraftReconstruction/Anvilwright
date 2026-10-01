@@ -18,7 +18,7 @@ import slimeknights.tconstruct.library.utils.Util;
  * @param conditions  Conditions to evaluate.
  */
 @SuppressWarnings("unused") // API
-public record LoadConditionAOEIterator(Loadable ifTrue, Loadable ifFalse, ICondition... conditions) implements AreaOfEffectIterator.Loadable, ConditionalObject<AreaOfEffectIterator.Loadable> {
+public record LoadConditionAOEIterator(Loadable ifTrue, Loadable ifFalse, ConditionJsonProvider... conditions) implements AreaOfEffectIterator.Loadable, ConditionalObject<AreaOfEffectIterator.Loadable> {
   @Override
   public RecordLoadable<? extends AreaOfEffectIterator.Loadable> getLoader() {
     return AreaOfEffectIterator.LOADER.getConditionalLoader();

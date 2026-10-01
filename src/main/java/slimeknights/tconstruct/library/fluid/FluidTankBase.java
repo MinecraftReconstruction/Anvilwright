@@ -5,6 +5,7 @@ import net.minecraft.world.level.Level;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.smeltery.network.FluidUpdatePacket;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class FluidTankBase<T extends MantleBlockEntity> extends FluidTank {
 

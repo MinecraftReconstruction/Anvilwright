@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Model for tank modifiers, also displays the fluid.

@@ -140,14 +140,6 @@ public class TinkerDataCapability implements EntityComponentInitializer {
       data.remove(key);
     }
 
-    /**
-     * Gets a value from the holder, or a default if missing
-     * @param key           Holder key
-     * @param defaultValue  Value
-     * @param <T>           Data type
-     * @return  Data or default
-     */
-    @SuppressWarnings("unchecked")
     /** Gets the value from the holder, creating it if missing */
     @SuppressWarnings("unchecked")
     public <T> T computeIfAbsent(TinkerDataKey<T> key, Function<TinkerDataKey<?>,T> constructor) {
@@ -173,12 +165,6 @@ public class TinkerDataCapability implements EntityComponentInitializer {
     @SuppressWarnings("unchecked")
     public <T> T get(TinkerDataKey<T> key) {
       return (T) data.get(key);
-    }
-
-    /** Gets the value from the holder, creating it if missing */
-    @SuppressWarnings("unchecked")
-    public <T, U extends TinkerDataKey<T> & Function<TinkerDataKey<?>,T>> T computeIfAbsent(U key) {
-      return (T) data.computeIfAbsent(key, key);
     }
 
     /**

@@ -36,6 +36,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Function;
 import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
+import net.minecraft.world.item.crafting.RecipeType;
 
 /**
  * Alloy recipe category for JEI display
