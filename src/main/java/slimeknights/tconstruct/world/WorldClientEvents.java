@@ -121,8 +121,12 @@ public class WorldClientEvents extends ClientEventBase {
     // render types - slime blocks
     RenderType translucent = RenderType.translucent();
     for (FoliageType type : FoliageType.VISIBLE) {
-      // the slime block map is keyed by slime type, so translate the foliage type
-      BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slime.get(type.asSlime()), translucent);
+      // the slime block map is keyed by slime type, so translate the foliage type; some foliage types
+      // (the blood variant) have no slime block and therefore no render layer to set
+      SlimeType slime = type.asSlime();
+      if (slime != null) {
+        BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slime.get(slime), translucent);
+      }
     }
 
     // doors

@@ -72,10 +72,13 @@ public class WorldEvents {
     LootTableEvents.MODIFY.register(WorldEvents::onLootTableLoad);
     LivingVisibilityEvent.VISIBILITY.register(WorldEvents::livingVisibility);
     LivingEntityEvents.DROPS.register(WorldEvents::creeperKill);
-    wanderingTrades();
     ConfigEvents.LOADING.register(config -> {
-      if (config.getModId().equals(TConstruct.MOD_ID) && config.getType() == ConfigType.COMMON)
+      if (config.getModId().equals(TConstruct.MOD_ID) && config.getType() == ConfigType.COMMON) {
+        // Porting Lib only fills in the values once the config is loaded, so the trade weight has to be read here
+        // rather than at mod init (reading it earlier throws in the dev environment)
+        wanderingTrades();
         onBiomeLoad();
+      }
     });
   }
 
