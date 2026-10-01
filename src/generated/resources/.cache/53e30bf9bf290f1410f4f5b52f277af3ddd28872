@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T19:35:46.460181	Hephaestus/Tinkers' Construct Smeltery Recipes
+// 1.20.1	2026-10-01T21:24:26.038383	Hephaestus/Tinkers' Construct Smeltery Recipes
 c587454fb233d142f53ea2d12b8d585221a8fd7b data/tconstruct/recipes/smeltery/melting/slime/ender/sapling.json
 1186010b238841cca51dc06589e10d75cc140d18 data/tconstruct/recipes/smeltery/casting/metal/constantan/plate_gold_cast.json
 81fff30c6144d6d61d2ed1b8d652003ec35965c9 data/tconstruct/recipes/smeltery/seared/grout.json
@@ -759,8 +759,8 @@ f3c75d997081a5121a3b49c52d85837eb8501664 data/tconstruct/recipes/smeltery/meltin
 a3b81813f0cd299a677663c376318b1f11dd6db2 data/tconstruct/recipes/smeltery/melting/metal/refined_glowstone/chestplate.json
 8f2e4eacea92a97e72cce77dba216e9be259609f data/tconstruct/recipes/smeltery/casts/sand/builder_cast/plates.json
 ba7ecc51c6d7543c9baab85236b98e2fcbdf1644 data/tconstruct/recipes/smeltery/melting/metal/enderium/plate.json
-1c9f7ba6664c7486e536801e29dd4903ff075f6b data/tconstruct/recipes/smeltery/seared/chute.json
 90b7e520a139ccf3c291b8d78c56cc70ebcd4e9e data/tconstruct/recipes/smeltery/casting/metal/steel/coin_sand_cast.json
+1c9f7ba6664c7486e536801e29dd4903ff075f6b data/tconstruct/recipes/smeltery/seared/chute.json
 306a152c94d31ed2cad96b659320f1286b756dab data/tconstruct/recipes/smeltery/melting/metal/nicrosil/raw_block.json
 97f9afa685720948d463ce83bab748c76b798a8e data/tconstruct/recipes/smeltery/melting/metal/invar/gear.json
 a33aa0f22120af325002e43c173699d931d4dbcb data/tconstruct/recipes/smeltery/melting/obsidian/chest.json

@@ -43,7 +43,7 @@ public class TConstructData implements DataGeneratorEntrypoint {
     TinkerModifiers.gatherData(pack, helper);
 
     TinkerTools.gatherData(pack, helper);
-    TinkerFluids.gatherData(pack);
+    TinkerFluids.gatherData(pack, helper);
     TinkerWorld.gatherData(pack);
     TinkerGadgets.gatherData(pack);
     TinkerCommons.gatherData(pack, helper);

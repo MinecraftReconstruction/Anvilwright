@@ -446,3 +446,40 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 - `PackOutput.Target` 在 Fabric 侧是 `DATA_PACK` / `RESOURCE_PACK`（不是 `SERVER_DATA`）。
 - `Ingredient#isSimple/isVanilla` 是 Forge 补丁，Fabric 侧要改用 `CustomIngredient#requiresTesting()`
   和 `instanceof CustomIngredient` 判断。
+
+## 2026-10-01 夜：客户端冒烟口径（紫黑物品清零）
+
+这一轮把口径从"编译/datagen 是否通过"换成了**客户端能不能画**，为此在
+`slimeknights.tconstruct.testing.TConstructClientSmokeTest`（开发环境专用，`fabric.mod.json` 的 `client` 入口）
+里加了三个可量化的检查，进世界后自动跑一次并打 `[smoketest]`：
+
+1. `CreativeModeTabs.tryRebuildTabContents` + 每个创造页签的图标/全部物品 `ItemRenderer#getModel`
+2. 所有 `tconstruct:` 物品里有多少个落到"missing model"（就是玩家看到的紫黑格）
+3. 全量纹理（13506 张）里有多少张没进 block atlas，并把完整清单写到 `run/smoketest-atlas-missing.txt`
+
+| 指标 | 修之前 | 修之后 |
+|---|---|---|
+| `Unable to bake model` 条数 | **109**（38 工具 + 71 桶） | **0** |
+| 用 missing model 的 `tconstruct:` 物品 | 数百（工具/盔甲/桶/铸模/方块） | **0 / 682** |
+| 进 block atlas 失败的地图集纹理 | 744 | 621（全部是**本来就不该进** block atlas 的：`tinker_armor/**` 473 张是盔甲层贴图、`particle/entity/mob_effect/colormap` 各有自己的 atlas、`gui/*` 30 张是直接绑定的界面贴图） |
+| 生成的 `models/item` 文件 | 71 | **501**（上游 3.12.1 是 499，多出的两个是本移植独有的血内容） |
+| `runData` | 绿 | 绿（新增 8 个 provider 后仍然绿） |
+| `runClient` | 能进世界，开创造栏崩 | 能进世界，0 崩溃、0 烘焙失败 |
+
+**根因不是"资源缺文件"，是 Forge 与 Fabric 的两处机制差**（详见 BEHAVIOUR-DIFFERENCES 36/37）：
+
+- Fabric 不会自动把"模型/代码用到的贴图"塞进 atlas，也不会像 Forge 那样在流体 type 上提供渲染扩展 ——
+  所以流体的 `FluidRenderHandler` 与精灵图目录源必须显式注册；
+- Forge 给 `Material#sprite` 打了"用当前烘焙的 atlas"的补丁，Fabric 没有：烘焙期间
+  `Minecraft#getTextureAtlas` 还是**上一次 reload** 的 atlas（首次为空），于是任何在烘焙里取贴图的代码都会拿到
+  `null`。38 个工具模型和 71 个桶模型的失败都是这一条。
+
+**本轮 5 个 commit**（都已 push 到 `mcr/upstream-3.12.1`）：
+
+| commit | 内容 |
+|---|---|
+| `9f379612e0` | 流体渲染：补回被合并丢掉的 4 个流体 provider；创造栏剩余 12 处 `TableBlockItem` 强转改防御式 |
+| `735d5a7b07` | 修掉 109 个烘焙失败的模型（`MaterialModel` 透传 spriteGetter、`FluidContainerModel` 用烘焙期 getter）；Mantle 侧 `ClientFluidTextureHandler`（`c7098eb1`） |
+| `b03b62708f` | 补回 `ToolItemModelProvider` / `ArmorModelProvider` / `TinkerTrimMaterialPaletteGenerator` / `ModifierModelMapProvider`，精灵图源合并进已注册的 provider，补注册盔甲与装饰模型 loader |
+| `f40e5a3987` | 补回 `TinkerCommons` 的 5 个客户端 provider（`models/item` 71 → 501，与上游对齐）+ `TinkerData` 让 existing-file-helper 也能看到 Porting Lib 的资源 |
+| （本轮最后） | `FluidTextureCameraProvider`（62 张相机贴图）+ 本文档 |

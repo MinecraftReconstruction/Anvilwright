@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T19:35:46.417377	Hephaestus/Tinkers Construct Entity Type TinkerTags
+// 1.20.1	2026-10-01T21:24:26.031991	Hephaestus/Tinkers Construct Entity Type TinkerTags
 76de17c7d4d0ffb4880d245111f426fc8292fa2d data/forge/tags/entity_types/turtles.json
 5759f1c77e0ee218dc23c79cbbf645af48decf49 data/forge/tags/entity_types/squids.json
 ca854c6e60aa89645840c1a358dc1081393781bd data/tconstruct/tags/entity_types/meltable/farm_animals.json
@@ -16,8 +16,8 @@ be609ae38a2cf6e11efc4b6f4b00aaa2a25ebba7 data/tconstruct/tags/entity_types/melta
 a5a2e1024af101c8c3921e6b0382ed89171c01cf data/forge/tags/entity_types/slimes.json
 ed01034f669f20a0f6c6fe11d94b90eabd897e2b data/forge/tags/entity_types/shulkers.json
 f7f22bd1e8515aeb15d647f2d290cd89c0aaec2d data/minecraft/tags/entity_types/frog_food.json
-a104d9e73a1ccd89eca8971ce21eefbbb7d82c54 data/forge/tags/entity_types/creepers.json
 75151275131c86cc277875f1bdc0b9c3d7308ea8 data/forge/tags/entity_types/axolotls.json
+a104d9e73a1ccd89eca8971ce21eefbbb7d82c54 data/forge/tags/entity_types/creepers.json
 d1a6a927bf688b101cd17a141b5d58917b3bd047 data/tconstruct/tags/entity_types/collectables/discardable.json
 5b5b4d699ad8f29b7cf33dcae445970b49c50c7a data/tconstruct/tags/entity_types/bacon_producer.json
 41e98f860874a38f717f10a13806d71694b7adea data/tconstruct/tags/entity_types/meltable/drowned.json
