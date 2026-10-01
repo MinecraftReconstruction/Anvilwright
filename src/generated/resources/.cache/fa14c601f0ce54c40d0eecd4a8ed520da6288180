@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.948213	Hephaestus/Tinkers' Construct Material Recipe
+// 1.20.1	2026-10-01T15:46:16.234334	Hephaestus/Tinkers' Construct Material Recipe
 23c225c5fcf72388a7555e38c99c84776db49468 data/tconstruct/recipes/tools/materials/flint/flint.json
 485f30a23f9dfae16ca802fafdd5a7468fd0ad9d data/tconstruct/recipes/tools/materials/casting/invar.json
 b2510ef673adbbf8888b6041fcecf4808a7012a7 data/tconstruct/recipes/tools/materials/wood/bamboo/stick.json
@@ -27,8 +27,8 @@ fc488700b3a155cf512e08ebeb7cdbf69a7caafe data/tconstruct/recipes/tools/materials
 e506cd407b244e7558e69bd6c4c3b1b7c1d24701 data/tconstruct/recipes/tools/materials/composite/whitestone_from_cadmium.json
 37c93ed92526c7ea57e9efa86b0cb0a0f69383eb data/tconstruct/recipes/tools/materials/slimeball/earth.json
 af320eaa2272bdb6ee0d1db51be993eb02a2eb9d data/tconstruct/recipes/tools/materials/melting/rose_gold.json
-a667528edd621197b85af58ef5cf9e454ce188bb data/tconstruct/recipes/tools/materials/paper.json
 fc1fb3e4ebd5c858d1f7fcfeecee06478950ce11 data/tconstruct/recipes/tools/materials/wool/red.json
+a667528edd621197b85af58ef5cf9e454ce188bb data/tconstruct/recipes/tools/materials/paper.json
 d5f904ce21a61d442537e5a0f385144e964632f9 data/tconstruct/recipes/tools/materials/hepatizon/nugget.json
 e1eae22a268312029071a857e672b04191e23b7b data/tconstruct/recipes/tools/materials/pig_iron/block.json
 d9aeb58a2ae59260c33cde6178eee2145854d8b3 data/tconstruct/recipes/tools/materials/wood/logs/jungle.json
@@ -96,8 +96,8 @@ b6d4fe9cab3c2de6074261ab252f4135d8558b4a data/tconstruct/recipes/tools/materials
 6d1fd6f5db0011aade35c69b9ac2096aa4565c3c data/tconstruct/recipes/tools/materials/melting/pewter.json
 941439110453fb0bce53dbfe389b469308290418 data/tconstruct/recipes/tools/materials/steeleaf/block.json
 15b931423c70be27905005eaa36390071ccb374f data/tconstruct/recipes/tools/materials/slimeball/ender.json
-640eeb5de7f0564d7d272f78cfa3a3225af739b4 data/tconstruct/recipes/tools/materials/magnetite.json
 caf5cc76e4ecdf35ca8bcb46d8f74224e6d56317 data/tconstruct/recipes/tools/materials/quartz/block.json
+640eeb5de7f0564d7d272f78cfa3a3225af739b4 data/tconstruct/recipes/tools/materials/magnetite.json
 d5dc8be24329855ff67597eb177764f645b334bd data/tconstruct/recipes/tools/materials/invar/ingot.json
 2164fc37dab2dc2d87e7fda559128ada287ea078 data/tconstruct/recipes/tools/materials/kobold.json
 3fa7e597615dd673847125290b7b35438a0565f1 data/tconstruct/recipes/tools/materials/casting/manyullyn.json

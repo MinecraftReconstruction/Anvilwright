@@ -60,6 +60,11 @@ public class NoContainerIngredient extends NestedIngredient {
 
     @Override
     public NoContainerIngredient read(JsonObject json) {
+      // strip our own fabric:type first, otherwise Ingredient.fromJson dispatches straight back into this
+      // serializer and recurses forever on the inline (no "match") form
+      if (json.has("fabric:type")) {
+        json.remove("fabric:type");
+      }
       // if we have match, parse as a nested object. Without match, just parse the object as vanilla
       Ingredient ingredient;
       if (json.has("match")) {

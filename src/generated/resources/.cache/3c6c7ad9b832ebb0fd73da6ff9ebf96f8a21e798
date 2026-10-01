@@ -1,8 +1,8 @@
-// 1.20.1	2026-10-01T15:40:57.010512	Hephaestus/Tinkers' Construct Fluid Tooltip Provider
+// 1.20.1	2026-10-01T15:46:16.3037	Hephaestus/Tinkers' Construct Fluid Tooltip Provider
 ca8edcac73ae97b992db2275aa0596f2028ca75d assets/tconstruct/mantle/fluid_tooltips/venom.json
 454a0ab42f453e40cfd963f362561607173e7754 assets/tconstruct/mantle/fluid_tooltips/ingots.json
-adace8c038609ad6cc1b3a242aee23c595a22885 assets/tconstruct/mantle/fluid_tooltips/foundry.json
 4e072d4565488376b1abbc98b99a7570b1a38c79 assets/tconstruct/mantle/fluid_tooltips/honey.json
+adace8c038609ad6cc1b3a242aee23c595a22885 assets/tconstruct/mantle/fluid_tooltips/foundry.json
 e4bcceeadbd4d86d9931ddf47dd88c8d17bf2982 assets/tconstruct/mantle/fluid_tooltips/slime.json
 fd1762b94cce1b5252c88ba2722b9ab50b5a3f8b assets/tconstruct/mantle/fluid_tooltips/metals.json
 a8a0f9f8e05cd4da786e8dd1822fa6fbfe9fe225 assets/tconstruct/mantle/fluid_tooltips/small_gems.json

@@ -32,6 +32,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -134,7 +135,7 @@ public class ModifierEvents {
   static void onKnockback(KnockbackEvent event) {
     LivingEntity entity = event.getEntity();
     Optional<TinkerDataCapability.Holder> dataCap = TinkerDataCapability.CAPABILITY.maybeGet(entity);
-    double knockback = entity.getAttributeValue(TinkerAttributes.KNOCKBACK_MULTIPLIER.get())
+    double knockback = TinkerAttributes.getValue(entity, TinkerAttributes.KNOCKBACK_MULTIPLIER.get())
                      + dataCap.map(data -> data.get(TinkerDataKeys.KNOCKBACK)).orElse(0f);
     if (knockback != 1) {
       event.setStrength(event.getStrength() * knockback);
@@ -153,7 +154,7 @@ public class ModifierEvents {
   @SuppressWarnings("removal")
   static void onLivingFall(LivingEntityEvents.Fall.FallEvent event) {
     LivingEntity entity = (LivingEntity) event.getEntity();
-    double boost = entity.getAttributeValue(TinkerAttributes.SAFE_FALL_DISTANCE.get()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
+    double boost = TinkerAttributes.getValue(entity, TinkerAttributes.SAFE_FALL_DISTANCE.get()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
     if (boost != 0) {
       event.setDistance((float) Math.max(event.getDistance() - boost, 0));
     }
@@ -162,7 +163,10 @@ public class ModifierEvents {
   /** Called on jumping to boost the jump height of the entity */
   @SuppressWarnings("removal")
   public static void onLivingJump(LivingEntity entity) {
-    double boost = entity.getAttributeValue(TinkerAttributes.JUMP_BOOST.get()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
+    // Fabric cannot attach our attributes to every entity type (see BEHAVIOUR-DIFFERENCES #6), so entities that do
+    // not carry the attribute simply get no boost instead of throwing
+    AttributeInstance instance = entity.getAttribute(TinkerAttributes.JUMP_BOOST.get());
+    double boost = (instance == null ? 0 : instance.getValue()) + ArmorStatModule.getStat(entity, TinkerDataKeys.JUMP_BOOST);
     if (boost > 0) {
       entity.setDeltaMovement(entity.getDeltaMovement().add(0, boost * 0.1, 0));
     }
@@ -186,7 +190,7 @@ public class ModifierEvents {
   /** Causes more gold armor to drop */
   static boolean onLivingDrops(LivingEntity target, DamageSource source, Collection<ItemEntity> drops, int lootingLevel, boolean recentlyHit) {
     if (source != null) {
-      float gold = (float) target.getAttributeValue(TinkerAttributes.CHRYSOPHILITE.get());
+      float gold = (float) TinkerAttributes.getValue(target, TinkerAttributes.CHRYSOPHILITE.get());
       if (gold > 0) {
         float extraChance = 0.04f * gold;
         // check each slot for gold
@@ -263,7 +267,7 @@ public class ModifierEvents {
     Player player = event.getPlayer();
     // directly use modifier for held to ensure the correct hand applies
     // TODO: can we make that datapack configurable?
-    double bonus = player.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER.get())
+    double bonus = TinkerAttributes.getValue(player, TinkerAttributes.EXPERIENCE_MULTIPLIER.get())
                  + ModifierUtil.getModifierLevel(player.getMainHandItem(), ModifierIds.experienced) * 0.5f
                  + ArmorStatModule.getStat(player, TinkerDataKeys.EXPERIENCE);
     event.setExpToDrop((int)(event.getExpToDrop() * bonus));
@@ -277,7 +281,7 @@ public class ModifierEvents {
 
     // always add armor boost, unfortunately no good way to stop shield stuff here
     if (attackingPlayer != null) {
-      multiplier += attackingPlayer.getAttributeValue(TinkerAttributes.EXPERIENCE_MULTIPLIER.get()) + ArmorStatModule.getStat(attackingPlayer, TinkerDataKeys.EXPERIENCE);
+      multiplier += TinkerAttributes.getValue(attackingPlayer, TinkerAttributes.EXPERIENCE_MULTIPLIER.get()) + ArmorStatModule.getStat(attackingPlayer, TinkerDataKeys.EXPERIENCE);
     }
     // if the target was killed by an experienced arrow, use that level
     TinkerDataCapability.Holder data = TinkerDataCapability.CAPABILITY.maybeGet(entity).orElse(null);
@@ -344,7 +348,7 @@ public class ModifierEvents {
       return;
     }
     // can the entity bounce?
-    if (living.getAttributeValue(TinkerAttributes.BOUNCY.get()) < 1) {
+    if (TinkerAttributes.getValue(living, TinkerAttributes.BOUNCY.get()) < 1) {
       return;
     }
 

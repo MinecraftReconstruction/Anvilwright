@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.915296	Hephaestus/Tinker's Construct Material Traits
+// 1.20.1	2026-10-01T15:46:16.223868	Hephaestus/Tinker's Construct Material Traits
 009c13603fca38fcbdbd52f7dfaf7ceb68bbc5fd data/tconstruct/tinkering/materials/traits/slimewood.json
 93bad01aaf9cad9cd93b9522b06357a6b3aac155 data/tconstruct/tinkering/materials/traits/ender_pearl.json
 e3bf9d5c9d42865e84bce8bde10c0b30fc2b468d data/tconstruct/tinkering/materials/traits/chorus.json
@@ -79,8 +79,8 @@ b9113fb2645d0a006a43b06c33fb891d140474ef data/tconstruct/tinkering/materials/tra
 5a4a5458dc2c314278ad05379017863af6ffbd91 data/tconstruct/tinkering/materials/traits/weeping_vine.json
 f6243ee0ad589edbf494baa0e00ff1e7089f06b4 data/tconstruct/tinkering/materials/traits/cheese.json
 603e4c531a89ae7b5b74017250ae078a714cd983 data/tconstruct/tinkering/materials/traits/blaze.json
-ff33419734d8fd2f4ed4fefb3a7f7aa787acf724 data/tconstruct/tinkering/materials/traits/pig_iron.json
 8c8315fdf2aa637aa4c8edddec31d90a768ddf35 data/tconstruct/tinkering/materials/traits/nicrosil.json
+ff33419734d8fd2f4ed4fefb3a7f7aa787acf724 data/tconstruct/tinkering/materials/traits/pig_iron.json
 f9934c10a932a8ce9bc265482b221c70836e1dd9 data/tconstruct/tinkering/materials/traits/gold.json
 e56aeff27ff5df0b95989ceecbd0f9d8830b0956 data/tconstruct/tinkering/materials/traits/paper.json
 0e2536e35b89b4764c598c85eb3a7000925b8801 data/tconstruct/tinkering/materials/traits/scorched_stone.json
@@ -90,8 +90,8 @@ f72e8222a06320522f8cba007920bcf896d57a1b data/tconstruct/tinkering/materials/tra
 a9a03e522a82c8fa5b235a1d3465a99aff832d0c data/tconstruct/tinkering/materials/traits/venom.json
 3bd748a6e45ee4aa16b0b4b9a904906500bfa19d data/tconstruct/tinkering/materials/traits/skyslime.json
 4d68f8c07d5e565b579f2b4bd38a354f3bfa6fa4 data/tconstruct/tinkering/materials/traits/electrum.json
-0ed74449617a152364dc24d5b1c169eb590c9454 data/tconstruct/tinkering/materials/traits/cobalt.json
 8cc24e7747e6856355c4f5d78c09ea4dcb243e4a data/tconstruct/tinkering/materials/traits/cactus.json
+0ed74449617a152364dc24d5b1c169eb590c9454 data/tconstruct/tinkering/materials/traits/cobalt.json
 f8b11fb8346868853f68fe1209154921e49f8ebd data/tconstruct/tinkering/materials/traits/enderslime_vine.json
 40ff94674aaf0801f1cc333d1fbdcb680334a8c8 data/tconstruct/tinkering/materials/traits/seared_stone.json
 2ad833a835341f41a12ac28783c530b6749ff104 data/tconstruct/tinkering/materials/traits/lead.json

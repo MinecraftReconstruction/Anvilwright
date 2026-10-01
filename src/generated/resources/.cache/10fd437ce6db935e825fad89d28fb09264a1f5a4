@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.944795	Hephaestus/Tinkers' Construct Common Recipes
+// 1.20.1	2026-10-01T15:46:16.23149	Hephaestus/Tinkers' Construct Common Recipes
 86af8b0074352efcdee9c7a7980355a3a4002aac data/tconstruct/advancements/recipes/misc/common/materials/knightmetal_ingot_from_nuggets.json
 e750f8da82e90221ed80b172562562845a633014 data/tconstruct/recipes/common/glass/yellow_clear_stained_glass.json
 17859d7b0406fe5c56838c6c0387273e8f3ea93f data/tconstruct/advancements/recipes/misc/common/materials/steel_block_from_ingots.json
@@ -62,8 +62,8 @@ cdc7183da30b08e482a42d7b66aa4613889fc40e data/tconstruct/recipes/common/material
 ad4a6e42df409e191b23fe1b349fae34d58b74b6 data/tconstruct/advancements/recipes/misc/common/materials/slimesteel_ingot_from_nuggets.json
 634fdee0246d22ded9e479e9d23ee04da8100daa data/tconstruct/recipes/common/firewood/nahuatl_fence.json
 53d44264ebfb11f95fd7e24112a69dae5c462760 data/tconstruct/recipes/common/glass/gray_clear_stained_glass_pane.json
-5ac9539eeeaaac9d9a78162b6de2e0a68a407885 data/tconstruct/recipes/common/glass/magenta_clear_stained_glass.json
 e01f16713eaee74392e03e172210dc676db987e9 data/tconstruct/advancements/recipes/misc/common/glass/magenta_clear_stained_glass.json
+5ac9539eeeaaac9d9a78162b6de2e0a68a407885 data/tconstruct/recipes/common/glass/magenta_clear_stained_glass.json
 90a25bb9b3c402c15968bfdb1d39fc976c47057a data/tconstruct/advancements/recipes/misc/common/materials/hepatizon_ingot_from_block.json
 b28938504c39abaaab2482e0052c0cd6d87e454d data/tconstruct/recipes/common/materials/knightslime_nugget_from_ingot.json
 41a6b46f5a83931bd28819ad7306a760880e86f1 data/tconstruct/advancements/recipes/misc/common/materials/steel_ingot_from_nuggets.json

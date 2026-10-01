@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.964645	Hephaestus/Tinkers' Construct Material Render Info Provider
+// 1.20.1	2026-10-01T15:46:16.257175	Hephaestus/Tinkers' Construct Material Render Info Provider
 71515bd7da97a2ac549a6b0d10470e715a765115 assets/tconstruct/tinkering/materials/magnetite.json
 d870f84285667176718f2399df614a15f0eff01b assets/tconstruct/tinkering/materials/wool/gray.json
 72e514b11aca40afb02b19e152ac63c0ab1554ab assets/tconstruct/tinkering/materials/enderslimeskin.json
@@ -91,8 +91,8 @@ ce4f30dfd1609ffcdf83362f3be6960196102412 assets/tconstruct/tinkering/materials/u
 b67716243a8e15282a9f79743f504f7927ddb8c6 assets/tconstruct/tinkering/materials/osmium.json
 66e1aa65c10f338e10bf263a15c1f0c1604b7eb1 assets/tconstruct/tinkering/materials/clay.json
 dd9ac65f53ec012a3663524a55f75716ee8bb034 assets/tconstruct/tinkering/materials/aluminum.json
-d744a6655e1069b478d45c8374a45dd01224a639 assets/tconstruct/tinkering/materials/slimeball/ichor.json
 ddde702af9508d19821db208e82814e0edd0f10e assets/tconstruct/tinkering/materials/quartz.json
+d744a6655e1069b478d45c8374a45dd01224a639 assets/tconstruct/tinkering/materials/slimeball/ichor.json
 b1e947ee8ce7a5c90d61d50f6ed4563b8b93a140 assets/tconstruct/tinkering/materials/slimeball/sky.json
 16520d15652ffbdc03b60645695a1699af0f61d1 assets/tconstruct/tinkering/materials/unknown.json
 1c574d1bef09be44a66f7ee58b155ac458e5a3e8 assets/tconstruct/tinkering/materials/glass.json
@@ -131,8 +131,8 @@ c42441515cdd862f65edbfc81e841282787300e1 assets/tconstruct/tinkering/materials/r
 c855bec8b821f72b2174b1ed4d53a5659a197665 assets/tconstruct/tinkering/materials/slimeball/ender.json
 ab434a7c96e7d841ed300a0259f96d5b52461112 assets/tconstruct/tinkering/materials/knightmetal.json
 5ec9698badc562155752f68f6f69cbb1d67c11d3 assets/tconstruct/tinkering/materials/weeping_vine.json
-9ef82469999d804c3ab64fc639cdf08dcb216fc4 assets/tconstruct/tinkering/materials/blazewood.json
 3744a733576b8df187f3fb05c7afa142de67b904 assets/tconstruct/tinkering/materials/venombone.json
+9ef82469999d804c3ab64fc639cdf08dcb216fc4 assets/tconstruct/tinkering/materials/blazewood.json
 9f6fbe69b838b8ec824794a99283f7ee6d2b3ff3 assets/tconstruct/tinkering/materials/jadeite.json
 e189e613283607eacf62f09fc7d3ed68143703f9 assets/tconstruct/tinkering/materials/rock/stone.json
 4d4d4f8bd2b6180256c5fafd418869e14a4cda8e assets/tconstruct/tinkering/materials/kobold.json
