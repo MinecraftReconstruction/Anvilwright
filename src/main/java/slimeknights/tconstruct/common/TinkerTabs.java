@@ -477,9 +477,6 @@ public class TinkerTabs {
     output.accept(TinkerSmeltery.toolBindingCast);
     output.accept(TinkerSmeltery.toolBindingCast.getSand());
     output.accept(TinkerSmeltery.toolBindingCast.getRedSand());
-    output.accept(TinkerSmeltery.plateCast);
-    output.accept(TinkerSmeltery.plateCast.getSand());
-    output.accept(TinkerSmeltery.plateCast.getRedSand());
     output.accept(TinkerSmeltery.largePlateCast);
     output.accept(TinkerSmeltery.largePlateCast.getSand());
     output.accept(TinkerSmeltery.largePlateCast.getRedSand());

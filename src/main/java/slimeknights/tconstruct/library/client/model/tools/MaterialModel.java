@@ -73,17 +73,24 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
 
   /**
    * Checks that all unique material textures for the given part exist, logs any that are missing via the sprite getter function.
-   * @param owner        Model owner
-   * @param textureName  Texture name to add
-   * @param material     List of materials
+   * @param allTextures   Collection to add the base textures to
+   * @param owner         Model owner
+   * @param spriteGetter  Sprite getter of the current bake, see the note below
+   * @param textureName   Texture name to add
+   * @param material      List of materials
+   *
+   * <p>NOTE(porting): this used to hardcode {@code Material::sprite}. Forge patches {@code Material#sprite} to hand
+   * out the sprite of the atlas currently being baked, Fabric does not: during {@code ModelBakery}'s bake
+   * {@code Minecraft#getTextureAtlas} still returns the atlas of the previous reload (empty on the first one), so
+   * every material lookup returned null and the whole tool model failed to bake. Take the sprite getter of the bake
+   * instead, which is the same value Porting Lib handed to the loader.
    */
-  public static void getMaterialTextures(Collection<Material> allTextures, BlockModel owner, String textureName, @Nullable MaterialVariantId material) {
+  public static void getMaterialTextures(Collection<Material> allTextures, BlockModel owner, Function<Material,TextureAtlasSprite> spriteGetter, String textureName, @Nullable MaterialVariantId material) {
     Material texture = owner.getMaterial(textureName);
     allTextures.add(texture);
 
     // if the texture is missing, stop here with a warning for the root
     if (!MissingTextureAtlasSprite.getLocation().equals(texture.texture())) {
-      Function<Material,TextureAtlasSprite> spriteGetter = Material::sprite;
       // if no specific material is set, load all materials as dependencies. If just one material, use just that one
       if (material == null) {
         MaterialRenderInfoLoader.INSTANCE.getAllRenderInfos().forEach(info -> info.getSprite(texture, spriteGetter));

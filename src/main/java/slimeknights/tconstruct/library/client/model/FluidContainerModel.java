@@ -56,6 +56,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.fluid.texture.ClientFluidTextureRegistry;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 
@@ -69,6 +70,7 @@ import com.google.gson.Gson;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
@@ -120,10 +122,33 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     return null;
   }
 
+  /**
+   * Gets the sprite for the contained fluid using the sprite getter of the given bake.
+   * <p>
+   * NOTE(porting): {@link FluidVariantRendering} reads the global texture atlas, which during a model bake still
+   * belongs to the previous resource reload (empty on the first one), so a bucket model baked during that pass got a
+   * null fluid sprite and failed to bake entirely. Ask this bake's sprite getter instead; at render time the global
+   * lookup works and is preferred, since only it can see stack sensitive textures such as potions.
+   */
+  private static TextureAtlasSprite getFluidSprite(Function<Material,TextureAtlasSprite> spriteGetter, FluidStack fluid) {
+    ResourceLocation still = ClientFluidTextureRegistry.getStillTexture(fluid.getFluid());
+    if (still != null) {
+      TextureAtlasSprite sprite = spriteGetter.apply(new Material(InventoryMenu.BLOCK_ATLAS, still));
+      if (sprite != null) {
+        return sprite;
+      }
+    }
+    // fluids from other mods have no handler in our registry, and outside of a bake the global lookup is correct
+    // (FluidVariantRendering#getSprite throws instead of returning null, so read the array and check it ourselves)
+    TextureAtlasSprite[] sprites = FluidVariantRendering.getSprites(fluid.getType());
+    TextureAtlasSprite sprite = sprites == null ? null : sprites[0];
+    return sprite != null ? sprite : spriteGetter.apply(new Material(InventoryMenu.BLOCK_ATLAS, MissingTextureAtlasSprite.getLocation()));
+  }
+
   private static BakedModel bakeInternal(BlockModel context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, FluidStack fluid, boolean flipGas) {
     // get basic sprites
     TextureAtlasSprite baseSprite = getSprite(context, spriteGetter, "base");
-    TextureAtlasSprite fluidSprite = !fluid.isEmpty() ? FluidVariantRendering.getSprite(fluid.getType()) : null;
+    TextureAtlasSprite fluidSprite = fluid.isEmpty() ? null : getFluidSprite(spriteGetter, fluid);
 
     // determine particle
     TextureAtlasSprite particleSprite = getSprite(context, spriteGetter, "particle");
@@ -135,7 +160,10 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     }
 
     // if its a gas and we flipping, flip it
-    if (flipGas && !fluid.isEmpty() && fluid.getFluid().getFluidType().isLighterThanAir()) {
+    // NOTE(porting): Forge guarantees every fluid has a FluidType, Fabric does not: Milk Lib's milk fluid (which
+    //  Tinkers enables, and which the filled copper can variants iterate over) is a plain Fluid with no FluidType.
+    //  Ask the Fabric attribute API instead, which is what every other port call site does.
+    if (flipGas && !fluid.isEmpty() && FluidVariantAttributes.isLighterThanAir(fluid.getType())) {
       modelState = new SimpleModelState(modelState.getRotation().compose(new Transformation(null, new Quaternionf(0, 0, 1, 0), null, null)));
     }
 
@@ -160,7 +188,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       );
 
       // apply light
-      int light = fluid.getFluid().getFluidType().getLightLevel(fluid);
+      int light = FluidVariantAttributes.getLuminance(fluid.getType());
       if (light > 0) {
         ModelHelper.applyEmissivity(quads, light);
       }
@@ -181,7 +209,15 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     if (fluid.isEmpty()) {
       overrides = new ContainedFluidOverrideHandler(context, overrides, modelState, flipGas);
     }
-    return bakeInternal(context, spriteGetter, modelState, overrides, modelLocation, fluid, flipGas);
+    try {
+      return bakeInternal(context, spriteGetter, modelState, overrides, modelLocation, fluid, flipGas);
+    } catch (RuntimeException e) {
+      // vanilla only logs the exception message when a model fails to bake, which loses the stack of our own code
+      if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        TConstruct.LOG.error("Failed to bake fluid container model {}", modelLocation, e);
+      }
+      throw e;
+    }
   }
 
   /** Handles swapping the model based on the contained fluid */

@@ -11,6 +11,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
@@ -166,7 +169,11 @@ public enum StatLoadable implements Loadable<Stat<?>> {
       name = ((EntityType<?>) value).getDescription();
     // other useful registries - some mod might be using them
     } else if (registry == BuiltInRegistries.FLUID) {
-      name = ((Fluid) value).getFluidType().getDescription();
+      // NOTE(porting): Fabric fluids need not have a FluidType, in which case fall back to the display name the
+      //  Fabric attribute API resolves (the fluid's translation key)
+      Fluid fluid = (Fluid) value;
+      FluidType fluidType = fluid.getFluidType();
+      name = fluidType == null ? FluidVariantAttributes.getName(FluidVariant.of(fluid)) : fluidType.getDescription();
     } else if (registry == BuiltInRegistries.MOB_EFFECT) {
       name = ((MobEffect) value).getDisplayName();
     } else if (registry == BuiltInRegistries.ENCHANTMENT) {
