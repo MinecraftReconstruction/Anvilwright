@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.modifiers.modules.behavior;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraftforge.common.ToolAction;
+import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;

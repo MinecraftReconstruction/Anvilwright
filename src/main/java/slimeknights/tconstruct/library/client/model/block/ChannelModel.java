@@ -15,7 +15,7 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import slimeknights.mantle.client.model.fluid.FluidCuboid;
+import slimeknights.mantle.client.render.FluidCuboid;
 import slimeknights.mantle.client.model.util.SimpleBlockModel;
 
 import java.util.EnumMap;

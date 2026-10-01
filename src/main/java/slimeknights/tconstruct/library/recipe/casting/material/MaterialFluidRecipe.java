@@ -21,6 +21,7 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /** Recipe defining casting and composite fluids for a given input */
 public class MaterialFluidRecipe implements ICustomOutputRecipe<ICastingContainer>, IDisplayMaterialRecipe {

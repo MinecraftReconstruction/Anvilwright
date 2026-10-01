@@ -26,6 +26,8 @@ import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import javax.annotation.Nonnull;
+import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 public class StrongBonesModifier extends TotalArmorLevelModifier {
   private static final TinkerDataKey<Integer> STRONG_BONES = TConstruct.createKey("strong_bones");

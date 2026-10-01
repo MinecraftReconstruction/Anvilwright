@@ -34,6 +34,10 @@ import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import slimeknights.mantle.registration.adapter.EnumRegistryAdapter.EnumObject;
+import slimeknights.mantle.registration.deferred.FluidDeferredRegister;
+import slimeknights.mantle.registration.object.BuildingBlockObject;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 
 /**
  * Contains base helpers for all Tinker modules. Should not be extended by other mods, this is only for internal usage.

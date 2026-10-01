@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
-import slimeknights.mantle.data.IEarlySafeManagerReloadListener;
+import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
 import slimeknights.tconstruct.TConstruct;
 
 import java.util.ArrayList;

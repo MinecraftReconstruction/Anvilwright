@@ -25,6 +25,12 @@ import slimeknights.tconstruct.library.tools.stat.IToolStat;
 import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 
 import java.util.List;
+import slimeknights.mantle.data.loadable.ErrorFactory;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.tconstruct.library.module.ModuleHook;
+import slimeknights.tconstruct.library.module.ModuleHookMap;
+import slimeknights.tconstruct.library.module.WithHooks;
+import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
 
 /**
  * This class contains all data pack configurable data for a tool, before materials are factored in.

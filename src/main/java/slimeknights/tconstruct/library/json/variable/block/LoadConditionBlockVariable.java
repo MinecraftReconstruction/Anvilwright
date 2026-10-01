@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.json.variable.block;
 
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import slimeknights.mantle.data.loadable.mapping.ConditionalLoadable.ConditionalObject;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.utils.Util;

@@ -30,6 +30,8 @@ import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.List;
+import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
+import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 
 /** Shared by melter and smeltery */
 public class MeltingCategory extends AbstractMeltingCategory {

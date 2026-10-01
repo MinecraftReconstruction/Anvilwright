@@ -70,6 +70,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static slimeknights.mantle.util.RetexturedHelper.TAG_TEXTURE;
+import slimeknights.mantle.client.model.ModelData;
 
 public abstract class HeatingStructureBlockEntity extends NameableBlockEntity implements IMasterLogic, ISmelteryTankHandler, IRetexturedBlockEntity, SidedStorageBlockEntity, CustomRenderBoundingBoxBlockEntity {
   private static final String TAG_STRUCTURE = "structure";

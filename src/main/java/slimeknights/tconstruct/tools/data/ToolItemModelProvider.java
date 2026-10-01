@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.ArmorItem.Type;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.data.AbstractToolItemModelProvider;
 import slimeknights.tconstruct.tools.TinkerTools;

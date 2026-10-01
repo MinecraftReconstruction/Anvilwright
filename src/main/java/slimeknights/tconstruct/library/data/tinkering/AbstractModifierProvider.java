@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import slimeknights.tconstruct.library.modifiers.Modifier;
 
 /** Datagen for dynamic modifiers */
 @SuppressWarnings("SameParameterValue")
@@ -90,7 +91,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   /* Redirect helpers */
 
   /** Adds a redirect with no modifier modules */
-  protected void addRedirect(ModifierId id, @Nullable ICondition condition, JsonRedirect... redirects) {
+  protected void addRedirect(ModifierId id, @Nullable ConditionJsonProvider condition, JsonRedirect... redirects) {
     addBuilder(id, null, condition, redirects);
   }
 

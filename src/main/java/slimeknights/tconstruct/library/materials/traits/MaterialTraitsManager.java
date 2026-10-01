@@ -10,7 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import slimeknights.mantle.data.MergingJsonDataLoader;
+import slimeknights.mantle.data.listener.MergingJsonDataLoader;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.exception.TinkerAPIMaterialException;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;

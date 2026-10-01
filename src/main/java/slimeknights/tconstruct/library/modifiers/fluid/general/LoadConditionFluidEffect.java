@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.modifiers.fluid.general;
 
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.fluids.FluidStack;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.registry.GenericLoaderRegistry;

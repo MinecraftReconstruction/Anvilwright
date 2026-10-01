@@ -38,6 +38,11 @@ import slimeknights.tconstruct.world.worldgen.trees.config.SlimeFungusConfig;
 import slimeknights.tconstruct.world.worldgen.trees.config.SlimeTreeConfig;
 import slimeknights.tconstruct.world.worldgen.trees.feature.SlimeFungusFeature;
 import slimeknights.tconstruct.world.worldgen.trees.feature.SlimeTreeFeature;
+import slimeknights.tconstruct.world.worldgen.islands.BloodSlimeIslandStructure;
+import slimeknights.tconstruct.world.worldgen.islands.ClayIslandStructure;
+import slimeknights.tconstruct.world.worldgen.islands.EarthSlimeIslandStructure;
+import slimeknights.tconstruct.world.worldgen.islands.EnderSlimeIslandStructure;
+import slimeknights.tconstruct.world.worldgen.islands.SkySlimeIslandStructure;
 
 /**
  * Contains any logic relevant to structure generation, including trees and islands

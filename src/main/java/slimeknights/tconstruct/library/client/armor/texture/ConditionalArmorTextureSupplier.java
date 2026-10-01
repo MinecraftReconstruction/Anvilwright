@@ -2,7 +2,7 @@ package slimeknights.tconstruct.library.client.armor.texture;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import slimeknights.mantle.data.loadable.mapping.ConditionalLoadable.ConditionalObject;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.registry.GenericLoaderRegistry.IHaveLoader;

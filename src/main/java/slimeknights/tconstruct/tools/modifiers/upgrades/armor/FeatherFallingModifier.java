@@ -9,7 +9,7 @@ import net.minecraft.world.item.TooltipFlag;
 import slimeknights.tconstruct.library.modifiers.impl.IncrementalModifier;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.utils.TooltipKey;
+import slimeknights.mantle.client.TooltipKey;
 import slimeknights.tconstruct.tools.modifiers.defense.AbstractProtectionModifier;
 
 import javax.annotation.Nullable;

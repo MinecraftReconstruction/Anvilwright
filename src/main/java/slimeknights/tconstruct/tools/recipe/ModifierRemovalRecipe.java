@@ -39,6 +39,10 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.worktable.AbstractSizedIngredientRecipeBuilder;
 
 public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
   public static final String BASE_KEY = TConstruct.makeTranslationKey("recipe", "remove_modifier");

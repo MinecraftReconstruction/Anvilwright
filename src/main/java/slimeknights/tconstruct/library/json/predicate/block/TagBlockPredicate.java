@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.data.GenericLoaderRegistry.IGenericLoader;
 import slimeknights.tconstruct.library.json.predicate.TagPredicateLoader;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
 
 /**
  * Modifier matching a block tag

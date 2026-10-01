@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNullElse;
+import slimeknights.tconstruct.library.modifiers.Modifier;
 
 /**
  * Loads the material data from datapacks and provides them to whatever needs them.

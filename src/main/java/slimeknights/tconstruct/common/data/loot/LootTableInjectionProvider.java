@@ -10,9 +10,9 @@ import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunct
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.loot.AbstractLootTableInjectionProvider;
@@ -195,7 +195,7 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
 
     // twilight forest - minotaur axe
     String tf = "twilightforest";
-    ICondition tfLoaded = new ModLoadedCondition(tf);
+    ConditionJsonProvider tfLoaded = new ModLoadedCondition(tf);
     LootPoolEntryContainer minotaurAxe = LootItem.lootTableItem(FakeRegistryEntry.item(TinkerTools.minotaurAxe.getId()))
       .setWeight(1) // TF tends to use 1 for its weight
       .apply(ancientToolData3)

@@ -14,6 +14,7 @@ import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryInputOutp
 import slimeknights.tconstruct.smeltery.block.entity.tank.IDisplayFluidListener;
 
 import javax.annotation.Nonnull;
+import slimeknights.mantle.client.model.ModelData;
 
 /**
  * Fluid IO extension to display controller fluid

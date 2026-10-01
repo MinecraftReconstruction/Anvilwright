@@ -9,7 +9,7 @@ import net.minecraftforge.fluids.ForgeFlowingFluid;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.registration.object.FluidObject;
-import slimeknights.mantle.util.SimpleFlowableFluid;
+import slimeknights.mantle.util.SimpleFlowingFluid;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
@@ -65,7 +65,7 @@ public enum SmelteryCompat {
 
   @Getter
   private final String name = this.name().toLowerCase(Locale.US);
-  private final FluidObject<? extends SimpleFlowableFluid> fluid;
+  private final FluidObject<? extends SimpleFlowingFluid> fluid;
   @Getter
   private final CompatType type;
   /** @deprecated use {@link #isPresent()}. No longer does anything. */

@@ -13,7 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.FaucetFluidLoader;
-import slimeknights.mantle.client.model.fluid.FluidCuboid;
+import slimeknights.mantle.client.render.FluidCuboid;
 import slimeknights.mantle.client.model.fluid.FluidsModel;
 import slimeknights.mantle.client.model.util.ModelHelper;
 import slimeknights.mantle.client.render.FluidRenderer;

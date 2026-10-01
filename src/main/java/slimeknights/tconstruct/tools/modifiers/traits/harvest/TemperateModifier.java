@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static slimeknights.tconstruct.library.modifiers.modules.behavior.ReduceToolDamageModule.reduceDamage;
+import slimeknights.mantle.client.TooltipKey;
 
 /** @deprecated use {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule},
  * {@link slimeknights.tconstruct.library.modifiers.modules.behavior.ConditionalStatModule},

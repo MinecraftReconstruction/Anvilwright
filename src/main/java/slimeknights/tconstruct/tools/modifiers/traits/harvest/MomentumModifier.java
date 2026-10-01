@@ -33,6 +33,7 @@ import slimeknights.tconstruct.tools.stats.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import slimeknights.mantle.client.TooltipKey;
 
 public class MomentumModifier extends Modifier implements ProjectileLaunchModifierHook, ConditionalStatModifierHook, BlockBreakModifierHook, BreakSpeedModifierHook, SlingLaunchModifierHook, TooltipModifierHook {
   private static final Component SPEED = TConstruct.makeTranslation("modifier", "momentum.speed");

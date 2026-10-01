@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static slimeknights.tconstruct.library.recipe.display.FilteredRecipe.matchesList;
+import slimeknights.tconstruct.library.recipe.display.FilteredFluidRecipe;
+import slimeknights.tconstruct.library.recipe.display.FilteredItemRecipe;
+import slimeknights.tconstruct.library.recipe.display.RecipeSlot;
 
 /** Interface for casting recipes that are displayable in JEI */
 public interface IDisplayableCastingRecipe extends FilteredItemRecipe, FilteredFluidRecipe {

@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.library.recipe.display;
 
-import net.minecraftforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 /** Interface to help with builders for {@link FilteredFluidRecipe} */
 @FunctionalInterface

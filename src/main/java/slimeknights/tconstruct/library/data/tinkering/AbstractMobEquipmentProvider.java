@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -43,7 +43,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   }
 
   /** Creates a builder for the given entity */
-  private MobEquipment.Builder equip(String name, ICondition[] conditions, String... entity) {
+  private MobEquipment.Builder equip(String name, ConditionJsonProvider[] conditions, String... entity) {
     MobEquipment.Builder builder = MobEquipment.builder();
     equipment.put(name, new EquipmentJson(entity, builder, conditions));
     return builder;
@@ -98,7 +98,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   
 
   /** JSON entry for the given equipment entry */
-  private record EquipmentJson(String[] entity, MobEquipment.Builder equipment, ICondition[] conditions) {
+  private record EquipmentJson(String[] entity, MobEquipment.Builder equipment, ConditionJsonProvider[] conditions) {
     /** Serializes this to JSON */
     public JsonObject serialize() {
       JsonObject json = new JsonObject();

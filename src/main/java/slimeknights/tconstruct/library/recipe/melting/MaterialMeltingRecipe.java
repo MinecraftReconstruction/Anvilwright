@@ -19,6 +19,7 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.Comparator;
 import java.util.List;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /**
  * Recipe to melt all castable tool parts of a given material

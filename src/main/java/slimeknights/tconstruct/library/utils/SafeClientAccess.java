@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
+import slimeknights.mantle.client.TooltipKey;
 
 /** @deprecated use {@link slimeknights.mantle.client.SafeClientAccess} */
 @Deprecated

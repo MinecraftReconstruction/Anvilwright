@@ -67,6 +67,11 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import slimeknights.tconstruct.library.recipe.material.MaterialRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapedMaterialRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapedMaterialsRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapelessMaterialsRecipe;
+import slimeknights.tconstruct.tables.item.TableBlockItem;
 
 /**
  * Handles all the table for tool creation

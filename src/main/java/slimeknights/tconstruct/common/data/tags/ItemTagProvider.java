@@ -117,6 +117,7 @@ import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE;
 import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE_PARTS;
 import static slimeknights.tconstruct.common.TinkerTags.Items.UNSWAPPABLE_TOOLS;
 import static slimeknights.tconstruct.common.TinkerTags.Items.WORN_ARMOR;
+import slimeknights.mantle.registration.object.WoodBlockObject;
 
 @SuppressWarnings("unchecked")
 public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {

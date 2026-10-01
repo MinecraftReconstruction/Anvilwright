@@ -5,6 +5,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import slimeknights.tconstruct.shared.command.subcommand.DurabilityCommand.Operation;
 
 /** Effect extension with a few helpers */
 public class TinkerEffect extends MobEffect {

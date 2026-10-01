@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.predicate.IJsonPredicate;
 
 /**
  * Extension of the vanilla ingredient to display materials on items and support matching by materials

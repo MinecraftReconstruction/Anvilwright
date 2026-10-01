@@ -6,6 +6,7 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import slimeknights.tconstruct.TConstruct;
 
 import java.util.function.Consumer;
+import slimeknights.mantle.recipe.data.IRecipeHelper;
 
 /**
  * Shared logic for each module's recipe provider

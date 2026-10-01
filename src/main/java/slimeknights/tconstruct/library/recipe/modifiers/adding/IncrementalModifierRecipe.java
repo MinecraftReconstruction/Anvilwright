@@ -28,6 +28,11 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.ItemOutput;
+import slimeknights.tconstruct.library.json.IntRange;
+import slimeknights.tconstruct.library.recipe.tinkerstation.ValidatedResult;
 
 /** Modifier that incrementally fills the entry, allowing partial application. */
 public class IncrementalModifierRecipe extends AbstractModifierRecipe {

@@ -31,6 +31,7 @@ import slimeknights.tconstruct.shared.command.subcommand.SlotsCommand;
 import slimeknights.tconstruct.shared.command.subcommand.StatsCommand;
 
 import java.util.function.Consumer;
+import slimeknights.tconstruct.common.registration.ArgumentTypeDeferredRegister;
 
 public class TConstructCommand {
   public static final DynamicCommandExceptionType COMPONENT_ERROR = new DynamicCommandExceptionType(error -> (Component)error);

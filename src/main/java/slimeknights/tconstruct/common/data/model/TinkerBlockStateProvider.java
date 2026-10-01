@@ -26,7 +26,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile;
 import net.minecraftforge.client.model.generators.ModelProvider;
 import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.mantle.client.model.builder.ColoredModelBuilder;
 import slimeknights.mantle.client.model.builder.ConnectedModelBuilder;
 import slimeknights.mantle.client.model.builder.MantleItemLayerBuilder;

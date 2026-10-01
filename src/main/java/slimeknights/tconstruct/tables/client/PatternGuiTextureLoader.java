@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
-import slimeknights.mantle.data.ResourceValidator;
+import slimeknights.mantle.data.listener.ResourceValidator;
 
 import java.util.function.Consumer;
 

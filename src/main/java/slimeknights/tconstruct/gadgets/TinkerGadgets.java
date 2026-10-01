@@ -45,6 +45,8 @@ import slimeknights.tconstruct.gadgets.item.ShootProjectileDispenserBehavior;
 import slimeknights.tconstruct.gadgets.item.ShurikenItem;
 import slimeknights.tconstruct.shared.TinkerFood;
 import slimeknights.tconstruct.world.block.FoliageType;
+import slimeknights.tconstruct.gadgets.item.slimesling.BaseSlimeSlingItem;
+import slimeknights.tconstruct.shared.block.SlimeType;
 
 /**
  * Contains any special tools unrelated to the base tools.

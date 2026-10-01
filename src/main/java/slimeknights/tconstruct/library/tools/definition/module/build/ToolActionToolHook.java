@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.library.tools.definition.module.build;
 
-import net.minecraftforge.common.ToolAction;
+import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import java.util.Collection;

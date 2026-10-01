@@ -2,11 +2,12 @@ package slimeknights.tconstruct.library.materials.json;
 
 import lombok.Data;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 
 import javax.annotation.Nullable;
+import slimeknights.tconstruct.library.json.JsonCondition;
 
 @SuppressWarnings("ClassCanBeRecord") // GSON does not support records
 @Data

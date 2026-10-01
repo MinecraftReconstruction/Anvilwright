@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.RegistryHelper;
@@ -22,7 +22,7 @@ import slimeknights.tconstruct.shared.TinkerCommons;
 /** @deprecated use {@link slimeknights.mantle.recipe.condition.TagFilledCondition} */
 @Deprecated(forRemoval = true)
 @RequiredArgsConstructor
-public class TagNotEmptyCondition<T> implements LootItemCondition, ICondition {
+public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJsonProvider {
   private static final ResourceLocation NAME = TConstruct.getResource("tag_not_empty");
   private final TagKey<T> tag;
 

@@ -15,11 +15,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.Tags;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.IntersectionIngredient;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.minecraftforge.common.crafting.conditions.ItemExistsCondition;
 import net.minecraftforge.common.crafting.conditions.TrueCondition;
 import org.jetbrains.annotations.ApiStatus.Internal;
@@ -199,7 +199,7 @@ public class SmelteryRecipeBuilder {
   @CheckReturnValue
   private Consumer<FinishedRecipe> withCondition(ICondition... conditions) {
     ConsumerWrapperBuilder builder = ConsumerWrapperBuilder.wrap();
-    for (ICondition condition : conditions) {
+    for (ConditionJsonProvider condition : conditions) {
       builder.addCondition(condition);
     }
     return builder.build(consumer);
@@ -207,13 +207,13 @@ public class SmelteryRecipeBuilder {
 
   /** Creates a condition for a tag being empty */
   @CheckReturnValue
-  public static ICondition tagCondition(ResourceLocation tag) {
+  public static ConditionJsonProvider tagCondition(ResourceLocation tag) {
     return new TagFilledCondition<>(ItemTags.create(tag));
   }
 
   /** Creates a condition for a tag being empty */
   @CheckReturnValue
-  public static ICondition tagCondition(String name) {
+  public static ConditionJsonProvider tagCondition(String name) {
     return tagCondition(commonResource(name));
   }
 

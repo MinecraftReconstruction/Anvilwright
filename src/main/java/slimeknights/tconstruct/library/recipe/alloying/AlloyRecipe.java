@@ -19,6 +19,8 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.BitSet;
 import java.util.List;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 
 /**
  * Base class for alloying recipes

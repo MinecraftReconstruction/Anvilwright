@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import slimeknights.mantle.util.typed.TypedMapBuilder;
 
 /** JSON loader that loads tool definitions from JSON */
 @Log4j2

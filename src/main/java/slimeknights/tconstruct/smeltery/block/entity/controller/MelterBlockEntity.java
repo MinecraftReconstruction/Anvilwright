@@ -37,6 +37,7 @@ import slimeknights.tconstruct.smeltery.block.entity.module.SolidFuelModule;
 import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 
 import javax.annotation.Nullable;
+import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 
 public class MelterBlockEntity extends NameableBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity, ChunkUnloadListeningBlockEntity {
 

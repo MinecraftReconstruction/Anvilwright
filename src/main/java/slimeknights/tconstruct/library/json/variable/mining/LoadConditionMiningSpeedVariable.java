@@ -2,8 +2,8 @@ package slimeknights.tconstruct.library.json.variable.mining;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents;
 import slimeknights.mantle.data.loadable.mapping.ConditionalLoadable.ConditionalObject;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.modifiers.hook.mining.BreakSpeedContext;

@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.library.recipe.display;
 
-import net.minecraftforge.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 import java.util.function.Predicate;
 

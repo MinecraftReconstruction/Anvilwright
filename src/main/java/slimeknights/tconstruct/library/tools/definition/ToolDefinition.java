@@ -11,6 +11,7 @@ import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
+import slimeknights.mantle.registration.object.IdAwareObject;
 
 /**
  * This class serves primarily as a container where the datapack tool data will be injected on datapack load
