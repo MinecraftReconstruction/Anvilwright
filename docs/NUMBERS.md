@@ -499,3 +499,47 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 （现在是 `1.20.1-3.12.1.DEV.<hash>`）、补了 128×128 的方形 `icon.png`
 （Mod Menu 要求方形，fork 的 `logo.png` 是 600×100，所以一直显示灰色问号）、
 来源/issue 指向 canonical 仓库、authors 加上 `MinecraftReconstruction`。
+
+## 2026-10-01 深夜（二）：Tier A 收尾 —— 行为差异从 70 条压到多少
+
+### 口径：先把"差异"分类
+
+| 类别 | TCon | Mantle | 说明 |
+|---|---|---|---|
+| 语义等价 / 只是换了挂点 | 20 | 10 | 玩家与 addon 都感知不到 |
+| **功能缺失** | 16 | 7 | 真正少了能力 |
+| 近似（表现可能略不同） | 5 | 5 | 需实机比对 |
+| 移植多余内容 | 2 | — | 血史莱姆 |
+| 待核对 | 1 | 1 | `FluidAction` simulate；`ShapedRetexturedRecipe` |
+| 修复 / API 恢复（不计入差异） | 4 | 5 | — |
+
+### Tier A 做完的结果（本轮验证：编译 + `runData` + 一次 `runClient`）
+
+| 条目 | 之前 | 之后 | 依据 |
+|---|---|---|---|
+| TCon #1 流体容器渲染层 | 功能缺失 | **闭合/等价** | Fabric 把所有非方块物品按 `item_entity_translucent_cull` 渲染；`[smoketest] layers/` 实测 `copper_can`、`molten_iron_bucket` 均为 translucent |
+| TCon #16 `tool_hook` 原料 | "Fabric 没有原料类型注册表" | **闭合** | 实际上 `TinkerMaterials` 早已用 `CustomIngredientSerializer.register` 注册；注释是过时的 |
+| TCon #29 附魔槽位开关 | 功能缺失 | **闭合** | 加 `transitive-mutable` AW 后恢复两条 action（并挪到 `ConfigEvents.LOADING`，否则 dev 环境抛 "Cannot get config value before config is loaded"） |
+| TCon #39 无 FluidType 流体的汽化 | 功能缺失 | **闭合** | Mantle `FluidTypes.getType` 给这类流体一个默认 type，钩子对所有流体可达 |
+| Mantle #5 `PlayerDestroyItemEvent` | 功能缺失 | **闭合为 N/A** | Fabric 上没有任何代码能订阅该事件，本来就无可观察差异 |
+| Mantle #13 书本结构预览的渲染层 | 功能缺失 | **闭合** | 新增 `ModelLayers`（记录每层 RenderType+quads）+ `StructureElement` 逐层绘制 |
+| Mantle #6/#14 模型渲染类型 | 功能缺失 | **已缩小** | 层信息不再丢弃（`MantleItemLayerModel`/`NBTKeyModel`/TCon 的两个流体模型都记录），Fabric 侧由物品/方块层落地；Fabric 本身没有逐 quad 渲染层 |
+
+### 顺手修掉的**真 bug**（不属于"行为差异"，是内容加载失败）
+
+客户端日志里原本有 **12 个配方解析失败**，两个根因：
+
+1. `NoContainerIngredient.toJson` 用 `JsonUtils.withType` 写 Forge 的 `"type"` 键，Fabric 读的是 `"fabric:type"`
+   → 6 个配方（`seared/scorched` 的 `fluid_cannon`/`alloyer`/`melter`/`gauge`）解析失败。
+2. `MaterialIngredient.toJson` 直接写 `material.toString()`（Java 对象字符串）而不是序列化谓词
+   → 另外 6 个配方（`travelers` 盔甲四件、`fake_ingot_to_block`/`fake_block_to_ingots`）解析失败。
+
+修完实测：`Parsing error loading recipe` **12 → 0**，同时
+`models/` 0、`sprites/` 0、`lang/` 0（`tconstruct` 物品 672 个全量审计）。
+
+### 剩下的（Tier B/C）
+
+* 需要自建 Fabric 事件 + mixin：TCon #10/#30（弓/弩事件）、#5（自定义显示上下文）、#7/#8（击退抗性同步）、#2（提供者扩展点）、Mantle #2（可取消的暴击事件）。
+* 大工程：TCon #32（REI 插件，约 110 处 API 适配）。
+* 不可消除：Mantle #1（Forge tag `remove`）、Mantle #21（流体单位 droplet vs mB）、TCon #3（只有 Forge 版的模组集成）。
+* 需要联网加依赖：TCon #18（能量 API）、#9（Dummmmmmy / Crafting Tweaks）。

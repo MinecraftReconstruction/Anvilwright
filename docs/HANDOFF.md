@@ -816,3 +816,35 @@ jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification
 ```bash
 ./gradlew clean build -x test --offline -Pmod_version=3.12.1-alpha.1
 ```
+
+## 21. 2026-10-02 凌晨：Tier A（行为差异缩小）完成
+
+**做了什么**（`mcr/upstream-3.12.1`，Mantle 侧同步 `mcr/mantle-1.11`）：
+
+1. **渲染层（Mantle #6/#13/#14 + TCon #1）**：Mantle 新增 `ModelLayers`——烘焙时把每层的 `(RenderType, quads)`
+   记下来（弱引用 + 线程安全），`MantleItemLayerModel`、`NBTKeyModel`、TCon 的 `FluidContainerModel`、
+   `CopperCanModel` 都记录；`StructureElement`（书本结构预览）据此逐层绘制，与上游那个"每层都画进
+   TRANSLUCENT_FULLBRIGHT"的循环等价。Fabric 没有逐 quad 渲染层，方块/物品层由 Indigo 决定
+   （非方块物品统一 translucent，实测 `copper_can`/`*_bucket` 正是 Forge 里流体层要的层）。
+2. **附魔槽位开关（TCon #29）**：`Enchantment.slots` 加 `transitive-mutable` AW，恢复两条 `ConfigurableAction`；
+   注意必须放在 `ConfigEvents.LOADING`（Porting Lib 要等配置加载完才能读值）。
+3. **无 FluidType 流体的汽化（TCon #39）**：Mantle 新增 `FluidTypes.getType(fluid)`，给没有 type 的流体一个默认
+   type，钩子对所有流体可达。
+4. **顺带修掉两个真 bug**：`NoContainerIngredient.toJson` 写成 Forge 的 `"type"`（应为 `"fabric:type"`）、
+   `MaterialIngredient.toJson` 直接写 `material.toString()`。**12 个配方解析失败 → 0**。
+5. `TinkerTools` 里那条 `tool_hook` TODO 是过时的（`TinkerMaterials` 早已注册），改成说明性注释。
+
+**本轮验证**：`compileJava` 绿、`runData` 绿、一次 `runClient`：
+`Parsing error loading recipe` 0、`Unable to bake model` 0、`[smoketest]` 五项审计（models/sprites/lang/atlas/layers）
+均 0 或正常值。**仍未做**：人工视觉比对（书本预览逐层效果、流体容器在 GUI/世界里的观感）。
+
+**下一步（Tier B/C，按性价比）**：
+1. 自建 Fabric 事件 + mixin 补齐扩展点：TCon #10/#30（弓/弩的 ArrowNock/ArrowLoose）、#5（自定义显示上下文）、
+   #7/#8（击退抗性同步）、Mantle #2（可取消的暴击事件）。
+2. TCon #32 REI 插件恢复（REI API 在缓存里，但要适配约 110 处）。
+3. 需要联网才能做的：TCon #18（能量 API `team.reborn.energy`）、#9（Dummmmmmy / Crafting Tweaks 集成）。
+4. 不可消除的保持登记：Mantle #1（Forge tag `remove`）、#21（流体单位）、TCon #3（Forge 独占模组）。
+
+**发布提醒**：已发布的 alpha 用的是 `1.11.DEV.c7098eb1` 的 Mantle 与 `3.12.1-alpha.1` 的 TCon；
+本轮 Mantle 又前进了两个 commit（`f7e95721`、`7b086e52`），如果要让玩家拿到本轮修复，需要
+`publishToMavenLocal` + 重新构建 TCon 并重发 alpha（Mantle 也要发 alpha 3）。

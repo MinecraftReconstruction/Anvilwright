@@ -24,6 +24,8 @@ import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTabs;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.config.ConfigurableAction;
+import io.github.fabricators_of_create.porting_lib.config.ConfigEvents;
+import io.github.fabricators_of_create.porting_lib.config.ConfigType;
 import slimeknights.tconstruct.common.data.tags.MaterialTagProvider;
 import slimeknights.tconstruct.library.client.data.TinkerSpriteSourceGenerator;
 import slimeknights.tconstruct.library.client.data.material.GeneratorPartTextureJsonGenerator;
@@ -307,9 +309,15 @@ public final class TinkerTools extends TinkerModule {
     EquipmentChangeWatcher.register();
     ToolCapabilityProvider.register(ToolFluidCapability.Provider::new);
     ToolCapabilityProvider.register(ToolInventoryCapability.Provider::new);
-    for (ConfigurableAction action : Config.COMMON.toolTweaks) {
-      action.run();
-    }
+    // NOTE(porting): the configurable actions read their config value, which Porting Lib only fills in once the config
+    // is loaded; running them here threw "Cannot get config value before config is loaded" in the dev environment
+    ConfigEvents.LOADING.register(config -> {
+      if (config.getModId().equals(TConstruct.MOD_ID) && config.getType() == ConfigType.COMMON) {
+        for (ConfigurableAction action : Config.COMMON.toolTweaks) {
+          action.run();
+        }
+      }
+    });
     ModifierHooks.init();
     ToolHooks.init();
   }
@@ -317,8 +325,9 @@ public final class TinkerTools extends TinkerModule {
   void registerRecipeSerializers() {
     ItemPredicateRegistry.register(ToolPredicate.ID, ToolPredicate::deserialize);
     ItemPredicateRegistry.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
-    // TODO: PORT - the tconstruct:tool_hook ingredient (ToolHookIngredient.Serializer) is registered through Forge's
-    //  CraftingHelper. Fabric has no ingredient-type registry, so the two recipes using it do not resolve yet.
+    // NOTE(porting): the tconstruct:tool_hook ingredient is registered with Fabric's CustomIngredientSerializer in
+    // TinkerMaterials alongside the other Tinkers ingredients, which is why the two recipes using it load correctly
+    // (Fabric does have an ingredient type registry, unlike what the port note here used to claim)
 
     // register tool stats that are not defined directly in the class; safer than static init registration
     ToolStats.register(OverslimeModule.OVERSLIME_STAT);

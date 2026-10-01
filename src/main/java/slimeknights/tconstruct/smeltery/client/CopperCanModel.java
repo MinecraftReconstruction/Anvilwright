@@ -37,6 +37,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
@@ -58,7 +59,10 @@ import slimeknights.tconstruct.smeltery.item.CopperCanItem;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import slimeknights.mantle.client.model.util.ModelLayers;
 
 /**
  * Reimplementation of {@link DynamicFluidContainerModel} as the forge one does not handle fluid NBT
@@ -105,6 +109,9 @@ public final class CopperCanModel implements IUnbakedGeometry<CopperCanModel> {
 
     // We need to disable GUI 3D and block lighting for this to render properly
     var modelBuilder = CompositeModel.Baked.builder(owner.hasAmbientOcclusion(), false, owner.getGuiLight().lightLikeBlock(), particleSprite, new ContainedFluidOverrideHandler(overrides, baker, owner, this), owner.getTransforms());
+    // Forge gave this model a cutout layer for the frame and a translucent one for the fluid; record them for the
+    // callers that can use the information, see ModelLayers and docs/BEHAVIOUR-DIFFERENCES.md
+    List<ModelLayers.Layer> layers = new ArrayList<>(3);
 
     if (baseLocation != null && baseSprite != null)
     {
@@ -112,6 +119,7 @@ public final class CopperCanModel implements IUnbakedGeometry<CopperCanModel> {
       var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents());
       var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelTransform, modelLocation);
       modelBuilder.addQuads(quads);
+      layers.add(new ModelLayers.Layer(RenderType.cutout(), quads));
     }
 
     if (fluidMaskLocation != null && fluidSprite != null)
@@ -125,6 +133,7 @@ public final class CopperCanModel implements IUnbakedGeometry<CopperCanModel> {
         var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
 
         modelBuilder.addQuads(quads);
+        layers.add(new ModelLayers.Layer(RenderType.translucent(), quads));
       }
     }
 
@@ -138,12 +147,15 @@ public final class CopperCanModel implements IUnbakedGeometry<CopperCanModel> {
         var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(2, coverSprite.contents()); // Use cover as mask
         var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> sprite, transformedState, modelLocation); // Bake with selected texture
         modelBuilder.addQuads(quads);
+        layers.add(new ModelLayers.Layer(RenderType.cutout(), quads));
       }
     }
 
     modelBuilder.setParticle(particleSprite);
 
-    return modelBuilder.build();
+    BakedModel baked = modelBuilder.build();
+    ModelLayers.put(baked, layers);
+    return baked;
   }
 
   private static class Loader implements IGeometryLoader<CopperCanModel> {

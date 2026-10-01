@@ -5,7 +5,10 @@
     {
       "fabric:type": "tconstruct:material",
       "item": "tconstruct:fake_storage_block",
-      "material": "MaterialHasPartPredicate[part=fake_ingot]"
+      "material": {
+        "type": "tconstruct:has_part",
+        "part": "tconstruct:fake_ingot"
+      }
     }
   ],
   "parts": 1,

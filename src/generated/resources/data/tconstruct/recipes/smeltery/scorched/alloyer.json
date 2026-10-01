@@ -6,7 +6,7 @@
       "item": "tconstruct:scorched_brick"
     },
     "G": {
-      "type": "tconstruct:no_container",
+      "fabric:type": "tconstruct:no_container",
       "match": [
         {
           "item": "tconstruct:scorched_ingot_gauge"

@@ -9,7 +9,7 @@
       "tag": "c:dusts/redstone"
     },
     "T": {
-      "type": "tconstruct:no_container",
+      "fabric:type": "tconstruct:no_container",
       "match": [
         {
           "item": "tconstruct:scorched_ingot_gauge"

@@ -28,6 +28,7 @@ import net.minecraft.world.phys.HitResult.Type;
 import io.github.fabricators_of_create.porting_lib.fluids.sound.SoundActions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import slimeknights.mantle.fluid.FluidTypes;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.fluid.FluidPredicate;
@@ -121,10 +122,10 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
     // if water, evaporate
     boolean placed = false;
     // start with forge vaporizing
-    // NOTE(porting): Fabric fluids need not have a FluidType, so the Porting Lib vaporize hooks only apply when
-    //  one is present (see BEHAVIOUR-DIFFERENCES); vanilla vaporizing below still runs for those fluids
-    FluidType fluidType = fluid.getFluidType();
-    if (fluidType != null && fluidType.isVaporizedOnPlacement(world, target, fluidStack)) {
+    // NOTE(porting): Fabric fluids need not carry a FluidType (milk-lib registers a plain Fluid, for example), so ask
+    //  Mantle for a default type instead of skipping the hook; vanilla vaporizing below is the unchanged fallback
+    FluidType fluidType = FluidTypes.getType(fluid);
+    if (fluidType.isVaporizedOnPlacement(world, target, fluidStack)) {
       fluidType.onVaporize(player, world, target, fluidStack);
       placed = true;
       // next, try vanilla vaporizing
