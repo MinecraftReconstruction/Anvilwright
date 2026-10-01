@@ -14,9 +14,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.tconstruct.fluids.TinkerFluids;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import slimeknights.tconstruct.fluids.util.ConstantFluidContainerWrapper;
 import slimeknights.tconstruct.library.recipe.FluidValues;
 
@@ -27,6 +27,9 @@ import java.util.List;
 public class MagmaBottleItem extends Item {
   private final int fireTime;
   public MagmaBottleItem(Properties props, int fireTime) {
+    // TODO: PORT - Forge used initCapabilities; Fabric registers the item lookup in the constructor
+    FluidStorage.ITEM.registerForItems((itemStack, context) ->
+      new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.magma.get(), FluidValues.BOTTLE), itemStack, context), this);
     super(props);
     this.fireTime = fireTime;
   }
@@ -77,9 +80,9 @@ public class MagmaBottleItem extends Item {
     return stack;
   }
 
-  @Nullable
-  @Override
-  public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-    return new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.magma.get(), FluidValues.BOTTLE), stack);
-  }
+//  @Nullable TODO: PORT
+//  @Override
+//  public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
+//    return new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.magma.get(), FluidValues.BOTTLE), stack);
+//  }
 }

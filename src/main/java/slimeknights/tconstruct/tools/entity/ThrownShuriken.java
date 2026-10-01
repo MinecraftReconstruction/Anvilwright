@@ -24,7 +24,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
+import io.github.fabricators_of_create.porting_lib.entity.events.ProjectileImpactEvent;
 import slimeknights.mantle.util.CombatHelper;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -175,7 +176,10 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
       if (!stack.isEmpty() && type == HitResult.Type.ENTITY && ModifierUtil.canPerformAction(getTool(), TinkerToolActions.SHIELD_DISABLE)) {
         ModifierUtil.disableShield(((EntityHitResult)hit).getEntity());
       }
-      if (!ForgeEventFactory.onProjectileImpact(this, hit)) {
+      // Forge cancelled the hit when a listener returned true; Porting Lib reports it as an impact result instead
+      ProjectileImpactEvent impactEvent = new ProjectileImpactEvent(this, hit);
+      EntityEvents.PROJECTILE_IMPACT.invoker().onProjectileImpact(impactEvent);
+      if (impactEvent.getImpactResult() == ProjectileImpactEvent.ImpactResult.DEFAULT) {
         this.onHit(hit);
       }
     }

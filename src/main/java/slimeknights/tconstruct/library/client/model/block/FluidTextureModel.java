@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.client.model.RetexturedModel;
-import slimeknights.mantle.client.model.RetexturedModel.RetexturedConfiguration;
+import slimeknights.mantle.client.model.RetexturedModel.RetexturedContext;
 import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.client.model.util.ColoredBlockModel.ColorData;
@@ -158,7 +158,7 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
       if (!key.fluid.isEmpty()) {
         color = FluidVariantRendering.getColor(key.fluid.getType());
         luminosity = FluidVariantAttributes.getLuminance(key.fluid.getType());
-        textured = new RetexturedModel.RetexturedConfiguration(textured, this.fluids, FluidVariantRendering.getSprite(key.fluid.getType()).contents().name());
+        textured = new RetexturedModel.RetexturedContext(textured, this.fluids, FluidVariantRendering.getSprite(key.fluid.getType()).contents().name());
       }
 
       // start baking

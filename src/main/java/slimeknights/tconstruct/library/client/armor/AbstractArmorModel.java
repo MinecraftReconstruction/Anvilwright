@@ -13,9 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
+import io.github.fabricators_of_create.porting_lib.event.client.LivingEntityRenderEvents;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier.ArmorTexture;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier.TextureType;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -86,8 +84,12 @@ public abstract class AbstractArmorModel extends Model {
   /** Initializes the wrapper */
   public static void init() {
     // register listeners to set and clear the buffer
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Pre.class, event -> buffer = event.getMultiBufferSource());
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, false, RenderLivingEvent.Post.class, event -> buffer = null);
+    // Forge used RenderLivingEvent.Pre/Post; Porting Lib exposes the same pair as fabric events
+    LivingEntityRenderEvents.PRE.register((entity, renderer, partialTick, poseStack, buffers, light) -> {
+      buffer = buffers;
+      return false;
+    });
+    LivingEntityRenderEvents.POST.register((entity, renderer, partialTick, poseStack, buffers, light) -> buffer = null);
   }
 
   /** Wings model to render */

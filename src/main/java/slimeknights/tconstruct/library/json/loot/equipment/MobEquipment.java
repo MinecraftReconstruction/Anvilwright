@@ -16,7 +16,10 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.event.entity.living.MobSpawnEvent.FinalizeSpawn;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -64,9 +67,16 @@ public record MobEquipment(EquipmentSlot slot, IJsonPredicate<Item> match, ItemO
     return new MobEquipment.Builder();
   }
 
-  /** Applies this replacement to the target mob */
-  @SuppressWarnings({"deprecation", "OverrideOnly"})  // in that event, I can't call the event method, or I'll get a stack overflow
-  public static boolean apply(List<MobEquipment> replace, Mob mob, FinalizeSpawn event) {
+  /**
+   * Applies this replacement to the target mob.
+   * <p>
+   * Forge drove this from {@code MobSpawnEvent.FinalizeSpawn}, which runs <em>before</em> vanilla's own
+   * finalize pass - upstream cancelled the event, ran {@code finalizeSpawn} itself and only then set the
+   * equipment. Fabric has no such event (Porting Lib has no spawn hook either), so this takes the spawn
+   * arguments directly; the caller is the place that must run it at the right time (a
+   * {@code Mob#finalizeSpawn} mixin is the honest fix, see docs/BEHAVIOUR-DIFFERENCES.md #21).
+   */
+  public static boolean apply(List<MobEquipment> replace, Mob mob, ServerLevelAccessor level, MobSpawnType spawnType, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag spawnTag) {
     // first, figure out which slots are going to apply. This is because we take over mob finalizing only if at least one applies
     RandomSource random = mob.getRandom();
     List<MobEquipment> apply = new ArrayList<>(replace.size());
@@ -75,12 +85,10 @@ public record MobEquipment(EquipmentSlot slot, IJsonPredicate<Item> match, ItemO
         apply.add(slot);
       }
     }
-    // forge event runs before finalize spawn so we can't just set our item now, or it may get overwritten
-    // instead, we cancel the event (which blocks vanilla finalize), then finalize ourself, then can set our item after
-    // since this is risky, only do this if we know we want our equipment there
+    // order matters: vanilla's finalize must have run (or been skipped) before we set our item, otherwise it
+    // overwrites the equipment. The caller runs this from inside finalizeSpawn, so do it here.
     if (!apply.isEmpty()) {
-      ServerLevelAccessor level = event.getLevel();
-      mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
+      mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), spawnType, spawnData, spawnTag);
 
       // apply any replacements
       for (MobEquipment slot : apply) {

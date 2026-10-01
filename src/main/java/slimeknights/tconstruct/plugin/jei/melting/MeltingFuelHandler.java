@@ -3,6 +3,8 @@ package slimeknights.tconstruct.plugin.jei.melting;
 import com.mojang.datafixers.util.Pair;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
+import mezz.jei.api.ingredients.IIngredientHelper;
+import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;

@@ -12,12 +12,10 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.common.MinecraftForge;
 import io.github.fabricators_of_create.porting_lib.util.CraftingHelper;
 import slimeknights.mantle.util.DataLoadedConditionContext;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent.FinalizeSpawn;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.server.packs.PackType;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -55,8 +53,10 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
   /** @apiNote no need for addons to call this */
   @Internal
   public static void init() {
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, AddReloadListenerEvent.class, INSTANCE::addDataPackListeners);
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, FinalizeSpawn.class, INSTANCE::finalizeSpawn);
+    addDataPackListeners();
+    // TODO: PORT - Forge's MobSpawnEvent.FinalizeSpawn has no Fabric counterpart and Porting Lib has no spawn
+    //  event either, so TCon's mob equipment replacements are not applied yet. The honest fix is a mixin into
+    //  Mob#finalizeSpawn; see docs/BEHAVIOUR-DIFFERENCES.md #21.
   }
 
   @Override
@@ -125,17 +125,7 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
   /* Events */
 
   /** Adds the managers as datapack listeners */
-  private void addDataPackListeners(AddReloadListenerEvent event) {
-    event.addListener(this);
-    context = event.getConditionContext();
-  }
-
-  /** Handler for the finalize spawn event */
-  private void finalizeSpawn(FinalizeSpawn event) {
-    Mob mob = event.getEntity();
-    List<MobEquipment> equipment = get(mob.getType());
-    if (!equipment.isEmpty() && MobEquipment.apply(equipment, mob, event)) {
-      event.setCanceled(true);
-    }
+  private void addDataPackListeners() {
+    ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(this);
   }
 }

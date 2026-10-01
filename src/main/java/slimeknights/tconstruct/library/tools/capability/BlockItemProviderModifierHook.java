@@ -4,8 +4,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -70,14 +68,15 @@ public interface BlockItemProviderModifierHook {
     }
 
     class Provider implements ToolCapabilityProvider.IToolCapabilityProvider {
-        private final LazyOptional<BlockItemProviderCapability> lazy;
+        private final Supplier<? extends IToolStackView> tool;
+
         public Provider(Supplier<? extends IToolStackView> tool) {
-            lazy = LazyOptional.of(() -> new CapabilityImpl(tool.get()));
+            this.tool = tool;
         }
 
-        @Override
-        public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-            return BlockItemProviderCapability.CAPABILITY.orEmpty(cap, lazy);
+        /** The block item provider of this tool. Fabric has no capability object to hand out, so callers keep this reference. */
+        public BlockItemProviderCapability getCapability() {
+            return new CapabilityImpl(tool.get());
         }
     }
 }

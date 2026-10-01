@@ -2,7 +2,7 @@ package slimeknights.tconstruct.plugin.jei.casting;
 
 import lombok.Getter;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -27,7 +27,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
   public CastingRecipeManager(IIngredientManager ingredientManager, List<IDisplayableCastingRecipe> recipes) {
     this.allRecipes = FilteredRecipe.alwaysVisible(recipes);
     IIngredientHelper<ItemStack> itemHelper = ingredientManager.getIngredientHelper(VanillaTypes.ITEM_STACK);
-    IIngredientHelper<FluidStack> fluidHelper = ingredientManager.getIngredientHelper(ForgeTypes.FLUID_STACK);
+    IIngredientHelper<FluidStack> fluidHelper = ingredientManager.getIngredientHelper(FabricTypes.FLUID_STACK);
     inputItemCache = new ItemRecipeCache<>(itemHelper, recipes, false);
     outputItemCache = new ItemRecipeCache<>(itemHelper, recipes, true);
     fluidCache = new FluidRecipeCache<>(fluidHelper, recipes, false);
@@ -36,7 +36,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
   @Override
   public boolean isHandledInput(ITypedIngredient<?> input) {
     IIngredientType<?> type = input.getType();
-    return type == VanillaTypes.ITEM_STACK || type == ForgeTypes.FLUID_STACK;
+    return type == VanillaTypes.ITEM_STACK || type == FabricTypes.FLUID_STACK;
   }
 
   @Override
@@ -50,7 +50,7 @@ public class CastingRecipeManager implements ISimpleRecipeManagerPlugin<IDisplay
     if (item != null) {
       return inputItemCache.filterRecipes(item.getIngredient());
     }
-    ITypedIngredient<FluidStack> fluid = input.cast(ForgeTypes.FLUID_STACK);
+    ITypedIngredient<FluidStack> fluid = input.cast(FabricTypes.FLUID_STACK);
     if (fluid != null) {
       return fluidCache.filterRecipes(fluid.getIngredient());
     }

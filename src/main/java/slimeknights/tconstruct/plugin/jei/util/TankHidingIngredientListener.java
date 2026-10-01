@@ -1,18 +1,19 @@
 package slimeknights.tconstruct.plugin.jei.util;
 
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientManager.IIngredientListener;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import slimeknights.tconstruct.library.fluid.FluidAction;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import slimeknights.tconstruct.library.fluid.EmptyFluidHandlerItem;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,18 +25,26 @@ public record TankHidingIngredientListener(IIngredientManager manager, List<Item
   private List<ItemStack> getTanks(Collection<? extends ITypedIngredient<?>> ingredients) {
     List<ItemStack> list = new ArrayList<>();
     for (ITypedIngredient<?> ingredient : ingredients) {
-      FluidStack fluid = ingredient.getIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = ingredient.getIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         for (Item item : tanks) {
           ItemStack tank = new ItemStack(item);
-          IFluidHandlerItem handler = tank.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElse(EmptyFluidHandlerItem.INSTANCE);
-          if (handler.getTanks() > 0 && handler.fill(fluid, FluidAction.EXECUTE) > 0) {
-            list.add(handler.getContainer());
+          ContainerItemContext context = ContainerItemContext.withInitial(tank);
+          Storage<FluidVariant> storage = FluidStorage.ITEM.find(tank, context);
+          if (storage != null && canAccept(storage, fluid)) {
+            list.add(context.getItemVariant().toStack(1));
           }
         }
       }
     }
     return list;
+  }
+
+  /** Checks whether the tank item would accept the given fluid */
+  private static boolean canAccept(Storage<FluidVariant> storage, FluidStack fluid) {
+    try (Transaction tx = Transaction.openOuter()) {
+      return storage.insert(fluid.getType(), fluid.getAmount(), tx) > 0;
+    }
   }
 
   @Override

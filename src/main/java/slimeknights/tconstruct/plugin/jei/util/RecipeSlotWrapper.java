@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.plugin.jei.util;
 
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.world.item.ItemStack;
@@ -67,7 +67,7 @@ public record RecipeSlotWrapper<T>(IRecipeSlotDrawable slot, IIngredientType<T> 
 
   /** Makes a wrapper for a fluid slot. */
   public static RecipeSlot<FluidStack> createFluid(List<IRecipeSlotDrawable> slots, String name) {
-    return create(slots, name, ForgeTypes.FLUID_STACK, RecipeSlot.EMPTY_FLUID);
+    return create(slots, name, FabricTypes.FLUID_STACK, RecipeSlot.EMPTY_FLUID);
   }
 
   /** Makes a wrapper for an item slot. */

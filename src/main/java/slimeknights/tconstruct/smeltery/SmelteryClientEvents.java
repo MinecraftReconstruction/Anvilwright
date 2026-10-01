@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
-import slimeknights.mantle.client.model.FaucetFluidLoader;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.TinkerItemDisplays;
@@ -40,7 +39,8 @@ public class SmelteryClientEvents extends ClientEventBase {
   }
 
   static void addResourceListener() {
-    FaucetFluidLoader.initialize();
+    // Forge loaded faucet fluid model data through Mantle's FaucetFluidLoader; the 1.20 Mantle replaced it with the
+    // FaucetFluid data map (loaded by Mantle itself, see client/render/FaucetFluid), so there is nothing to do here.
   }
 
   static void registerRenderers() {

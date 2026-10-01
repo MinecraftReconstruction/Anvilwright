@@ -5,7 +5,6 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.widgets.IDrawableWidget;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocus;
@@ -85,7 +84,8 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
     List<IRecipeSlotDrawable> slots = builder.getRecipeSlots().getSlots();
     IRecipeSlotDrawable resultSlot = CategoryUtil.findSlot(slots, RESULT_TOOL_SLOT);
     if (resultSlot != null && resultSlot.getDisplayedItemStack().isEmpty()) {
-      IDrawableWidget arrow = builder.addDrawableWidget(errorArrow).setPosition(xPos, yPos);
+      // JEI 15.20 dropped IDrawableWidget/addDrawableWidget in favour of addDrawable(IDrawable, x, y)
+      builder.addDrawable(errorArrow, xPos, yPos);
       // need to compute the error message again as no good way to store it between methods
       // fortunately, we can just fetch the item from the input slot; only case we would have such an output error is if that is unique
       IRecipeSlotDrawable toolSlot = CategoryUtil.findSlot(slots, TOOL_SLOT);
@@ -94,7 +94,9 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
         if (!tool.isEmpty()) {
           RecipeResult<ItemStack> focusUpdate = recipe.onFocused(tool);
           if (focusUpdate.hasError()) {
-            arrow.setTooltip(focusUpdate.getMessage());
+            // the arrow widget can no longer carry its own tooltip, so the message goes on the result slot
+            var message = focusUpdate.getMessage();
+            resultSlot.addTooltipCallback((view, tooltip) -> tooltip.add(message));
           }
         }
       }

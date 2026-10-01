@@ -490,7 +490,8 @@ public class JEIPlugin implements IModPlugin {
 
     // potions
     registry.registerSubtypeInterpreter(TinkerFluids.potion.asItem(), (PotionSubtypeInterpreter<ItemStack>)ItemStack::getTag);
-    registry.registerSubtypeInterpreter(ForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)FluidStack::getTag);
+    registry.registerSubtypeInterpreter(FabricTypes.FLUID_STACK, TinkerFluids.potion.get(),
+      (PotionSubtypeInterpreter<IJeiFluidIngredient>)ingredient -> ingredient.getTag().orElse(null));
 
     // parts
     for (Holder<Item> item : getTag(TinkerTags.Items.TOOL_PARTS)) {
@@ -531,10 +532,11 @@ public class JEIPlugin implements IModPlugin {
 
   @Override
   public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-    registration.addGenericGuiContainerHandler(MelterScreen.class, new GuiContainerTankHandler<>());
-    registration.addGenericGuiContainerHandler(AlloyerScreen.class, new GuiContainerTankHandler<>());
-    registration.addGenericGuiContainerHandler(HeatingStructureScreen.class, new GuiContainerTankHandler<>());
-    registration.addGenericGuiContainerHandler(ToolContainerScreen.class, new GuiContainerTankHandler<>());
+    IIngredientManager ingredientManager = registration.getJeiHelpers().getIngredientManager();
+    registration.addGenericGuiContainerHandler(MelterScreen.class, new GuiContainerTankHandler<>(ingredientManager));
+    registration.addGenericGuiContainerHandler(AlloyerScreen.class, new GuiContainerTankHandler<>(ingredientManager));
+    registration.addGenericGuiContainerHandler(HeatingStructureScreen.class, new GuiContainerTankHandler<>(ingredientManager));
+    registration.addGenericGuiContainerHandler(ToolContainerScreen.class, new GuiContainerTankHandler<>(ingredientManager));
   }
 
   @Override
@@ -637,15 +639,6 @@ public class JEIPlugin implements IModPlugin {
     optionalCast(manager, TinkerSmeltery.wireCast);
     optionalItem(manager, TinkerMaterials.necroniumBone, "uranium_ingots");
     modIdHelper = jeiRuntime.getJeiHelpers().getModIdHelper();
-  }
-
-  /** Class to pass {@link IScreenWithFluidTank} into JEI */
-  public static class GuiContainerTankHandler<C extends AbstractContainerMenu, T extends AbstractContainerScreen<C> & IScreenWithFluidTank> implements IGuiContainerHandler<T> {
-//    @Override TODO: PORT
-    @Nullable
-    public Object getIngredientUnderMouse(T containerScreen, double mouseX, double mouseY) {
-      return containerScreen.getIngredientUnderMouse(mouseX, mouseY);
-    }
   }
 
   /** Subtype interpreter for tools, treats the tool as unique in ingredient list, generic in recipes */

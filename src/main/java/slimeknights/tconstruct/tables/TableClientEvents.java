@@ -14,6 +14,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.mantle.client.render.InventoryBlockEntityRenderer;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 import slimeknights.tconstruct.tables.block.entity.chest.TinkersChestBlockEntity;
@@ -36,7 +37,9 @@ public class TableClientEvents extends ClientEventBase {
   }
 
   static void registerRenderers() {
-    BlockEntityRendererProvider<TableBlockEntity> tableRenderer = TableTileEntityRenderer::new;
+    // upstream renders table inventories through Mantle's generic renderer; the fork's own table renderer was
+    // dropped upstream in "Migrate away from using block model instances to control BE rendering"
+    BlockEntityRendererProvider<TableBlockEntity> tableRenderer = InventoryBlockEntityRenderer::new;
     BlockEntityRenderers.register(TinkerTables.craftingStationTile.get(), tableRenderer);
     BlockEntityRenderers.register(TinkerTables.tinkerStationTile.get(), tableRenderer);
     BlockEntityRenderers.register(TinkerTables.modifierWorktableTile.get(), tableRenderer);
