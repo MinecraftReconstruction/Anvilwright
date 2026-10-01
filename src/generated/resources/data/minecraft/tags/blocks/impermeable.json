@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:clear_glass",
     "tconstruct:soul_glass",

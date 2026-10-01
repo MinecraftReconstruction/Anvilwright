@@ -259,7 +259,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     TinkerWorld.slimeDirt.forEach((type, block) -> this.getOrCreateTagBuilder(type.getBlockTag()).add(block));
     FabricTagBuilder enderBarkRoots = this.getOrCreateTagBuilder(TinkerTags.Blocks.ENDERBARK_ROOTS).add(TinkerWorld.enderbarkRoots.get());
     TinkerWorld.slimyEnderbarkRoots.forEach((type, block) -> {
-      this.getOrCreateTagBuilder(type.getDirtType().getBlockTag()).add(block);
+      this.getOrCreateTagBuilder(type.asDirt().getBlockTag()).add(block);
       enderBarkRoots.add(block);
     });
     endermanHoldable.addTag(TinkerTags.Blocks.SLIMY_SOIL);
