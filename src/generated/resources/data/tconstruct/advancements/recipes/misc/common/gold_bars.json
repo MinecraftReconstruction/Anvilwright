@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/gold_bars"
+        "recipe": "forge:common/gold_bars"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/gold_bars"
+      "forge:common/gold_bars"
     ]
   },
   "sends_telemetry_event": false

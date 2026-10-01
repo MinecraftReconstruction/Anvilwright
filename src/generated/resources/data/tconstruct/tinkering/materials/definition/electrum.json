@@ -11,7 +11,22 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:electrum_ingots"
+              "forge:ingots/electrum"
+            ]
+          },
+          {
+            "condition": "fabric:and",
+            "values": [
+              {
+                "condition": "tconstruct:config",
+                "prop": "allow_ingotless_alloys"
+              },
+              {
+                "condition": "fabric:item_tags_populated",
+                "values": [
+                  "forge:ingots/silver"
+                ]
+              }
             ]
           }
         ]
@@ -19,7 +34,7 @@
     ]
   },
   "craftable": false,
-  "tier": 3,
-  "sortOrder": 8,
-  "hidden": false
+  "hidden": false,
+  "sortOrder": 5,
+  "tier": 3
 }

@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/ichor/crystal_block"
+        "recipe": "forge:common/slime/ichor/crystal_block"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/ichor/crystal_block"
+      "forge:common/slime/ichor/crystal_block"
     ]
   },
   "sends_telemetry_event": false

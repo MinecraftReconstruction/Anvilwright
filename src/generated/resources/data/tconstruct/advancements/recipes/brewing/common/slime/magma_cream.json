@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/magma_cream"
+        "recipe": "forge:common/slime/magma_cream"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/magma_cream"
+      "forge:common/slime/magma_cream"
     ]
   },
   "sends_telemetry_event": false

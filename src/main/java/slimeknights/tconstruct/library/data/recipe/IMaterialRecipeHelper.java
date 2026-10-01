@@ -96,8 +96,13 @@ public interface IMaterialRecipeHelper extends IRecipeHelper {
 
   /** Adds recipes to melt and cast a material */
   default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, boolean forgeTag, long fluidAmount, String folder) {
+    // fluids registered without a common tag (sky/ender slime) have a null forge tag, fall back to the local one
+    TagKey<Fluid> fluidTag = forgeTag ? fluid.getForgeTag() : fluid.getLocalTag();
+    if (fluidTag == null) {
+      fluidTag = fluid.getLocalTag();
+    }
     MaterialFluidRecipeBuilder.material(material)
-                              .setFluid(forgeTag ? fluid.getForgeTag() : fluid.getLocalTag(), fluidAmount)
+                              .setFluid(fluidTag, fluidAmount)
                               .setTemperature(FluidVariantAttributes.getTemperature(FluidVariant.of(fluid.get())) - 300)
                               .save(consumer, location(folder + "casting/" + material.getLocation('_').getPath()));
     materialMelting(consumer, material, fluid.get(), fluidAmount, folder);

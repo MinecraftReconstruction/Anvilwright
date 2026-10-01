@@ -4,7 +4,7 @@
   "group": "slime_blocks",
   "key": {
     "#": {
-      "tag": "c:slimeball/sky"
+      "tag": "forge:slimeball/sky"
     }
   },
   "pattern": [

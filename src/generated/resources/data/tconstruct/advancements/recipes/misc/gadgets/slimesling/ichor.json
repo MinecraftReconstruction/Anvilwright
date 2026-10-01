@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "c:slimeball/ichor"
+            "tag": "forge:slimeball/ichor"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:gadgets/slimesling/ichor"
+        "recipe": "forge:gadgets/slimesling/ichor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:gadgets/slimesling/ichor"
+      "forge:gadgets/slimesling/ichor"
     ]
   },
   "sends_telemetry_event": false

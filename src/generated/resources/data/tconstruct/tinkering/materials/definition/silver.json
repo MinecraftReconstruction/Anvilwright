@@ -11,7 +11,7 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:silver_ingots"
+              "forge:ingots/silver"
             ]
           }
         ]
@@ -19,7 +19,7 @@
     ]
   },
   "craftable": false,
-  "tier": 2,
+  "hidden": false,
   "sortOrder": 7,
-  "hidden": false
+  "tier": 2
 }

@@ -4,7 +4,7 @@
   "group": "slime_blocks",
   "key": {
     "#": {
-      "tag": "c:slimeball/blood"
+      "tag": "forge:slimeball/blood"
     }
   },
   "pattern": [

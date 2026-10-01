@@ -1,32 +1,40 @@
 {
-  "type": "tconstruct:material_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:or",
+      "condition": "fabric:or",
       "values": [
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/nicrosil"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/nicrosil"
+          ]
         },
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/tin"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/tin"
+          ]
         },
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/nickel"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/nickel"
+          ]
         },
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/chromium"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/chromium"
+          ]
         }
       ]
     }
   ],
+  "type": "tconstruct:material_melting",
   "input": "tconstruct:nicrosil",
   "result": {
-    "amount": 90,
-    "tag": "forge:molten_nicrosil"
+    "amount": 9000,
+    "fluid": "tconstruct:molten_nicrosil"
   },
   "temperature": 1100
 }

@@ -1,28 +1,34 @@
 {
-  "type": "tconstruct:material_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:or",
+      "condition": "fabric:or",
       "values": [
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/pewter"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/pewter"
+          ]
         },
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/tin"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/tin"
+          ]
         },
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/lead"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/lead"
+          ]
         }
       ]
     }
   ],
+  "type": "tconstruct:material_melting",
   "input": "tconstruct:pewter",
   "result": {
-    "amount": 90,
-    "tag": "forge:molten_pewter"
+    "amount": 9000,
+    "fluid": "tconstruct:molten_pewter"
   },
   "temperature": 400
 }

@@ -2,8 +2,8 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:honey",
   "result": {
-    "amount": 250,
-    "tag": "forge:honey"
+    "amount": 27000,
+    "fluid": "tconstruct:honey"
   },
   "temperature": 1
 }

@@ -3,14 +3,14 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:uranium_ingots"
+        "forge:ingots/uranium"
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_uranium"
+    "tag": "forge:molten_uranium"
   },
   "input": "tconstruct:necrotic_bone",
   "output": "tconstruct:necronium",

@@ -2,7 +2,7 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:skyslime",
   "result": {
-    "amount": 250,
+    "amount": 20250,
     "fluid": "tconstruct:sky_slime"
   },
   "temperature": 10

@@ -11,7 +11,7 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:osmium_ingots"
+              "forge:ingots/osmium"
             ]
           }
         ]
@@ -19,7 +19,7 @@
     ]
   },
   "craftable": false,
-  "tier": 2,
+  "hidden": false,
   "sortOrder": 5,
-  "hidden": false
+  "tier": 2
 }

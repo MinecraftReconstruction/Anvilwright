@@ -2,8 +2,8 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:magma",
   "result": {
-    "amount": 250,
-    "tag": "forge:magma"
+    "amount": 20250,
+    "fluid": "tconstruct:magma"
   },
   "temperature": 300
 }

@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/earth/crystal_smelting"
+        "recipe": "forge:common/slime/earth/crystal_smelting"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/earth/crystal_smelting"
+      "forge:common/slime/earth/crystal_smelting"
     ]
   },
   "sends_telemetry_event": false

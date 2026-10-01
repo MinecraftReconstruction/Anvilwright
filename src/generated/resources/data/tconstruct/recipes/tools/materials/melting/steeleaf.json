@@ -1,14 +1,16 @@
 {
-  "type": "tconstruct:material_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/steeleaf"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:steeleaf_ingots"
+      ]
     }
   ],
+  "type": "tconstruct:material_melting",
   "input": "tconstruct:steeleaf",
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "fluid": "tconstruct:molten_steeleaf"
   },
   "temperature": 934

@@ -1,20 +1,22 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:ingots/fiery"
+      ]
+    }
+  ],
   "type": "tconstruct:material_melting",
   "byproducts": [
     {
-      "amount": 90,
+      "amount": 9000,
       "tag": "forge:molten_iron"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/fiery"
     }
   ],
   "input": "tconstruct:fiery",
   "result": {
-    "amount": 250,
+    "amount": 27000,
     "fluid": "tconstruct:fiery_liquid"
   },
   "temperature": 1500

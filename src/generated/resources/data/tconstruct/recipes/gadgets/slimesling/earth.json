@@ -7,7 +7,7 @@
       "item": "minecraft:string"
     },
     "L": {
-      "tag": "c:slimeball/earth"
+      "tag": "forge:slimeball/earth"
     },
     "X": {
       "item": "tconstruct:earth_congealed_slime"

@@ -11,7 +11,7 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:aluminum_ingots"
+              "forge:ingots/aluminum"
             ]
           }
         ]
@@ -19,7 +19,7 @@
     ]
   },
   "craftable": false,
-  "tier": 2,
+  "hidden": false,
   "sortOrder": 9,
-  "hidden": false
+  "tier": 2
 }

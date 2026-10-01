@@ -5,7 +5,9 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:slimeball/ender"
+            "items": [
+              "tconstruct:netherite_nugget"
+            ]
           }
         ]
       },
@@ -13,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "forge:common/slime/ender/slimeblock"
+        "recipe": "tconstruct:common/materials/netherite_ingot_from_nuggets"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "forge:common/slime/ender/slimeblock"
+      "tconstruct:common/materials/netherite_ingot_from_nuggets"
     ]
   },
   "sends_telemetry_event": false

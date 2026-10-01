@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
+  "category": "misc",
   "group": "tconstruct:amethyst_bronze_block",
   "key": {
     "#": {
-      "tag": "c:amethyst_bronze_ingots"
+      "tag": "forge:ingots/amethyst_bronze"
     },
     "*": {
       "item": "tconstruct:amethyst_bronze_ingot"
