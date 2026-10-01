@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.fluids.data;
 
 import com.mojang.blaze3d.shaders.FogShape;
-import net.minecraft.data.PackOutput;
 import slimeknights.mantle.fluid.texture.AbstractFluidTextureProvider;
 import slimeknights.mantle.fluid.texture.FluidTexture;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -10,10 +9,11 @@ import slimeknights.tconstruct.fluids.TinkerFluids;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
 import static slimeknights.tconstruct.fluids.TinkerFluids.withoutMolten;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 @SuppressWarnings({"UnusedReturnValue", "SameParameterValue"})
 public class FluidTextureProvider extends AbstractFluidTextureProvider {
-  public FluidTextureProvider(PackOutput packOutput) {
+  public FluidTextureProvider(FabricDataOutput packOutput) {
     super(packOutput, TConstruct.MOD_ID);
   }
 

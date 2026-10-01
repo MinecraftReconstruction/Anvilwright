@@ -16,6 +16,12 @@ import java.util.List;
 import java.util.function.Function;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.json.field.MergingField;
+import slimeknights.tconstruct.library.json.field.MergingField.MissingMode;
+import slimeknights.tconstruct.library.json.field.MergingListField;
 
 /** Melting recipe that scale output based on input damage */
 public class DamageableMeltingRecipe extends MeltingRecipe {
@@ -74,8 +80,8 @@ public class DamageableMeltingRecipe extends MeltingRecipe {
       // fill byproducts until we run out of space or byproducts
       int itemDamage = input.getDamageValue();
       for (int i = 0; i < byproducts.size(); i++) {
-        FluidStack fluidStack = byproducts.get(i);
-        TransferUtil.insertFluid(handler, scaleOutput(fluidStack, itemDamage, maxDamage, i < byproductSizes.length ? byproductSizes[i] : unitSize));
+        FluidOutput fluidStack = byproducts.get(i);
+        TransferUtil.insertFluid(handler, scaleOutput(fluidStack.get(), itemDamage, maxDamage, i < byproductSizes.size() ? byproductSizes.get(i) : unitSize));
       }
     }
   }

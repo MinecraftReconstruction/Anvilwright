@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -31,13 +30,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Helper for generating tool item models */
 public abstract class AbstractToolItemModelProvider extends GenericDataProvider {
   protected final Map<String,JsonObject> models = new HashMap<>();
   protected final ExistingFileHelper existingFileHelper;
   protected final String modId;
-  public AbstractToolItemModelProvider(PackOutput packOutput, ExistingFileHelper existingFileHelper, String modId) {
+  public AbstractToolItemModelProvider(FabricDataOutput packOutput, ExistingFileHelper existingFileHelper, String modId) {
     super(packOutput, Target.RESOURCE_PACK, "models/item");
     this.existingFileHelper = existingFileHelper;
     this.modId = modId;

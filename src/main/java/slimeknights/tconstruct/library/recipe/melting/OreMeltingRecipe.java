@@ -23,6 +23,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.FluidOutput;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 
 /**
  * Extension of melting recipe to boost results of ores

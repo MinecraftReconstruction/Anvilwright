@@ -41,11 +41,11 @@ public enum Byproduct implements IByproduct {
   private final String name;
   private final boolean alwaysPresent;
   private final FluidObject<?> fluid;
-  private final int amount;
-  private final int damageUnit;
+  private final long amount;
+  private final long damageUnit;
   private final OreRateType oreRate;
 
-  Byproduct(boolean alwaysPresent, FluidObject<?> fluid, int amount, int damageUnit, OreRateType oreRate) {
+  Byproduct(boolean alwaysPresent, FluidObject<?> fluid, long amount, long damageUnit, OreRateType oreRate) {
     this.name = name().toLowerCase(Locale.ROOT);
     this.alwaysPresent = alwaysPresent;
     this.fluid = fluid;
@@ -60,6 +60,6 @@ public enum Byproduct implements IByproduct {
 
   @Override
   public FluidOutput getFluid(float scale) {
-    return fluid.result((int)(amount * scale));
+    return fluid.result((long)(amount * scale));
   }
 }

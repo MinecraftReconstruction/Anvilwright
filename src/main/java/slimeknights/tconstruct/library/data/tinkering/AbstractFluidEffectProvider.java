@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -51,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static slimeknights.mantle.Mantle.commonResource;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data provider for spilling fluids */
 @SuppressWarnings("deprecation")  // fluid registry is ours to use, not yours forge
@@ -58,7 +58,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   private final String modId;
   private final Map<ResourceLocation,Builder> entries = new HashMap<>();
 
-  public AbstractFluidEffectProvider(PackOutput packOutput, String modId) {
+  public AbstractFluidEffectProvider(FabricDataOutput packOutput, String modId) {
     super(packOutput, Target.DATA_PACK, FluidEffectManager.FOLDER);
     this.modId = modId;
   }

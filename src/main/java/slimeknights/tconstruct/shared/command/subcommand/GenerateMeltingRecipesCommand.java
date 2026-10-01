@@ -71,6 +71,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 /** Generates melting recipes based on crafting recipes */
 public class GenerateMeltingRecipesCommand {
@@ -435,7 +436,7 @@ public class GenerateMeltingRecipesCommand {
       if (item instanceof BucketItem bucket) {
         Fluid fluid = bucket.getFluid();
         if (fluid != Fluids.EMPTY) {
-          return MeltingResult.from(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
+          return MeltingResult.from(new FluidStack(fluid, FluidConstants.BUCKET));
         }
       }
       // fluid capability check

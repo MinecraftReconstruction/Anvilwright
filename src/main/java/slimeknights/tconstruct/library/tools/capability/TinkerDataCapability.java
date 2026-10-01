@@ -45,6 +45,12 @@ public class TinkerDataCapability implements EntityComponentInitializer {
 //    }
   }
 
+  /** Gets the data capability from an entity, or null if missing */
+  @Nullable
+  public static Holder getData(LivingEntity entity) {
+    return CAPABILITY.maybeGet(entity).orElse(null);
+  }
+
 
   /* Required methods */
 

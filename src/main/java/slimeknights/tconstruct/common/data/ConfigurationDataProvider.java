@@ -3,7 +3,6 @@ package slimeknights.tconstruct.common.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -25,11 +24,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data generator for someone-off JSON files used for command configuration */
 public class ConfigurationDataProvider extends GenericDataProvider {
   private final Map<ResourceLocation, JsonObject> configuration = new LinkedHashMap<>();
-  public ConfigurationDataProvider(PackOutput output) {
+  public ConfigurationDataProvider(FabricDataOutput output) {
     super(output, Target.DATA_PACK, "");
   }
 

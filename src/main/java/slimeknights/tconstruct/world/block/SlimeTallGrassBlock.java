@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import slimeknights.tconstruct.shared.block.SlimeType;
+
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import javax.annotation.Nonnull;
@@ -27,9 +27,9 @@ public class SlimeTallGrassBlock extends BushBlock implements IShearable, IPlant
   private static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 13.0D, 14.0D);
 
   @Getter
-  private final SlimeType foliageType;
+  private final FoliageType foliageType;
 
-  public SlimeTallGrassBlock(Properties properties, SlimeType foliageType) {
+  public SlimeTallGrassBlock(Properties properties, FoliageType foliageType) {
     super(properties.offsetType(Block.OffsetType.XYZ));
     this.foliageType = foliageType;
   }

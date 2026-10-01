@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import lombok.Setter;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
@@ -41,13 +40,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data provider for modifier model maps */
 public abstract class AbstractModifierModelMapProvider extends GenericDataProvider {
   private final Map<ResourceLocation, Builder> models = new HashMap<>();
 
   private final String modId;
-  public AbstractModifierModelMapProvider(PackOutput output, String modId) {
+  public AbstractModifierModelMapProvider(FabricDataOutput output, String modId) {
     super(output, Target.RESOURCE_PACK, ModifierModelMapManager.FOLDER);
     this.modId = modId;
   }

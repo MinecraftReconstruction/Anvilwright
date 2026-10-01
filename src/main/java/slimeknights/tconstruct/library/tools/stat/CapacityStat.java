@@ -34,7 +34,7 @@ public class CapacityStat extends FloatToolStat {
   }
 
   /** Formats the contents of this stat as "#,### / #,### Unit" using the format key and appropriate color. */
-  public MutableComponent formatContents(int current, int max) {
+  public MutableComponent formatContents(long current, long max) {
     return Component.literal(Util.COMMA_FORMAT.format(current) + " / ")
                     .append(Component.translatable(formatKey, Util.COMMA_FORMAT.format(max)))
                     .withStyle(style -> style.withColor(getColor()));

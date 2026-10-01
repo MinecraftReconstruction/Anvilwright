@@ -85,6 +85,11 @@ import slimeknights.tconstruct.common.registration.GeodeItemObject;
 import slimeknights.tconstruct.library.utils.Util;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.block.BloodSlimeBlock;
+import slimeknights.tconstruct.world.block.DirtType;
+import slimeknights.tconstruct.world.block.FoliageType;
+import slimeknights.tconstruct.world.block.SlimePropaguleBlock;
+import slimeknights.tconstruct.world.block.SlimePropaguleLeavesBlock;
+import slimeknights.tconstruct.world.block.CrystalClusterBlock;
 import slimeknights.tconstruct.world.block.CongealedSlimeBlock;
 import slimeknights.tconstruct.world.block.PiglinWallHeadBlock;
 import slimeknights.tconstruct.world.block.SlimeDirtBlock;
@@ -92,6 +97,7 @@ import slimeknights.tconstruct.world.block.SlimeFungusBlock;
 import slimeknights.tconstruct.world.block.SlimeGrassBlock;
 import slimeknights.tconstruct.world.block.SlimeLeavesBlock;
 import slimeknights.tconstruct.world.block.SlimeNyliumBlock;
+import slimeknights.tconstruct.world.block.SlimeRootsBlock;
 import slimeknights.tconstruct.world.block.SlimeSaplingBlock;
 import slimeknights.tconstruct.world.block.SlimeTallGrassBlock;
 import slimeknights.tconstruct.world.block.SlimeVineBlock;
@@ -138,12 +144,19 @@ public final class TinkerWorld extends TinkerModule {
   public static final ItemObject<Block> cobaltOre = BLOCKS.register("cobalt_ore", () -> new Block(builder(MapColor.NETHER, SoundType.NETHER_ORE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(10.0F)), DEFAULT_BLOCK_ITEM);
   public static final ItemObject<Block> rawCobaltBlock = BLOCKS.register("raw_cobalt_block", () -> new Block(builder(MapColor.COLOR_BLUE, SoundType.NETHER_ORE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(6.0f, 7.0f)), DEFAULT_BLOCK_ITEM);
   public static final ItemObject<Item> rawCobalt = ITEMS.register("raw_cobalt", WORLD_PROPS);
+  // metal shards and clusters, added with the ancient tools in 3.11
+  public static final ItemObject<Item> steelShard = ITEMS.register("steel_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Item> cobaltShard = ITEMS.register("cobalt_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Item> knightmetalShard = ITEMS.register("knightmetal_shard", TOOLTIP_ITEM);
+  public static final ItemObject<Block> steelCluster = BLOCKS.register("steel_cluster", () -> new CrystalClusterBlock(Sounds.SKY_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.STONE).lightLevel(state -> 5).sound(SoundType.METAL)), TOOLTIP_BLOCK_ITEM);
+  public static final ItemObject<Block> cobaltCluster = BLOCKS.register("cobalt_cluster", () -> new CrystalClusterBlock(Sounds.ICHOR_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.COLOR_BLUE).lightLevel(state -> 8).sound(SoundType.NETHERITE_BLOCK)), TOOLTIP_BLOCK_ITEM);
+  public static final ItemObject<Block> knightmetalCluster = BLOCKS.register("knightmetal_cluster", () -> new CrystalClusterBlock(Sounds.ENDER_CRYSTAL_CHIME.getSound(), 7, 3, clusterProps().mapColor(MapColor.GRASS).lightLevel(state -> 12).sound(SoundType.NETHERITE_BLOCK)), TOOLTIP_BLOCK_ITEM);
 
   // slime
   public static final EnumObject<SlimeType, SlimeBlock> slime = Util.make(() -> {
     Function<SlimeType,BlockBehaviour.Properties> slimeProps = type -> builder(type.getMapColor(), SoundType.SLIME_BLOCK).friction(0.8F).sound(SoundType.SLIME_BLOCK).noOcclusion();
     return new EnumObject.Builder<SlimeType, SlimeBlock>(SlimeType.class)
-      .putDelegate(SlimeType.EARTH, (SlimeBlock) Blocks.SLIME_BLOCK)
+      .put(SlimeType.EARTH, () -> (SlimeBlock)Blocks.SLIME_BLOCK)
       // sky slime: sticks to anything, but will not pull back
       .put(SlimeType.SKY,   BLOCKS.register("sky_slime", () -> new StickySlimeBlock(slimeProps.apply(SlimeType.SKY), (state, other) -> true), TOOLTIP_BLOCK_ITEM))
       // ichor: does not stick to self, but sticks to anything else
@@ -152,51 +165,43 @@ public final class TinkerWorld extends TinkerModule {
       // ender: only sticks to self
       .put(SlimeType.ENDER, BLOCKS.register("ender_slime", () -> new StickySlimeBlock(slimeProps.apply(SlimeType.ENDER), (state, other) -> other.getBlock() == state.getBlock()), TOOLTIP_BLOCK_ITEM))
       // blood slime: not sticky, and honey won't stick to it, good for bounce pads
-      .put(SlimeType.BLOOD, BLOCKS.register("blood_slime", () -> new BloodSlimeBlock(slimeProps.apply(SlimeType.BLOOD)), TOOLTIP_BLOCK_ITEM))
       .build();
   });
   public static final EnumObject<SlimeType, CongealedSlimeBlock> congealedSlime = BLOCKS.registerEnum(SlimeType.values(), "congealed_slime", type -> new CongealedSlimeBlock(builder(type.getMapColor(), SoundType.SLIME_BLOCK).strength(0.5F).friction(0.5F).lightLevel(s -> type.getLightLevel())), TOOLTIP_BLOCK_ITEM);
 
   // island blocks
-  public static final EnumObject<SlimeType, Block> slimeDirt = Util.make(() -> {
-    Function<SlimeType, MapColor> color = type -> switch (type) {
-      default -> MapColor.GRASS; // EARTH
-      case SKY -> MapColor.WARPED_STEM;
-      case ENDER -> MapColor.TERRACOTTA_LIGHT_BLUE;
-      case ICHOR -> MapColor.TERRACOTTA_ORANGE;
-    };
-    return BLOCKS.registerEnum(SlimeType.TRUE_SLIME, "slime_dirt", (type) -> new SlimeDirtBlock(builder(color.apply(type), SoundType.SLIME_BLOCK).strength(1.9f)), TOOLTIP_BLOCK_ITEM);
-  });
-  public static final EnumObject<SlimeType, Block> allDirt = new EnumObject.Builder<SlimeType, Block>(SlimeType.class).put(SlimeType.BLOOD, () -> Blocks.DIRT).putAll(slimeDirt).build();
+  public static final EnumObject<DirtType, Block> slimeDirt = BLOCKS.registerEnum(DirtType.TINKER, "slime_dirt", (type) -> new SlimeDirtBlock(builder(type.getMapColor(), SoundType.SLIME_BLOCK).strength(1.9f)), TOOLTIP_BLOCK_ITEM);
+  public static final EnumObject<DirtType, Block> allDirt = new EnumObject.Builder<DirtType, Block>(DirtType.class).put(DirtType.VANILLA, () -> Blocks.DIRT).putAll(slimeDirt).build();
 
-  // grass variants
-  public static final EnumObject<SlimeType, Block> vanillaSlimeGrass, earthSlimeGrass, skySlimeGrass, enderSlimeGrass, ichorSlimeGrass;
+  /** Grass variants, the name represents the dirt type */
+  public static final EnumObject<FoliageType, Block> vanillaSlimeGrass, earthSlimeGrass, skySlimeGrass, enderSlimeGrass, ichorSlimeGrass;
   /** Map of dirt type to slime grass type. Each slime grass is a map from foliage to grass type */
-  public static final Map<SlimeType, EnumObject<SlimeType, Block>> slimeGrass = new EnumMap<>(SlimeType.class);
+  public static final Map<DirtType, EnumObject<FoliageType, Block>> slimeGrass = new EnumMap<>(DirtType.class);
 
 	static {
-    Function<SlimeType,BlockBehaviour.Properties> slimeGrassProps = type -> builder(type.getMapColor(), SoundType.SLIME_BLOCK).strength(2.0f).requiresCorrectToolForDrops().randomTicks();
-    Function<SlimeType, Block> slimeGrassRegister = type -> type.isNether() ? new SlimeNyliumBlock(slimeGrassProps.apply(type), type) : new SlimeGrassBlock(slimeGrassProps.apply(type), type);
+    Function<FoliageType,BlockBehaviour.Properties> slimeGrassProps = type -> builder(type.getMapColor(), SoundType.SLIME_BLOCK).strength(2.0f).requiresCorrectToolForDrops().randomTicks();
+    Function<FoliageType, Block> slimeGrassRegister = type -> type.isNether() ? new SlimeNyliumBlock(slimeGrassProps.apply(type), type) : new SlimeGrassBlock(slimeGrassProps.apply(type), type);
     // blood is not an exact match for vanilla, but close enough
-    vanillaSlimeGrass = BLOCKS.registerEnum(SlimeType.values(), "vanilla_slime_grass", slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
-    earthSlimeGrass   = BLOCKS.registerEnum(SlimeType.values(), "earth_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
-    skySlimeGrass     = BLOCKS.registerEnum(SlimeType.values(), "sky_slime_grass",     slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
-    enderSlimeGrass   = BLOCKS.registerEnum(SlimeType.values(), "ender_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
-    ichorSlimeGrass   = BLOCKS.registerEnum(SlimeType.values(), "ichor_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
-    slimeGrass.put(SlimeType.BLOOD, vanillaSlimeGrass); // not an exact fit, but good enough
-    slimeGrass.put(SlimeType.EARTH, earthSlimeGrass);
-    slimeGrass.put(SlimeType.SKY,   skySlimeGrass);
-    slimeGrass.put(SlimeType.ENDER, enderSlimeGrass);
-    slimeGrass.put(SlimeType.ICHOR, ichorSlimeGrass);
+    FoliageType[] values = FoliageType.values();
+    vanillaSlimeGrass = BLOCKS.registerEnum(values, "vanilla_slime_grass", slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
+    earthSlimeGrass   = BLOCKS.registerEnum(values, "earth_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
+    skySlimeGrass     = BLOCKS.registerEnum(values, "sky_slime_grass",     slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
+    enderSlimeGrass   = BLOCKS.registerEnum(values, "ender_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
+    ichorSlimeGrass   = BLOCKS.registerEnum(values, "ichor_slime_grass",   slimeGrassRegister, TOOLTIP_BLOCK_ITEM);
+    slimeGrass.put(DirtType.VANILLA, vanillaSlimeGrass);
+    slimeGrass.put(DirtType.EARTH, earthSlimeGrass);
+    slimeGrass.put(DirtType.SKY,   skySlimeGrass);
+    slimeGrass.put(DirtType.ENDER, enderSlimeGrass);
+    slimeGrass.put(DirtType.ICHOR, ichorSlimeGrass);
   }
-  public static final EnumObject<SlimeType, SlimeGrassSeedItem> slimeGrassSeeds = ITEMS.registerEnum(SlimeType.values(), "slime_grass_seeds", type -> new SlimeGrassSeedItem(WORLD_PROPS, type));
+  public static final EnumObject<FoliageType, SlimeGrassSeedItem> slimeGrassSeeds = ITEMS.registerEnum(FoliageType.values(), "slime_grass_seeds", type -> new SlimeGrassSeedItem(ITEM_PROPS, type));
 
   /** Creates a wood variant properties function */
   private static Function<WoodVariant,BlockBehaviour.Properties> createSlimewood(MapColor planks, MapColor bark) {
     return type -> switch (type) {
-      case WOOD -> BlockBehaviour.Properties.of().mapColor(bark).sound(SoundType.WOOD).requiresCorrectToolForDrops();
-      case LOG -> BlockBehaviour.Properties.of().mapColor(state -> state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? planks : bark).sound(SoundType.WOOD).requiresCorrectToolForDrops();
-      default -> BlockBehaviour.Properties.of().mapColor(planks).sound(SoundType.SLIME_BLOCK);
+      case WOOD -> BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).mapColor(bark).sound(SoundType.WOOD).requiresCorrectToolForDrops();
+      case LOG -> BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).mapColor(state -> state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? planks : bark).sound(SoundType.WOOD).requiresCorrectToolForDrops();
+      default -> BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.BASS).mapColor(planks).sound(SoundType.SLIME_BLOCK);
     };
   }
 
@@ -204,47 +209,50 @@ public final class TinkerWorld extends TinkerModule {
   public static final WoodBlockObject greenheart  = BLOCKS.registerWood("greenheart",  createSlimewood(MapColor.COLOR_LIGHT_GREEN, MapColor.COLOR_GREEN),     false);
   public static final WoodBlockObject skyroot     = BLOCKS.registerWood("skyroot",     createSlimewood(MapColor.COLOR_CYAN,        MapColor.TERRACOTTA_CYAN), false);
   public static final WoodBlockObject bloodshroom = BLOCKS.registerWood("bloodshroom", createSlimewood(MapColor.COLOR_RED,         MapColor.COLOR_ORANGE),    false);
+  public static final WoodBlockObject enderbark   = BLOCKS.registerWood("enderbark",   createSlimewood(MapColor.COLOR_BLACK,       MapColor.COLOR_BLACK),     false);
+  public static final ItemObject<Block> enderbarkRoots = BLOCKS.register("enderbark_roots", () -> new SlimeRootsBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).instrument(NoteBlockInstrument.BASS).strength(0.7F).randomTicks().sound(SoundType.MANGROVE_ROOTS).noOcclusion().isSuffocating(Blocks::never).isViewBlocking(Blocks::never).noOcclusion()), BLOCK_ITEM);
+  public static final EnumObject<SlimeType,Block> slimyEnderbarkRoots = BLOCKS.registerEnum(SlimeType.values(), "enderbark_roots", type -> new SlimeDirtBlock(BlockBehaviour.Properties.of().mapColor(type.getMapColor()).strength(0.7F).sound(SoundType.MUDDY_MANGROVE_ROOTS).lightLevel(s -> type.getLightLevel())), BLOCK_ITEM);
 
   // plants
-  public static final EnumObject<SlimeType, SlimeTallGrassBlock> slimeFern, slimeTallGrass;
+  public static final EnumObject<FoliageType, SlimeTallGrassBlock> slimeFern, slimeTallGrass;
   static {
-    Function<SlimeType,BlockBehaviour.Properties> props = type -> {
-      BlockBehaviour.Properties properties;
+    Function<FoliageType,BlockBehaviour.Properties> props = type -> {
+      BlockBehaviour.Properties properties = BlockBehaviour.Properties.of().mapColor(type.getMapColor());
       if (type.isNether()) {
-        properties = builder(type.getMapColor(), SoundType.ROOTS).replaceable().pushReaction(PushReaction.DESTROY);
+        properties.sound(SoundType.ROOTS).offsetType(BlockBehaviour.BlockStateBase.OffsetType.XZ);
       } else {
-        properties = builder(type.getMapColor(), SoundType.GRASS).replaceable().ignitedByLava().pushReaction(PushReaction.DESTROY);
+        properties.sound(SoundType.GRASS).offsetType(BlockBehaviour.BlockStateBase.OffsetType.XYZ);
       }
-      return properties.instabreak().noCollission();
+      return properties.replaceable().instabreak().noCollission().pushReaction(PushReaction.DESTROY);
     };
-    slimeFern = BLOCKS.registerEnum(SlimeType.values(), "slime_fern", type -> new SlimeTallGrassBlock(props.apply(type), type), DEFAULT_BLOCK_ITEM);
-    slimeTallGrass = BLOCKS.registerEnum(SlimeType.values(), "slime_tall_grass", type -> new SlimeTallGrassBlock(props.apply(type), type), DEFAULT_BLOCK_ITEM);
+    slimeFern = BLOCKS.registerEnum(FoliageType.values(), "slime_fern", type -> new SlimeTallGrassBlock(props.apply(type), type), BLOCK_ITEM);
+    slimeTallGrass = BLOCKS.registerEnum(FoliageType.values(), "slime_tall_grass", type -> new SlimeTallGrassBlock(props.apply(type), type), BLOCK_ITEM);
   }
-  public static final EnumObject<SlimeType,FlowerPotBlock> pottedSlimeFern = BLOCKS.registerPottedEnum(SlimeType.values(), "slime_fern", slimeFern);
+  public static final EnumObject<FoliageType,FlowerPotBlock> pottedSlimeFern = BLOCKS.registerPottedEnum("slime_fern", slimeFern);
 
   // trees
-  public static final EnumObject<SlimeType, Block> slimeSapling = Util.make(() -> {
-    Function<SlimeType,BlockBehaviour.Properties> props = type -> builder(type.getMapColor(), type.isNether() ? SoundType.FUNGUS : SoundType.GRASS).pushReaction(PushReaction.DESTROY).instabreak().noCollission();
-    return new EnumObject.Builder<SlimeType,Block>(SlimeType.class)
-      .putAll(BLOCKS.registerEnum(SlimeType.OVERWORLD, "slime_sapling", (type) -> new SlimeSaplingBlock(new SlimeTree(type), type, props.apply(type).randomTicks()), TOOLTIP_BLOCK_ITEM))
-      .put(SlimeType.BLOOD, BLOCKS.register("blood_slime_sapling", () -> new SlimeFungusBlock(props.apply(SlimeType.BLOOD), ResourceKey.create(Registries.CONFIGURED_FEATURE, TConstruct.getResource("blood_slime_fungus"))), TOOLTIP_BLOCK_ITEM))
-      .put(SlimeType.ICHOR, BLOCKS.register("ichor_slime_sapling", () -> new SlimeFungusBlock(props.apply(SlimeType.ICHOR), ResourceKey.create(Registries.CONFIGURED_FEATURE, TConstruct.getResource("ichor_slime_fungus"))), HIDDEN_BLOCK_ITEM))
+  public static final EnumObject<FoliageType, Block> slimeSapling = Util.make(() -> {
+    Function<FoliageType,BlockBehaviour.Properties> props = type -> builder(type.getMapColor(), type.isNether() ? SoundType.FUNGUS : SoundType.GRASS).instabreak().noCollission().pushReaction(PushReaction.DESTROY);
+    return new EnumObject.Builder<FoliageType,Block>(FoliageType.class)
+      .putAll(BLOCKS.registerEnum(FoliageType.OVERWORLD, "slime_sapling", (type) -> new SlimeSaplingBlock(new SlimeTree(type), type, props.apply(type).randomTicks()), TOOLTIP_BLOCK_ITEM))
+      .put(FoliageType.BLOOD, BLOCKS.register("blood_slime_sapling", () -> new SlimeFungusBlock(props.apply(FoliageType.BLOOD), TinkerStructures.bloodSlimeFungus), TOOLTIP_BLOCK_ITEM))
+      .put(FoliageType.ICHOR, BLOCKS.register("ichor_slime_sapling", () -> new SlimeFungusBlock(props.apply(FoliageType.ICHOR), TinkerStructures.ichorSlimeFungus), BLOCK_ITEM))
+      .put(FoliageType.ENDER, BLOCKS.register("ender_slime_sapling", () -> new SlimePropaguleBlock(new SlimeTree(FoliageType.ENDER), FoliageType.ENDER, props.apply(FoliageType.ENDER).randomTicks()), TOOLTIP_BLOCK_ITEM))
       .build();
   });
-  public static final EnumObject<SlimeType,FlowerPotBlock> pottedSlimeSapling = BLOCKS.registerPottedEnum(SlimeType.values(), "slime_sapling", slimeSapling);
-  public static final EnumObject<SlimeType, Block> slimeLeaves = BLOCKS.registerEnum(SlimeType.values(), "slime_leaves", type -> {
-    if (type.isNether()) {
-      return new SlimeWartBlock(builder(type.getMapColor(), SoundType.WART_BLOCK).strength(1.5F).isValidSpawn((s, w, p, e) -> false), type);
-    }
-    return new SlimeLeavesBlock(builder(type.getMapColor(), SoundType.GRASS).ignitedByLava().pushReaction(PushReaction.DESTROY).strength(1.0f).randomTicks().noOcclusion().isValidSpawn((s, w, p, e) -> false), type);
-  }, DEFAULT_BLOCK_ITEM);
+  public static final EnumObject<FoliageType,FlowerPotBlock> pottedSlimeSapling = BLOCKS.registerPottedEnum(FoliageType.values(), "slime_sapling", slimeSapling);
+  public static final EnumObject<FoliageType, Block> slimeLeaves = new EnumObject.Builder<FoliageType, Block>(FoliageType.class)
+    .putAll(BLOCKS.registerEnum(FoliageType.OVERWORLD, "slime_leaves", type -> new SlimeLeavesBlock(builder(type.getMapColor(), SoundType.GRASS).strength(1.0f).randomTicks().noOcclusion().isValidSpawn(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never).pushReaction(PushReaction.DESTROY).isRedstoneConductor(Blocks::never), type), BLOCK_ITEM))
+    .putAll(BLOCKS.registerEnum(FoliageType.NETHER, "slime_leaves", type -> new Block(builder(type.getMapColor(), SoundType.WART_BLOCK).strength(1.5F).isValidSpawn((s, w, p, e) -> false)), BLOCK_ITEM))
+    .put(FoliageType.ENDER, BLOCKS.register("ender_slime_leaves", () -> new SlimePropaguleLeavesBlock(builder(FoliageType.ENDER.getMapColor(), SoundType.GRASS).strength(1.0f).randomTicks().noOcclusion().isValidSpawn(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never).pushReaction(PushReaction.DESTROY).isRedstoneConductor(Blocks::never), FoliageType.ENDER), BLOCK_ITEM))
+    .build();
 
   // slime vines
   public static final ItemObject<SlimeVineBlock> skySlimeVine, enderSlimeVine;
   static {
-    Function<SlimeType,BlockBehaviour.Properties> props = type -> builder(type.getMapColor(), SoundType.GRASS).replaceable().ignitedByLava().pushReaction(PushReaction.DESTROY).strength(0.75F).noCollission().randomTicks();
-    skySlimeVine = BLOCKS.register("sky_slime_vine", () -> new SlimeVineBlock(props.apply(SlimeType.SKY), SlimeType.SKY), DEFAULT_BLOCK_ITEM);
-    enderSlimeVine = BLOCKS.register("ender_slime_vine", () -> new SlimeVineBlock(props.apply(SlimeType.ENDER), SlimeType.ENDER), DEFAULT_BLOCK_ITEM);
+    Function<SlimeType,BlockBehaviour.Properties> props = type -> builder(type.getMapColor(), SoundType.GRASS).replaceable().strength(0.75F).noCollission().randomTicks().pushReaction(PushReaction.DESTROY);
+    skySlimeVine = BLOCKS.register("sky_slime_vine", () -> new SlimeVineBlock(props.apply(SlimeType.SKY), SlimeType.SKY), BLOCK_ITEM);
+    enderSlimeVine = BLOCKS.register("ender_slime_vine", () -> new SlimeVineBlock(props.apply(SlimeType.ENDER), SlimeType.ENDER), BLOCK_ITEM);
   }
 
   // geodes
@@ -476,5 +484,10 @@ public final class TinkerWorld extends TinkerModule {
       return new PiglinWallHeadBlock(type, props);
     }
     return new WallSkullBlock(type, props);
+  }
+
+  /** Properties shared by the metal crystal clusters */
+  private static BlockBehaviour.Properties clusterProps() {
+    return BlockBehaviour.Properties.of().forceSolidOn().noOcclusion().randomTicks().strength(2.5f).requiresCorrectToolForDrops().pushReaction(PushReaction.DESTROY);
   }
 }

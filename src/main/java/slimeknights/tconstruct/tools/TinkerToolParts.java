@@ -13,6 +13,7 @@ import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
+import slimeknights.tconstruct.common.TinkerTabs;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.json.loot.ToolPartLootEntry;
 import slimeknights.tconstruct.library.materials.MaterialRegistry;
@@ -53,7 +54,7 @@ public final class TinkerToolParts extends TinkerModule {
                                          return TinkerToolParts.pickHead.get().withMaterialForDisplay(material);
                                        })
                                        .displayItems(TinkerToolParts::addTabItems)
-                                       .withTabsBefore(TinkerTools.tabTools.getId())
+                                       .withTabsBefore(TinkerTabs.TAB_TOOLS)
                                        .withSearchBar()
                                        .build());
 

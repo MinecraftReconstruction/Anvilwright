@@ -205,7 +205,11 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
 **策略**：这一族**一律不要单独修**。修掉真错误后它们自己会消失；如果最后卡在某一条，那就是真的，
 再去看那个类的 Lombok 注解（`@Getter` 的字段名/可见性）是不是和上游一致。
 
-## 8. 剩余工作（真错误 224 条 / 103 文件，按建议顺序）
+## 8. 剩余工作（**先读 [NUMBERS.md](NUMBERS.md) 的最新一节**；下表是 9-29 第二轮的口径，已过时）
+
+⚠️ 9-30 上午重算了根因：整树数字是 2844（不是 224），那 224 是用当时的口径测的、只覆盖了当时被 javac 走到的那部分。
+现在的做法是 **`scripts/port/missing_members.py` 按"合并丢的声明"驱动** + 整树数字只做参考。
+两件大事在 [NUMBERS.md](NUMBERS.md) 末尾：`SlimeType`/`FoliageType` 重构（~85 条）与 JEI 版本（~16 条）。
 
 完整清单见 [merge-3.12.1-workqueue.txt](merge-3.12.1-workqueue.txt)（三列：真错误 / 假错误 / origin）。
 
@@ -276,3 +280,41 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
 1. 按第 8 节的顺序打家族，**每批之后跑 `workqueue.py` 看"真错误"列**，不要只看总数。
 2. 流体家族现在有可用的单罐基类了：先把 holder 类型统一到 `SimpleFluidTank` 或 `Storage<FluidVariant>`，再逐个改调用点的 `simulate/execute` 语义（行为差异 #4 那条仍然要点名实测）。
 3. `IClientItemExtensions` 家族是本轮唯一**没动**的大块（Fabric 无对应物，需要重写 + 视觉比对），别在不看画面的情况下"顺手改完"。
+
+---
+
+## 12. 2026-09-30 上午：这一轮的交接（数字、结论、下一步）
+
+**一句话**：找到了本轮所有"修不完"的根因 —— 3.12.1 的合并是 `-X ours` 式的，
+**上游的调用点进来了、声明没进来**；另外 Mantle 从 AlphaMode 版换成我们的 1.11 时丢了 5 个 API。
+
+### 这一轮做了什么（每个 commit 都已经 push）
+
+| commit | 内容 | 整树数字 |
+|---|---|---|
+| `579d548a` | Mantle 补 `getLocalTag/getForgeTag/getTag/getBlock/getRegistryName` 并换版本；`SmelteryRecipeProvider` 的 10 条 Forge import；`FluidValues.SIP/LANTERN_CAPACITY`、`JsonUtils.debugLogResourceValues`、`TinkerDataCapability.getData`、`MeltingFuelBuilder.solid`；新增 `scripts/port/missing_members.py` | 3545 → 3300 |
+| `a42324ee` | `TinkerTools` 补回 3.11 的 11 个工具 + 4 个实体类型 + `bonk` 粒子；`TinkerToolParts.withTabsBefore` 指向本移植的 TinkerTabs | 3194 |
+| `fe5b6a0e` | `TinkerCommons`/`TinkerMaterials`/`TinkerGadgets`/`TinkerFluids`/`SlimeType` 补回合并丢的方块、物品、流体（含 60 处流体注册改成 Mantle 1.11 链式 API） | **2844** |
+| `cbbd92e0` | 文档：NUMBERS.md 写下根因与本轮数字；BEHAVIOUR-DIFFERENCES #23–#26 | — |
+
+### 下一个 agent 从哪继续（按性价比）
+
+1. **`python3 scripts/port/missing_members.py .port/fast_cur.txt`** —— 每次先跑这个，它给出"还有多少声明是合并丢的"，
+   现在应该已经降到 40 条左右；`TinkerWorld` 的 17 个字段（clusters/shards/enderbark/spawn）还没补。
+2. **`TinkerWorld` 的 `SlimeType.BLOOD` → `FoliageType.BLOOD`/`DirtType`**：上游 3.12.1 把史莱姆类型拆开了，
+   本移植没跟上，这一件事约 85 条错误（`FoliageType/DirtType cannot be converted to SlimeType`）。
+3. **`TinkerSmeltery`**：它自己的错误会让 `seared*/scorched*` 那一大批字段"看不见"，从而级联到所有冶炼炉数据。
+   它的字段缺失是合并丢的（`searedGlass`/`searedDrain`/`searedChute`/`searedFluidCannon`…）。
+4. **JEI 版本**：`gradle.properties` 的 `jei_version` 提到上游的 `15.59.0.210`（要联网确认 Fabric 有没有），
+   或改写 16 处 `addDrawableWidget/addRecipeArrowWidget`。
+5. **底层类再体检一遍**：`library/tools/nbt/**`、`ModifierEntry`、`ModifierManager`、`ToolDefinition` —— 它们是级联的源头，
+   但里面很多报错是**分块编译的 Lombok 幻影**（单独编译一包时 `getXxx()` 会"找不到"，整树编译却正常）。
+   判据仍是"目标类有没有对应注解"，见第 7 节。
+
+### 别再踩的坑
+
+- 整树数字会因为"javac 到底走到哪些类"而跳（本轮见过 3 ↔ 3545），**只当参考**。
+- `truecount.sh` 的分块数字**也有 Lombok 幻影**（分块编译时 `-sourcepath` 隐式加载的类不走注解处理器）：
+  本轮实测 `library/tools/nbt` 单包 20 条错，其中 `getLevel()/getName()/getVariant()/getData()` 一类全是幻影。
+- 换 Mantle 版本后**必须**重跑 `./gradlew -I scripts/port/printcp.gradle printCompileCp` 并重编，
+  否则 classpath 里还是旧 Mantle。

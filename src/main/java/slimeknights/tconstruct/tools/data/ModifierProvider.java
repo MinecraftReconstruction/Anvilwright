@@ -267,6 +267,7 @@ import static slimeknights.tconstruct.library.json.math.ModifierFormula.MULTIPLI
 import static slimeknights.tconstruct.library.json.math.ModifierFormula.VALUE;
 import static slimeknights.tconstruct.library.modifiers.modules.behavior.RepairModule.FACTOR;
 import static slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_SLOTS;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 public class ModifierProvider extends AbstractModifierProvider {
   public ModifierProvider(FabricDataOutput output) {
@@ -566,7 +567,7 @@ public class ModifierProvider extends AbstractModifierProvider {
     // fluid
     buildModifier(ModifierIds.spilling)
       .addModule(ToolTankHelper.TANK_HANDLER)
-      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME))
+      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET))
       .addModule(new SpillingModule(LevelingValue.eachLevel(1), ModifierCondition.ANY_TOOL));
     // on fishing rods, we want spilling, but no spilling on bows
     buildModifier(ModifierIds.spillingRod).showInTooltips(ShowInTooltips.PARTS_ONLY).addModule(ModifierTraitModule.tagCondition(ModifierIds.spilling, TinkerTags.Items.FISHING_RODS));
@@ -732,16 +733,16 @@ public class ModifierProvider extends AbstractModifierProvider {
     buildModifier(ModifierIds.spitting).priority(120) // want to run before sling modifiers so we can sling spit, and before throwing so we use our tank first
       .addModule(new SpittingModule(LevelingInt.eachLevel(1)))
       .addModule(ToolTankHelper.TANK_HANDLER)
-      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME));
+      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET));
     buildModifier(ModifierIds.splashing)
       .addModule(new SplashingModule(LevelingValue.eachLevel(1)))
       .addModule(ToolTankHelper.TANK_HANDLER)
-      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME))
+      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET))
       .addModule(ShowOffhandModule.DISALLOW_BROKEN).addModule(ShowInteractionSourceModule.INSTANCE);
     buildModifier(ModifierIds.slurping).priority(40)
       .addModule(new SlurpingModule(LevelingValue.eachLevel(1), LevelingInt.flat(21)))
       .addModule(ToolTankHelper.TANK_HANDLER)
-      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidType.BUCKET_VOLUME));
+      .addModule(StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).eachLevel(FluidConstants.BUCKET));
 
     // fishing
     buildModifier(ModifierIds.fishing).levelDisplay(ModifierLevelDisplay.NO_LEVELS).addModule(FishingModule.INSTANCE).addModule(ShowInteractionSourceModule.INSTANCE);
@@ -1338,7 +1339,7 @@ public class ModifierProvider extends AbstractModifierProvider {
       .addModule(MobEffectModule.builder(MobEffects.WITHER).level(RandomLevelingValue.flat(1)).time(RandomLevelingValue.flat(120)).chance(LevelingValue.eachLevel(0.1f)).targetSelf(true).counterDurabilityUsage(0).buildCounter());
 
     // traits - tier 4
-    buildModifier(ModifierIds.overburn).addModules(OverburnModule.INSTANCE, StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).flat(FluidType.BUCKET_VOLUME), ToolTankHelper.TANK_HANDLER);
+    buildModifier(ModifierIds.overburn).addModules(OverburnModule.INSTANCE, StatBoostModule.add(ToolTankHelper.CAPACITY_STAT).flat(FluidConstants.BUCKET), ToolTankHelper.TANK_HANDLER);
     buildModifier(ModifierIds.overlord)
       .addModule(StatCopyModule.builder(OverslimeModule.OVERSLIME_STAT, ToolStats.DURABILITY).eachLevel(0.1f))
       .addModule(StatBoostModule.multiplyBase(ToolStats.DURABILITY).levelRange(1, 6).eachLevel(-0.15f))

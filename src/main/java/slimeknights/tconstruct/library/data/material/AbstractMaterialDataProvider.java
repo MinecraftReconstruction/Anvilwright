@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -34,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /**
  * Extendable material provider, useful for addons
@@ -67,7 +67,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   /** Boolean just in case material stats run first */
   private boolean addMaterialsRun = false;
 
-  public AbstractMaterialDataProvider(PackOutput packOutput) {
+  public AbstractMaterialDataProvider(FabricDataOutput packOutput) {
     super(packOutput, Target.DATA_PACK, MaterialManager.FOLDER, MaterialManager.GSON);
   }
 

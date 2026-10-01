@@ -19,6 +19,15 @@ transitive-accessible field net/minecraft/world/item/crafting/FireworkStarRecipe
 # (Forge exposed this through its access transformer, Fabric uses the access widener)
 transitive-accessible field net/minecraft/world/level/block/MangrovePropaguleBlock SHAPE_PER_AGE [Lnet/minecraft/world/phys/shapes/VoxelShape;
 
+# Thrown trident - throwing tools (upstream has these in META-INF/accesstransformer.cfg)
+transitive-accessible field net/minecraft/world/entity/projectile/ThrownTrident tridentItem Lnet/minecraft/world/item/ItemStack;
+transitive-accessible field net/minecraft/world/entity/projectile/ThrownTrident dealtDamage Z
+transitive-accessible field net/minecraft/world/entity/projectile/ThrownTrident ID_LOYALTY Lnet/minecraft/network/syncher/EntityDataAccessor;
+transitive-accessible field net/minecraft/world/entity/projectile/ThrownTrident ID_FOIL Lnet/minecraft/network/syncher/EntityDataAccessor;
+transitive-extendable method net/minecraft/world/entity/projectile/ThrownTrident getPickupItem ()Lnet/minecraft/world/item/ItemStack;
+# changing despawn duration for thrown tools
+transitive-accessible field net/minecraft/world/entity/projectile/AbstractArrow life I
+
 # Tile entity type injection
 transitive-accessible field net/minecraft/world/level/block/entity/BlockEntityType validBlocks Ljava/util/Set;
 

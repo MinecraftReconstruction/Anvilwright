@@ -3,7 +3,6 @@ package slimeknights.tconstruct.library.data.tinkering;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -20,13 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data provider for {@link EquipmentJson} */
 public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   private final Map<String, EquipmentJson> equipment = new HashMap<>();
   private final String modId;
 
-  public AbstractMobEquipmentProvider(PackOutput output, String modId) {
+  public AbstractMobEquipmentProvider(FabricDataOutput output, String modId) {
     super(output, Target.DATA_PACK, MobEquipmentManager.FOLDER, JsonHelper.DEFAULT_GSON);
     this.modId = modId;
   }

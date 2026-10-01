@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.recipe.data.AbstractRecipeBuilder;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
@@ -48,6 +49,12 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
    */
   public static MeltingFuelBuilder fuel(FluidStack fluid, int duration) {
     return fuel(FluidIngredient.of(fluid), duration, FluidVariantAttributes.getTemperature(fluid.getType()) - 300);
+  }
+
+  /** Setups the builder for solid fuel, which has no fluid input */
+  @Internal
+  public static MeltingFuelBuilder solid(int temperature) {
+    return fuel(FluidIngredient.EMPTY, 0, temperature);
   }
 
   @Override

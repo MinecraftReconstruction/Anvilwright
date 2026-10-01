@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import slimeknights.mantle.registration.object.FlowingFluidObject;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.client.model.FluidContainerModel;
@@ -33,7 +34,10 @@ public class FluidClientEvents extends ClientEventBase {
   }
 
   private static void setTranslucent(FluidObject<?> fluid) {
-    BlockRenderLayerMap.INSTANCE.putFluid(fluid.getStill(), RenderType.translucent());
-    BlockRenderLayerMap.INSTANCE.putFluid(fluid.getFlowing(), RenderType.translucent());
+    BlockRenderLayerMap.INSTANCE.putFluid(fluid.get(), RenderType.translucent());
+    // flowing fluids render with their own fluid, so they need the layer as well
+    if (fluid instanceof FlowingFluidObject<?> flowing) {
+      BlockRenderLayerMap.INSTANCE.putFluid(flowing.getFlowing(), RenderType.translucent());
+    }
   }
 }

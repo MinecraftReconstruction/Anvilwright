@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.common.data.loot;
 
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.level.material.Fluids;
@@ -33,10 +32,12 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Add all relevant loot to loot tables */
 public class LootTableInjectionProvider extends AbstractLootTableInjectionProvider {
-  public LootTableInjectionProvider(PackOutput packOutput) {
+  public LootTableInjectionProvider(FabricDataOutput packOutput) {
     super(packOutput, TConstruct.MOD_ID);
   }
 
@@ -166,7 +167,7 @@ public class LootTableInjectionProvider extends AbstractLootTableInjectionProvid
     }
 
     // swashers are found in the ocean in all sorts of places, maybe there were pirates once
-    LootItemConditionalFunction.Builder<?> setFluid = SetFluidLootFunction.builder(new FluidStack(Fluids.LAVA, FluidType.BUCKET_VOLUME));
+    LootItemConditionalFunction.Builder<?> setFluid = SetFluidLootFunction.builder(new FluidStack(Fluids.LAVA, FluidConstants.BUCKET));
     injectChest("buried_treasure")
       .addToPool("pool3", LootItem.lootTableItem(TinkerTools.swasher.get())
                                   .setWeight(2) // 50% chance because the vanilla stuff in that table is trash anyways

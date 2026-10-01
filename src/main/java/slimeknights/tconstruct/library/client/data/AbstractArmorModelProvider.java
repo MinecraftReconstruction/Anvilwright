@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.library.client.data;
 
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import slimeknights.mantle.data.GenericDataProvider;
@@ -15,12 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 /** Data provider for armor models */
 public abstract class AbstractArmorModelProvider extends GenericDataProvider {
   private final Map<ResourceLocation,ArmorModel> models = new HashMap<>();
 
-  public AbstractArmorModelProvider(PackOutput packOutput) {
+  public AbstractArmorModelProvider(FabricDataOutput packOutput) {
     super(packOutput, Target.RESOURCE_PACK, ArmorModelManager.FOLDER);
   }
 

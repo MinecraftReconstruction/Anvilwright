@@ -66,7 +66,7 @@ public class PotionFluidType extends FluidType {
 
   /** Creates a fluid output for the given potion */
   @SuppressWarnings("deprecation")  // forge registries have nullable keys, like why would you want that?
-  public static FluidOutput potionResult(Potion potion, int size) {
+  public static FluidOutput potionResult(Potion potion, long size) {
     CompoundTag tag = null;
     if (potion != Potions.EMPTY) {
       tag = potionTag(BuiltInRegistries.POTION.getKey(potion));

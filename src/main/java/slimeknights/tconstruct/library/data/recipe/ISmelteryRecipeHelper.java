@@ -334,7 +334,7 @@ public interface ISmelteryRecipeHelper extends ICastCreationHelper {
    * @param recipeName   Name of the recipe for output
    * @param optional     If true, conditions the recipe on the tag
    */
-  default void tagCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, int amount, CastItemObject cast, String tagName, String recipeName, boolean optional) {
+  default void tagCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, long amount, CastItemObject cast, String tagName, String recipeName, boolean optional) {
     tagCasting(consumer, fluid, false, amount, cast, tagName, recipeName, optional);
   }
 

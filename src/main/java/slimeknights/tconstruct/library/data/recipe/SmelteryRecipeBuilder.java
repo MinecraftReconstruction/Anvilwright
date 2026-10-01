@@ -97,10 +97,10 @@ public class SmelteryRecipeBuilder {
   private OreRateType oreRate = null;
   /** Base unit value for builder */
   @Setter
-  private int baseUnit = 0;
+  private long baseUnit = 0;
   /** Base unit value for builder */
   @Setter
-  private int damageUnit = 1;
+  private long damageUnit = 1;
 
   /* Constructors */
 
@@ -171,7 +171,7 @@ public class SmelteryRecipeBuilder {
 
   /** Creates a recipe result for melting */
   @CheckReturnValue
-  private FluidOutput result(int amount) {
+  private FluidOutput result(long amount) {
     if (fluidObject != null) {
       return fluidObject.result(amount);
     }
@@ -184,7 +184,7 @@ public class SmelteryRecipeBuilder {
 
   /** Creates an ingredient input for casting */
   @CheckReturnValue
-  private FluidIngredient ingredient(int amount) {
+  private FluidIngredient ingredient(long amount) {
     if (fluidObject != null) {
       return fluidObject.ingredient(amount);
     }
@@ -230,8 +230,8 @@ public class SmelteryRecipeBuilder {
   }
 
   /** Gets the units for a damagable melting recipe */
-  private int[] damageUnits() {
-    int[] units = new int[1 + unitByproducts.length];
+  private long[] damageUnits() {
+    long[] units = new long[1 + unitByproducts.length];
     units[0] = damageUnit;
     for (int i = 0; i < unitByproducts.length; i++) {
       units[i+1] = unitByproducts[i].getDamageUnit();

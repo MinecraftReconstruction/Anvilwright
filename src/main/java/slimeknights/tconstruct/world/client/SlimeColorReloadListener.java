@@ -10,13 +10,12 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import java.io.IOException;
-import slimeknights.tconstruct.shared.block.SlimeType;
 
 /**
  * Color reload listener for all slime foliage types
  */
 public class SlimeColorReloadListener extends SimplePreparableReloadListener<int[]> implements IdentifiableResourceReloadListener {
-  private final SlimeType color;
+  private final FoliageType color;
   private final ResourceLocation path;
   public SlimeColorReloadListener(FoliageType color) {
     this.color = color;

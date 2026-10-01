@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static slimeknights.tconstruct.library.tools.capability.fluid.ToolTankHelper.TANK_HELPER;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
 /** Module allowing a tool to act as a bucket, placing fluids when sneaking and picking up when not. */
 public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModule, BlockInteractionModifierHook, GeneralInteractionModifierHook, EquipmentChangeModifierHook {
@@ -89,7 +90,7 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
       return InteractionResult.PASS;
     }
     FluidStack fluidStack = TANK_HELPER.getFluid(tool);
-    if (fluidStack.getAmount() < FluidType.BUCKET_VOLUME) {
+    if (fluidStack.getAmount() < FluidConstants.BUCKET) {
       return InteractionResult.PASS;
     }
     Fluid fluid = fluidStack.getFluid();
@@ -148,7 +149,7 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
 
     // if we placed something, consume fluid
     if (placed) {
-      fluidStack.shrink(FluidType.BUCKET_VOLUME);
+      fluidStack.shrink(FluidConstants.BUCKET);
       TANK_HELPER.setFluid(tool, fluidStack);
       return InteractionResult.SUCCESS;
     }
@@ -164,7 +165,7 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
     // need at least a bucket worth of empty space in a fluid we can pickup, and cannot have NBT on the stored fluid
     FluidStack fluidStack = TANK_HELPER.getFluid(tool);
     Fluid currentFluid = fluidStack.getFluid();
-    if (fluidStack.hasTag() || TANK_HELPER.getCapacity(tool) - fluidStack.getAmount() < FluidType.BUCKET_VOLUME || !fluidStack.isEmpty() && !fluids.matches(currentFluid)) {
+    if (fluidStack.hasTag() || TANK_HELPER.getCapacity(tool) - fluidStack.getAmount() < FluidConstants.BUCKET || !fluidStack.isEmpty() && !fluids.matches(currentFluid)) {
       return InteractionResult.PASS;
     }
     // have to trace to find the fluid, ensure we can edit the position
@@ -199,9 +200,9 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
           // set the fluid if empty, increase the fluid if filled
           if (!world.isClientSide) {
             if (fluidStack.isEmpty()) {
-              TANK_HELPER.setFluid(tool, new FluidStack(pickedUpFluid, FluidType.BUCKET_VOLUME));
+              TANK_HELPER.setFluid(tool, new FluidStack(pickedUpFluid, FluidConstants.BUCKET));
             } else if (pickedUpFluid == currentFluid) {
-              fluidStack.grow(FluidType.BUCKET_VOLUME);
+              fluidStack.grow(FluidConstants.BUCKET);
               TANK_HELPER.setFluid(tool, fluidStack);
             } else {
               TConstruct.LOG.error("Picked up a fluid {} that does not match the current fluid state {}, this should not happen", pickedUpFluid, fluidState.getType());
