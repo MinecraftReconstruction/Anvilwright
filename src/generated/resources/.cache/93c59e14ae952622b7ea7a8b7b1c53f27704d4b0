@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.952912	Hephaestus/Tags for minecraft:damage_type
+// 1.20.1	2026-10-01T15:46:16.240681	Hephaestus/Tags for minecraft:damage_type
 6e6291f6e35f0cf4355ed42046abab1d828679eb data/minecraft/tags/damage_type/bypasses_armor.json
 a4e2d18e45a992de04d7f293c1a0dba52fb6b05a data/minecraft/tags/damage_type/bypasses_effects.json
 898bd2eb705d936aaf1449ce93ced03fee20e38f data/minecraft/tags/damage_type/is_explosion.json

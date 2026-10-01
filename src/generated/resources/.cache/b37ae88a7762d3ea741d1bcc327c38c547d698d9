@@ -1,6 +1,6 @@
-// 1.20.1	2026-10-01T15:40:56.921677	Hephaestus/Tinkers' Construct Tool Recipes
-0d9795ea25f22cd0793d487bc101e9d31e7ba12e data/tconstruct/recipes/smeltery/casts/sand/molding/adze_head.json
+// 1.20.1	2026-10-01T15:46:16.228817	Hephaestus/Tinkers' Construct Tool Recipes
 bf1bb96088d0f02f31f254a2a344075fbd2bfa62 data/tconstruct/recipes/smeltery/casts/red_sand/builder_block/tough_binding.json
+0d9795ea25f22cd0793d487bc101e9d31e7ba12e data/tconstruct/recipes/smeltery/casts/sand/molding/adze_head.json
 8e2a3ec8b26997f2296d3a30553ae825d14df434 data/tconstruct/recipes/tools/parts/casting/fake_ingot_composite.json
 96e060b280511dbc0be88e34b03da2362ba889ef data/tconstruct/recipes/tools/armor/slime_skull/swapping/knightmetal.json
 59538380ddc90a57d5d65a6a74024e8b2a198e31 data/tconstruct/recipes/smeltery/casts/sand/builder_cast/leggings_plating.json
@@ -8,8 +8,8 @@ bf1bb96088d0f02f31f254a2a344075fbd2bfa62 data/tconstruct/recipes/smeltery/casts/
 65e28d60f02d8c5a9c3f4ca26ee773e2439fa689 data/tconstruct/recipes/tools/armor/slime_skull/swapping/copper.json
 6a27c8968e441ee1792a2bc527469018c30c6f87 data/tconstruct/recipes/tools/building/dagger.json
 3464a76593a84cf1821280c164e428241ab61f4e data/tconstruct/recipes/smeltery/casts/sand/builder_cast/broad_axe_head.json
-8a83c1c12babdb64b983bff8f44219cef03ead79 data/tconstruct/recipes/tools/building/broad_axe.json
 2c1077bb3734a688299a3e11ee586460e2dfa58f data/tconstruct/recipes/smeltery/casts/sand/builder_cast/hammer_head.json
+8a83c1c12babdb64b983bff8f44219cef03ead79 data/tconstruct/recipes/tools/building/broad_axe.json
 46bae23a3b54b5a08deb60bf658d1b128e912113 data/tconstruct/recipes/smeltery/casts/red_sand/molding/helmet_plating.json
 dd8d33a36848ea21d42d3f0a24da8a1dba52282a data/tconstruct/recipes/smeltery/casts/sand/builder_cast/chestplate_plating.json
 f50aed035d7b59e3f0e131c2aa509497aaa4ad84 data/tconstruct/recipes/tools/parts/casting/small_axe_head_sand_cast.json
@@ -47,8 +47,8 @@ be92cc8f547306e565006474e9d38a9a942e11e0 data/tconstruct/recipes/smeltery/casts/
 71e30a6155c9007415fac57eed6c7a98597a4da7 data/tconstruct/recipes/tools/recycling/melting_pan.json
 5dba224be9744d9dea3a1a5c65bfcdf51355750d data/tconstruct/recipes/smeltery/casts/red_sand/builder_block/leggings_plating.json
 76c9c2d1b185a9ab9718d779460f58a8024cc012 data/tconstruct/recipes/tools/parts/casting/broad_axe_head_composite.json
-4156b50df3cff4ef21664784430e13942b5c69de data/tconstruct/recipes/tools/armor/travelers/chestplate_leather.json
 9e75f4b3e9a991e58edec2aed4ff77de8800f5d4 data/tconstruct/recipes/smeltery/casts/red_sand/molding/hammer_head.json
+4156b50df3cff4ef21664784430e13942b5c69de data/tconstruct/recipes/tools/armor/travelers/chestplate_leather.json
 7872cd0c1b38ed62fdbbd0064fc9c40fa5078c13 data/tconstruct/recipes/smeltery/casts/red_sand/builder_block/tool_handle.json
 bf05ab32ca0a678d3322234d4ef9460dafa6ff37 data/tconstruct/recipes/smeltery/casts/red_sand/molding/adze_head.json
 6ac92914fbb248941f36b239d8080dcbac1fce34 data/tconstruct/advancements/recipes/tools/tools/building/ichor_staff.json
@@ -201,8 +201,8 @@ f907107ab1dce7ab461713363dc7d9b1f72219a8 data/tconstruct/recipes/tools/parts/bui
 e93e1a0da703e26a4810eae4445da58dce81bb5f data/tconstruct/recipes/smeltery/casts/red_sand/builder_cast/repair_kit.json
 19b9c2103aa83e01f976725f394c5d29dd1d6b79 data/tconstruct/recipes/tools/parts/builder/bow_grip.json
 2fe259b7edcbc0f69fa19e777e58633aa19edb8d data/tconstruct/recipes/smeltery/casts/sand/molding/leggings_plating.json
-b979ca71e501c60a8bba80ab474067d7bd680206 data/tconstruct/recipes/smeltery/casts/sand/molding/bow_grip.json
 734761c4c2ab42b5332de9e0028c37e9e4243d40 data/tconstruct/recipes/smeltery/casts/sand/builder_block/small_axe_head.json
+b979ca71e501c60a8bba80ab474067d7bd680206 data/tconstruct/recipes/smeltery/casts/sand/molding/bow_grip.json
 b8d01bebbfe21c339ebc22a3e5b39dd197509276 data/tconstruct/recipes/tools/parts/casting/laces_composite.json
 3e2fc8d92fabc427cefc2a038c019d08381d0ba5 data/tconstruct/recipes/smeltery/casts/red_sand/builder_block/bow_grip.json
 c0d6266657dffa75159d7465f1ece678a3b8b264 data/tconstruct/recipes/tools/parts/casting/boots_plating_gold_cast.json
@@ -265,8 +265,8 @@ e868e5b1c4a1ccead40b1f315d6ee57db2d43632 data/tconstruct/recipes/tools/parts/cas
 f3cc295cfeff3b962916dddcf18741d02080a08f data/tconstruct/recipes/smeltery/casts/red_sand/builder_cast/boots_plating.json
 c979902e869fc7dfe6d4bd1afe6b7eb3b1bdf81e data/tconstruct/recipes/smeltery/casts/sand/builder_cast/tough_handle.json
 22ecc6ee4ca6928b8bae07571e8ab62df12b6023 data/tconstruct/advancements/recipes/misc/tools/parts/fake_block_to_ingots.json
-1866dada0dc7153f0df43f6b0bc309510e866660 data/tconstruct/recipes/tools/armor/slime_skull/swapping/ender_pearl.json
 843aa94e18dedd4d4fd5c595c9b01802f97b0e53 data/tconstruct/recipes/tools/parts/casting/fake_ingot_gold_cast.json
+1866dada0dc7153f0df43f6b0bc309510e866660 data/tconstruct/recipes/tools/armor/slime_skull/swapping/ender_pearl.json
 a5efa34d45f9169f2cbacc185c5435b1bcbdf287 data/tconstruct/recipes/tools/armor/slime_skull/ender_pearl.json
 3aaaf9875177ce10f6e71e915d0c00eec6e6cb70 data/tconstruct/recipes/tools/armor/travelers/boots_cuirass.json
 c51e8ec58ac3a6ff912b07d85157a4dd2d6f1feb data/tconstruct/recipes/smeltery/casts/red_sand/builder_block/broad_blade.json

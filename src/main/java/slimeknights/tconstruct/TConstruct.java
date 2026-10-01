@@ -73,6 +73,7 @@ import net.minecraft.world.level.block.Blocks;
 import slimeknights.mantle.registration.RegistrationHelper;
 import slimeknights.tconstruct.common.data.ConfigurationDataProvider;
 import slimeknights.tconstruct.common.data.DamageTypeProvider;
+import slimeknights.tconstruct.common.data.TinkerRegistrySets;
 import slimeknights.tconstruct.common.data.advancement.FunctionProvider;
 import slimeknights.tconstruct.shared.TinkerAttributes;
 import slimeknights.tconstruct.shared.TinkerClient;
@@ -165,6 +166,9 @@ public class TConstruct implements ModInitializer {
   }
 
   public static void gatherData(FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
+    // datapack registry entries (damage types + worldgen) have to be written by a provider, buildRegistry alone
+    // only feeds the lookups used while generating
+    pack.addProvider(TinkerRegistrySets::new);
     BlockTagProvider blockTags = pack.addProvider(BlockTagProvider::new);
     pack.addProvider((output, registriesFuture) -> new ItemTagProvider(output, registriesFuture, blockTags));
     pack.addProvider(FluidTagProvider::new);

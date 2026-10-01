@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.958133	Hephaestus/Tinkers' Construct Block Enchantment Tags
+// 1.20.1	2026-10-01T15:46:16.247025	Hephaestus/Tinkers' Construct Block Enchantment Tags
 84ed90036e24e97c0a9079b460bed1375c6ba7c0 data/tconstruct/tags/enchantment/modifier_like/soulbound.json
 1fb8418a4da4ad8302fd256ca85a427daebc9a7c data/tconstruct/tags/enchantment/modifier_like/revitalizing.json
 55746590dbce5efd739ea7aee15333ed6a863b38 data/tconstruct/tags/enchantment/modifier_like/necrotic.json
@@ -8,11 +8,11 @@
 44bfe87618ca7afb5bcd1019cd1243deac98192b data/tconstruct/tags/enchantment/modifier_like/magnetic.json
 a7c899398ee7d3710e99b380f0ef8c8b9b5e32db data/tconstruct/tags/enchantment/modifier_like/severing.json
 fec30512af6cc41cb77e03a4e9be2370d52da183 data/tconstruct/tags/enchantment/modifier_like/killager.json
+50325919fdf85c7a9657ef4abefe2d6081ec674c data/tconstruct/tags/enchantment/modifier_like/fiery.json
 a2618259db11fc929ced8a60525cf895f7d7179f data/tconstruct/tags/enchantment/modifier_like/experienced.json
 aafd4e4f19831688458238de28248c5a966cbe64 data/tconstruct/tags/enchantment/modifier_like/knockback_resistance.json
 33ff72f11a67a8f6626f489d90905e488c2c3b86 data/tconstruct/tags/enchantment/modifier_like/double_jump.json
 0c539747bde049c97151667d81f4ce954e3ffaab data/tconstruct/tags/enchantment/modifier_like/reflecting.json
-50325919fdf85c7a9657ef4abefe2d6081ec674c data/tconstruct/tags/enchantment/modifier_like/fiery.json
 a32bb20687075a06f6c5fcf90377001191890261 data/tconstruct/tags/enchantment/modifier_like/expanded.json
 6e4169e1106f5599ffd5a0b860ec9a36213da3b4 data/tconstruct/tags/enchantment/modifier_like/reach.json
 4f2b3f1be9fc9a5239ff33aaba88f5d3f8474d45 data/tconstruct/tags/enchantment/modifier_like/autosmelt.json

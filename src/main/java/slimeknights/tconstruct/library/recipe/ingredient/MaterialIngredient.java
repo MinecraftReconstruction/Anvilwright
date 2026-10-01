@@ -254,13 +254,15 @@ public class MaterialIngredient extends NestedIngredient {
 
     @Override
     public FabricMaterialIngredient read(JsonObject json) {
+      // strip our own fabric:type first, otherwise Ingredient.fromJson would dispatch straight back into this
+      // serializer and recurse forever when the material is written inline (no "match" field)
+      if (json.has("fabric:type")) {
+        json.remove("fabric:type");
+      }
       // if we have match, parse as a nested object. Without match, just parse the object as vanilla
       Ingredient ingredient = json.has("match") ? Ingredient.fromJson(json.get("match")) : Ingredient.fromJson(json);
       // the predicate is one of the material predicates, defaulting to any material
       IJsonPredicate<MaterialVariantId> material = MATERIAL_FIELD.get(json);
-      if (json.has("fabric:type")) {
-        json.remove("fabric:type");
-      }
       return new FabricMaterialIngredient(new MaterialIngredient(ingredient, material));
     }
 

@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:40:56.943979	Hephaestus/Tinker's Construct Material Stats
+// 1.20.1	2026-10-01T15:46:16.230816	Hephaestus/Tinker's Construct Material Stats
 a88190a98adcb0f2bb1bfc530790946a09ca9a50 data/tconstruct/tinkering/materials/stats/twisting_vine.json
 2c0f6d7733d3c9d0a0bf9678bef06b05aa90b62a data/tconstruct/tinkering/materials/stats/magnetite.json
 2912ae13f48aa836a80ea52035534a1671469b3c data/tconstruct/tinkering/materials/stats/rock.json
@@ -32,8 +32,8 @@ d69ebb36ea105d3c557ab5c0ae3bc9e03dee2086 data/tconstruct/tinkering/materials/sta
 b9bbd260768155bb806bef2bfad529095044a2bb data/tconstruct/tinkering/materials/stats/copper.json
 6482c80f072fcd71cdb753e88ed21d5c40b77e2f data/tconstruct/tinkering/materials/stats/gold.json
 ddfe217c213335236f1d36f880305a3acdd387de data/tconstruct/tinkering/materials/stats/leather.json
-433a13efad6587ef85c51cde8074e6b5fb53f555 data/tconstruct/tinkering/materials/stats/amethyst_bronze.json
 b0288f9529791cd654c70e75015a1323edd03302 data/tconstruct/tinkering/materials/stats/ancient_hide.json
+433a13efad6587ef85c51cde8074e6b5fb53f555 data/tconstruct/tinkering/materials/stats/amethyst_bronze.json
 b3cc68c7501421727a1a114fa264ebc36808ecb1 data/tconstruct/tinkering/materials/stats/whitestone.json
 d877dcbe17940109d166e4cef179d8108318521a data/tconstruct/tinkering/materials/stats/blood.json
 bdf60538c1232d67aa3e90cf01f956f3793e7833 data/tconstruct/tinkering/materials/stats/bronze.json
@@ -52,8 +52,8 @@ b23a7c6ed53f3774ab2ce5067aef6f23adc8761e data/tconstruct/tinkering/materials/sta
 cc1c33a564ff6bb23b906b954d8a66157990cc61 data/tconstruct/tinkering/materials/stats/vine.json
 73af86028b48c161db3f8085ea5fd9d934816674 data/tconstruct/tinkering/materials/stats/plated_slimewood.json
 ea7aa2e1aba669467b7e8f85f29aaed6a24c6949 data/tconstruct/tinkering/materials/stats/dragon_scale.json
-465a094f18efb62701d04be60e74014167630e1c data/tconstruct/tinkering/materials/stats/slimeskin.json
 9c30f39fd4f20edab385394f1b96c4ade1893510 data/tconstruct/tinkering/materials/stats/cactus.json
+465a094f18efb62701d04be60e74014167630e1c data/tconstruct/tinkering/materials/stats/slimeskin.json
 fa4f80b48528a4db898a44c5deb732928a279227 data/tconstruct/tinkering/materials/stats/cheese.json
 77d9a9f9ca7b3b999d7f2e580d0f8f6df984b7ee data/tconstruct/tinkering/materials/stats/wood.json
 ef0dfa1c5ab2739405521d9ef0839aa030c4cadb data/tconstruct/tinkering/materials/stats/leaves.json
@@ -76,8 +76,8 @@ eb9ef2ac8dc1aa216ef79a198b386ce1b099767f data/tconstruct/tinkering/materials/sta
 9a0140e3b702c519d20bb40883f022fc4310eb99 data/tconstruct/tinkering/materials/stats/blazing_bone.json
 5ce545ed23b8419359f0f7e6ee02dbcfd71de4f2 data/tconstruct/tinkering/materials/stats/ender_pearl.json
 59c46b130c8b3f51c37f00a7ca3527ccaafaf5a4 data/tconstruct/tinkering/materials/stats/obsidian.json
-ec74a87a82edfeee063324aeac0984a0bd1914b1 data/tconstruct/tinkering/materials/stats/blaze.json
 cc261062ae4b441f8d8b2b7e4196283e521aa670 data/tconstruct/tinkering/materials/stats/prismarine.json
+ec74a87a82edfeee063324aeac0984a0bd1914b1 data/tconstruct/tinkering/materials/stats/blaze.json
 56f71ffb72962a7b0cef4ce442375e75db042396 data/tconstruct/tinkering/materials/stats/steel.json
 d4dee79d24c79aa83141f0e9d05af12497bf354c data/tconstruct/tinkering/materials/stats/string.json
 35abe1e00f5f4efaf77eacca2bed75d16cdfd8d5 data/tconstruct/tinkering/materials/stats/electrum.json

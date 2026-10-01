@@ -1,0 +1,6 @@
+{
+  "effects": "burning",
+  "exhaustion": 0.1,
+  "message_id": "tconstruct.player_attack_fire",
+  "scaling": "never"
+}
