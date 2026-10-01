@@ -45,6 +45,9 @@ public class TConstructCommand {
     ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("tool_stat"), ToolStatArgument.class, SingletonArgumentInfo.contextFree(ToolStatArgument::stat));
     ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("modifier"), ModifierArgument.class, SingletonArgumentInfo.contextFree(ModifierArgument::modifier));
     ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("material"), MaterialArgument.class, SingletonArgumentInfo.contextFree(MaterialArgument::material));
+    ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("material_variant"), MaterialVariantArgument.class, SingletonArgumentInfo.contextFree(MaterialVariantArgument::material));
+    ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("material_stat"), MaterialStatsArgument.class, SingletonArgumentInfo.contextFree(MaterialStatsArgument::stats));
+    ArgumentTypeInfos.register(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, TConstruct.resourceString("modifier_hook"), ModifierHookArgument.class, SingletonArgumentInfo.contextFree(ModifierHookArgument::modifierHook));
 
     // add command listener
     CommandRegistrationCallback.EVENT.register(TConstructCommand::registerCommand);
