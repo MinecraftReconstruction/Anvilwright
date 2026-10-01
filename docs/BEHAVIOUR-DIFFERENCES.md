@@ -57,3 +57,10 @@
 
 - 新增一条差异 → 在表格末尾追加，并在提交信息里点名"行为差异"
 - 验证通过某条 → 把"验证状态"改成"已验证（日期 + 验证方式）"，**不要删除该行**
+
+## 移植回归修复记录（非与上游的设计差异）
+
+| # | 位置 | 症状 | 根因 | 修法 | 验证 |
+|---|---|---|---|---|---|
+| R1 | Mantle 的自定义流体渲染层（`MantleRenderTypes`） | 在冶炼炉控制器旁放燃料罐即崩：`shaderInstance is null`（`LevelRenderer.renderLevel` → `RenderType.end` → `VertexBuffer.drawWithShader`）。任何渲染流体的方块实体都会触发（量表/通道/喷嘴/罐/流体炮） | Mantle 的 `MantleShaders.registerShaders` 没有注册到 Fabric 的 `CoreShaderRegistrationCallback`，`fluidShader` 一直是 null，而 `MantleRenderTypes.FLUID` 的 shader 就指向它 | Mantle 侧修复（见其文档 R1）。TCon 侧在开发用冒烟测试里新增 `shaders/` 两项：断言 `MantleShaders.isRegistered()`，并把 `FLUID` / `SMELTERY_FLUID` / `TRANSLUCENT_FULLBRIGHT` 三个渲染层各冲一个零面积 quad（正好走崩溃那条代码路径，失败即崩） | 已验证（2026-10-02：`[smoketest] shaders/ mantle core shaders registered = true`、`flushed ... without crashing`，0 崩溃） |
+| R2 | Porting Lib 依赖版本 | 运行时依赖是**混合版本**：21 个模块 `2.3.16-beta.81`（来自 Mantle），3 个模块 `2.3.15`（beta 删掉了 `brewing`/`client_events`/`items`，由 TCon 的稳定版 pin 补上） | Mantle 为了 `OverlayRenderCallback.Types.HOTBAR`（2.3.16-beta 才有的枚举值）把整棵依赖树拉到了 beta | Mantle 改用稳定版 `2.3.15+1.20.1`，副手攻击指示器的 hotbar 那一半改由 Fabric 的 `HudRenderCallback` 绘制（顺带少一条 Porting Lib 依赖）；现在 26 个模块全是 `2.3.15+1.20.1` | 已验证（2026-10-02：编译零错误、runData 绿、客户端日志里 `2.3.16-beta` 出现 0 次） |
