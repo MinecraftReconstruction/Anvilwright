@@ -9,9 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.common.crafting.VanillaIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.JsonUtils;
 
@@ -41,7 +39,7 @@ public class NoContainerIngredient extends NestedIngredient {
     // if we are a vanilla ingredient, and not an array ingredient, serialize into the ingredient directly
     if (nested.isVanilla() && nestedElement.isJsonObject()) {
       JsonObject nestedObject = nestedElement.getAsJsonObject();
-      nestedObject.addProperty("type", ID.toString());
+      nestedObject.addProperty("fabric:type", ID.toString());
       return nestedObject;
     }
     // if we have an array or a type, then serialize nested
@@ -51,27 +49,27 @@ public class NoContainerIngredient extends NestedIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
+  public CustomIngredientSerializer<?> getSerializer() {
     return Serializer.INSTANCE;
   }
 
-  public enum Serializer implements IIngredientSerializer<NoContainerIngredient> {
+  public enum Serializer implements CustomIngredientSerializer<NoContainerIngredient> {
     INSTANCE;
 
     @Override
-    public NoContainerIngredient parse(JsonObject json) {
+    public NoContainerIngredient read(JsonObject json) {
       // if we have match, parse as a nested object. Without match, just parse the object as vanilla
       Ingredient ingredient;
       if (json.has("match")) {
-        ingredient = CraftingHelper.getIngredient(json.get("match"), false);
+        ingredient = Ingredient.fromJson(json.get("match"), false);
       } else {
-        ingredient = VanillaIngredientSerializer.INSTANCE.parse(json);
+        ingredient = Ingredient.fromJson(json);
       }
       return new NoContainerIngredient(ingredient);
     }
 
     @Override
-    public NoContainerIngredient parse(FriendlyByteBuf buffer) {
+    public NoContainerIngredient read(FriendlyByteBuf buffer) {
       return new NoContainerIngredient(Ingredient.fromNetwork(buffer));
     }
 

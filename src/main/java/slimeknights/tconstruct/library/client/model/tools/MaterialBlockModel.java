@@ -18,7 +18,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.SimpleBakedModel;
+import slimeknights.mantle.client.model.util.MantleBakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -28,12 +28,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.IQuadTransformer;
 import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.client.model.ModelProperty;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
+import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
 import org.jetbrains.annotations.NotNull;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.client.model.RetexturedModel;
@@ -67,6 +65,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext.QuadTransform;
 
 /**
  * Model that handles dynamic materials using the block model elements style.
@@ -111,12 +111,12 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
   }
 
   @Override
-  public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context) {
+  public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, BlockModel context) {
     model.resolveParents(modelGetter, context);
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
+  public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location, boolean isGui3d) {
     BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides, location);
     List<Set<String>> parts = this.parts.stream().map(part -> RetexturedModel.getAllRetextured(owner, model, part)).toList();
 
@@ -139,13 +139,13 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
 
   /** Common logic between all variants of baking */
   private static abstract class AbstractBaked<T,P> extends DynamicBakedWrapper<BakedModel> {
-    protected final IGeometryBakingContext owner;
+    protected final BlockModel owner;
     protected final SimpleBlockModel model;
     protected final ModelState transform;
     protected final boolean particleRetextured;
     protected final ModelProperty<P> property;
 
-    private AbstractBaked(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, boolean particleRetextured, ModelProperty<P> property) {
+    private AbstractBaked(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, boolean particleRetextured, ModelProperty<P> property) {
       super(original);
       this.owner = owner;
       this.model = model;
@@ -201,7 +201,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
       }
 
       // create context to swap the textures
-      IGeometryBakingContext retextureContext = new ExtraTextureContext(owner, replacements);
+      BlockModel retextureContext = new ExtraTextureContext(owner, replacements);
 
       // if no parts need colors, we can just use standard baking
       if (tints.isEmpty()) {
@@ -210,10 +210,10 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
 
       // need to tint or apply light to some textures
       TextureAtlasSprite particle = spriteGetter.apply(owner.getMaterial("particle"));
-      SimpleBakedModel.Builder builder = SimpleBlockModel.bakedBuilder(owner, originalModel.getOverrides()).particle(particle);
+      MantleBakedModel.Builder builder = SimpleBlockModel.bakedBuilder(owner, originalModel.getOverrides(), false).particle(particle);
       List<BlockElement> elements = model.getElements();
       int size = elements.size();
-      IQuadTransformer quadTransformer = SimpleBlockModel.applyTransform(transform, owner.getRootTransform());
+      QuadTransform quadTransformer = SimpleBlockModel.applyTransform(transform, owner.getRootTransform());
       Transformation transformation = transform.getRotation();
       boolean uvlock = transform.isUvLocked();
       for (int i = 0; i < size; i++) {
@@ -230,7 +230,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
         }
         // apply color if we have it
         if (tint != null) {
-          IQuadTransformer partTransformer = tint.color() == -1 ? quadTransformer : quadTransformer.andThen(ColoredBlockModel.applyColorQuadTransformer(tint.color()));
+          QuadTransform partTransformer = tint.color() == -1 ? quadTransformer : ColoredBlockModel.mergeTransform(quadTransformer, ColoredBlockModel.applyColorQuadTransformer(tint.color()));
           ColoredBlockModel.bakePart(builder, retextureContext, part, tint.emissivity(), spriteGetter, transformation, partTransformer, uvlock, BAKE_LOCATION);
         } else {
           SimpleBlockModel.bakePart(builder, retextureContext, part, spriteGetter, transform, quadTransformer, BAKE_LOCATION);
@@ -298,7 +298,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
     private final List<Set<String>> parts;
     @Getter
     private final ItemOverrides overrides;
-    private BakedTool(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, List<Set<String>> parts, boolean particleRetextured) {
+    private BakedTool(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, List<Set<String>> parts, boolean particleRetextured) {
       super(original, owner, model, transform, particleRetextured, ModelProperties.MATERIALS);
       this.parts = parts;
       this.overrides = new MaterialsOverrides(this, original.getOverrides());
@@ -332,7 +332,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
     protected final Set<String> retexture;
     private final Function<MaterialVariantId, BakedModel> baker = this::bakeWith;
 
-    private BakedSingleMaterial(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, Set<String> retexture, ModelProperty<P> property) {
+    private BakedSingleMaterial(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, Set<String> retexture, ModelProperty<P> property) {
       super(original, owner, model, transform, retexture.contains("particle"), property);
       this.retexture = retexture;
     }
@@ -355,7 +355,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
   private static class SimpleBakedTool extends BakedSingleMaterial<MaterialIdNBT> {
     @Getter
     private final ItemOverrides overrides;
-    private SimpleBakedTool(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
+    private SimpleBakedTool(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
       super(original, owner, model, transform, retexture, ModelProperties.MATERIALS);
       this.overrides = new MaterialsOverrides(this, original.getOverrides());
     }
@@ -370,7 +370,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
   private static class BakedPart extends BakedSingleMaterial<MaterialVariantId> {
     @Getter
     private final ItemOverrides overrides;
-    private BakedPart(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
+    private BakedPart(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
       super(original, owner, model, transform, retexture, ModelProperties.MATERIAL);
       this.overrides = new MaterialOverrides(original.getOverrides());
     }
@@ -402,7 +402,7 @@ public class MaterialBlockModel implements IUnbakedGeometry<MaterialBlockModel> 
     private final Function<ResourceLocation, BakedModel> blockBaker = this::bakeWithBlock;
     @Getter
     private final MaterialBlockOverrides overrides;
-    private BakedAnvil(BakedModel original, IGeometryBakingContext owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
+    private BakedAnvil(BakedModel original, BlockModel owner, SimpleBlockModel model, ModelState transform, Set<String> retexture) {
       super(original, owner, model, transform, retexture, ModelProperties.MATERIAL);
       this.overrides = new MaterialBlockOverrides();
     }

@@ -16,7 +16,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import slimeknights.mantle.recipe.ingredient.AbstractIngredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredientSerializer;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -94,26 +94,26 @@ public class BlockTagIngredient extends AbstractIngredient {
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
+  public CustomIngredientSerializer<?> getSerializer() {
     return Serializer.INSTANCE;
   }
 
   @Override
   public JsonElement toJson() {
     JsonObject json = new JsonObject();
-    json.addProperty("type", Serializer.ID.toString());
+    json.addProperty("fabric:type", Serializer.ID.toString());
     json.add("tag", Loadables.BLOCK_TAG.serialize(tag));
     return json;
   }
 
   /** Serializer instance */
-  public enum Serializer implements IIngredientSerializer<Ingredient> {
+  public enum Serializer implements CustomIngredientSerializer<Ingredient> {
     INSTANCE;
 
     public static final ResourceLocation ID = TConstruct.getResource("block_tag");
 
     @Override
-    public Ingredient parse(JsonObject json) {
+    public Ingredient read(JsonObject json) {
       return new BlockTagIngredient(Loadables.BLOCK_TAG.getIfPresent(json, "tag"));
     }
 
@@ -124,7 +124,7 @@ public class BlockTagIngredient extends AbstractIngredient {
     }
 
     @Override
-    public Ingredient parse(FriendlyByteBuf buffer) {
+    public Ingredient read(FriendlyByteBuf buffer) {
       int size = buffer.readVarInt();
       return Ingredient.fromValues(Stream.generate(() -> new Ingredient.ItemValue(buffer.readItem())).limit(size));
     }

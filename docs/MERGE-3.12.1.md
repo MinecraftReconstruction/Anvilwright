@@ -200,6 +200,29 @@ NoContainerIngredient,ToolHookIngredient,NestedIngredient}.java`，它们用 For
 
 ### 2. 客户端模型 API（B 类里约 45 个错误，3 个文件）
 
+**进度**：`UniqueGuiModel` **已移植完**（1272 → 1263）。它的模板是我们端口里的
+`TankModel.BakedGuiUniqueModel`：Fabric 的 `ForwardingBakedModel`（`wrapped` 字段）+
+Porting Lib 的 `TransformTypeDependentItemBakedModel`（**4 参数**的
+`applyTransform(ItemDisplayContext, PoseStack, boolean, DefaultTransform)`），
+`DefaultTransform` 是那个接口的嵌套类型、不用 import。bake 签名是
+`bake(BlockModel owner, ModelBaker, Function<Material,TextureAtlasSprite>, ModelState, ItemOverrides, ResourceLocation, boolean isGui3d)`。
+
+**`FluidContainerModel`（20 个错误）比预想的深**：它是 Forge 的
+`net.minecraftforge.client.model.DynamicFluidContainerModel` 的**整份克隆**——这个类 vanilla 根本没有，
+所以要自己实现流体容器模型那套逻辑。涉及的 Forge 专有物：
+`RenderTypeGroup` / `DynamicFluidContainerModel.getLayerRenderTypes(boolean)` /
+`IClientItemExtensions`（`net.minecraftforge.client.extensions.common`）。
+其中 render type 部分可以照 Mantle 的做法用 `RenderTypeUtil.get(id)`；
+`IClientItemExtensions` 要看我们端口里 `library/client/item/ModifiableItemClientExtension` 是怎么处理的。
+
+**`MaterialBlockModel`（15 个错误）**：除了 `IGeometryBakingContext`，它还依赖 **旧版 Mantle 的模型 API**
+（`ExtraTextureContext`、`SimpleBlockModel.bakeDynamic(ctx, transform)`、`bakedBuilder(owner, overrides)`、
+Forge 的 `IQuadTransformer`）。Mantle 1.11 的对应物是：
+`SimpleBlockModel.bakeDynamic(BlockModel owner, ModelState transform)`、
+`SimpleBlockModel.bakedBuilder(BlockModel, ItemOverrides, boolean isGui3d)`、
+Porting Lib 的 `QuadTransformers`/`QuadTransform`（见 `ColoredBlockModel`），
+而 `ExtraTextureContext` **已经不存在**——需要把"替换贴图"改到 sprite getter 那一层。
+
 `library/client/model/tools/MaterialBlockModel.java`、`library/client/model/UniqueGuiModel.java`、
 `library/client/model/FluidContainerModel.java` 都是 3.12 新增文件，用 Forge 的
 `IGeometryBakingContext`（还有 `ExtraTextureContext` 那种"包一层 context 换贴图"的写法）。
