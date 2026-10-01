@@ -2,14 +2,11 @@ package slimeknights.tconstruct.common.data.tags;
 
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.DamageTypeTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
-import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
-import slimeknights.tconstruct.TConstruct;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -74,10 +71,9 @@ import static slimeknights.tconstruct.common.TinkerTags.DamageTypes.PROJECTILE_P
 import static slimeknights.tconstruct.common.TinkerTags.DamageTypes.RUGGED_ATTACKS;
 import static slimeknights.tconstruct.common.TinkerTags.DamageTypes.RUGGED_TERRAIN;
 
-@SuppressWarnings("removal")
 public class DamageTypeTagProvider extends DamageTypeTagsProvider {
-  public DamageTypeTagProvider(PackOutput packOutput, CompletableFuture<Provider> lookup, @Nullable ExistingFileHelper existingFileHelper) {
-    super(packOutput, lookup, TConstruct.MOD_ID, existingFileHelper);
+  public DamageTypeTagProvider(FabricDataOutput packOutput, CompletableFuture<Provider> lookup) {
+    super(packOutput, lookup);
   }
 
   @SuppressWarnings("unchecked")

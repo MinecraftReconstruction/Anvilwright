@@ -16,6 +16,7 @@ import static slimeknights.tconstruct.common.TinkerTags.Fluids.LARGE_GEM_TOOLTIP
 import static slimeknights.tconstruct.common.TinkerTags.Fluids.METAL_TOOLTIPS;
 import static slimeknights.tconstruct.common.TinkerTags.Fluids.SLIME_TOOLTIPS;
 import static slimeknights.tconstruct.common.TinkerTags.Fluids.SMALL_GEM_TOOLTIPS;
+import slimeknights.mantle.datagen.MantleTags;
 
 @SuppressWarnings("removal")
 public class FluidTooltipProvider extends AbstractFluidTooltipProvider {

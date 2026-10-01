@@ -1,16 +1,18 @@
 package slimeknights.tconstruct.library.recipe.casting.material;
 
-import com.google.gson.JsonObject;
-import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import net.minecraft.world.level.material.Fluid;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.mantle.recipe.IMultiRecipe;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariant;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
@@ -24,15 +26,6 @@ import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import slimeknights.mantle.data.loadable.record.RecordLoadable;
-import slimeknights.mantle.data.predicate.IJsonPredicate;
-import slimeknights.mantle.recipe.IMultiRecipe;
-import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.level.material.Fluid;
-import slimeknights.mantle.data.loadable.field.ContextKey;
-import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
-import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 
 /**
  * Casting recipe taking a part of a material and a fluid and outputting the part with a new material
@@ -89,22 +82,85 @@ public class CompositeCastingRecipe extends MaterialCastingRecipe implements IMu
   @Override
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (multiRecipes == null) {
-      RecipeType<?> type = getType();
-      multiRecipes = MaterialCastingLookup
-        .getAllCompositeFluids().stream()
-        .filter(recipe -> {
-          MaterialVariant output = recipe.getOutput();
-          MaterialVariant input = recipe.getInput();
-          return !output.isUnknown() && input != null && !input.isUnknown()
-            && !output.get().isHidden() && !input.get().isHidden() && result.canUseMaterial(output.getId()) && result.canUseMaterial(input.getId());
-        })
-        .map(recipe -> {
-          List<FluidStack> fluids = resizeFluids(recipe.getFluids());
-          long fluidAmount = fluids.stream().mapToLong(FluidStack::getAmount).max().orElse(0);
-          return new DisplayCastingRecipe(type, Collections.singletonList(result.withMaterial(Objects.requireNonNull(recipe.getInput()).getVariant())), fluids, result.withMaterial(recipe.getOutput().getVariant()),
-                                          ICastingRecipe.calcCoolingTime(recipe.getTemperature(), itemCost * fluidAmount), consumed);
-        })
-        .collect(Collectors.toList());
+      List<MaterialFluidRecipe> recipes = MaterialCastingLookup.getSortedCompositeFluids();
+      List<FluidStack> displayFluids = new ArrayList<>(recipes.size());
+      List<ItemStack> displayInputs = new ArrayList<>(recipes.size());
+      List<ItemStack> displayResults = new ArrayList<>(recipes.size());
+      int maxTime = 0;
+      for (MaterialFluidRecipe recipe : MaterialCastingLookup.getAllCompositeFluids()) {
+        MaterialVariant output = recipe.getOutput();
+        MaterialVariantId outputId = output.getVariant();
+        MaterialVariant input = recipe.getInput();
+        if (input == null || !result.canUseMaterial(output.getId()) || !result.canUseMaterial(input.getId()) || !materials.matches(outputId)) {
+          continue;
+        }
+        // filter fluids for the casting stat conflict
+        List<FluidStack> fluids = recipe.getFluids();
+        if (castingStatConflict != null) {
+          // if we require non-casting, filter out all fluids that match a casting recipe
+          fluids = fluids.stream()
+            .filter(fluid -> {
+              MaterialFluidRecipe fluidRecipe = MaterialCastingLookup.getCastingFluid(fluid.getFluid());
+              // its fine if we have a recipe as long as the material is not usable by this part
+              return fluidRecipe == MaterialFluidRecipe.EMPTY || !castingStatConflict.canUseMaterial(fluidRecipe.getOutput().getId());
+            })
+            .map(this::resizeFluid)
+            .toList();
+        } else {
+          fluids = resizeFluids(fluids);
+        }
+        if (fluids.isEmpty()) continue;
+
+        // expand input into a list of variants if no variant is matched
+        MaterialVariantId inputId = input.getVariant();
+        List<ItemStack> inputs;
+        if (inputId.getVariant().isEmpty()) {
+          // skip outputs that are the same variant as the input; those are not valid recipes
+          inputs = MaterialRecipeCache.getVariants(input.getId()).stream().filter(material -> !output.sameVariant(material)).map(result::withMaterial).toList();
+        } else {
+          inputs = List.of(result.withMaterial(inputId.normalizeVariant()));
+        }
+        if (inputs.isEmpty()) continue;
+
+        // store all cooling times now, before we duplicate fluids
+        for (FluidStack fluid : fluids) {
+          // use the maximum time for cooling time. Will be recomputed dynamically but need a fallback
+          int time = ICastingRecipe.calcCoolingTime(recipe.getTemperature(), fluid.getAmount());
+          if (time > maxTime) {
+            maxTime = time;
+          }
+        }
+
+        // its important that input and fluids are the same size. If not, pad the smaller one by cycling elements
+        int inputSize = inputs.size();
+        int fluidSize = fluids.size();
+        if (inputSize != fluidSize) {
+          if (inputSize < fluidSize) {
+            inputs = growList(inputs, fluidSize);
+          } else {
+            fluids = growList(fluids, inputSize);
+          }
+        }
+        // add items to the lists
+        ItemStack result = this.result.withMaterial(outputId);
+        for (int i = 0; i < inputs.size(); i++) {
+          displayResults.add(result);
+        }
+        displayFluids.addAll(fluids);
+        displayInputs.addAll(inputs);
+      }
+
+      // if no fluids, nothing to display
+      if (displayFluids.isEmpty()) {
+        multiRecipes = List.of();
+      } else {
+        multiRecipes = List.of(DisplayCastingRecipe.from(this)
+          .casts(List.copyOf(displayInputs)).consumed()
+          .fluids(List.copyOf(displayFluids))
+          .results(List.copyOf(displayResults))
+          .coolingTime(maxTime).materialCasting(true)
+          .build());
+      }
     }
     return multiRecipes;
   }

@@ -84,18 +84,15 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import static slimeknights.tconstruct.TConstruct.getResource;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
 import net.minecraft.world.item.CreativeModeTab;
+import slimeknights.mantle.data.predicate.block.BlockPredicate;
+import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
+import slimeknights.mantle.data.predicate.entity.MobTypePredicate;
 
 /**
  * Contains items and blocks and stuff that is shared by multiple modules, but might be required individually
  */
 @SuppressWarnings("unused")
 public final class TinkerCommons extends TinkerModule {
-  /** Creative tab for general items, or those that lack another tab */
-  public static final RegistryObject<CreativeModeTab> tabGeneral = CREATIVE_TABS.register(
-    "general", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "general"))
-                                    .icon(() -> new ItemStack(TinkerCommons.materialsAndYou))
-                                    .displayItems(TinkerCommons::addTabItems)
-                                    .build());
 
   /*
    * Blocks
@@ -195,14 +192,9 @@ public final class TinkerCommons extends TinkerModule {
     ResourceConditions.register(TagIntersectionPresentCondition.NAME, TinkerConditons::tagIntersectionPresentPredicate);
     ResourceConditions.register(TagDifferencePresentCondition.NAME, TinkerConditons::tagDifferencePresentPredicate);
     // block predicates
-    BlockPredicate.LOADER.register(TConstruct.getResource("and"), BlockPredicate.AND);
-    BlockPredicate.LOADER.register(TConstruct.getResource("or"), BlockPredicate.OR);
-    BlockPredicate.LOADER.register(TConstruct.getResource("inverted"), BlockPredicate.INVERTED);
+    // and/or/inverted are registered by Mantle's predicate registry (JSON addons use the common names)
     BlockPredicate.LOADER.register(TConstruct.getResource("requires_tool"), BlockPredicate.REQUIRES_TOOL.getLoader());
     // entity predicates
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("and"), LivingEntityPredicate.AND);
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("or"), LivingEntityPredicate.OR);
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("inverted"), LivingEntityPredicate.INVERTED);
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("any"), LivingEntityPredicate.ANY.getLoader());
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("fire_immune"), LivingEntityPredicate.FIRE_IMMUNE.getLoader());
     LivingEntityPredicate.LOADER.register(TConstruct.getResource("water_sensitive"), LivingEntityPredicate.WATER_SENSITIVE.getLoader());

@@ -42,6 +42,7 @@ import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
+import slimeknights.mantle.datagen.MantleTags;
 
 public class ChannelBlock extends Block implements EntityBlock {
 	private static final Component SIDE_IN = TConstruct.makeTranslation("block", "channel.side.in");

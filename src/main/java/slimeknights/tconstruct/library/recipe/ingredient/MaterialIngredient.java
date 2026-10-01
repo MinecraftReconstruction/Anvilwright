@@ -31,6 +31,7 @@ import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.crafting.Ingredient.Value;
+import slimeknights.tconstruct.library.materials.definition.MaterialId;
 
 /**
  * Extension of the vanilla ingredient to display materials on items and support matching by materials
@@ -159,15 +160,13 @@ public class MaterialIngredient extends NestedIngredient {
       if (!MaterialRegistry.isFullyLoaded()) {
         return nested.getItems();
       }
-      // no material? apply all materials for variants
-      Stream<ItemStack> items = Arrays.stream(getPlainMatchingStacks());
-      if (material.equals(WILDCARD)) {
-        items = items.flatMap(stack -> MaterialRegistry.getMaterials().stream()
+      // expand every matching stack into one stack per registry material, then filter by the predicate
+      Stream<ItemStack> items = getMatchingStacks().stream()
+        .flatMap(stack -> MaterialRegistry.getMaterials().stream()
           .map(mat -> IMaterialItem.withMaterial(stack, mat.getIdentifier()))
           .filter(ItemStack::hasTag));
-      } else {
-        // specific material? apply to all stacks
-        items = items.map(stack -> IMaterialItem.withMaterial(stack, this.material)).filter(ItemStack::hasTag);
+      if (material != MaterialPredicate.ANY) {
+        items = items.filter(this::test);
       }
       materialStacks = items.distinct().toArray(ItemStack[]::new);
     }
@@ -175,10 +174,15 @@ public class MaterialIngredient extends NestedIngredient {
   }
 
   @Override
+  public CustomIngredientSerializer<FabricMaterialIngredient> getSerializer() {
+    return Serializer.INSTANCE;
+  }
+
+  @Override
   public JsonElement toJson() {
     JsonElement parent = nested.toJson();
     JsonObject result;
-    if (nested.isVanilla() && parent.isJsonObject()) {
+    if (parent.isJsonObject()) {
       result = parent.getAsJsonObject();
     } else {
       result = new JsonObject();
@@ -186,7 +190,7 @@ public class MaterialIngredient extends NestedIngredient {
     }
     JsonObject object = parent.getAsJsonObject();
     object.addProperty("fabric:type", Serializer.ID.toString());
-    if (material != WILDCARD) {
+    if (material != MaterialPredicate.ANY) {
       object.addProperty("material", material.toString());
     }
     return object;
@@ -201,7 +205,7 @@ public class MaterialIngredient extends NestedIngredient {
     private final MaterialIngredient ingredient;
 
     public FabricMaterialIngredient(Stream<? extends Ingredient.Value> itemLists, MaterialVariantId material) {
-      this.ingredient = new MaterialIngredient(itemLists, material);
+      this.ingredient = new MaterialIngredient(Ingredient.fromValues(itemLists), MaterialPredicate.variant(material));
     }
 
     public FabricMaterialIngredient(MaterialIngredient ingredient) {
@@ -239,6 +243,7 @@ public class MaterialIngredient extends NestedIngredient {
    */
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   public static class Serializer implements CustomIngredientSerializer<FabricMaterialIngredient> {
+    public static final Serializer INSTANCE = new Serializer();
     public static final ResourceLocation ID = TConstruct.getResource("material");
     private static final LoadableField<IJsonPredicate<MaterialVariantId>,MaterialIngredient> MATERIAL_FIELD = new MaterialPredicateField<>("material", i -> i.material);
 
@@ -249,41 +254,36 @@ public class MaterialIngredient extends NestedIngredient {
 
     @Override
     public FabricMaterialIngredient read(JsonObject json) {
-      MaterialId material;
-      if (json.has("material")) {
-        material = new MaterialId(GsonHelper.getAsString(json, "material"));
-      } else {
-        ingredient = VanillaIngredientSerializer.INSTANCE.parse(json);
-      }
-      if (json.has("fabric:type"))
+      // if we have match, parse as a nested object. Without match, just parse the object as vanilla
+      Ingredient ingredient = json.has("match") ? Ingredient.fromJson(json.get("match")) : Ingredient.fromJson(json);
+      // the predicate is one of the material predicates, defaulting to any material
+      IJsonPredicate<MaterialVariantId> material = MATERIAL_FIELD.get(json);
+      if (json.has("fabric:type")) {
         json.remove("fabric:type");
-      return new FabricMaterialIngredient(Stream.of(Ingredient.valueFromJson(json)), material);
+      }
+      return new FabricMaterialIngredient(new MaterialIngredient(ingredient, material));
     }
 
     @Override
     public void write(JsonObject parent, FabricMaterialIngredient ingredient) {
-      if (!parent.isJsonObject()) {
-        throw new JsonIOException("Cannot serialize an array of material ingredients, use CompoundIngredient instead");
-      }
-      parent.addProperty("type", Serializer.ID.toString());
-      if (ingredient.ingredient.material != WILDCARD) {
-        parent.addProperty("material", ingredient.ingredient.material.toString());
-      }
+      parent.addProperty("fabric:type", Serializer.ID.toString());
+      MATERIAL_FIELD.serialize(ingredient.ingredient, parent);
     }
 
     @Override
     public FabricMaterialIngredient read(FriendlyByteBuf buffer) {
-      MaterialVariantId material = Objects.requireNonNull(MaterialVariantId.tryParse(buffer.readUtf()));
-      return new FabricMaterialIngredient(Stream.generate(() -> new ItemValue(buffer.readItem())).limit(buffer.readVarInt()), material);
+      IJsonPredicate<MaterialVariantId> material = MATERIAL_FIELD.decode(buffer);
+      int size = buffer.readVarInt();
+      return new FabricMaterialIngredient(new MaterialIngredient(Ingredient.fromValues(Stream.generate(() -> new ItemValue(buffer.readItem())).limit(size)), material));
     }
 
     @Override
     public void write(FriendlyByteBuf buffer, FabricMaterialIngredient ingredient) {
       buffer.writeResourceLocation(Serializer.ID);
       // write first as the order of the stream is uncertain
-      buffer.writeUtf(ingredient.toVanilla().material.toString());
+      MATERIAL_FIELD.encode(buffer, ingredient.toVanilla());
       // write stacks
-      ItemStack[] items = ingredient.toVanilla().getPlainMatchingStacks();
+      ItemStack[] items = ingredient.toVanilla().getMatchingStacks().toArray(new ItemStack[0]);
       buffer.writeVarInt(items.length);
       for (ItemStack stack : items) {
         buffer.writeItem(stack);

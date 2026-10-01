@@ -45,6 +45,10 @@ public class MaterialPartTextureGenerator extends GenericTextureGenerator {
   private final StatOverride overrides;
 
   public MaterialPartTextureGenerator(FabricDataOutput output, ExistingFileHelper existingFileHelper, AbstractPartSpriteProvider spriteProvider, AbstractMaterialSpriteProvider... materialProviders) {
+    this(output, existingFileHelper, spriteProvider, StatOverride.EMPTY, materialProviders);
+  }
+
+  public MaterialPartTextureGenerator(FabricDataOutput output, ExistingFileHelper existingFileHelper, AbstractPartSpriteProvider spriteProvider, StatOverride overrides, AbstractMaterialSpriteProvider... materialProviders) {
     super(output, FOLDER);
     this.spriteReader = new DataGenSpriteReader(existingFileHelper, FOLDER);
     this.existingFileHelper = existingFileHelper;
@@ -69,7 +73,6 @@ public class MaterialPartTextureGenerator extends GenericTextureGenerator {
 
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
-    List<CompletableFuture<?>> futures = new ArrayList<>();
     runCallbacks(existingFileHelper, null);
     
     // ensure we have parts
@@ -106,10 +109,18 @@ public class MaterialPartTextureGenerator extends GenericTextureGenerator {
         }
       }
     }
-    spriteReader.closeAll();
-    partProvider.cleanCache();
-    runCallbacks(null, null);
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return allOf(tasks).thenRunAsync(() -> {
+      spriteReader.closeAll();
+      partProvider.cleanCache();
+      runCallbacks(null, null);
+    });
+  }
+
+  /** Gets the output path for a given sprite */
+  public static ResourceLocation outputPath(PartSpriteInfo part, MaterialSpriteInfo material) {
+    // path format: pNamespace:pPath_mNamespace_mPath
+    ResourceLocation materialTexture = material.getTexture();
+    return part.getPath().withSuffix("_" + materialTexture.getNamespace() + "_" + materialTexture.getPath());
   }
 
   /**

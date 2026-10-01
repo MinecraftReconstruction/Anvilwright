@@ -44,6 +44,7 @@ import slimeknights.tconstruct.tools.modifiers.loot.HasModifierLootCondition;
 import slimeknights.tconstruct.tools.modifiers.loot.ModifierBonusLootFunction;
 
 import static slimeknights.mantle.Mantle.commonResource;
+import net.minecraft.advancements.critereon.EntityTypePredicate;
 
 public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
   public GlobalLootModifiersProvider(FabricDataOutput output) {
@@ -53,17 +54,17 @@ public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
   @SuppressWarnings("removal")
   @Override
   protected void start() {
-    add("wither_bone", ReplaceItemLootModifier.builder(Ingredient.of(Items.BONE), ItemOutput.fromItem(TinkerMaterials.necroticBone))
+    add("wither_bone", ReplaceItemLootModifier.CODEC, ReplaceItemLootModifier.builder(Ingredient.of(Items.BONE), ItemOutput.fromItem(TinkerMaterials.necroticBone))
       .addCondition(LootTableIdCondition.builder(new ResourceLocation("entities/wither_skeleton")).build())
       .addCondition(ConfigEnabledCondition.WITHER_BONE_DROP)
       .build());
 
     // generic modifier hook
     // TODO: look into migrating this fully to loot tables
-    add("modifier_hook", ModifierLootModifier.builder().addCondition(BlockOrEntityCondition.INSTANCE).build());
+    add("modifier_hook", ModifierLootModifier.CODEC.get(), ModifierLootModifier.builder().addCondition(BlockOrEntityCondition.INSTANCE).build());
 
     // tasty drops more bacon
-    add("tasty_bacon", AddEntryLootModifier.builder(LootItem.lootTableItem(TinkerCommons.bacon))
+    add("tasty_bacon", AddEntryLootModifier.CODEC, AddEntryLootModifier.builder(LootItem.lootTableItem(TinkerCommons.bacon))
       // this target must be a bacon producer
       .addCondition(new HasLootContextSetCondition(LootContextParamSets.ENTITY))
       .addCondition(LootItemEntityPropertyCondition.hasProperties(EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(TinkerTags.EntityTypes.BACON_PRODUCER))).build())
@@ -75,7 +76,7 @@ public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
       .build());
 
     // chrysophilite modifier hook
-    add("chrysophilite_modifier", AddEntryLootModifier.builder(LootItem.lootTableItem(Items.GOLD_NUGGET))
+    add("chrysophilite_modifier", AddEntryLootModifier.CODEC, AddEntryLootModifier.builder(LootItem.lootTableItem(Items.GOLD_NUGGET))
       .addCondition(new BlockTagLootCondition(TinkerTags.Blocks.CHRYSOPHILITE_ORES))
       .addCondition(new ContainsItemModifierLootCondition(Ingredient.of(TinkerTags.Items.CHRYSOPHILITE_ORES)).inverted())
       .addCondition(ChrysophiliteLootCondition.INSTANCE)
@@ -107,7 +108,7 @@ public class GlobalLootModifiersProvider extends GlobalLootModifierProvider {
     if (optional) {
       builder.addCondition(new TagFilledCondition<>(nuggets));
     }
-    add("lustrous/" + name, builder.addCondition(new HasModifierLootCondition(ModifierIds.lustrous))
+    add("lustrous/" + name, AddEntryLootModifier.CODEC, builder.addCondition(new HasModifierLootCondition(ModifierIds.lustrous))
       .addFunction(SetItemCountFunction.setCount(UniformGenerator.between(2, 4)).build())
       .addFunction(ModifierBonusLootFunction.oreDrops(ModifierIds.lustrous, false).build())
       .addFunction(ApplyExplosionDecay.explosionDecay().build())

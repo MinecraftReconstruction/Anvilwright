@@ -56,6 +56,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
 import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
@@ -95,7 +96,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
         JsonObject fluidObject = fluidElement.getAsJsonObject();
         fluid = Loadables.FLUID.getIfPresent(fluidObject, "name");
         if (fluidObject.has("nbt")) {
-          tag = TagParser.parseTag(GSON.toJson(fluidObject.get("nbt")));
+          tag = TagParser.parseTag(JsonHelper.DEFAULT_GSON.toJson(fluidObject.get("nbt")));
         }
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");
@@ -109,7 +110,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
   /** Gets the given sprite, or null if the texture is not present in the model */
   @Nullable
   private static TextureAtlasSprite getSprite(BlockModel context, Function<Material,TextureAtlasSprite> spriteGetter, String key) {
-    if (context.hasMaterial(key)) {
+    if (context.hasTexture(key)) {
       return spriteGetter.apply(context.getMaterial(key));
     }
     return null;
@@ -135,7 +136,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     }
 
     // start building the mode
-    CompositeModel.Baked.Builder modelBuilder = CompositeModel.Baked.builder(context.isAmbientOcclusion(), false, false, particleSprite, overrides, context.getTransforms());
+    CompositeModel.Baked.Builder modelBuilder = CompositeModel.Baked.builder(context.hasAmbientOcclusion(), false, false, particleSprite, overrides, context.getTransforms());
 
     // add in the base
     if (baseSprite != null) {
@@ -157,12 +158,12 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
       // apply light
       int light = fluid.getFluid().getFluidType().getLightLevel(fluid);
       if (light > 0) {
-        QuadTransformers.settingEmissivity(light).processInPlace(quads);
+        ModelHelper.applyEmissivity(quads, light);
       }
       // apply color
       int color = FluidVariantRendering.getColor(fluid.getType());
       if (color != -1) {
-        ColoredBlockModel.applyColorQuadTransformer(color).processInPlace(quads);
+        ModelHelper.applyColor(quads, color);
       }
       modelBuilder.addQuads(quads);
     }
@@ -170,7 +171,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
   }
 
   @Override
-  public BakedModel bake(BlockModel context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+  public BakedModel bake(BlockModel context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, boolean isGui3d) {
     // We need to disable GUI 3D and block lighting for this to render properly
     // only do contained fluid if we did not set the fluid in the model properties
     if (fluid.isEmpty()) {

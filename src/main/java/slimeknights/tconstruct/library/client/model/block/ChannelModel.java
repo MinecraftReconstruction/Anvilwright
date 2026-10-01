@@ -47,7 +47,7 @@ public class ChannelModel implements IUnbakedGeometry<ChannelModel> {
 
 	@Override
 	public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location, boolean isGui3d) {
-		BakedModel baked = this.model.bakeModel(owner, transform, overrides, spriteGetter, location);
+		BakedModel baked = this.model.bakeModel(owner, owner.getElements(), spriteGetter, transform, overrides, location, false);
 		return new Baked(baked, this.fluids);
 	}
 
@@ -97,22 +97,22 @@ public class ChannelModel implements IUnbakedGeometry<ChannelModel> {
 	private static class Loader implements IGeometryLoader<ChannelModel> {
 		@Override
 		public ChannelModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
-			SimpleBlockModel model = SimpleBlockModel.deserialize(deserializationContext, modelContents);
+			SimpleBlockModel model = SimpleBlockModel.deserialize(modelContents, deserializationContext);
 
 			// parse fluid cuboid for each side
 			JsonObject fluidJson = GsonHelper.getAsJsonObject(modelContents, "fluids");
 			Map<ChannelModelPart,FluidCuboid> fluids = new EnumMap<>(ChannelModelPart.class);
-			fluids.put(ChannelModelPart.DOWN, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(fluidJson, "down")));
+			fluids.put(ChannelModelPart.DOWN, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(fluidJson, "down"), "down"));
 			// center
 			JsonObject centerJson = GsonHelper.getAsJsonObject(fluidJson, "center");
-			fluids.put(ChannelModelPart.CENTER_STILL, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(centerJson, "still")));
-			fluids.put(ChannelModelPart.CENTER_FLOWING, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(centerJson, "flowing")));
+			fluids.put(ChannelModelPart.CENTER_STILL, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(centerJson, "still"), "still"));
+			fluids.put(ChannelModelPart.CENTER_FLOWING, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(centerJson, "flowing"), "flowing"));
 			// side
 			JsonObject sideJson = GsonHelper.getAsJsonObject(fluidJson, "side");
-			fluids.put(ChannelModelPart.SIDE_STILL, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(sideJson, "still")));
-			fluids.put(ChannelModelPart.SIDE_IN, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(sideJson, "in")));
-			fluids.put(ChannelModelPart.SIDE_OUT, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(sideJson, "out")));
-			fluids.put(ChannelModelPart.SIDE_EDGE, FluidCuboid.fromJson(GsonHelper.getAsJsonObject(sideJson, "edge")));
+			fluids.put(ChannelModelPart.SIDE_STILL, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(sideJson, "still"), "still"));
+			fluids.put(ChannelModelPart.SIDE_IN, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(sideJson, "in"), "in"));
+			fluids.put(ChannelModelPart.SIDE_OUT, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(sideJson, "out"), "out"));
+			fluids.put(ChannelModelPart.SIDE_EDGE, FluidCuboid.LOADABLE.convert(GsonHelper.getAsJsonObject(sideJson, "edge"), "edge"));
 
 			return new ChannelModel(model, fluids);
 		}

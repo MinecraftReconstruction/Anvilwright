@@ -589,3 +589,39 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 2. `library/recipe/casting/*`（PotionCastingRecipe / 材料铸造 / 铸造 builder，约 80 条）
 3. `shared`、`library/client/model/block`、`library/recipe/ingredient`
 4. 全树 0 → `./gradlew build --offline` → `runData` → 与上游 `src/generated` diff → `runServer` → `runClient`
+
+## 22. 2026-10-01 凌晨（三）：统一到 Gradle 全量口径，791 → 292
+
+**口径改变（重要）**：放弃 `--gen`/分块数字当进度条，改用
+`./gradlew compileJava -I scripts/port/maxerrs.gradle --offline`（`-Xmaxerrs 100000`，不会提前停手）。
+接手时 **791**，本轮结束 **292**。逐检查点数字见 `NUMBERS.md` 的"凌晨（三）"一节。
+
+**已 push 的 checkpoint（`git ls-remote` 复核）**：
+`3138afa6d3` → `17f35d671e` → `5bd3fc3076` → `7b2479ff84`（本轮结束前的最后一个）
+
+**本轮修完的簇**
+1. `MaterialBlockModel`：Forge 的 `getQuads(...IModelData)` / `getParticleIcon(IModelData)` → FRAPI
+   `emitBlockQuads` + Porting Lib `CustomParticleIconModel#getParticleIcon(Object)`。
+2. tag provider 家族（`EntityTypeTagProvider` / `BlockEntityTypeTagProvider` / `FluidTagProvider` /
+   `BiomeTagProvider` / `PotionTagProvider` / `MenuTypeTagProvider` / `CreativeTabTagProvider` /
+   `InstrumentTagProvider` / `DamageTypeTagProvider`）：
+   - 构造函数统一成 `(FabricDataOutput, CompletableFuture<HolderLookup.Provider>)`；
+   - `tag(...)`（vanilla `TagAppender`，没有 `add(T...)`）→ `getOrCreateTagBuilder(...)`；
+   - **`add(...)` 必须放在 `addTag/addTags(...)` 之前**，否则链式返回的类型会掉回 `TagAppender`；
+   - `ItemTags.create(...)` → `TagKey.create(Registries.ITEM, ...)`；
+   - `CostTagAppender` 的 appender 类型换成 `FabricTagProvider<Item>.FabricTagBuilder`；
+   - `BlockEntityTypeTagProvider` 换回上游的 `SIDE_INVENTORIES` 版本（fork 里的 `CRAFTING_STATION_BLACKLIST`
+     上游已删除），并补回 `ironchest(...)` 的兼容 tag。
+3. 精灵/材质数据生成：`GenericDataProvider`/`GenericTextureGenerator` 的 ctor 只收 `FabricDataOutput`；
+   `saveThing` → `saveJson`；`MaterialPartTextureGenerator` 补回上游的 `outputPath(...)`/`StatOverride` 重载。
+4. 装饰模型（modifier model）管线：`IBakedModifierModel` 要求 `Mesh getQuads(...)`，把剩下 12 个还写着
+   `addQuads(..., Consumer<Collection<BakedQuad>>)` 的实现全部改成 Mesh 版本（纯搬运，不改数值）。
+5. 烘焙 quad 的颜色/自发光：新增 `library/client/model/ModelHelper#applyColor/applyEmissivity`
+   （直接改 `BakedQuad#getVertices()` 的顶点 int），替代 Forge 的 `IQuadTransformer#processInPlace`。
+6. gadget：补回 `IchorSlimeSlingItem`（只在 fork 历史里，上游 3.12 已删除滑翔弹弓）、
+   `TinkerGadgets` 的 register 改成带 properties 的 lambda、补 `Util` 等 import。
+
+**删除的死代码**：`library/client/ResourceColorManager`（fork 遗留的 `@Deprecated` 垫片，上游没有，且无调用点）。
+
+**下一步**：继续按 Gradle 全量口径推平剩余 292 条（热点：`GadgetRecipeProvider` 尾巴、`shared`、
+`smeltery/*`、`library/client/book/content`、`fluids/data`）。

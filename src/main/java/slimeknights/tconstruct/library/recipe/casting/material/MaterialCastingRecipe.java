@@ -29,6 +29,7 @@ import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.loadable.field.ContextKey;
+import java.util.Collection;
 
 /**
  * Casting recipe that takes an arbitrary fluid of a given amount and set the material on the output based on that fluid
@@ -97,21 +98,43 @@ public class MaterialCastingRecipe extends AbstractMaterialCastingRecipe impleme
   @Override
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (multiRecipes == null) {
-      RecipeType<?> type = getType();
-      List<ItemStack> castItems = Arrays.asList(cast.getItems());
-      multiRecipes = MaterialCastingLookup
-        .getAllCastingFluids().stream()
-        .filter(recipe -> {
-          MaterialVariant output = recipe.getOutput();
-          return !output.isUnknown() && !output.get().isHidden() && result.canUseMaterial(output.getId());
-        })
-        .map(recipe -> {
-          List<FluidStack> fluids = resizeFluids(recipe.getFluids());
-          long fluidAmount = fluids.stream().mapToLong(FluidStack::getAmount).max().orElse(0);
-          return new DisplayCastingRecipe(type, castItems, fluids, result.withMaterial(recipe.getOutput().getVariant()),
-                                          ICastingRecipe.calcCoolingTime(recipe.getTemperature(), itemCost * fluidAmount), consumed);
-        })
-        .collect(Collectors.toList());
+      // expand the fluid list, one result per fluid
+      Collection<MaterialFluidRecipe> recipes = MaterialCastingLookup.getAllCastingFluids();
+      List<ItemStack> results = new ArrayList<>();
+      List<FluidStack> fluids = new ArrayList<>();
+      int maxTime = 0;
+      for (MaterialFluidRecipe recipe : recipes) {
+        // must support this material
+        MaterialVariant output = recipe.getOutput();
+        MaterialVariantId outputId = output.getVariant();
+        if (!result.canUseMaterial(output.getId()) || !this.materials.matches(outputId)) {
+          continue;
+        }
+
+        // add all fluids to our builders
+        List<FluidStack> newFluids = resizeFluids(recipe.getFluids());
+        fluids.addAll(newFluids);
+        ItemStack resultStack = this.result.withMaterial(outputId);
+        for (FluidStack fluid : newFluids) {
+          // add one copy of result per fluid
+          results.add(resultStack);
+          // use the maximum time for cooling time. Will be recomputed dynamically but need a fallback
+          int time = ICastingRecipe.calcCoolingTime(recipe.getTemperature(), fluid.getAmount() * itemCost);
+          if (time > maxTime) {
+            maxTime = time;
+          }
+        }
+      }
+      if (fluids.isEmpty()) {
+        multiRecipes = List.of();
+      } else {
+        multiRecipes = List.of(DisplayCastingRecipe.from(this)
+          .cast(getCast()).consumed(isConsumed())
+          .fluids(List.copyOf(fluids))
+          .results(List.copyOf(results))
+          .coolingTime(maxTime).materialCasting(true)
+          .build());
+      }
     }
     return multiRecipes;
   }

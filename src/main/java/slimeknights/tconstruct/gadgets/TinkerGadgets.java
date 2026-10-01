@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.gadgets;
 
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.minecraft.Util;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
@@ -48,6 +49,10 @@ import slimeknights.tconstruct.gadgets.item.ShurikenItem;
 import slimeknights.tconstruct.shared.TinkerFood;
 import slimeknights.tconstruct.world.block.FoliageType;
 import slimeknights.tconstruct.gadgets.item.slimesling.BaseSlimeSlingItem;
+import slimeknights.tconstruct.gadgets.item.slimesling.EarthSlimeSlingItem;
+import slimeknights.tconstruct.gadgets.item.slimesling.EnderSlimeSlingItem;
+import slimeknights.tconstruct.gadgets.item.slimesling.IchorSlimeSlingItem;
+import slimeknights.tconstruct.gadgets.item.slimesling.SkySlimeSlingItem;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import java.util.function.Function;
 
@@ -94,8 +99,9 @@ public final class TinkerGadgets extends TinkerModule {
     .put(SlimeType.ENDER, ITEMS_DEFFERED.register("ender_slime_sling", () -> new EnderSlimeSlingItem(SLING_PROPS)))
     .build();
   // throwballs
-  public static final ItemObject<GlowBallItem> glowBall = ITEMS_DEFFERED.register("glow_ball", GlowBallItem::new);
-  public static final ItemObject<EFLNItem> efln = ITEMS_DEFFERED.register("efln_ball", EFLNItem::new);
+  private static final Item.Properties THROWABLE_PROPS = new Item.Properties().stacksTo(16)/*.tab(TAB_GADGETS)*/;
+  public static final ItemObject<GlowBallItem> glowBall = ITEMS_DEFFERED.register("glow_ball", () -> new GlowBallItem(THROWABLE_PROPS));
+  public static final ItemObject<EFLNItem> efln = ITEMS_DEFFERED.register("efln_ball", () -> new EFLNItem(THROWABLE_PROPS));
 
   // foods
   private static final BlockBehaviour.Properties CAKE = builder(SoundType.WOOL).pushReaction(PushReaction.DESTROY).strength(0.5F);
@@ -108,7 +114,6 @@ public final class TinkerGadgets extends TinkerModule {
   public static final ItemObject<FoodCakeBlock> magmaCake = BLOCKS_DEFFERED.register("magma_cake", () -> new FoodCakeBlock(CAKE, TinkerFood.MAGMA_CAKE), UNSTACKABLE_BLOCK_ITEM);
 
   // Shurikens
-  private static final Item.Properties THROWABLE_PROPS = new Item.Properties().stacksTo(16)/*.tab(TAB_GADGETS)*/;
   public static final ItemObject<ShurikenItem> quartzShuriken = ITEMS_DEFFERED.register("quartz_shuriken", () -> new ShurikenItem(THROWABLE_PROPS, QuartzShurikenEntity::new));
   public static final ItemObject<ShurikenItem> flintShuriken = ITEMS_DEFFERED.register("flint_shuriken", () -> new ShurikenItem(THROWABLE_PROPS, FlintShurikenEntity::new));
 

@@ -1,26 +1,22 @@
 package slimeknights.tconstruct.common.data.tags;
 
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.alchemy.Potion;
-import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.core.HolderLookup;
 import slimeknights.mantle.data.BuiltinRegistryTagProvider;
-import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 public class PotionTagProvider extends BuiltinRegistryTagProvider<Potion> {
-  @SuppressWarnings("deprecation")
-  public PotionTagProvider(PackOutput packOutput, CompletableFuture<Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-    super(packOutput, BuiltInRegistries.POTION, lookupProvider, TConstruct.MOD_ID, existingFileHelper);
+  public PotionTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+    super(output, BuiltInRegistries.POTION, registriesFuture);
   }
 
   @Override
-  protected void addTags(Provider provider) {
-    tag(TinkerTags.Potions.HIDDEN_FLUID).addOptional(TinkerTags.HIDDEN_FROM_RECIPE_VIEWERS);
+  protected void addTags(HolderLookup.Provider provider) {
+    tag(TinkerTags.Potions.HIDDEN_FLUID).addOptionalTag(TinkerTags.HIDDEN_FROM_RECIPE_VIEWERS);
   }
 
   @Override

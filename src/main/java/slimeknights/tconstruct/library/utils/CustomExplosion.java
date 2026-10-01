@@ -61,7 +61,7 @@ public class CustomExplosion extends Explosion {
 
   @Override
   public void explode() {
-    this.level.gameEvent(this.source, GameEvent.EXPLODE, getPosition());
+    this.level.gameEvent(this.source, GameEvent.EXPLODE, new Vec3(this.x, this.y, this.z));
     calculateHitBlocks();
     damageAndPushEntities();
   }
@@ -146,7 +146,7 @@ public class CustomExplosion extends Explosion {
 
     // start pushing entities
     // this logic is for the most part identical to vanilla, except taking better advantage of vec3
-    Vec3 center = getPosition();
+    Vec3 center = new Vec3(this.x, this.y, this.z);
     for (Entity entity : list) {
       Vec3 dir = entity.position().subtract(center);
       double length = dir.length();
@@ -214,7 +214,7 @@ public class CustomExplosion extends Explosion {
     if (!level.isClientSide && level instanceof ServerLevel server) {
       // skip position sync if there are no blocks to be removed
       List<BlockPos> toBlow = interactsWithBlocks() ? getToBlow() : List.of();
-      Vec3 position = getPosition();
+      Vec3 position = new Vec3(this.x, this.y, this.z);
       for (ServerPlayer player : server.players()) {
         if (player.distanceToSqr(position) < 4096.0D) {
           player.connection.send(new ClientboundExplodePacket(x, y, z, radius, toBlow, hitPlayers.get(player)));

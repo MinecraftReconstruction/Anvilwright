@@ -20,6 +20,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.ItemLike;
 import slimeknights.mantle.client.book.data.BookData;
+import slimeknights.mantle.client.book.HTMLUtils;
 import slimeknights.mantle.client.book.data.content.PageContent;
 import slimeknights.mantle.client.book.data.element.ImageData;
 import slimeknights.mantle.client.book.data.element.TextData;
@@ -49,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class ContentTool extends PageContent {
   public static final ResourceLocation ID = TConstruct.getResource("tool");
@@ -119,7 +121,7 @@ public class ContentTool extends PageContent {
     } else {
       this.tool = new Fallback(item);
     }
-    this.text = new TextData[] { new TextData(ForgeI18n.getPattern(tool.asItem().getDescriptionId() + ".description"))};
+    this.text = new TextData[] { new TextData(I18n.get(tool.asItem().getDescriptionId() + ".description"))};
   }
 
   @SuppressWarnings("removal")
@@ -128,9 +130,9 @@ public class ContentTool extends PageContent {
       if (this.toolName == null) {
         this.toolName = this.parent.name;
       }
-      Item tool = BuiltInRegistries.ITEM.get(new ResourceLocation(this.toolName));
-      if (tool instanceof IModifiableDisplay) {
-        this.tool = (IModifiableDisplay) tool;
+      Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(this.toolName));
+      if (item instanceof IModifiableDisplay tool) {
+        this.tool = tool;
       } else {
         this.tool = new Fallback(item == null ? Items.BARRIER : item);
       }
@@ -151,16 +153,16 @@ public class ContentTool extends PageContent {
   public void load() {
     // determine the recipe to display
     if (this.parts == null || slotPos == null) {
-      List<PartRequirement> required = getTool().getToolDefinition().getData().getParts();
-      // if no required components, do a crafting recipe lookup
-      if (required.isEmpty()) {
-        // get the stacks for the first crafting table recipe
-        Recipe<CraftingContainer> recipe = Optional.ofNullable(Minecraft.getInstance().level)
-                                                   .flatMap(world -> ((RecipeManagerAccessor)world.getRecipeManager()).port_lib$byType(RecipeType.CRAFTING).values().stream()
-                                                                          .filter(r -> r.getResultItem(world.registryAccess()).getItem() == getTool().asItem())
-                                                                          .findFirst())
-                                                   .orElse(null);
-        if (recipe != null) {
+      IModifiableDisplay tool = getTool();
+      List<IToolPart> required = ToolPartsHook.parts(tool.getToolDefinition());
+
+      // get the stacks for the first crafting table recipe, prefer this option over parts as it may not be craftable with said parts
+      Recipe<CraftingContainer> recipe = Optional.ofNullable(Minecraft.getInstance().level)
+                                                 .flatMap(world -> ((RecipeManagerAccessor)world.getRecipeManager()).port_lib$byType(RecipeType.CRAFTING).values().stream()
+                                                                        .filter(r -> r.getResultItem(world.registryAccess()).getItem() == tool.asItem())
+                                                                        .findFirst())
+                                                 .orElse(null);
+      if (recipe != null) {
           // parts is just the items in the recipe
           this.parts = recipe.getIngredients().stream().map(ingredient -> ItemStackList.of(ingredient.getItems())).collect(Collectors.toList());
 
@@ -170,9 +172,6 @@ public class ContentTool extends PageContent {
             this.imgSlots = IMG_SLOTS_SHAPED[Mth.clamp(shaped.getHeight() - 1, 0, 2)][width];
             this.slotPos = SLOTS_WIDTH[width];
           }
-        } else {
-          this.parts = Collections.emptyList();
-        }
       } else {
         ImmutableList.Builder<ItemStackList> partBuilder = ImmutableList.builder();
         for (int i = 0; i < required.size(); i++) {
