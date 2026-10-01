@@ -9,7 +9,10 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
@@ -26,6 +29,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.mantle.client.render.MantleRenderTypes;
+import slimeknights.mantle.client.render.MantleShaders;
+import slimeknights.tconstruct.library.client.TinkerRenderTypes;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
@@ -126,6 +132,7 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
     auditItemModels(minecraft);
     auditItemSprites(minecraft);
     auditItemRenderLayers(minecraft);
+    auditFluidRenderTypes();
     auditTranslations(minecraft);
     auditAtlas(minecraft);
     TConstruct.LOG.info("{}summary: {} passed, {} failed", TAG, passed, failed);
@@ -232,6 +239,43 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
       RenderType type = ItemBlockRenderTypes.getRenderType(stack, false);
       TConstruct.LOG.info("{}layers/ {} -> {}", TAG, BuiltInRegistries.ITEM.getKey(stack.getItem()), type);
     }
+  }
+
+  /**
+   * Flushes Mantle's custom fluid and fullbright render types once, which is the exact code path that crashed the game
+   * when a searing tank was placed next to a smeltery controller.
+   * <p>
+   * Mantle's render types carry a custom core shader; if that shader was never registered its {@code ShaderInstance} is
+   * null and {@code RenderType#end} calls {@code VertexBuffer#drawWithShader(null)}. The geometry emitted here is
+   * degenerate (every vertex at the origin), so a passing run draws nothing - but a null shader still crashes, which
+   * makes this a regression test for BEHAVIOUR-DIFFERENCES / the fluid BER path.
+   */
+  private static void auditFluidRenderTypes() {
+    TConstruct.LOG.info("{}shaders/ mantle core shaders registered = {}", TAG, MantleShaders.isRegistered());
+    flushColorTexLightmap(MantleRenderTypes.FLUID);
+    flushColorTexLightmap(TinkerRenderTypes.SMELTERY_FLUID);
+    flushBlock(MantleRenderTypes.TRANSLUCENT_FULLBRIGHT);
+    TConstruct.LOG.info("{}shaders/ flushed the fluid and fullbright render types without crashing", TAG);
+  }
+
+  /** Flushes a degenerate quad with the POSITION_COLOR_TEX_LIGHTMAP format */
+  private static void flushColorTexLightmap(RenderType type) {
+    MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+    VertexConsumer consumer = source.getBuffer(type);
+    for (int i = 0; i < 4; i++) {
+      consumer.vertex(0, 0, 0).color(255, 255, 255, 255).uv(0, 0).uv2(0).endVertex();
+    }
+    source.endBatch(type);
+  }
+
+  /** Flushes a degenerate quad with Mantle's block + overlay format */
+  private static void flushBlock(RenderType type) {
+    MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+    VertexConsumer consumer = source.getBuffer(type);
+    for (int i = 0; i < 4; i++) {
+      consumer.vertex(0, 0, 0).color(255, 255, 255, 255).uv(0, 0).overlayCoords(0).uv2(0).normal(0, 1, 0).endVertex();
+    }
+    source.endBatch(type);
   }
 
   /**
