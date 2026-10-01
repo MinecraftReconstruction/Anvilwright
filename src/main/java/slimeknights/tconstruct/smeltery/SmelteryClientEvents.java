@@ -11,6 +11,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.ClientEventBase;
 import slimeknights.tconstruct.library.TinkerItemDisplays;
 import slimeknights.tconstruct.library.client.model.block.ChannelModel;
+import slimeknights.tconstruct.smeltery.client.CopperCanModel;
 import slimeknights.tconstruct.library.client.model.block.FluidTextureModel;
 import slimeknights.tconstruct.library.client.model.block.TankModel;
 import slimeknights.tconstruct.library.client.model.tools.ToolModel;

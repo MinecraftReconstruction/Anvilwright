@@ -14,6 +14,8 @@ import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
 import slimeknights.mantle.data.gson.ResourceLocationSerializer;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.loadable.common.ColorLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.util.typed.TypedMapBuilder;
 import slimeknights.mantle.util.typed.TypedMap;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;

@@ -1211,7 +1211,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
                             .setCast(MantleTags.Items.LINGERING_BOTTLE, true)
                             .save(consumer, location(waterFolder + "lingering"));
     ItemCastingRecipeBuilder.basinRecipe(Blocks.WET_SPONGE)
-      .setFluid(Fluids.WATER, FluidValues.BOTTLE)
+      .setFluid(Fluids.WATER, (int)FluidValues.BOTTLE)
       .setCoolingTime(1)
       .setCast(Blocks.SPONGE, true)
       .save(consumer, location(waterFolder + "wet_sponge"));

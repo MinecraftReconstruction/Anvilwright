@@ -38,7 +38,7 @@ public class ProxyTankBlockEntityRenderer implements BlockEntityRenderer<ProxyTa
       if (!fluids.isEmpty()) {
         long capacity = itemTank.getCapacity();
         for (FluidCuboid cube : fluids) {
-          FluidRenderer.renderScaledCuboid(matrices, buffer, cube, fluid, 0, capacity, light, true);
+          FluidRenderer.renderScaledCuboid(matrices, buffer, cube, fluid, 0, (int)capacity, light, true);
         }
       }
 
