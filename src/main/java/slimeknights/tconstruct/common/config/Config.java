@@ -260,6 +260,10 @@ public class Config {
       this.debugLogResourceValues = builder
         .comment("If true, the values of data pack and resource pack registries such as materials will be dumped to the debug log. If false, the info is still accessible using the in game commands.")
         .define("debugLogResourceValues", false);
+      this.syncKnockbackResistance = builder
+        .comment("If true, makes the knockback resistance attribute sync its value to client side. This allows modifiers such as springing and flinging to work properly.",
+          "If false, knockback resistance will not sync so will hopefully be 0 client side. Can be disabled in case another mod relied on it not syncing.")
+        .define("syncKnockbackResistance", true);
       this.logInvalidToolStack = builder
         .comment("If STACKTRACE, logs the stacktrace whenever a tool stack is created from a non-modifiable item. If WARNING (default), logs a shorter but more efficient error. If IGNORE, disables logging (useful for modpacks/players *after* they reported the issue). The stacktrace helps debug which mod is causing it, but is rather expensive on the chance they are doing it a lot.")
         .defineEnum("logInvalidToolStack", LogInvalidToolStack.WARNING);
@@ -273,7 +277,6 @@ public class Config {
   public static class Client {
     //public final ForgeConfigSpec.BooleanValue temperatureInCelsius;
     public final ModConfigSpec.BooleanValue tankFluidModel;
-    public final ModConfigSpec.BooleanValue extraToolTips;
     public final ModConfigSpec.BooleanValue logMissingMaterialTextures;
     public final ModConfigSpec.BooleanValue logMissingModifierTextures;
     public final ModConfigSpec.BooleanValue renderShieldSlotItem;

@@ -666,3 +666,35 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 3. `Util.isNeo/isForge` 的状态要补进 `BEHAVIOUR-DIFFERENCES.md`（规则 4）。
 4. 全树 0 → `./gradlew build --offline`（datagen/资源/mixin/AW 校验）→ `runData` 与上游 `src/generated` 结构化 diff
    → `runServer` → `runClient`。
+
+## 24. 2026-10-01：**javac 全量归零** ✅（下一棒的起点）
+
+`./gradlew compileJava -I scripts/port/maxerrs.gradle --offline` → **BUILD SUCCESSFUL，0 error**，
+`build/classes/java/main` 下 2830 个 class。逐检查点数字见 `NUMBERS.md` 的最末两节。
+
+**最后一轮修的东西（都是小尾巴）**
+- Config：补回 `syncKnockbackResistance` 的赋值，删掉没有任何赋值的 `extraToolTips` 字段。
+- `EFLNEntity`/`EFLNExplosion`：`Explosion.BlockInteraction.KEEP`（vanilla 枚举，不是 `Level.ExplosionInteraction`）、
+  爆炸抗性改走 Vanilla `Block#getExplosionResistance()` + Porting Lib `ExplosionResistanceBlock` 接口。
+- `FancyArmorStandEntity`：**删掉** Forge 独占的 `getPickedResult`/`brokenByPlayer`/`brokenByAnything`
+  （掉落改由 `entities/armor_stand` 战利品表负责，`src/generated` 里已有该表）→ **需要补进行为差异**。
+- `SlimesteelBlock`：`canStickTo` 是 Forge 方法，删掉；`isSlimeBlock` 走 Porting Lib `CustomSlimeBlock`。
+- `KnightMetalBlock`/`KnightMetalFluidCannonBlock`：Forge 的 `getBlockPathType(...)` 没有 Fabric 对应物，
+  **删掉覆写** → **需要补进行为差异**（怪物寻路不再把这两种方块当成伤害方块）。
+- 其它：`PiggyBackPackItem` 的 `ElementScreen#draw`、`GadgetRecipeProvider` 的 `folder` 变量、
+  `ModelSpriteProvider` 的 ctor、`FluidBucketModelProvider` 的桶流体查询、`SmelteryTank` 的 `IMultitankListChange` 实现等。
+
+**⚠️ 数字波动的解释（写下来免得下一棒怀疑自己）**：javac 分层报错。归属阶段的错误一消，解析阶段
+（构造函数不匹配、long/int 转换）才会冒出来；另外修坏一处会连带十几条（本轮出现过一次 2 → 117 → 39）。
+**只有"整树全量、改完再看"的数字可信。**
+
+**下一棒的顺序（按用户拍板的计划）**
+1. 规则 4 欠账先补：`BEHAVIOUR-DIFFERENCES.md` 追加
+   #36 精致的盔甲架掉落/拾取钩子（Forge 独占，改用战利品表）、
+   #37 `Util.isNeo/isForge` 在 Fabric 上恒 false、
+   #38 knightmetal 的 `getBlockPathType`（寻路伤害方块）被删除、
+   #39 `ClientGeneratePartTexturesCommand`/`MaterialRenderInfoLoader.createContext` 的调试上下文简化。
+2. `./gradlew build --offline`（真正闸门：datagen 注册、资源、mixin、AW 校验）。
+3. `runData` → 把 `src/generated` 与上游 3.12.1 做结构化 diff（最能抓语义错误）。
+4. `runServer`（验 `tinkering/tool_definitions`、冶炼炉方块实体）→ `runClient`（验盔甲/工具渲染、JEI）。
+5. 最后：canonical 非 fork 仓库 + 两条分支（细粒度 checkpoint / 压成 15–20 个逻辑提交，压缩版设默认分支）。

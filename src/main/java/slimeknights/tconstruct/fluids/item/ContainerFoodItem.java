@@ -56,7 +56,7 @@ public class ContainerFoodItem extends Item {
 
   @Override
   public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-    FoodProperties food = stack.getFoodProperties(null);
+    FoodProperties food = stack.getItem().getFoodProperties();
     if (food != null) {
       addEffectTooltip(food, tooltip);
     }

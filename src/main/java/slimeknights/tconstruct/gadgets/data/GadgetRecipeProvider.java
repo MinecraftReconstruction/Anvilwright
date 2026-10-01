@@ -103,7 +103,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                         .save(consumer, prefix(TinkerGadgets.quartzShuriken.getId(), folder));
 
     // piggybackpack
-    String folder = "gadgets/";
+    folder = "gadgets/";
     ItemCastingRecipeBuilder.tableRecipe(TinkerGadgets.piggyBackpack)
                             .setCast(Items.SADDLE, true)
                             .setFluidAndTime(TinkerFluids.blood, false, FluidValues.SLIME_CONGEALED)

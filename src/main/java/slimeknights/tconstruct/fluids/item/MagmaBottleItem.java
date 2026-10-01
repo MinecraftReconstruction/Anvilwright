@@ -28,10 +28,10 @@ import slimeknights.tconstruct.library.utils.Util;
 public class MagmaBottleItem extends Item {
   private final int fireTime;
   public MagmaBottleItem(Properties props, int fireTime) {
+    super(props);
     // TODO: PORT - Forge used initCapabilities; Fabric registers the item lookup in the constructor
     FluidStorage.ITEM.registerForItems((itemStack, context) ->
       new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.magma.get(), FluidValues.BOTTLE), itemStack, context), this);
-    super(props);
     this.fireTime = fireTime;
   }
 

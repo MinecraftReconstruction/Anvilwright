@@ -209,7 +209,7 @@ public class PiggyBackPackItem extends TooltipItem {
             default -> Icons.PIGGYBACK_3;
           };
 
-          element.draw(graphics, Icons.ICONS, x + 6, y + 7);
+          element.draw(graphics, x + 6, y + 7);
           return true;
         }
       };

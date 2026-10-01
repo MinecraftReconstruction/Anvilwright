@@ -99,7 +99,7 @@ public class GuiFuelModule implements IScreenWithFluidTank, ClickableTankModule 
     int fuel = fuelModule.getFuel();
     int fuelQuality = fuelModule.getFuelQuality();
     if (fuel > 0 && fuelQuality > 0) {
-      fire.drawScaledYUp(graphics, texture, fireX + screen.leftPos, fireY + screen.topPos, 14 * fuel / fuelQuality);
+      fire.drawScaledYUp(graphics, fireX + screen.leftPos, fireY + screen.topPos, 14 * fuel / fuelQuality);
     }
 
     // draw tank second, it changes the image

@@ -419,6 +419,26 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 | `3fa173e336` | **131** | gadget 配方（叶子蛋糕用 `FoliageType`）、`ItemFrameRenderer.blockRenderer` 的 AW |
 | （本轮结束） | **123** | 旧版装饰模型（染液/破损/材料）改 mesh + `ColorLoadable.parseString` |
 
+### 2026-10-01：**Gradle 全量编译归零（0 条）** ✅
+
+`./gradlew compileJava -I scripts/port/maxerrs.gradle --offline` → **BUILD SUCCESSFUL，0 条 error**，
+产出 2830 个 class 文件。继续推进的记录：
+
+| 检查点 commit | 条数 | 修的东西 |
+|---|---|---|
+| `52992e8b15` | 147 | 客户端 loader、材料贴图 quad、书里头盔槽位 |
+| `6db0fea7f7` | 139 | 战利品表 helper、`Target.DATA_PACK`、DynamicTextureLoader |
+| `3fa173e336` | 131 | gadget 配方、`ItemFrameRenderer` AW |
+| `9579adc097` | 123 | 旧装饰模型改 mesh、采矿变量 |
+| `e788e3084e` | 64 | 命令/战利品/储罐、datagen 注册表 provider、屏幕与渲染器 |
+| `1b8a100801` | 39 | render data 桥接、储罐监听、slime 方块、clone item stack |
+| `2ee641db4e` | 22 | 渲染器/网络/import、删掉 Forge path type 覆写 |
+| （最后一轮） | **0** | 配置字段补回、爆炸交互枚举与构造函数、gadget 杂项 |
+
+⚠️ **数字为什么会"变多"**：javac 分层报错。**归属阶段**的错误（找不到符号、不重写）一消，
+**解析阶段**的错误（构造函数不匹配、类型转换）才会被报出来；再加上修坏一处会连带一片。
+所以只有"整树全量、修完再看"的数字才可信，中间出现 +N 不代表倒退。
+
 **新发现的坑**
 - Mantle 1.11 的 `Loadable` 用 `convert(JsonElement, String)` / `getIfPresent(JsonObject, String)`，
   老代码里的 `JsonHelper.parseColor/getJson/convertToItemStack` 这些垫片都要换成

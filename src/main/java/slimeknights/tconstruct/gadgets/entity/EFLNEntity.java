@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import slimeknights.tconstruct.gadgets.Exploder;
@@ -43,7 +44,7 @@ public class EFLNEntity extends ThrowableItemProjectile implements IEntityAdditi
   @Override
   protected void onHit(HitResult result) {
     if (!this.level().isClientSide) {
-      EFLNExplosion explosion = new EFLNExplosion(this.level(), this, null, null, this.getX(), this.getY(), this.getZ(), 6f, false, Explosion.BlockInteraction.KEEP);
+      EFLNExplosion explosion = new EFLNExplosion(this.level(), this.position(), 6f, this, 6f, null, 1f, false, Explosion.BlockInteraction.KEEP);
       if (!ExplosionEvents.START.invoker().onExplosionStart(this.level(), explosion)) {
         Exploder.startExplosion(this.level(), explosion, this, BlockPos.containing(this.getX(), this.getY(), this.getZ()), 6f, 6f);
       }

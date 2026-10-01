@@ -146,7 +146,6 @@ public class GuiSmelteryTank implements IScreenWithFluidTank {
         } else {
           GuiUtil.renderHighlight(graphics, x, (y + height) - heightSum, width, heights[hovered]);
         }
-        GuiUtil.renderHighlight(graphics, x, y, width, top - y);
       }
     }
   }

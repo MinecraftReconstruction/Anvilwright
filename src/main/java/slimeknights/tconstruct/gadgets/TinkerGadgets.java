@@ -65,7 +65,6 @@ public final class TinkerGadgets extends TinkerModule {
   public TinkerGadgets() {
 //    slimeSling.values(); // Force enums to register
   }
-  static final Logger log = Util.getLogger("tinker_gadgets");
 
   /*
    * Block base properties
