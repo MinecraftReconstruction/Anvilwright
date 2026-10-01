@@ -96,7 +96,11 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
         JsonObject fluidObject = fluidElement.getAsJsonObject();
         fluid = Loadables.FLUID.getIfPresent(fluidObject, "name");
         if (fluidObject.has("nbt")) {
-          tag = TagParser.parseTag(JsonHelper.DEFAULT_GSON.toJson(fluidObject.get("nbt")));
+          try {
+            tag = TagParser.parseTag(JsonHelper.DEFAULT_GSON.toJson(fluidObject.get("nbt")));
+          } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            throw new com.google.gson.JsonSyntaxException("Invalid NBT in fluid model", e);
+          }
         }
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");

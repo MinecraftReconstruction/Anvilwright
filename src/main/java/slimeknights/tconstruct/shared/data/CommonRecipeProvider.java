@@ -288,7 +288,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
     Item cobaltIngot = TinkerMaterials.cobalt.getIngot();
     SimpleCookingRecipeBuilder.blasting(Ingredient.of(TinkerWorld.rawCobalt, TinkerWorld.cobaltOre), RecipeCategory.MISC, cobaltIngot, 1.5f, 200)
                               .unlockedBy("has_item", has(TinkerWorld.rawCobalt))
-                              .save(consumer, wrap(cobaltIngot, folder, "_smelting"));
+                              .save(consumer, wrap(id(cobaltIngot), folder, "_smelting"));
     // pack raw cobalt
     packingRecipe(consumer, RecipeCategory.MISC, "raw_block", TinkerWorld.rawCobaltBlock, "raw", TinkerWorld.rawCobalt, TinkerTags.Items.RAW_COBALT, folder);
   }

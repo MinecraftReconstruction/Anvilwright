@@ -134,7 +134,7 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
 
   @Override
   @Nonnull
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelData(getTexture());
   }
 
@@ -178,10 +178,6 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
     }
   }
 
-  @Override
-  public ModelData getRenderData() {
-    return getModelData();
-  }
 
   /** Fluid implementation of smeltery IO */
   public static abstract class SmelteryFluidIO extends SmelteryInputOutputBlockEntity<FluidVariant> implements SidedStorageBlockEntity {
@@ -205,11 +201,6 @@ public abstract class SmelteryInputOutputBlockEntity<T> extends SmelteryComponen
         }
       }
       return null;
-    }
-
-    @Override
-    public ModelData getRenderData() {
-      return getModelData();
     }
 
     @Nullable

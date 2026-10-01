@@ -16,6 +16,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
+import slimeknights.tconstruct.library.utils.WeakListenerList;
+import slimeknights.tconstruct.library.fluid.IMultitankListChange;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler.FluidChange;
 import slimeknights.tconstruct.smeltery.network.SmelteryTankUpdatePacket;
@@ -31,7 +33,9 @@ import java.util.function.Consumer;
  * Fluid handler implementation for the smeltery
  */
 @SuppressWarnings("UnstableApiUsage")
-public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> extends SnapshotParticipant<SmelteryTank.FluidSnapshot> implements SlottedStorage<FluidVariant> {
+public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> extends SnapshotParticipant<SmelteryTank.FluidSnapshot> implements SlottedStorage<FluidVariant>, IMultitankListChange {
+  /** Listeners to run when the tank list changes */
+  private final WeakListenerList tankListChange = new WeakListenerList();
   private final T parent;
   /** Fluids actually contained in the tank */
   @Getter
@@ -404,4 +408,17 @@ public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> ex
   }
 
   public record FluidSnapshot(long contained, List<FluidStack> fluids) {}
+
+  /* Multitank list listeners */
+
+  @Override
+  public <TE> void addTankListListener(TE parent, Consumer<TE> listener) {
+    tankListChange.addListener(parent, listener);
+  }
+
+  @Override
+  public void removeTankListListeners(Object parent) {
+    tankListChange.removeListeners(parent);
+  }
+
 }

@@ -40,7 +40,7 @@ import slimeknights.tconstruct.smeltery.menu.MelterContainerMenu;
 import javax.annotation.Nullable;
 import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 
-public class MelterBlockEntity extends NameableBlockEntity implements ITankBlockEntity, SidedStorageBlockEntity, ChunkUnloadListeningBlockEntity {
+public class MelterBlockEntity extends NameableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, ChunkUnloadListeningBlockEntity {
 
   /** Max capacity for the tank */
   private static final long TANK_CAPACITY = FluidValues.INGOT * 12;

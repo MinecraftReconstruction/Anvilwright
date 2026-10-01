@@ -38,15 +38,10 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
   /* Textures */
 
   /** Model data for the current texture, override to add extra properties */
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelData(texture);
   }
 
-  @Nonnull
-  @Override
-  public ModelData getRenderData() {
-    return getModelData();
-  }
 
   @Override
   public String getTextureName() {

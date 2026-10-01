@@ -174,6 +174,11 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
 
   /* Helpers */
 
+  /** Creates the context for the render info parser */
+  public static TypedMap createContext(MaterialVariantId id) {
+    return TypedMapBuilder.builder().put(MaterialVariantId.CONTEXT_KEY, id).put(ContextKey.DEBUG, "Material Render Info " + id).build();
+  }
+
   /** Gets the variant for the given render info path */
   public static MaterialVariantId variant(ResourceLocation location) {
     String path = location.getPath();

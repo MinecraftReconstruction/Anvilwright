@@ -38,7 +38,7 @@ public class DrainBlockEntity extends SmelteryFluidIO implements IDisplayFluidLi
 
   @Nonnull
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, displayFluid).build();
   }
 

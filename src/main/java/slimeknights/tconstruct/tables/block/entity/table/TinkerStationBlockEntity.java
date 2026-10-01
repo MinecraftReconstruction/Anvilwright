@@ -310,7 +310,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   /* Texture */
 
   @Override
-  public ModelData getModelData() {
+  public Object getRenderData() {
     // include material and texture, practically only one of the two should do anything
     return RetexturedHelper.getModelDataBuilder(texture).with(ModelProperties.MATERIAL, material).build();
   }

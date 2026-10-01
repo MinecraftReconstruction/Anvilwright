@@ -103,7 +103,8 @@ public class AntigravityEffect extends TinkerEffect {
       float friction = 1f;
       if (living.verticalCollision && !living.verticalCollisionBelow && !living.shouldDiscardFriction()) {
         BlockPos above = BlockPos.containing(living.getX(), living.getBoundingBox().maxY + 0.1, living.getZ());
-        friction = level.getBlockState(above).getFriction(level, above, living);
+        // Forge let blocks override the friction for an entity; vanilla uses the block friction
+        friction = level.getBlockState(above).getFriction();
       }
       // update speed based on ladders and friction
       living.setDeltaMovement(velocity.x * friction, y, velocity.z * friction);

@@ -138,7 +138,7 @@ public class CastingTankBlock extends InventoryBlock implements ITankBlock, Enti
   }
 
   @Override
-  public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+  public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState state) {
     return ITankBlockEntity.getCloneItemStack(new ItemStack(this), world, pos);
   }
 
