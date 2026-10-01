@@ -848,3 +848,40 @@ jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification
 **发布提醒**：已发布的 alpha 用的是 `1.11.DEV.c7098eb1` 的 Mantle 与 `3.12.1-alpha.1` 的 TCon；
 本轮 Mantle 又前进了两个 commit（`f7e95721`、`7b086e52`），如果要让玩家拿到本轮修复，需要
 `publishToMavenLocal` + 重新构建 TCon 并重发 alpha（Mantle 也要发 alpha 3）。
+
+## 22. 2026-10-02：Porting Lib 版本现状调查（决定新版本目标前必读）
+
+**结论**：Porting Lib 公开可用的构件**只有 1.20.1 一条线**；1.21+ 全是未发布的 WIP 分支，26.x 完全不存在的。
+
+| 分支 | mod_version | MC | 最后一次提交 | 是否发布构件 |
+|---|---|---|---|---|
+| `1.20.1`（我们用的线） | 2.3.15 | 1.20.1 | 2026-01-08 | ✅ maven `mvn.devos.one/releases` + Modrinth（最新 `2.3.15+1.20.1`） |
+| `1.21.1`（仓库默认分支，最活跃） | 3.1.0 | 1.21.1 | **2026-09-27** | ❌ 404 |
+| `1.21.5` | 3.1.0 | 1.21.5 | 2025-12/2026-01 | ❌ 404 |
+| `1.21.11` | 4.0.0 | 1.21.11（`>=1.21.11 <=1.21.12`） | **2026-01-08** | ❌ 404 |
+| 26.x | — | — | — | ❌ 不存在 |
+
+- 仓库本身没死（默认分支 1.21.1，最近还在收社区 PR，维护者 AlphaMode / BluSpring 等），但**发版只覆盖 1.20.1**；
+  maven metadata 里连一个 1.21.x 版本都没有。
+- 主力消费者 Create Fabric 也停在 `mc1.21.1/fabric/dev`（仓库最后推送 2025-12），所以 1.21+ 的推进缺少下游驱动。
+
+**1.21.11 分支的实际形态**（1993 个文件、32 个模块、356 个 mixin 类、带 build/release/snapshot 三个 CI workflow）：
+
+- 模块层面，我们用的 21 个模块里 **7 个没了**：`accessors`、`extensions`、`model_generators`、`networking`、`tool_actions`、`lazy_registration`、`utility`；
+  新增 `client_extensions`、`entity_data_serializers`、`item_abilities`、`milk`、`model_data`、`registry`、`render_types`、`resources`。
+  另外模块源码现在是 `src/main` + `src/client` 分层（来自 `1.21.1-split-sources` 那条线）。
+- 类层面（抽查我们依赖的 20 个关键类）：12 个仍在，**7 处改名或消失**：
+  | 1.20.1 | 1.21.11 |
+  |---|---|
+  | `ToolAction` / `ToolActions` | → `ItemAbility` / `ItemAbilities`（`item_abilities` 模块，包名仍 `porting_lib.tool`） |
+  | `RegistryObject` | → 没了，新 `registry` 模块给的是 `DeferredRegister`/`DeferredHolder`/`DeferredItem`/`DeferredBlock` |
+  | `BucketItemAccessor` | → `accessors` 模块删除（我们有自己的 AW，可自行暴露 `BucketItem.content`） |
+  | `FluidExtension` | → 消失（`fluids` 只剩 `FluidStateExtension`），`fluid.getFluidType()` 这条路要换 |
+  | `LivingEntityEvents` | → 拆成 `entity.events.living.LivingEvents` + 各事件类 |
+  | `BlockModelExtensions` | → 消失 |
+  | `ItemLayerPixels` | → 消失（`models` 模块内部重构，`ItemLayerModel` 移到 builders） |
+
+**对路线选择的意义**：以 1.21.11 为目标 = 先自己 build+发布一条**停摆了 9 个月**的第三方库，再改我们
+100+ 个文件去适配它，而 1.21.11 也不是最新（26.2/26.3 已发布，社区视线在 1.21.1 与 26.x 之间）。
+所以"长期可维护"的结论没变：**把 Porting Lib 用法抽薄、换成 Fabric 原生 API**（`fabric-transfer-api-v1`、
+`fabric-rendering-fluids-v1`、`fabric-model-loading-api-v1` 到 26.2 都还在），比赌一条第三方分支更划算。
