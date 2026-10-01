@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.tools.context;
 
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -15,10 +14,13 @@ import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static slimeknights.tconstruct.common.TinkerTags.Items.MODIFIABLE;
 import net.minecraft.world.level.Level;
+import slimeknights.mantle.util.LogicHelper;
+import slimeknights.tconstruct.common.TinkerTags;
 
 /** Context for a modifier hook that runs on multiple equipment slots */
 @RequiredArgsConstructor
@@ -30,8 +32,7 @@ public class EquipmentContext {
   protected final boolean[] fetchedTool = new boolean[6];
   /** Array of tools currently on the entity */
   protected final IToolStackView[] toolsInSlots = new IToolStackView[6];
-  /** Cached tinker data capability, saves capability lookup times slightly */
-  private LazyOptional<TinkerDataCapability.Holder> tinkerData = null;
+
 
   /** Creates a context with an existing tool instance */
   public static EquipmentContext withTool(LivingEntity living, IToolStackView tool, EquipmentSlot slot) {
@@ -93,11 +94,8 @@ public class EquipmentContext {
   }
 
   /** Gets the tinker data capability */
-  public LazyOptional<TinkerDataCapability.Holder> getTinkerData() {
-    if (tinkerData == null) {
-      tinkerData = LazyOptional.of(() -> entity.getComponent(TinkerDataCapability.CAPABILITY));
-    }
-    return tinkerData;
+  public Optional<TinkerDataCapability.Holder> getTinkerData() {
+    return TinkerDataCapability.CAPABILITY.maybeGet(entity);
   }
 
   /** Gets the tinker data capability, or null if absent */

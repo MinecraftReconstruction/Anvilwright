@@ -13,6 +13,8 @@ import slimeknights.tconstruct.tools.TinkerToolParts;
 import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.function.Consumer;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.Item;
 
 public class StationSlotLayoutProvider extends AbstractStationSlotLayoutProvider {
   public StationSlotLayoutProvider(FabricDataOutput output) {

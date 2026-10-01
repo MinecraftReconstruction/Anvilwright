@@ -29,6 +29,10 @@ import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.recipe.IMultiRecipe;
 import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.level.material.Fluid;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.tconstruct.library.json.predicate.material.MaterialPredicate;
 
 /**
  * Casting recipe taking a part of a material and a fluid and outputting the part with a new material

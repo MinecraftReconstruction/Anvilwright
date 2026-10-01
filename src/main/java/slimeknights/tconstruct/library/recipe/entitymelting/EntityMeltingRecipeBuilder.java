@@ -12,6 +12,7 @@ import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.ingredient.EntityIngredient;
 
 import java.util.function.Consumer;
+import slimeknights.mantle.data.loadable.Loadables;
 
 /** Builder for entity melting recipes */
 @RequiredArgsConstructor(staticName = "melting")

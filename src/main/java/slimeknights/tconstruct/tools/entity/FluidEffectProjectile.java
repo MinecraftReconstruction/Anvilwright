@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.stream.Stream;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 /**
  * Projectile that applies a fluid effect on hit, based on {@link LlamaSpit}, but not extending as we want custom movement logic
@@ -166,7 +167,7 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
   /** Updates the stack for the fluid cannon */
   private void updateCannonStack(FluidEffectContext context) {
     if (cannon != null) {
-      IItemHandlerModifiable handler = getCannonInventory();
+      SlottedStackStorage handler = getCannonInventory();
       if (handler != null) {
         handler.setStackInSlot(0, context.getStack());
       }

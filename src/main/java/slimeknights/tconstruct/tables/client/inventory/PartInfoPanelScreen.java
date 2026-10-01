@@ -12,6 +12,7 @@ import slimeknights.tconstruct.tables.client.inventory.module.InfoPanelScreen;
 import slimeknights.tconstruct.tables.menu.PartBuilderContainerMenu;
 
 import java.util.ListIterator;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartBuilderContainerMenu> {
   private static final String COST_KEY = TConstruct.makeTranslationKey("gui", "part_builder.cost");
@@ -124,7 +125,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
 
     // info ? in the top right corner
     if (this.hasTooltips()) {
-      graphics.drawString(this.font, "?", guiRight() - this.border.w - this.font.width("?") / 2f, this.topPos + 5, 0xff5f5f5f, false);
+      graphics.drawString(this.font, "?", (int)(guiRight() - this.border.w - this.font.width("?") / 2f), this.topPos + 5, 0xff5f5f5f, false);
     }
 
     int scaledFontHeight = this.getScaledFontHeight();
@@ -132,7 +133,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.caption) / 2;
 
-      graphics.drawString(this.font, this.caption.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
+      graphics.drawString(this.font, this.caption.getVisualOrderText(), this.leftPos + x2, (int) y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -141,7 +142,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.patternCost) / 2;
 
-      graphics.drawString(this.font, this.patternCost.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
+      graphics.drawString(this.font, this.patternCost.getVisualOrderText(), this.leftPos + x2, (int) y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -150,7 +151,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.materialValue) / 2;
 
-      graphics.drawString(this.font, this.materialValue.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
+      graphics.drawString(this.font, this.materialValue.getVisualOrderText(), this.leftPos + x2, (int) y, color, true);
       y += scaledFontHeight + 3;
     }
 

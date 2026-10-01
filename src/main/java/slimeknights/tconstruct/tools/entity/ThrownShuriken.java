@@ -135,7 +135,7 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
       super.shoot(pX, pY, pZ, velocity, inaccuracy);
 
       // run modifier hooks from the arrow's perspective
-      ModDataNBT arrowData = PersistentDataCapability.getOrWarn(this);
+      ModDataNBT arrowData = new ModDataNBT(PersistentDataCapability.getOrWarn(this));
       for (ModifierEntry entry : tool.getModifiers()) {
         entry.getHook(ModifierHooks.PROJECTILE_SHOT).onProjectileShoot(tool, entry, shooter, stack, this, null, arrowData, true);
       }

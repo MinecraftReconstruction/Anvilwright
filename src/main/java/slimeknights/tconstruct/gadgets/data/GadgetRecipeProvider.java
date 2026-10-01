@@ -32,6 +32,7 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.block.FoliageType;
 
 import java.util.function.Consumer;
+import static slimeknights.mantle.Mantle.commonResource;
 
 public class GadgetRecipeProvider extends BaseRecipeProvider {
   public GadgetRecipeProvider(FabricDataOutput output) {

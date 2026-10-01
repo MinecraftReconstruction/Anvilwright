@@ -168,6 +168,14 @@ import static slimeknights.mantle.util.RetexturedHelper.addTagVariants;
 import slimeknights.tconstruct.common.registration.CastItemObject;
 import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank;
 import net.minecraft.core.RegistryAccess;
+import mezz.jei.api.gui.builder.IIngredientAcceptor;
+import slimeknights.mantle.client.SafeClientAccess;
+import slimeknights.tconstruct.plugin.jei.material.MaterialCategory;
+import slimeknights.tconstruct.plugin.jei.material.MaterialIconIngredientRenderer;
+import slimeknights.tconstruct.plugin.jei.material.MaterialIngredientHelper;
+import slimeknights.tconstruct.plugin.jei.material.OverslimeRecipeExtension;
+import slimeknights.tconstruct.plugin.jei.material.ShapedMaterialsExtension;
+import slimeknights.tconstruct.plugin.jei.material.ShapelessMaterialsExtension;
 
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {

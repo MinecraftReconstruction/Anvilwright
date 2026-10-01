@@ -32,6 +32,8 @@ import java.util.Map.Entry;
 import slimeknights.mantle.util.typed.TypedMapBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.util.JsonHelper;
 
 /** JSON loader that loads tool definitions from JSON */
 @Log4j2

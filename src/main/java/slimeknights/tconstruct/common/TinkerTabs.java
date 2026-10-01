@@ -204,23 +204,23 @@ public class TinkerTabs {
     TinkerWorld.congealedSlime.forEach((slimeType, congealedSlimeBlock) -> output.accept(congealedSlimeBlock));
     TinkerWorld.slimeDirt.forEach(block -> output.accept(block));
     TinkerWorld.vanillaSlimeGrass.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
     TinkerWorld.earthSlimeGrass.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
     TinkerWorld.skySlimeGrass.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
     TinkerWorld.enderSlimeGrass.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
     TinkerWorld.ichorSlimeGrass.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
 
@@ -273,19 +273,19 @@ public class TinkerTabs {
     output.accept(TinkerWorld.bloodshroom.getSign());
 
     TinkerWorld.slimeFern.forEach((slimeType, slimeTallGrassBlock) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(slimeTallGrassBlock);
     });
     TinkerWorld.slimeTallGrass.forEach((slimeType, slimeTallGrassBlock) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(slimeTallGrassBlock);
     });
     TinkerWorld.slimeSapling.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
     TinkerWorld.slimeLeaves.forEach((slimeType, block) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(block);
     });
 
@@ -332,7 +332,7 @@ public class TinkerTabs {
 
     output.accept(TinkerWorld.rawCobalt);
     TinkerWorld.slimeGrassSeeds.forEach((slimeType, slimeGrassSeedItem) -> {
-      if (slimeType != SlimeType.ICHOR)
+      if (slimeType != FoliageType.ICHOR)
         output.accept(slimeGrassSeedItem);
     });
 

@@ -135,6 +135,41 @@ import slimeknights.tconstruct.tools.entity.ThrownShuriken;
 import slimeknights.tconstruct.tools.entity.ThrownTool;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
+import slimeknights.tconstruct.library.client.data.material.MaterialPaletteDebugGenerator;
+import slimeknights.tconstruct.library.materials.MaterialRegistry;
+import slimeknights.tconstruct.library.materials.definition.IMaterial;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.library.modifiers.ModifierManager;
+import slimeknights.tconstruct.library.recipe.ingredient.ToolHookIngredient;
+import slimeknights.tconstruct.library.tools.capability.BlockItemProviderModifierHook;
+import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
+import slimeknights.tconstruct.library.tools.definition.module.material.ToolMaterialHook;
+import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
+import slimeknights.tconstruct.library.tools.item.IModifiable;
+import slimeknights.tconstruct.library.tools.item.armor.MultilayerArmorItem;
+import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolStack;
+import slimeknights.tconstruct.shared.TinkerCommons;
+import slimeknights.tconstruct.tools.data.ArmorModelProvider;
+import slimeknights.tconstruct.tools.data.ModifierIds;
+import slimeknights.tconstruct.tools.data.ToolItemModelProvider;
+import slimeknights.tconstruct.tools.data.client.ModifierModelMapProvider;
+import slimeknights.tconstruct.tools.data.material.MaterialIds;
+import slimeknights.tconstruct.tools.data.sprite.TinkerTrimMaterialPaletteGenerator;
+import slimeknights.tconstruct.tools.logic.ModifiableArrowDispenserBehavior;
+import slimeknights.tconstruct.tools.logic.ModifiableShurikenDispenserBehavior;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Contains all complete tool items

@@ -65,6 +65,23 @@ import slimeknights.tconstruct.world.WorldEvents;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.function.Supplier;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.block.Blocks;
+import slimeknights.mantle.registration.RegistrationHelper;
+import slimeknights.tconstruct.common.data.ConfigurationDataProvider;
+import slimeknights.tconstruct.common.data.DamageTypeProvider;
+import slimeknights.tconstruct.common.data.advancement.FunctionProvider;
+import slimeknights.tconstruct.shared.TinkerAttributes;
+import slimeknights.tconstruct.shared.TinkerClient;
+import slimeknights.tconstruct.world.data.WorldgenProvider;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import slimeknights.tconstruct.library.TinkerBookIDs;
 
 /**
  * TConstruct, the tool mod. Craft your tools with style, then modify until the original is gone!
@@ -119,7 +136,7 @@ public class TConstruct implements ModInitializer {
     TinkerNetwork.setup();
 
     // init client logic
-    TinkerBookIDs.registerCommandSuggestion();
+    // note: Mantle 1.11 dropped BookTestCommand, so the book ID command suggestions are gone
 //    if (ModList.get().isLoaded("crafttweaker")) {
 //      MinecraftForge.EVENT_BUS.register(new CRTHelper());
 //    }

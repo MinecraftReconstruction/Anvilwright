@@ -11,6 +11,7 @@ import slimeknights.tconstruct.TConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import slimeknights.mantle.data.listener.ISafeManagerReloadListener;
 
 /**
  * Logic to get the display name for a resource domain

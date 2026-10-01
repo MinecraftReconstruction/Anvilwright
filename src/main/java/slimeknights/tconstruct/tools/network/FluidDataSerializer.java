@@ -8,12 +8,12 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 public class FluidDataSerializer implements EntityDataSerializer<FluidStack> {
   @Override
   public void write(FriendlyByteBuf buffer, FluidStack stack) {
-    buffer.writeFluidStack(stack);
+    stack.writeToPacket(buffer);
   }
 
   @Override
   public FluidStack read(FriendlyByteBuf buffer) {
-    return buffer.readFluidStack();
+    return FluidStack.readFromPacket(buffer);
   }
 
   @Override

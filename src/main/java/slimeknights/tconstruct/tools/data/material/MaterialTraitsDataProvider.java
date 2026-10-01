@@ -18,6 +18,7 @@ import static slimeknights.tconstruct.library.materials.MaterialRegistry.AMMO;
 import static slimeknights.tconstruct.library.materials.MaterialRegistry.ARMOR;
 import static slimeknights.tconstruct.library.materials.MaterialRegistry.MELEE_HARVEST;
 import static slimeknights.tconstruct.library.materials.MaterialRegistry.RANGED;
+import net.minecraft.data.PackOutput;
 
 public class MaterialTraitsDataProvider extends AbstractMaterialTraitDataProvider {
   public MaterialTraitsDataProvider(FabricDataOutput output, AbstractMaterialDataProvider materials) {

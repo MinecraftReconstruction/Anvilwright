@@ -346,6 +346,7 @@ import slimeknights.tconstruct.tools.stats.ToolType;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
+import slimeknights.tconstruct.common.TinkerTabs;
 
 /**
  * Contains modifiers and the items or blocks used to craft modifiers
@@ -379,12 +380,12 @@ public final class TinkerModifiers extends TinkerModule {
   public static final ItemObject<Item> cobaltReinforcement = ITEMS.register("cobalt_reinforcement", ITEM_PROPS);
   public static final ItemObject<Item> obsidianReinforcement = ITEMS.register("obsidian_reinforcement", ITEM_PROPS);
   // special
-  public static final ItemObject<Item> modifierCrystal = ITEMS.register("modifier_crystal", () -> new ModifierCrystalItem(new Item.Properties().stacksTo(16)));
-  public static final ItemObject<CreativeSlotItem> creativeSlotItem = ITEMS.register("creative_slot", () -> new CreativeSlotItem(ITEM_PROPS));
+  public static final ItemObject<Item> modifierCrystal = ITEMS.register("modifier_crystal", () -> new ModifierCrystalItem(new Item.Properties().stacksTo(16), TinkerTabs.TAB_TOOLS));
+  public static final ItemObject<CreativeSlotItem> creativeSlotItem = ITEMS.register("creative_slot", () -> new CreativeSlotItem(ITEM_PROPS, TinkerTabs.TAB_TOOLS));
 
   // entity
   public static final RegistryObject<EntityType<FluidEffectProjectile>> fluidSpitEntity = ENTITIES.register("fluid_spit", () ->
-    EntityType.Builder.<FluidEffectProjectile>of(FluidEffectProjectile::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10).setShouldReceiveVelocityUpdates(false));
+    EntityType.Builder.<FluidEffectProjectile>of(FluidEffectProjectile::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
   public static final RegistryObject<EntityType<CustomFireball>> fireball = ENTITIES.register("fireball", () -> EntityType.Builder.<CustomFireball>of(CustomFireball::new, MobCategory.MISC).sized(0.3125F, 0.3125F).clientTrackingRange(4).updateInterval(10));
 
   /*
@@ -780,7 +781,7 @@ public final class TinkerModifiers extends TinkerModule {
   /**
    * Loot
    */
-  public static final RegistryObject<Codec<ModifierLootModifier>> modifierLootModifier = GLOBAL_LOOT_MODIFIERS.register("modifier_hook", () -> ModifierLootModifier.CODEC);
+  public static final RegistryObject<Codec<ModifierLootModifier>> modifierLootModifier = GLOBAL_LOOT_MODIFIERS.register("modifier_hook", () -> ModifierLootModifier.CODEC.get());
   public static final RegistryObject<LootItemConditionType> hasModifierLootCondition = LOOT_CONDITIONS.register("has_modifier", () -> new LootItemConditionType(new HasModifierLootCondition.ConditionSerializer()));
   public static final RegistryObject<LootItemFunctionType> modifierBonusFunction = LOOT_FUNCTIONS.register("modifier_bonus", () -> new LootItemFunctionType(new ModifierBonusLootFunction.Serializer()));
   public static final RegistryObject<LootItemConditionType> chrysophiliteLootCondition = LOOT_CONDITIONS.register("has_chrysophilite", () -> new LootItemConditionType(ChrysophiliteLootCondition.SERIALIZER));
@@ -1115,7 +1116,7 @@ public final class TinkerModifiers extends TinkerModule {
     PersistentDataCapability.register();
     EntityModifierCapability.register();
     // by default, we support modifying projectiles (arrows or fireworks mainly, but maybe other stuff). other entities may come in the future
-    EntityModifierCapability.registerEntityPredicate(entity -> entity instanceof Projectile);
+    EntityModifierCapability.registerEntityPredicate(Projectile.class);
   }
 
   /** Registers the datagen providers, called from {@link slimeknights.tconstruct.TConstructData}. */

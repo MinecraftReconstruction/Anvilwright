@@ -43,6 +43,11 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import static slimeknights.mantle.Mantle.COMMON;
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 @SuppressWarnings("removal")
 public class MaterialRecipeProvider extends BaseRecipeProvider implements IMaterialRecipeHelper {

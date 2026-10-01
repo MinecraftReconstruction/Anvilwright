@@ -64,7 +64,7 @@ public class BlockDeferredRegisterExtension extends BlockDeferredRegister {
 
   /** Registers a potted form of the given block using the vanilla pot */
   public <T extends Enum<T> & StringRepresentable, B extends Block>  EnumObject<T, FlowerPotBlock> registerPottedEnum(T[] values, String name, EnumObject<T, B> block) {
-    EnumObject.Builder<T, FlowerPotBlock> builder = new Builder<>(values[0].getDeclaringClass());
+    EnumObject.Builder<T, FlowerPotBlock> builder = new EnumObject.Builder<>(values[0].getDeclaringClass());
     for (T value : values) {
       Supplier<? extends B> supplier = block.getSupplier(value);
       if (supplier != null) {

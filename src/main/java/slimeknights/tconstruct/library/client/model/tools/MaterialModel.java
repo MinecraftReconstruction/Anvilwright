@@ -49,6 +49,8 @@ import java.util.function.Function;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import com.google.gson.JsonSyntaxException;
+import org.joml.Vector2f;
 
 /**
  * Model for an item with material texture variants, such as tool parts. Used only for single material items, {@link ToolModel} is used for multi-material items.
@@ -153,6 +155,15 @@ public class MaterialModel implements IUnbakedGeometry<MaterialModel> {
    * @param overrides      Override instance to use, will either be empty or {@link MaterialOverrideHandler}
    * @return  Baked model
    */
+  /** Reads a 2-element float array from the given JSON object */
+  public static Vec2 arrayToObject(JsonObject json, String key) {
+    JsonArray array = GsonHelper.getAsJsonArray(json, key);
+    if (array.size() != 2) {
+      throw new JsonSyntaxException("Expected " + key + " to be an array of 2 numbers");
+    }
+    return new Vec2(array.get(0).getAsFloat(), array.get(1).getAsFloat());
+  }
+
   private static BakedModel bakeInternal(BlockModel owner, Function<Material, TextureAtlasSprite> spriteGetter, Transformation transform, @Nullable MaterialVariantId material, int index, ItemOverrides overrides) {
     MeshBuilder meshBuilder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
     QuadEmitter emitter = meshBuilder.getEmitter();

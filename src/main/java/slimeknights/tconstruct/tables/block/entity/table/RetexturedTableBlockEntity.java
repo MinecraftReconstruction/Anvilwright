@@ -19,6 +19,7 @@ import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public abstract class RetexturedTableBlockEntity extends TableBlockEntity implements IRetexturedBlockEntity, CustomRenderBoundingBoxBlockEntity {
   private static final String TAG_TEXTURE = "texture";
@@ -87,7 +88,6 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
     }
   }
     
-    @Override
     public CompoundTag getTileData() {
         return getCustomData();
     }

@@ -26,6 +26,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 
 /**
  * Generic class for generating tags at any location even for non-registries.

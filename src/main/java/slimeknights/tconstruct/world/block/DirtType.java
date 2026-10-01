@@ -12,6 +12,7 @@ import slimeknights.tconstruct.shared.block.SlimeType;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
+import net.minecraft.core.registries.Registries;
 
 /** Variants of slimy dirt */
 @Getter
@@ -39,7 +40,7 @@ public enum DirtType implements StringRepresentable {
   DirtType(Tiers harvestTier, MapColor mapColor) {
     this.harvestTier = harvestTier;
     this.mapColor = mapColor;
-    this.blockTag = BlockTags.create(TConstruct.getResource("slimy_soil/" + this.getSerializedName()));
+    this.blockTag = TagKey.create(Registries.BLOCK, TConstruct.getResource("slimy_soil/" + this.getSerializedName()));
   }
 
   private SlimeType slimeType;

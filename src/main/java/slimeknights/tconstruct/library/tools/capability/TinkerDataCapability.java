@@ -16,6 +16,11 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import lombok.Getter;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import slimeknights.mantle.registration.object.IdAwareObject;
+import javax.annotation.Nonnull;
 
 /**
  * Capability to make it easy for Tinkers to store common data on the player, primarily used for armor

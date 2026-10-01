@@ -56,7 +56,7 @@ public class DoubleJumpHandler {
       int extraJumps = Mth.floor(entity.getAttributeValue(TinkerAttributes.JUMP_COUNT.get())) - 1;
       if (extraJumps > 0) {
         // check that we can take more jumps
-        ModDataNBT data = PersistentDataCapability.getOrWarn(entity);
+        ModDataNBT data = new ModDataNBT(PersistentDataCapability.getOrWarn(entity));
         int jumps = data.getInt(JUMPS);
         if (jumps < extraJumps) {
           // actually jump, this method is nice enough to work in air

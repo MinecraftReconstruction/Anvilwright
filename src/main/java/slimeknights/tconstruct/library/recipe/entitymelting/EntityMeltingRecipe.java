@@ -26,6 +26,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 
 /**
  * Recipe to melt an entity into a fluid

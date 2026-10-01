@@ -14,6 +14,7 @@ import slimeknights.tconstruct.tables.block.entity.inventory.IScalingContainer;
 import slimeknights.tconstruct.transfer.EmptySlottedStorage;
 
 import java.util.Optional;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 public class ScalingChestScreen<T extends BlockEntity> extends DynamicContainerScreen<MultiModuleScreen<?>,BaseContainerMenu<T>> {
   private final IScalingContainer scaling;

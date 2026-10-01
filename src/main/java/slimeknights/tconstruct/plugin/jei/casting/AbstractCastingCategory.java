@@ -38,6 +38,20 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.gui.drawable.IDrawableAnimated.StartDirection;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.category.AbstractRecipeCategory;
+import slimeknights.tconstruct.library.recipe.display.RecipeSlot;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
+import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
+import slimeknights.tconstruct.plugin.jei.util.RecipeSlotWrapper;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 /** Shared base logic for the two casting recipe types */
 public abstract class AbstractCastingCategory implements IRecipeCategory<IDisplayableCastingRecipe>, IRecipeTooltipReplacement {

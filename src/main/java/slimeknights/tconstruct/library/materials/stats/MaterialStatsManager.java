@@ -29,6 +29,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import slimeknights.mantle.data.registry.IdAwareComponentRegistry;
+import org.apache.logging.log4j.Level;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.util.JsonHelper;
+import slimeknights.mantle.util.typed.TypedMapBuilder;
 
 /**
  * Loads the different material stats from the datapacks.

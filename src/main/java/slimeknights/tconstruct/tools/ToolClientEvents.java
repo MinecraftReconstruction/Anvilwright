@@ -80,6 +80,17 @@ import slimeknights.tconstruct.tools.network.TinkerControlPacket;
 import java.util.Map;
 
 import static slimeknights.tconstruct.library.client.model.tools.ToolModel.registerItemColors;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.Mth;
+import slimeknights.mantle.data.listener.ISafeManagerReloadListener;
+import java.util.function.Consumer;
+import static slimeknights.tconstruct.TConstruct.getResource;
+import slimeknights.tconstruct.tools.client.ArmorModelHelper;
+import slimeknights.tconstruct.tools.client.PlateArmorModel;
+import slimeknights.tconstruct.tools.client.SlimelytraArmorModel;
+import slimeknights.tconstruct.library.tools.item.IModifiable;
 
 @SuppressWarnings("unused")
 public class ToolClientEvents extends ClientEventBase {
@@ -96,15 +107,25 @@ public class ToolClientEvents extends ClientEventBase {
     }
   };
 
+  /** Wraps a Mantle safe reload listener so Fabric can identify it */
+  private static IdentifiableISafeManagerReloadListener wrap(String path, ISafeManagerReloadListener listener) {
+    return new IdentifiableISafeManagerReloadListener(TConstruct.getResource(path)) {
+      @Override
+      public void onReloadSafe(ResourceManager manager) {
+        listener.onReloadSafe(manager);
+      }
+    };
+  }
+
   static void addResourceListener() {
     ModifierModelManager.init(ResourceManagerHelper.get(PackType.CLIENT_RESOURCES));
     MaterialTooltipCache.init(ResourceManagerHelper.get(PackType.CLIENT_RESOURCES));
     DynamicTextureLoader.init();
     ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(MODIFIER_RELOAD_LISTENER);
-    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(PlateArmorModel.RELOAD_LISTENER);
-    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(SlimeskullArmorModel.RELOAD_LISTENER);
-    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(SlimelytraArmorModel.RELOAD_LISTENER);
-    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(HarvestTiers.RELOAD_LISTENER);
+    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(wrap("plate_armor_model", PlateArmorModel.RELOAD_LISTENER));
+    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(wrap("slimeskull_armor_model", SlimeskullArmorModel.RELOAD_LISTENER));
+    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(wrap("slimelytra_armor_model", SlimelytraArmorModel.RELOAD_LISTENER));
+    ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(wrap("harvest_tiers", HarvestTiers.RELOAD_LISTENER));
   }
 
   static void registerModelLoaders(Map<ResourceLocation, IGeometryLoader<?>> loaders) {
@@ -164,7 +185,7 @@ public class ToolClientEvents extends ClientEventBase {
     TinkerItemProperties.registerToolProperties(TinkerTools.cleaver.asItem());
     // bow
     TinkerItemProperties.registerCrossbowProperties(TinkerTools.crossbow.asItem());
-    TinkerItemProperties.registerBowProperties(TinkerTools.longbow.asItem());
+    TinkerItemProperties.registerToolProperties(TinkerTools.longbow.asItem());
     // misc
     TinkerItemProperties.registerToolProperties(TinkerTools.flintAndBrick.asItem());
     TinkerItemProperties.registerToolProperties(TinkerTools.skyStaff.asItem());
@@ -182,8 +203,9 @@ public class ToolClientEvents extends ClientEventBase {
   }
 
   static void registerParticleFactories() {
-    ParticleFactoryRegistry.getInstance().register(TinkerTools.hammerAttackParticle.get(), HammerAttackParticle.Factory::new);
-    ParticleFactoryRegistry.getInstance().register(TinkerTools.axeAttackParticle.get(), AxeAttackParticle.Factory::new);
+    ParticleFactoryRegistry.getInstance().register(TinkerTools.hammerAttackParticle.get(), AttackParticle.Factory::new);
+    ParticleFactoryRegistry.getInstance().register(TinkerTools.axeAttackParticle.get(), AttackParticle.Factory::new);
+    ParticleFactoryRegistry.getInstance().register(TinkerTools.bonkAttackParticle.get(), AttackParticle.Factory::new);
   }
 
   static void itemColors() {
@@ -237,7 +259,7 @@ public class ToolClientEvents extends ClientEventBase {
       // ensure we pressed the key since the last tick, holding should not use all your jumps at once
       boolean isJumping = minecraft.options.keyJump.isDown();
       if (!wasJumping && isJumping) {
-        if (DoubleJumpModifier.extraJump(player)) {
+        if (DoubleJumpHandler.extraJump(player)) {
           TinkerNetwork.getInstance().sendToServer(TinkerControlPacket.DOUBLE_JUMP);
         }
       }
@@ -284,19 +306,10 @@ public class ToolClientEvents extends ClientEventBase {
       // start by calculating tool stat, not an attribute to ensure both hands get their say
       if (using.is(TinkerTags.Items.HELD)) {
         ToolStack tool = ToolStack.from(using);
-        // multiply by 5 to cancel out the vanilla 20%
-        float speed = 5 * (tool.getStats().get(ToolStats.USE_ITEM_SPEED));
-        // FAST_USE_ITEM was originally 80% move speed, since the stat defaults to 20% this makes it act the same as long as you don't modify the stat
-        if (tool.getVolatileData().getBoolean(IModifiable.FAST_USE_ITEM)) {
-          speed = Math.min(5, speed + 5 * 0.6f);
-        }
-        input.leftImpulse *= speed;
-        input.forwardImpulse *= speed;
+        speed += tool.getStats().get(ToolStats.USE_ITEM_SPEED) - ToolStats.USE_ITEM_SPEED.getDefaultValue();
       }
       // next, add in deprecated key bonus
       speed = Mth.clamp(speed + ArmorStatModule.getStat(player, TinkerDataKeys.USE_ITEM_SPEED), 0, 1);
-      // update speed, note if the armor stat is 0 and the held tool is not tinkers this is a no-op effectively
-      Input input = event.getInput();
       // multiply by 5 to cancel out the vanilla 20%
       input.leftImpulse *= (float) (speed * 5);
       input.forwardImpulse *= (float) (speed * 5);

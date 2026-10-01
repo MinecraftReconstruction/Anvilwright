@@ -18,6 +18,7 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import slimeknights.tconstruct.library.fluid.EmptyFluidHandlerItem;
 
 /** Handler to remove tanks when their fluid is removed from JEI. */
 public record TankHidingIngredientListener(IIngredientManager manager, List<Item> tanks) implements IIngredientListener {

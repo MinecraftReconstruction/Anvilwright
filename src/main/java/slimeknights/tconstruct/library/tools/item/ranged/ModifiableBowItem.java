@@ -271,7 +271,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
         EntityModifierCapability.getCapability(arrow).addModifiers(modifiers);
 
         // fetch the persistent data for the arrow as modifiers may want to store data
-        ModDataNBT arrowData = PersistentDataCapability.getOrWarn(arrow);
+        ModDataNBT arrowData = new ModDataNBT(PersistentDataCapability.getOrWarn(arrow));
 
         // if infinite, skip pickup
         if (creative) {

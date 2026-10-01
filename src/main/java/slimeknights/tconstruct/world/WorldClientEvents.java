@@ -41,11 +41,14 @@ import slimeknights.tconstruct.world.client.TinkerSlimeRenderer;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.model.PiglinHeadModel;
 
 @SuppressWarnings("unused")
 public class WorldClientEvents extends ClientEventBase {
   static void addResourceListener() {
-    for (SlimeType type : SlimeType.values()) {
+    for (FoliageType type : FoliageType.values()) {
       ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SlimeColorReloadListener(type));
     }
   }
@@ -96,8 +99,8 @@ public class WorldClientEvents extends ClientEventBase {
     RenderType cutoutMipped = RenderType.cutoutMipped();
 
     // render types - slime plants
-    for (SlimeType type : SlimeType.values()) {
-      if (type != SlimeType.BLOOD) {
+    for (FoliageType type : FoliageType.values()) {
+      if (type != FoliageType.BLOOD) {
         BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slimeLeaves.get(type), cutoutMipped);
       }
       BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.vanillaSlimeGrass.get(type), cutoutMipped);
@@ -116,7 +119,7 @@ public class WorldClientEvents extends ClientEventBase {
 
     // render types - slime blocks
     RenderType translucent = RenderType.translucent();
-    for (SlimeType type : SlimeType.TINKER) {
+    for (FoliageType type : FoliageType.VISIBLE) {
       BlockRenderLayerMap.INSTANCE.putBlock(TinkerWorld.slime.get(type), translucent);
     }
 
@@ -170,7 +173,7 @@ public class WorldClientEvents extends ClientEventBase {
   static void registerBlockColorHandlers() {
 
     // slime plants - blocks
-    for (SlimeType type : SlimeType.values()) {
+    for (FoliageType type : FoliageType.values()) {
       ColorProviderRegistry.BLOCK.register(
         (state, reader, pos, index) -> getSlimeColorByPos(pos, type, null),
         TinkerWorld.vanillaSlimeGrass.get(type), TinkerWorld.earthSlimeGrass.get(type), TinkerWorld.skySlimeGrass.get(type),
@@ -185,10 +188,10 @@ public class WorldClientEvents extends ClientEventBase {
 
     // vines
     ColorProviderRegistry.BLOCK.register(
-      (state, reader, pos, index) -> getSlimeColorByPos(pos, SlimeType.SKY, SlimeColorizer.LOOP_OFFSET),
+      (state, reader, pos, index) -> getSlimeColorByPos(pos, FoliageType.SKY, SlimeColorizer.LOOP_OFFSET),
       TinkerWorld.skySlimeVine.get());
     ColorProviderRegistry.BLOCK.register(
-      (state, reader, pos, index) -> getSlimeColorByPos(pos, SlimeType.ENDER, SlimeColorizer.LOOP_OFFSET),
+      (state, reader, pos, index) -> getSlimeColorByPos(pos, FoliageType.ENDER, SlimeColorizer.LOOP_OFFSET),
       TinkerWorld.enderSlimeVine.get());
   }
 

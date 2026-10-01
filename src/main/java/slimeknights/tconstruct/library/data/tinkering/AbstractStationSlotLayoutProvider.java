@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
+import java.util.Collections;
 
 /** Base data generator to generate station slot layouts */
 @SuppressWarnings("deprecation")  // just let me get item keys forge

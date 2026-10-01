@@ -30,6 +30,8 @@ import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 
 import javax.annotation.Nonnull;
+import net.minecraft.world.damagesource.DamageSource;
+import slimeknights.tconstruct.common.TinkerTags;
 
 /** Global loot modifier for modifiers */
 public class ModifierLootModifier extends LootModifier {
@@ -58,7 +60,7 @@ public class ModifierLootModifier extends LootModifier {
 
         // no need to build the dummy tool if we lack modifiers
         if (!modifiers.isEmpty()) {
-          ModDataNBT persistentData = projectile.getCapability(PersistentDataCapability.CAPABILITY).orElseGet(ModDataNBT::new);
+          ModDataNBT persistentData = PersistentDataCapability.CAPABILITY.maybeGet(projectile).map(ModDataNBT::new).orElseGet(ModDataNBT::new);
           IToolStackView dummyTool = new DummyToolStack(Items.AIR, modifiers, persistentData);
           for (ModifierEntry entry : modifiers) {
             entry.getHook(ModifierHooks.PROCESS_LOOT).processLoot(dummyTool, entry, generatedLoot, context);

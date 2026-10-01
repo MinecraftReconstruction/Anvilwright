@@ -34,6 +34,7 @@ import java.util.List;
 import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
 import net.minecraft.world.item.crafting.RecipeType;
+import com.mojang.datafixers.util.Either;
 
 /** Shared by melter and smeltery */
 public class MeltingCategory extends AbstractMeltingCategory {

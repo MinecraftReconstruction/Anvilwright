@@ -85,7 +85,7 @@ public class DamageSpeedTradeModifier extends Modifier implements AttributesModi
   }
 
   @Override
-  public void onBreakSpeed(IToolStackView tool, int level, PlayerEvents.BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
+  public void onBreakSpeed(IToolStackView tool, ModifierEntry modifier, BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
     if (isEffective) {
       event.setNewSpeed((float)(event.getNewSpeed() * (1 - getMultiplier(tool, modifier.getLevel()))));
     }

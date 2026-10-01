@@ -318,3 +318,70 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
   本轮实测 `library/tools/nbt` 单包 20 条错，其中 `getLevel()/getName()/getVariant()/getData()` 一类全是幻影。
 - 换 Mantle 版本后**必须**重跑 `./gradlew -I scripts/port/printcp.gradle printCompileCp` 并重编，
   否则 classpath 里还是旧 Mantle。
+
+---
+
+## 13. 2026-09-30 傍晚：编译已经收敛到 1 条错误（本轮交接）
+
+### 13.1 现在的状态（一句话）
+
+`./gradlew compileJava` 那套 javac 口径（`scripts/port/fastcompile.sh --gen`）**只剩 1 条错误**：
+Mantle 的 `FluidTransferHelper` 缺 `interactWithStack(...)` 与 `handleUIResult(...)`
+（Forge 版 Mantle 有这两个方法，我们的 Fabric 版没搬，见 13.4 第 1 条）。
+
+### 13.2 本轮做了什么（8 个 commit，全部 push 到 `mcr/upstream-3.12.1`）
+
+| commit | 内容 |
+|---|---|
+| `579d548a` | Mantle 补 `FluidObject.getLocalTag/getForgeTag/getTag/getBlock`、`ItemObject.getRegistryName`；新增 `scripts/port/missing_members.py` |
+| `a42324ee` | `TinkerTools` 补回 3.11 的 11 个工具 + 4 个实体 + bonk 粒子 |
+| `fe5b6a0e` | `TinkerCommons`/`TinkerMaterials`/`TinkerGadgets`/`TinkerFluids`/`SlimeType` 补回合并丢的方块/物品/流体（60 处流体注册改成 Mantle 1.11 链式 API） |
+| `cbbd92e0`/`43e6d105` | NUMBERS.md 写下"合并丢声明"的根因与测量方法；HANDOFF 第 12 节 |
+| `9eb2778e` | 全树 long→int 扫尾、14 个 datagen provider 回 `FabricDataOutput`、**accesswidener 补 ThrownTrident 等** |
+| `0e863702` | **import 补全轮**：新增 `sync_imports.py` + `drop_broken_imports.py`，一次清掉 800+ 条 import 级联（整树 2057 → 个位数量级） |
+| `5315710c`/`ffb7d85a` | 逐文件扫尾：ToolModel/MaterialModel 的 FRAPI Mesh 桥接、盔甲模型入口、事件类构造器、`RecipeResult<LazyToolStack>`、`ToolHarvestLogic.runBlockBreak`、`ToolAttackUtil` 两个方法、`ToolContainerMenu` 构造器等 |
+
+### 13.3 本轮新增/更新的工具（都在 `scripts/port/`）
+
+| 工具 | 用途 |
+|---|---|
+| `sync_imports.py [--apply]` | 从上游同名文件补齐本文件缺的 import（跳过 Forge-only） |
+| `drop_broken_imports.py [log]` | 把 javac 报"不存在"的 **import 行本身**删掉，可反复跑 |
+| `missing_members.py [log]` | 找"上游有声明、我们整棵树没有"的成员（合并丢的声明） |
+| `fastcompile.sh [--gen]` | 20 秒整树 javac；**`--gen` 口径才是现在的真值** |
+
+⚠️ 不要再拿"默认口径"的整树数字当进度：本轮它显示 132 时，`--gen` 只有 6。
+默认口径里绝大多数是 Lombok 幻影（javac 在失败状态下看不到 Lombok 生成的成员）。
+
+### 13.4 接着干（按顺序）
+
+1. **补 Mantle 的两个方法** → 应该就能 0 错误：
+   `Mantle-Fabric/src/main/java/slimeknights/mantle/fluid/FluidTransferHelper.java`
+   - `@Nullable public static TransferResult interactWithStack(Storage<FluidVariant> tank, ItemStack stack, TransferDirection direction)`
+   - `public static ItemStack handleUIResult(Player player, ItemStack emptyStack, @Nullable TransferResult result)`
+   参考 Forge 版（本地 `~/Desktop/repo/Mantle/src/main/java/slimeknights/mantle/fluid/FluidTransferHelper.java:360` 与 `:491`），
+   Fabric 版用 `ContainerItemContext` + `FluidStorage.ITEM` + 现成的 `tryTransfer(...)` 重写。
+   改完照旧：`publishToMavenLocal` → 改 TCon 的 `mantle_version`（当前 `1.11.DEV.0f373c6d`）→
+   **必须**重跑 `./gradlew -I scripts/port/printcp.gradle printCompileCp` 再编译。
+2. **跑真正的 Gradle 构建**：`./gradlew build --offline`。javac 过了不代表 Gradle 过
+   （datagen provider 的注册、资源、mixins、AW 校验都可能再报）。新错误优先看 `build/reports`。
+3. **冒烟测试**：`./gradlew runServer`（先）→ `runClient`。重点看：
+   工具定义/修饰符能否加载（`tinkering/tool_definitions`）、冶炼炉方块实体、盔甲模型、
+   以及 BEHAVIOUR-DIFFERENCES 里标"未验证"的那些点。
+4. **迁移到 canonical 仓库**（用户明确的发布计划）：
+   - 建一个 **non-fork** 仓库（不要 fork 关系），把 `mcr/upstream-3.12.1` 的历史整体推上去；
+   - 两条分支：**带 checkpoint 的**（现有细粒度历史）与 **不带 checkpoint 的**（把这一百来个 commit
+     按逻辑压成十几~二十块，例如"合并上游 3.12.1""Mantle API 恢复""注册表补全""流体重写""datagen 修复"
+     "import 级联""盔甲/模型""事件与网络""权限与 AW"…），**后者设为默认分支**；
+   - README/ATTRIBUTION 用固定措辞：`Unofficial, largely AI-assisted ("vibed") port.`（中文：
+     「非官方、由 AI 大幅辅助完成（"largely vibed"）的移植工程」），并明确上游作者
+     SlimeKnights / AlphaMode，且 **不要**写"AI-generated"。
+
+### 13.5 仍然要小心的事
+
+- **别信单个数字**：任何"总错误数"都要说明口径（`--gen` 才有意义），且修好一个文件后**别的文件会被暴露出来**，
+  数量阶段性上涨是正常的。
+- **分块编译（`truecount.sh`）对跨包 Lombok 类会造幻影**，本轮实测 `library/tools/nbt` 单包 20 条里大部分是幻影。
+- **改 accesswidener 之后必须重新生成 classpath**，否则测得的是旧 MC jar。
+- 本轮为了编译通过，有几处是"先让它能编译"的保守处理（例如 `Modifier.getModule(Class)` 返回 null、
+  若干 Forge 专属钩子退化成普通方法），**这些都需要在冒烟测试里逐条确认**，必要时补行为差异条目。

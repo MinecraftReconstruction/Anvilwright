@@ -38,7 +38,7 @@ public class ShapedMaterialRecipe extends ShapedRecipe {
   }
 
   public ShapedMaterialRecipe(ShapedRecipe recipe, List<MaterialVariantId> extraMaterials) {
-    this(recipe.getId(), recipe.getGroup(), recipe.category(), recipe.getRecipeWidth(), recipe.getRecipeHeight(), recipe.getIngredients(), recipe.result, recipe.showNotification(), extraMaterials);
+    this(recipe.getId(), recipe.getGroup(), recipe.category(), recipe.width, recipe.height, recipe.getIngredients(), recipe.result, recipe.showNotification(), extraMaterials);
   }
 
   /** @deprecated use {@link #ShapedMaterialRecipe(ResourceLocation,String,CraftingBookCategory,int,int,NonNullList,ItemStack,boolean,List)} */

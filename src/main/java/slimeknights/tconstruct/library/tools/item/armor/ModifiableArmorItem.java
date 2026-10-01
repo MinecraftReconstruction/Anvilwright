@@ -78,6 +78,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import slimeknights.tconstruct.tools.item.ArmorSlotType;
 import net.minecraft.world.item.CreativeModeTab;
+import slimeknights.tconstruct.library.tools.capability.ToolCapabilityProvider;
 
 public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay, DamageableItem, PiglinsNeutralItem, FabricElytraItem, CustomEnchantingBehaviorItem, WalkOnSnowItem, ToolActionItem, RepairableItem {
   /** Volatile modifier tag to make piglins neutal when worn */
@@ -103,7 +104,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   }
 
   public ModifiableArmorItem(ModifiableArmorMaterial material, ArmorSlotType slotType, Properties properties, ResourceKey<CreativeModeTab> tab) {
-    this(material, slotType.getArmorType(), properties, Objects.requireNonNull(material.getArmorDefinition(slotType), "Missing tool definition for " + slotType), tab);
+    this(material, slotType.getArmorType(), properties, Objects.requireNonNull(material.getArmorDefinition(slotType.getArmorType()), "Missing tool definition for " + slotType), tab);
   }
 
   /* Basic properties */
@@ -123,7 +124,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return type == Type.BOOTS && ModifierUtil.checkVolatileFlag(stack, SNOW_BOOTS);
   }
 
-  @Override
+  /** Forge hook that had no Porting Lib interface; kept for API compatibility */
   public boolean isEnderMask(ItemStack stack, Player player, EnderMan endermanEntity) {
     return type == Type.HELMET && ModifierUtil.checkVolatileFlag(stack, ENDERMASK);
   }
@@ -133,7 +134,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return ModifierUtil.canPerformAction(ToolStack.from(stack), toolAction);
   }
 
-  @Override
+  /** Forge hook that had no Porting Lib interface; kept for API compatibility */
   public boolean isNotReplaceableByPickAction(ItemStack stack, Player player, int inventorySlot) {
     return true;
   }
@@ -156,7 +157,7 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
     return enchantment.isCurse() && CustomEnchantingBehaviorItem.super.canApplyAtEnchantingTable(stack, enchantment);
   }
 
-  @Override
+  /** Forge hook that had no Porting Lib interface; the enchantment hook covers it */
   public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
     return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
   }
@@ -379,7 +380,6 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
       }
       List<ModifierEntry> modifiers = tool.getModifierList();
       if (!modifiers.isEmpty()) {
-        LivingEntity living = (LivingEntity) entityIn;
         boolean isCorrectSlot = living.getItemBySlot(getEquipmentSlot()) == stack;
         // we pass in the stack for most custom context, but for the sake of armor its easier to tell them that this is the correct slot for effects
         for (ModifierEntry entry : modifiers) {

@@ -336,7 +336,7 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
 
     // info ? in the top right corner
     if (this.hasTooltips()) {
-      graphics.drawString(this.font, "?", guiRight() - this.border.w - this.font.width("?") / 2f, this.topPos + 5, 0xff5f5f5f, false);
+      graphics.drawString(this.font, "?", (int)(guiRight() - this.border.w - this.font.width("?") / 2f), this.topPos + 5, 0xff5f5f5f, false);
     }
 
     // draw caption
@@ -345,7 +345,7 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
       int x2 = this.imageWidth / 2;
       x2 -= this.font.width(this.caption) / 2;
 
-      graphics.drawString(this.font, this.caption.getVisualOrderText(), (float) this.leftPos + x2, y, color, true);
+      graphics.drawString(this.font, this.caption.getVisualOrderText(), this.leftPos + x2, (int) y, color, true);
       y += scaledFontHeight + 3;
     }
 
@@ -371,7 +371,7 @@ public class InfoPanelScreen<P extends MultiModuleScreen<?>, C extends AbstractC
       }
 
       FormattedCharSequence line = iter.next();
-      graphics.drawString(this.font, line, x, y, color, true);
+      graphics.drawString(this.font, line, (int) x, (int) y, color, true);
       y += textHeight;
     }
 

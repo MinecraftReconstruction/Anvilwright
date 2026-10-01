@@ -16,6 +16,7 @@ import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.context.EquipmentContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import io.github.fabricators_of_create.porting_lib.util.PotionHelper;
 
 /** @deprecated use {@link slimeknights.tconstruct.library.modifiers.modules.combat.MobEffectModule.ArmorCounter} and {@link slimeknights.tconstruct.tools.modules.ClearEffectOnUnequipModule} */
 @Deprecated(forRemoval = true)
@@ -44,7 +45,7 @@ public class RevengeModifier extends NoLevelsModifier implements EquipmentChange
       IToolStackView replacement = context.getReplacementTool();
       if (replacement == null || replacement.getModifierLevel(this) == 0) {
         // cure effects using the helmet
-        context.getEntity().curePotionEffects(new ItemStack(tool.getItem()));
+        PotionHelper.curePotionEffects(context.getEntity(), new ItemStack(tool.getItem()));
       }
     }
   }

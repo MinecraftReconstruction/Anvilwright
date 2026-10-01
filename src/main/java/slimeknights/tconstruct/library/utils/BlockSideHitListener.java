@@ -13,6 +13,8 @@ import java.util.UUID;
 import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
 import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus.Internal;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 
 /**
  * Logic to keep track of the side of the block that was last hit

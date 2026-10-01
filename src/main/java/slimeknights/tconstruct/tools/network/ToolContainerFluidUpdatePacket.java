@@ -10,12 +10,12 @@ import slimeknights.tconstruct.tools.menu.ToolContainerMenu;
 /** Packet used when a fluid is changed inside a tool container menu */
 public record ToolContainerFluidUpdatePacket(FluidStack fluid) implements IThreadsafePacket {
   public ToolContainerFluidUpdatePacket(FriendlyByteBuf buffer) {
-    this(buffer.readFluidStack());
+    this(FluidStack.readFromPacket(buffer));
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer) {
-    buffer.writeFluidStack(fluid);
+    fluid.writeToPacket(buffer);
   }
 
   @Override

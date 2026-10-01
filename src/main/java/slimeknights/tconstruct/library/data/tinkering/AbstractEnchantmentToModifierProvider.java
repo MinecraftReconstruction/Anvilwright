@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 
 /** Data generator for mappings from enchantments to modifiers */
 public abstract class AbstractEnchantmentToModifierProvider extends GenericDataProvider {

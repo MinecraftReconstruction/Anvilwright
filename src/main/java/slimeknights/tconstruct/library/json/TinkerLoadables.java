@@ -35,6 +35,8 @@ import slimeknights.tconstruct.library.tools.part.IToolPart;
 import slimeknights.tconstruct.library.utils.GsonLoadable;
 
 import java.util.Set;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 
 @SuppressWarnings("deprecation")
 public class TinkerLoadables {

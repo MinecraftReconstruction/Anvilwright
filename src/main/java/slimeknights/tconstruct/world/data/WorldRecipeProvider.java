@@ -21,6 +21,8 @@ import slimeknights.tconstruct.shared.block.SlimeType;
 import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.function.Consumer;
+import static slimeknights.mantle.Mantle.commonResource;
+import net.minecraft.data.PackOutput;
 
 public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRecipeHelper {
   public WorldRecipeProvider(FabricDataOutput output) {

@@ -26,6 +26,18 @@ import slimeknights.mantle.util.JsonHelper;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.Potions;
+import slimeknights.mantle.data.loadable.Loadables;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import slimeknights.mantle.data.loadable.field.LoadableField;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.TypeAwareRecipeSerializer;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Recipe for casting a fluid onto an item, copying the fluid NBT to the item

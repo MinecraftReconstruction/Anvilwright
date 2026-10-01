@@ -118,6 +118,24 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
+import net.minecraft.world.item.CreativeModeTab.Output;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour.OffsetType;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import slimeknights.mantle.registration.object.EntityObject;
+import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
+import slimeknights.tconstruct.library.json.loot.equipment.MobEquipmentManager;
+import slimeknights.tconstruct.shared.TinkerCommons;
+import slimeknights.tconstruct.shared.TinkerMaterials;
+import slimeknights.tconstruct.smeltery.TinkerSmeltery;
+import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.world.block.PiglinHeadBlock;
+import slimeknights.tconstruct.world.data.MobEquipmentProvider;
+import slimeknights.tconstruct.world.item.EndermanHeadItem;
 
 /**
  * Contains blocks and items relevant to structures and world gen

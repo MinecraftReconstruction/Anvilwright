@@ -33,6 +33,7 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.Locale;
 import java.util.function.Consumer;
+import static slimeknights.mantle.Mantle.commonResource;
 
 public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonRecipeHelper {
   public CommonRecipeProvider(FabricDataOutput output) {

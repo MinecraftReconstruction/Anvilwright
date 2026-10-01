@@ -38,6 +38,9 @@ import java.util.List;
 import java.util.function.Function;
 import slimeknights.tconstruct.plugin.jei.util.IRecipeTooltipReplacement;
 import net.minecraft.world.item.crafting.RecipeType;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
+import java.awt.Color;
 
 /**
  * Alloy recipe category for JEI display

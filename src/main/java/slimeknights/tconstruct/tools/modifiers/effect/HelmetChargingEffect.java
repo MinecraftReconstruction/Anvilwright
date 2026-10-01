@@ -22,6 +22,7 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /** Effect for rendering the charge up when you start using a helmet */
 public class HelmetChargingEffect extends MobEffect {

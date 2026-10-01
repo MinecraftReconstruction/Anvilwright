@@ -24,6 +24,9 @@ import slimeknights.tconstruct.tools.modules.armor.GoldenAttributeModule;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.tools.item.armor.ModifiableArmorItem;
 
 /** @deprecated use {@link GoldenAttributeModule} with {@link TinkerAttributes#CHRYSOPHILITE} */
 @Deprecated(forRemoval = true)

@@ -35,6 +35,10 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.world.entity.EquipmentSlot;
+import slimeknights.mantle.fluid.FluidTransferHelper;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
+import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferResult;
+import slimeknights.mantle.inventory.EmptyItemHandler;
 
 /** Container for a tool inventory */
 public class ToolContainerMenu extends AbstractContainerMenu {
@@ -56,6 +60,8 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   /** Item handler being rendered */
   @Getter
   private final SlottedStackStorage itemHandler;
+  /** Fluid handler for the tool */
+  private final ToolFluidHandler tank;
   private final Player player;
   @Getter
   private final int slotIndex;
@@ -91,10 +97,12 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     this.itemHandler = handler;
     this.player = playerInventory.player;
     this.tank = new ToolFluidHandler(tool, player.level().isClientSide ? null : player);
-    this.slotIndex = slotIndex;
+    this.slotIndex = slotType.getIndex();
+    CraftingType craftingType = CraftingType.fromStack(stack);
+    boolean includeOffhand = ModifierUtil.checkVolatileFlag(stack, ToolInventoryCapability.INCLUDE_OFFHAND);
 
     // if requested, add 3x3 crafting area
-    int slots = itemHandler.getSlots();
+    int slots = itemHandler.getSlotCount();
     int craftingOffset = (slots == 0 ? REPEAT_BACKGROUND_START : UI_START) + 1;
     if (craftingType == CraftingType.FULL) {
       this.craftingContainer = new TransientCraftingContainer(this, 3, 3);
@@ -122,7 +130,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     this.toolInventoryStart = this.slots.size();
 
     // add tool slots
-    int slots = itemHandler.getSlotCount();
+    int yOffset = REPEAT_BACKGROUND_START + getCraftingHeight() * SLOT_SIZE + 1;
     for (int i = 0; i < slots; i++) {
       this.addSlot(new ToolContainerSlot(itemHandler, i, 8 + (i % 9) * SLOT_SIZE, yOffset + (i / 9) * SLOT_SIZE));
     }
@@ -131,7 +139,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     if (this.showOffhand) {
       int x = 8 + (slots % 9) * SLOT_SIZE;
       int y = yOffset + (slots / 9) * SLOT_SIZE;
-      if (slotIndex == Inventory.SLOT_OFFHAND) {
+      if (slotType == EquipmentSlot.OFFHAND) {
         this.addSlot(new ReadOnlySlot(playerInventory, 40, x, y));
       } else {
         this.addSlot(new Slot(playerInventory, 40, x, y));
@@ -149,7 +157,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
     for(int r = 0; r < 3; ++r) {
       for(int c = 0; c < 9; ++c) {
         int index = c + r * 9 + 9;
-        if (index == slotIndex) {
+        if (index == slotType.getIndex()) {
           this.addSlot(new ReadOnlySlot(playerInventory, index, 8 + c * 18, yOffset + r * 18));
         } else {
           this.addSlot(new Slot(        playerInventory, index, 8 + c * 18, yOffset + r * 18));
@@ -278,6 +286,11 @@ public class ToolContainerMenu extends AbstractContainerMenu {
       // no proper setChanged method on item handler, so just set the existing stack
       set(getItem());
     }
+  }
+
+  /** Gets the fluid tank for this menu, used by the fluid sync packet */
+  public SimpleFluidTank getTank() {
+    return tank;
   }
 
   /** Logic handling the fluid tank in the UI */

@@ -28,6 +28,7 @@ import java.util.List;
 import slimeknights.mantle.data.loadable.field.LoadableField;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
+import slimeknights.mantle.data.loadable.field.ContextKey;
 
 /**
  * Casting recipe that takes an arbitrary fluid of a given amount and set the material on the output based on that fluid

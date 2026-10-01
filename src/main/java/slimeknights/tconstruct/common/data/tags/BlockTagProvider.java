@@ -234,7 +234,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     FabricTagBuilder leavesTagAppender = this.tag(TinkerTags.Blocks.SLIMY_LEAVES);
     FabricTagBuilder wartTagAppender = this.tag(BlockTags.WART_BLOCKS);
     FabricTagBuilder saplingTagAppender = this.tag(TinkerTags.Blocks.SLIMY_SAPLINGS);
-    for (SlimeType type : SlimeType.values()) {
+    for (FoliageType type : FoliageType.values()) {
       if (type.isNether()) {
         wartTagAppender.add(TinkerWorld.slimeLeaves.get(type));
         endermanHoldable.add(TinkerWorld.slimeSapling.get(type));
@@ -372,11 +372,11 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
       Blocks.BIG_DRIPLEAF,
       Blocks.BIG_DRIPLEAF_STEM,
       Blocks.SMALL_DRIPLEAF,
-      TinkerWorld.slimeSapling.get(SlimeType.EARTH),
-      TinkerWorld.slimeSapling.get(SlimeType.SKY),
-      TinkerWorld.slimeSapling.get(SlimeType.ICHOR),
-      TinkerWorld.slimeSapling.get(SlimeType.ENDER),
-      TinkerWorld.slimeSapling.get(SlimeType.BLOOD)
+      TinkerWorld.slimeSapling.get(FoliageType.EARTH),
+      TinkerWorld.slimeSapling.get(FoliageType.SKY),
+      TinkerWorld.slimeSapling.get(FoliageType.ICHOR),
+      TinkerWorld.slimeSapling.get(FoliageType.ENDER),
+      TinkerWorld.slimeSapling.get(FoliageType.BLOOD)
     );
   }
 

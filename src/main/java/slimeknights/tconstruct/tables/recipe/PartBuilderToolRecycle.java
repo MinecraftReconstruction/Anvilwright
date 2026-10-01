@@ -54,6 +54,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
+import java.util.stream.IntStream;
 
 /**
  * Recipe to break a tool into tool parts.

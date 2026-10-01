@@ -12,6 +12,7 @@ import slimeknights.tconstruct.shared.block.SlimeType;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
+import net.minecraft.core.registries.Registries;
 
 /** Variants of slimy foliage, for grass and leaves notably. */
 @Getter
@@ -50,7 +51,7 @@ public enum FoliageType implements StringRepresentable {
     this.mapColor = mapColor;
     this.nether = nether;
     // tags
-    grassBlockTag = BlockTags.create(TConstruct.getResource((nether ? "slimy_nylium/" : "slimy_grass/") + this.getSerializedName()));
+    grassBlockTag = TagKey.create(Registries.BLOCK, TConstruct.getResource((nether ? "slimy_nylium/" : "slimy_grass/") + this.getSerializedName()));
   }
 
   private SlimeType slimeType;

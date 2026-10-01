@@ -40,6 +40,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Recipe for converting enchanted books into modifier crystals */
 public class EnchantmentConvertingRecipe extends AbstractWorktableRecipe {

@@ -17,6 +17,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.entity.Mob;
 
 public class CongealedSlimeBlock extends Block implements LandPathNodeTypesRegistry.StaticPathNodeTypeProvider {
 

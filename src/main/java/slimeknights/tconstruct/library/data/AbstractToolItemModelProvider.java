@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.data.PackOutput;
 
 /** Helper for generating tool item models */
 public abstract class AbstractToolItemModelProvider extends GenericDataProvider {

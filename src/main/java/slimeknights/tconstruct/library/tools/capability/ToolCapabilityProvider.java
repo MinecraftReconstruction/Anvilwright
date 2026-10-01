@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class ToolCapabilityProvider /*implements ICapabilityProvider*/ {
   private static final List<BiFunction<ContainerItemContext,Supplier<? extends IToolStackView>,IToolCapabilityProvider>> PROVIDER_CONSTRUCTORS = new ArrayList<>();
 
-  private final ItemStack stack;
   private final Lazy<ToolStack> tool;
   private final List<IToolCapabilityProvider> providers;
   public ToolCapabilityProvider(ContainerItemContext stack) {

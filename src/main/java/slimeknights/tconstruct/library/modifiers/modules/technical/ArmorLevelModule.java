@@ -4,7 +4,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -22,6 +21,7 @@ import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.List;
 
 /**
@@ -105,7 +105,7 @@ public record ArmorLevelModule(TinkerDataKey<Integer> key, boolean allowBroken, 
    * @return  Level from the key
    */
   public static int getLevel(LivingEntity living, TinkerDataKey<Integer> key) {
-    return getLevel(living.getCapability(TinkerDataCapability.CAPABILITY), key);
+    return getLevel(TinkerDataCapability.CAPABILITY.maybeGet(living), key);
   }
 
   /**
@@ -114,7 +114,7 @@ public record ArmorLevelModule(TinkerDataKey<Integer> key, boolean allowBroken, 
    * @param key    Key to get
    * @return  Level from the key
    */
-  public static int getLevel(LazyOptional<TinkerDataCapability.Holder> cap, TinkerDataKey<Integer> key) {
+  public static int getLevel(Optional<TinkerDataCapability.Holder> cap, TinkerDataKey<Integer> key) {
     TinkerDataCapability.Holder data = LogicHelper.orElseNull(cap);
     return data != null ? data.get(key, 0) : 0;
   }

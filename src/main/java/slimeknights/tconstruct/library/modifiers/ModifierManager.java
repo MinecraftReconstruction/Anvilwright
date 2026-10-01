@@ -62,6 +62,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import slimeknights.mantle.data.loadable.field.ContextKey;
+import net.fabricmc.loader.api.FabricLoader;
 
 /** Modifier registry and JSON loader */
 @Log4j2
@@ -101,7 +103,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
   /** Modifiers loaded from JSON */
   private Map<ModifierId,Modifier> dynamicModifiers = Collections.emptyMap();
   /** Modifier tags loaded from JSON */
-  private Map<ResourceLocation, Collection<Modifier>> tags = Collections.emptyMap();
+  private Map<TagKey<Modifier>, List<Modifier>> tags = Collections.emptyMap();
   /** Map from modifier to tags on the modifier */
   private Map<ModifierId,Set<TagKey<Modifier>>> reverseTags = Collections.emptyMap();
 
@@ -176,7 +178,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     }
     for (ModifierId id : staticModifiers.keySet()) {
       if (dynamicModifiers.containsKey(id)) {
-        if (FMLLoader.isProduction()) {
+        if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
           log.warn("Dynamic modifier {} is replacing static modifier with the same ID. The ability to do this may be removed in a future version, so if this is intentional please open an issue report with reasoning..", id);
         } else {
           log.error("Dynamic modifier {} is replacing static modifier with the same ID. This is likely a bug with your mod, but on the chance its intentional this error does become just a warning at runtime.", id);
@@ -208,7 +210,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
     enchantmentMap = new HashMap<>();
     this.enchantmentTagMap = new LinkedHashMap<>();
     for (Resource resource : pResourceManager.getResourceStack(ENCHANTMENT_MAP)) {
-      JsonObject enchantmentJson = JsonHelper.getJson(resource);
+      JsonObject enchantmentJson = JsonUtils.getJson(resource);
       if (enchantmentJson != null) {
         for (Entry<String,JsonElement> entry : enchantmentJson.entrySet()) {
           try {
@@ -282,7 +284,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
       }
 
       // fallback to actual modifier
-      Modifier modifier = ComposableModifier.LOADER.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
+      Modifier modifier = ComposableModifier.LOADER.deserialize(json, contextBuilder(key).build());
       modifier.setId(new ModifierId(key));
       return modifier;
     } catch (JsonSyntaxException e) {
@@ -292,7 +294,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
   }
 
   /** Updates the modifiers from the server */
-  void updateModifiersFromServer(Map<ModifierId,Modifier> modifiers, Map<ResourceLocation,Collection<Modifier>> tags, Map<Enchantment,Modifier> enchantmentMap, Map<TagKey<Enchantment>,Modifier> enchantmentTagMappings) {
+  void updateModifiersFromServer(Map<ModifierId,Modifier> modifiers, Map<TagKey<Modifier>,List<Modifier>> tags, Map<Enchantment,Modifier> enchantmentMap, Map<TagKey<Enchantment>,Modifier> enchantmentTagMappings) {
     this.dynamicModifiers = modifiers;
     this.dynamicModifiersLoaded = true;
     this.tags = tags;
@@ -512,7 +514,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
      * Registers that the given modifier is expected to be loaded in datapacks
      * @param name  Modifier name
      */
-    public void registerExpected(ModifierId name, Class<?> classFilter) {
+    public void registerExpected(ModifierId name) {
       // should not include under both types
       if (staticModifiers.containsKey(name)) {
         throw new IllegalArgumentException(name + " is already registered as a static modifier");

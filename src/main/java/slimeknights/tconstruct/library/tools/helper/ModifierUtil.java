@@ -43,6 +43,10 @@ import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.Tin
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.EquipmentSlot.Type;
+import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
+import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability;
 
 /** Generic modifier hooks that don't quite fit elsewhere */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -225,12 +229,6 @@ public final class ModifierUtil {
    */
   public static float getTotalModifierFloat(LivingEntity living, TinkerDataKey<Float> key) {
     return TinkerDataCapability.CAPABILITY.maybeGet(living).map(data -> data.get(key)).orElse(0f);
-  }
-
-  /** Checks if the entity has aqua affinity from either enchants or modifiers */
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public static boolean hasAquaAffinity(LivingEntity living) {
-    return ModifierUtil.getTotalModifierLevel(living, TinkerDataKeys.AQUA_AFFINITY) > 0 || EnchantmentHelper.hasAquaAffinity(living);
   }
 
   /** Shortcut to get a volatile flag when the tool stack is not needed otherwise */

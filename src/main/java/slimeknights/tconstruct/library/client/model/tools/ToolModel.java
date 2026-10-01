@@ -149,6 +149,16 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
    * @param transforms      Transforms to apply
    * @param isLarge         If true, the quads are for a large tool
    */
+  /** Wraps vanilla quads into a mesh, as the Mantle sprite helper still works in vanilla quads */
+  private static Mesh ofQuads(List<BakedQuad> quads) {
+    MeshBuilder builder = RendererAccess.INSTANCE.getRenderer().meshBuilder();
+    QuadEmitter emitter = builder.getEmitter();
+    for (BakedQuad quad : quads) {
+      emitter.fromVanilla(quad, RendererAccess.INSTANCE.getRenderer().materialFinder().find(), quad.getDirection());
+    }
+    return builder.build();
+  }
+
   private static void addModifierQuads(Function<Material, TextureAtlasSprite> spriteGetter, Map<ModifierId,IBakedModifierModel> modifierModels, List<ModifierId> firstModifiers, IToolStackView tool, Consumer<Mesh> quadConsumer, ItemLayerPixels pixels, Transformation transforms, boolean isLarge) {
     if (!modifierModels.isEmpty()) {
       // keep a running tint index so models know where they should start, currently starts at 0 as the main model does not use tint indexes
@@ -226,9 +236,9 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
     // add quads for all parts
     if (parts.isEmpty()) {
       particle = spriteGetter.apply(owner.getMaterial(isBroken && owner.hasTexture("broken") ? "broken" : "tool"));
-      smallConsumer.accept(MantleItemLayerModel.getQuadsForSprite(-1, -1, particle, Transformation.identity(), 0, smallPixels));
+      smallConsumer.accept(ofQuads(MantleItemLayerModel.getQuadsForSprite(-1, -1, particle, Transformation.identity(), 0, smallPixels)));
       if (largeTransforms != null) {
-        largeConsumer.accept(MantleItemLayerModel.getQuadsForSprite(-1, -1, spriteGetter.apply(owner.getMaterial(isBroken && owner.hasTexture("broken_large") ? "broken_large" : "tool_large")), largeTransforms, 0, largePixels));
+        largeConsumer.accept(ofQuads(MantleItemLayerModel.getQuadsForSprite(-1, -1, spriteGetter.apply(owner.getMaterial(isBroken && owner.hasTexture("broken_large") ? "broken_large" : "tool_large")), largeTransforms, 0, largePixels)));
       }
     } else {
       for (int i = parts.size() - 1; i >= 0; i--) {
@@ -248,9 +258,9 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
         } else {
           // part without materials
           particle = spriteGetter.apply(owner.getMaterial(part.getName(isBroken, false)));
-          smallConsumer.accept(MantleItemLayerModel.getQuadsForSprite(-1, -1, particle, Transformation.identity(), 0, smallPixels));
+          smallConsumer.accept(ofQuads(MantleItemLayerModel.getQuadsForSprite(-1, -1, particle, Transformation.identity(), 0, smallPixels)));
           if (largeTransforms != null) {
-            largeConsumer.accept(MantleItemLayerModel.getQuadsForSprite(-1, -1, spriteGetter.apply(owner.getMaterial(part.getName(isBroken, true))), largeTransforms, 0, largePixels));
+            largeConsumer.accept(ofQuads(MantleItemLayerModel.getQuadsForSprite(-1, -1, spriteGetter.apply(owner.getMaterial(part.getName(isBroken, true))), largeTransforms, 0, largePixels)));
           }
         }
       }
@@ -259,15 +269,11 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
     // large models use a custom model here
     MeshBuilder finalSmallMesh = RendererAccess.INSTANCE.getRenderer().meshBuilder();
     QuadEmitter emitter = finalSmallMesh.getEmitter();
-    for (Mesh mesh : smallBuilder.build()) {
-      mesh.outputTo(emitter);
-    }
+    smallBuilder.build(mesh -> mesh.outputTo(emitter));
     if (largeTransforms != null) {
       MeshBuilder finalLargeMesh = RendererAccess.INSTANCE.getRenderer().meshBuilder();
       QuadEmitter largeEmitter = finalLargeMesh.getEmitter();
-      for (Mesh mesh : largeBuilder.build()) {
-        mesh.outputTo(largeEmitter);
-      }
+      largeBuilder.build(mesh -> mesh.outputTo(largeEmitter));
       return new BakedLargeToolModel(finalLargeMesh.build(), finalSmallMesh.build(), particle, owner.getTransforms(), overrides, owner.getGuiLight().lightLikeBlock());
     }
     // for small, we leave out the large quads, so the baked item model logic is sufficient
@@ -319,7 +325,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       }
     }
     // load modifier models
-    modifierModels = ModifierModelManager.getModelsForTool(smallModifierRoots, isLarge ? largeModifierRoots : Collections.emptyList(), allTextures);
+    modifierModels = ModifierModelManager.getModelsForTool(spriteGetter, smallModifierRoots, isLarge ? largeModifierRoots : Collections.emptyList());
 
     Transformation largeTransforms = isLarge ? new Transformation(new Vector3f((offset.x - 8) / 32, (-offset.y - 8) / 32, 0), null, new Vector3f(2, 2, 1), null) : null;
     overrides = new MaterialOverrideHandler(owner, toolParts, firstModifiers, largeTransforms, modifierModels, overrides); // TODO: nest original overrides?
@@ -608,7 +614,7 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       // modifiers first
       List<ModifierId> firstModifiers = Collections.emptyList();
       if (modelContents.has("first_modifiers")) {
-        firstModifiers = JsonHelper.parseList(modelContents, "first_modifiers", ModifierId::convertFromJson);
+        firstModifiers = JsonHelper.parseList(modelContents, "first_modifiers", ModifierId.PARSER);
       }
       return new ToolModel(parts, isLarge, offset, smallModifierRoots, largeModifierRoots, firstModifiers);
     }

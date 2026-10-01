@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.SlimeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.BiPredicate;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
 public class StickySlimeBlock extends SlimeBlock implements CustomSlimeBlock, StickyBlock, StickToBlock {
 

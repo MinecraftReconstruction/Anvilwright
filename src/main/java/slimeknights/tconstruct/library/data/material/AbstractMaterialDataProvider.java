@@ -34,6 +34,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import static slimeknights.mantle.Mantle.commonResource;
+import net.minecraft.data.PackOutput;
+import slimeknights.mantle.recipe.condition.TagFilledCondition;
 
 /**
  * Extendable material provider, useful for addons

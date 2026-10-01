@@ -14,6 +14,7 @@ import slimeknights.tconstruct.smeltery.block.entity.module.EntityMeltingModule;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 
 /**
  * Extension of entity melting recipe for the sake of displaying entities in the default "recipe"

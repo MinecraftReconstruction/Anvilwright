@@ -18,6 +18,14 @@ import java.util.Comparator;
 import java.util.List;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.world.item.crafting.Ingredient;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.subtypes.UidContext;
+import net.minecraft.world.item.crafting.RecipeType;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 
 public class MeltingFuelHandler {
   /**

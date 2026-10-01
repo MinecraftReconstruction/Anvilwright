@@ -17,6 +17,10 @@ import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.ListTag;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** Capability to allow an entity to store modifiers, used on projectiles fired from modifiable items */
 public class EntityModifierCapability implements EntityComponentInitializer {

@@ -10,6 +10,8 @@ import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.Direction;
+import slimeknights.mantle.util.LogicHelper;
 
 /**
  * Provides block items to things that place blocks, such as the Exchanging modifier or place-block fluid effects like

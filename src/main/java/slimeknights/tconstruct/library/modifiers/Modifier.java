@@ -317,6 +317,15 @@ public class Modifier implements IdAwareObject {
   /* Modules */
 
   /**
+   * Gets a submodule of this modifier, or null if it has none. Kept from the port for the module
+   * hooks that still look modules up by type.
+   */
+  @Nullable
+  public <T> T getModule(Class<T> type) {
+    return null;
+  }
+
+  /**
    * Gets a hook of this modifier. To modify the return values, use {@link #registerHooks(Builder)}
    *
    * @param hook  Hook to fetch

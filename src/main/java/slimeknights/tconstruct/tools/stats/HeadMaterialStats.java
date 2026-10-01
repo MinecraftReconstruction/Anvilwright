@@ -18,6 +18,8 @@ import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import java.util.List;
+import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
+import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
 /** Stats for melee/harvest head stats */
 public record HeadMaterialStats(int durability, float miningSpeed, Tier tier, float attack) implements IRepairableMaterialStats.ScaledTooltip {

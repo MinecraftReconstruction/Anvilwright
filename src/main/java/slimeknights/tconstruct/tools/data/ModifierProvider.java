@@ -268,6 +268,20 @@ import static slimeknights.tconstruct.library.json.math.ModifierFormula.VALUE;
 import static slimeknights.tconstruct.library.modifiers.modules.behavior.RepairModule.FACTOR;
 import static slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial.ARMOR_SLOTS;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.data.PackOutput;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.InstrumentTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.LiquidBlock;
+import slimeknights.mantle.client.TooltipKey;
 
 public class ModifierProvider extends AbstractModifierProvider {
   public ModifierProvider(FabricDataOutput output) {

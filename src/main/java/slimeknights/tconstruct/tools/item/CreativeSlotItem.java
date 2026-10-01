@@ -33,6 +33,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.sounds.SoundEvents;
 
 public class CreativeSlotItem extends Item {
   private static final String NBT_KEY = "slot";
@@ -81,6 +82,18 @@ public class CreativeSlotItem extends Item {
       tooltip.add(Component.translatable(TOOLTIP, slot.getDisplayName()).withStyle(ChatFormatting.GRAY));
     } else {
       tooltip.add(TOOLTIP_MISSING);
+    }
+  }
+
+  /** Adds all variants of this slot item to the creative tab */
+  public void addVariants(Consumer<ItemStack> items) {
+    Collection<SlotType> allTypes = SlotType.getAllSlotTypes();
+    if (allTypes.isEmpty()) {
+      items.accept(new ItemStack(this));
+    } else {
+      for (SlotType type : allTypes) {
+        items.accept(withSlot(new ItemStack(this), type));
+      }
     }
   }
 

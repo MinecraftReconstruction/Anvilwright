@@ -20,6 +20,7 @@ import static net.minecraft.world.item.Tiers.IRON;
 import static net.minecraft.world.item.Tiers.NETHERITE;
 import static net.minecraft.world.item.Tiers.STONE;
 import static net.minecraft.world.item.Tiers.WOOD;
+import net.minecraft.data.PackOutput;
 
 public class MaterialStatsDataProvider extends AbstractMaterialStatsDataProvider {
   public MaterialStatsDataProvider(FabricDataOutput output, AbstractMaterialDataProvider materials) {

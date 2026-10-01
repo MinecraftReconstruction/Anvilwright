@@ -269,7 +269,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
         EntityModifierCapability.getCapability(projectile).addModifiers(modifiers);
 
         // fetch the persistent data for the arrow as modifiers may want to store data
-        ModDataNBT projectileData = PersistentDataCapability.getOrWarn(projectile);
+        ModDataNBT projectileData = new ModDataNBT(PersistentDataCapability.getOrWarn(projectile));
 
         // let modifiers set properties
         for (ModifierEntry entry : modifiers.getModifiers()) {

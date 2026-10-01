@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+import slimeknights.mantle.data.loadable.Loadables;
 
 /** Builder for alloy recipes */
 @SuppressWarnings("unused")

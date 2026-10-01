@@ -30,7 +30,7 @@ public class FaucetActivationPacket implements BlockEntityPacket<FaucetBlockEnti
   @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeFluidStack(fluid);
+    fluid.writeToPacket(buffer);
     buffer.writeBoolean(isPouring);
   }
 

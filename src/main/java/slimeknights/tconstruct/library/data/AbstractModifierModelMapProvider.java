@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.data.PackOutput;
 
 /** Data provider for modifier model maps */
 public abstract class AbstractModifierModelMapProvider extends GenericDataProvider {

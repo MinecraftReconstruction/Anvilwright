@@ -32,6 +32,21 @@ import slimeknights.tconstruct.plugin.jei.fabric.JEITypes;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.placement.HorizontalAlignment;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.gui.widgets.IRecipeWidget;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.category.AbstractRecipeCategory;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
+import slimeknights.tconstruct.library.recipe.melting.IDisplayableMeltingRecipe;
+import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
+import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
+import java.awt.Color;
 
 /** Shared logic between melting and foundry */
 public abstract class AbstractMeltingCategory implements IRecipeCategory<MeltingRecipe> {

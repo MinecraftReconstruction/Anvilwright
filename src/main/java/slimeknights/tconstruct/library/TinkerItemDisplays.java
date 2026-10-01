@@ -1,6 +1,9 @@
 package slimeknights.tconstruct.library;
 
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.resources.ResourceLocation;
+import slimeknights.tconstruct.TConstruct;
+import java.util.Locale;
 
 /**
  * Custom transform types used for tinkers item rendering.

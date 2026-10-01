@@ -27,18 +27,20 @@ import slimeknights.tconstruct.tools.stats.StatlessMaterialStats;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
 
 public class RepairKitItem extends MaterialItem implements IRepairKitItem {
   private static final String TOOLTIP_KEY = TConstruct.makeTranslationKey("item", "repair_kit.tooltip");
   private final float repairAmount;
-  public RepairKitItem(Properties properties, float repairAmount) {
-    super(properties);
+  public RepairKitItem(Properties properties, float repairAmount, ResourceKey<CreativeModeTab> tab) {
+    super(properties, tab);
     this.repairAmount = repairAmount;
   }
 
   /** Constructor using config for repair amount */
-  public RepairKitItem(Properties properties) {
-    this(properties, 0);
+  public RepairKitItem(Properties properties, ResourceKey<CreativeModeTab> tab) {
+    this(properties, 0, tab);
   }
 
   @Override

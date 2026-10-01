@@ -27,6 +27,8 @@ import static slimeknights.mantle.Mantle.COMMON;
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import static slimeknights.mantle.Mantle.commonResource;
+import slimeknights.mantle.recipe.helper.FluidOutput;
 
 /**
  * Recipe helper for methods related to melting and casting

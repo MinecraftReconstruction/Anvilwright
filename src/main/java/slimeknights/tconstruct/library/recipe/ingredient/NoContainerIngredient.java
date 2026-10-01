@@ -14,6 +14,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.utils.JsonUtils;
 
 import javax.annotation.Nullable;
+import slimeknights.tconstruct.library.utils.Util;
 
 /** Ingredient matching an item with no container item, used to ensure NBT fluid items are empty */
 public class NoContainerIngredient extends NestedIngredient {
@@ -25,7 +26,7 @@ public class NoContainerIngredient extends NestedIngredient {
 
   @Override
   public boolean test(@Nullable ItemStack stack) {
-    return stack != null && super.test(stack) && !stack.hasCraftingRemainingItem();
+    return stack != null && super.test(stack) && !Util.hasCraftingRemainingItem(stack);
   }
 
   @Override

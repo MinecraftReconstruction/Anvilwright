@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.data.PackOutput;
 
 /** Data provider for {@link EquipmentJson} */
 public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {

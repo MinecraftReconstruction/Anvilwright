@@ -22,6 +22,7 @@ import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import slimeknights.mantle.data.loadable.Loadable;
 
 /**
  * Ingredient matching material items with the given value. Typically, matches ingots or blocks
@@ -171,6 +172,29 @@ public class MaterialValueIngredient extends AbstractIngredient {
         buffer.readFloat(),
         buffer.readFloat()
       );
+    }
+
+    @Override
+    public ResourceLocation getIdentifier() {
+      return ID;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void write(JsonObject parent, MaterialValueIngredient ingredient) {
+      parent.addProperty("type", ID.toString());
+      IJsonPredicate<MaterialVariantId> material = ingredient.material;
+      parent.add("material", ((Loadable<IJsonPredicate<MaterialVariantId>>)material.getLoader()).serialize(material));
+      if (ingredient.minValue == ingredient.maxValue) {
+        parent.addProperty("value", ingredient.minValue);
+      } else {
+        JsonObject value = new JsonObject();
+        value.addProperty("min", ingredient.minValue);
+        if (ingredient.maxValue != Float.POSITIVE_INFINITY) {
+          value.addProperty("max", ingredient.maxValue);
+        }
+        parent.add("value", value);
+      }
     }
 
     @Override

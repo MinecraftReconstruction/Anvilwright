@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import slimeknights.mantle.client.TooltipKey;
 import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
+import net.minecraft.core.BlockPos;
 
 // TODO: convert into a module
 public class DwarvenModifier extends Modifier implements ConditionalStatModifierHook, BreakSpeedModifierHook, TooltipModifierHook {
@@ -80,17 +81,17 @@ public class DwarvenModifier extends Modifier implements ConditionalStatModifier
   }
 
   @Override
-  public void onBreakSpeed(IToolStackView tool, int level, PlayerEvents.BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
+  public void onBreakSpeed(IToolStackView tool, ModifierEntry modifier, BreakSpeed event, Direction sideHit, boolean isEffective, float miningSpeedModifier) {
     if (!isEffective) {
       return;
     }
-    event.setNewSpeed(getBoost(event.getPlayer().level(), event.getPos().getY(), level, event.getNewSpeed(), miningSpeedModifier * tool.getMultiplier(ToolStats.MINING_SPEED), MINING_BONUS));
+    event.setNewSpeed(getBoost(event.getPlayer().level(), event.getPos().getY(), modifier, event.getNewSpeed(), miningSpeedModifier * tool.getMultiplier(ToolStats.MINING_SPEED) * MINING_BONUS));
   }
 
   @Override
   public float modifyStat(IToolStackView tool, ModifierEntry modifier, LivingEntity living, FloatToolStat stat, float baseValue, float multiplier) {
     if (stat == ToolStats.VELOCITY) {
-      return getBoost(living.level(), (float)living.getY(), modifier.getLevel(), baseValue, multiplier, VELOCITY_BONUS);
+      return getBoost(living.level(), (float)living.getY(), modifier, baseValue, multiplier * VELOCITY_BONUS);
     }
     return baseValue;
   }
@@ -105,7 +106,7 @@ public class DwarvenModifier extends Modifier implements ConditionalStatModifier
       if (player != null && key == TooltipKey.SHIFT) {
         // passing in 1 means greater than 1 is a boost, and less than 1 is a percentage
         // the -1 means for percentage, the range is now 0 to -75%, and for flat boost its properly 0 to baseBoost
-        boost = getBoost(player.level(), (float)player.getY(), level, 1, 1f, baseBoost) - 1;
+        boost = getBoost(player.level(), (float)player.getY(), modifier, 1, baseBoost) - 1;
         if (boost < 0) {
           // goes from 0 to -75%, don't show 0%
           if (boost <= -0.01) {

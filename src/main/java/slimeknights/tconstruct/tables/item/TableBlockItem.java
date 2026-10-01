@@ -21,7 +21,7 @@ public class TableBlockItem extends RetexturedBlockItem {
   @Override
   public void fillItemCategory(CreativeModeTab.Output items) {
     if (showAllCondition.getAsBoolean()) {
-      addTagVariants(this.getBlock(), this.textureTag, items, true);
+      addTagVariants(this, this.textureTag, items, true);
     } else {
       items.accept(new ItemStack(this));
     }

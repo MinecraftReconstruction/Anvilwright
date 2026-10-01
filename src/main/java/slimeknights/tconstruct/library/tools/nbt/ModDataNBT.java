@@ -16,39 +16,48 @@ import java.util.function.BiFunction;
  * On a typical tool, there are two copies of this class, one for persistent data, and one that rebuilds when the modifiers refresh.
  * Note unlike other NBT classes, the data inside this one is mutable as most of it is directly used by the tools.
  */
-@EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class ModDataNBT implements IModDataView {
-  /** Compound representing modifier data */
-  @Getter(AccessLevel.PROTECTED)
-  private final CompoundTag data;
-
-  /**
-   * Creates a new mod data containing empty data
-   */
+@EqualsAndHashCode(callSuper = true)
+public class ModDataNBT extends NamespacedNBT implements IModDataView {
+  /** Creates a new mod data containing empty data */
   public ModDataNBT() {
-    this(new CompoundTag());
+    super();
+  }
+
+  /** Creates a new mod data wrapping the given compound */
+  protected ModDataNBT(CompoundTag data) {
+    super(data);
+  }
+
+  /** Constructor to clone from another instance, needed to deal with an API conflict */
+  public ModDataNBT(NamespacedNBT nbt) {
+    super(nbt.getData());
   }
 
   @Override
   public <T> T get(ResourceLocation name, BiFunction<CompoundTag,String,T> function) {
-    return function.apply(data, name.toString());
+    return function.apply(getData(), name.toString());
+  }
+
+  /** Both view interfaces declare the same default, so name the one to use explicitly */
+  @Override
+  public CompoundTag getCompound(ResourceLocation name) {
+    return get(name, CompoundTag::getCompound);
   }
 
   @Override
   public ListTag getList(ResourceLocation name, int type) {
     // save generation of the extra lambda object
-    return data.getList(name.toString(), type);
+    return getData().getList(name.toString(), type);
   }
 
   @Override
   public boolean contains(ResourceLocation name) {
-    return data.contains(name.toString());
+    return getData().contains(name.toString());
   }
 
   @Override
   public boolean contains(ResourceLocation name, int type) {
-    return data.contains(name.toString(), type);
+    return getData().contains(name.toString(), type);
   }
 
   /**
@@ -57,7 +66,7 @@ public class ModDataNBT implements IModDataView {
    * @param nbt   NBT value
    */
   public void put(ResourceLocation name, Tag nbt) {
-    data.put(name.toString(), nbt);
+    getData().put(name.toString(), nbt);
   }
 
   /**
@@ -66,7 +75,7 @@ public class ModDataNBT implements IModDataView {
    * @param value  Integer value
    */
   public void putInt(ResourceLocation name, int value) {
-    data.putInt(name.toString(), value);
+    getData().putInt(name.toString(), value);
   }
 
   /**
@@ -75,7 +84,7 @@ public class ModDataNBT implements IModDataView {
    * @param value  Boolean value
    */
   public void putBoolean(ResourceLocation name, boolean value) {
-    data.putBoolean(name.toString(), value);
+    getData().putBoolean(name.toString(), value);
   }
 
   /**
@@ -84,7 +93,7 @@ public class ModDataNBT implements IModDataView {
    * @param value  Float value
    */
   public void putFloat(ResourceLocation name, float value) {
-    data.putFloat(name.toString(), value);
+    getData().putFloat(name.toString(), value);
   }
 
   /**
@@ -93,7 +102,7 @@ public class ModDataNBT implements IModDataView {
    * @param value  String value
    */
   public void putString(ResourceLocation name, String value) {
-    data.putString(name.toString(), value);
+    getData().putString(name.toString(), value);
   }
 
   /**
@@ -101,7 +110,7 @@ public class ModDataNBT implements IModDataView {
    * @param name  Key to remove
    */
   public void remove(ResourceLocation name) {
-    data.remove(name.toString());
+    getData().remove(name.toString());
   }
 
 
@@ -109,7 +118,7 @@ public class ModDataNBT implements IModDataView {
 
   /** Gets a copy of the internal data, generally should only be used for syncing, no reason to call directly */
   public CompoundTag getCopy() {
-    return data.copy();
+    return getData().copy();
   }
 
   /**
@@ -117,8 +126,8 @@ public class ModDataNBT implements IModDataView {
    * @param data  data
    */
   public void copyFrom(CompoundTag data) {
-    this.data.getAllKeys().clear();
-    this.data.merge(data);
+    getData().getAllKeys().clear();
+    getData().merge(data);
   }
 
   /**

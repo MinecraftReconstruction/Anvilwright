@@ -7,6 +7,8 @@ import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.shared.block.SlimeType;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.DyeColor;
 
 public class MaterialRenderInfoProvider extends AbstractMaterialRenderInfoProvider {
   public MaterialRenderInfoProvider(FabricDataOutput output, AbstractMaterialSpriteProvider spriteProvider) {

@@ -38,6 +38,7 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.utils.Util;
 
 import java.util.List;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /** Module implementing shearing on kamas, scythes, and swords */
 public record ShearsModule(float flatBonus, float perLevelBonus, float expandedBonus, ModifierCondition<IToolStackView> condition) implements ModifierModule, EntityInteractionModifierHook, ToolActionModifierHook, ConditionalModule<IToolStackView> {
@@ -117,7 +118,7 @@ public record ShearsModule(float flatBonus, float perLevelBonus, float expandedB
     // use looting instead of fortune, as that is our hook with entity access
     // modifier can always use tags or the nullable parameter to distinguish if needed
     LootingContext context = new LootingContext(player, target, null, Util.getSlotType(hand));
-    int looting = LootingModifierHook.getLooting(tool, context, player.getItemInHand(hand).getEnchantmentLevel(Enchantments.MOB_LOOTING));
+    int looting = LootingModifierHook.getLooting(tool, context, EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MOB_LOOTING, player.getItemInHand(hand)));
     looting = ArmorLootingModifierHook.getLooting(tool, context, looting);
     Level world = player.getCommandSenderWorld();
     if (shearEntity(stack, tool, world, player, target, looting)) {

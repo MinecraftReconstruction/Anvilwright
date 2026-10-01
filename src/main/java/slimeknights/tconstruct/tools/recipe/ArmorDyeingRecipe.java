@@ -1,13 +1,8 @@
 package slimeknights.tconstruct.tools.recipe;
 
-import com.google.gson.JsonObject;
-import io.github.fabricators_of_create.porting_lib.util.TagUtil;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import io.github.fabricators_of_create.porting_lib.tags.Tags.Items;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +10,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
+import io.github.fabricators_of_create.porting_lib.tags.Tags.Items;
 import slimeknights.mantle.recipe.IMultiRecipe;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -38,9 +35,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.crafting.Ingredient;
 
 /** Recipe to dye travelers gear */
 public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDisplayModifierRecipe> {
@@ -73,9 +67,8 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
   }
 
   @Override
-  public ItemStack assemble(ITinkerStationContainer inv, RegistryAccess registryAccess) {
-    ItemStack tinkerable = inv.getTinkerableStack();
-    ToolStack tool = ToolStack.copyFrom(tinkerable);
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    ToolStack tool = inv.getTinkerable().copy();
 
     ModDataNBT persistentData = tool.getPersistentData();
     ModifierId key = TinkerModifiers.dyed.getId();
@@ -100,7 +93,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
     for (int i = 0; i < inv.getInputCount(); i++) {
       ItemStack stack = inv.getInput(i);
       if (!stack.isEmpty()) {
-        DyeColor dye = TagUtil.getColorFromStack(stack);
+        DyeColor dye = stack.getItem() instanceof net.minecraft.world.item.DyeItem dyeItem ? dyeItem.getDyeColor() : null;
         if (dye != null) {
           float[] color = dye.getTextureDiffuseColors();
           int r = (int)(color[0] * 255);
@@ -169,68 +162,6 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
     return displayRecipes;
   }
 
-
-  /* Required */
-
-  /** @deprecated use {@link #assemble(ITinkerStationContainer, RegistryAccess)}  */
-  @Deprecated
-  @Override
-  public ItemStack getResultItem(RegistryAccess registryAccess) {
-    return ItemStack.EMPTY;
-  }
-
-  /** Serializer logic */
-  public static class Serializer implements LoggingRecipeSerializer<ArmorDyeingRecipe> {
-    @Nullable
-    @Override
-    public ArmorDyeingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      Ingredient toolRequirement = Ingredient.fromNetwork(buffer);
-      return new ArmorDyeingRecipe(id, toolRequirement);
-    }
-
-    @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, ArmorDyeingRecipe recipe) {
-      recipe.toolRequirement.toNetwork(buffer);
-    }
-
-    @Override
-    public ArmorDyeingRecipe fromJson(ResourceLocation id, JsonObject json) {
-      Ingredient toolRequirement = Ingredient.fromJson(json.get("tools"));
-      return new ArmorDyeingRecipe(id, toolRequirement);
-    }
-  }
-
-  /** Finished recipe */
-  @SuppressWarnings("ClassCanBeRecord")
-  @RequiredArgsConstructor
-  public static class Finished implements FinishedRecipe {
-    @Getter
-    private final ResourceLocation id;
-    private final Ingredient toolRequirement;
-
-    @Override
-    public void serializeRecipeData(JsonObject json) {
-      json.add("tools", toolRequirement.toJson());
-    }
-
-    @Override
-    public RecipeSerializer<?> getType() {
-      return TinkerModifiers.armorDyeingSerializer.get();
-    }
-
-    @Nullable
-    @Override
-    public JsonObject serializeAdvancement() {
-      return null;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getAdvancementId() {
-      return null;
-    }
-  }
-
   private static class DisplayRecipe implements IDisplayModifierRecipe {
     private static final IntRange LEVELS = new IntRange(1, 1);
     private final ModifierEntry RESULT = new ModifierEntry(TinkerModifiers.dyed, 1);
@@ -253,6 +184,7 @@ public class ArmorDyeingRecipe implements ITinkerStationRecipe, IMultiRecipe<IDi
       this.recipeId = recipeId;
       this.toolWithoutModifier = tools;
       this.dyes = RegistryHelper.getTagValueStream(BuiltInRegistries.ITEM, color.getTag()).map(ItemStack::new).toList();
+      this.variant = Component.translatable("color.minecraft." + color.getSerializedName());
 
       ResourceLocation modID = RESULT.getId();
       this.tintColor = Util.getColor(color);

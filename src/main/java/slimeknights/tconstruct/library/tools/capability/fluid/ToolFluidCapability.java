@@ -22,6 +22,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Supplier;
+import net.minecraft.world.item.ItemStack;
+import javax.annotation.Nonnull;
 
 /**
  * Logic to make a tool a fluid handler
