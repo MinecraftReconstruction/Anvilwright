@@ -1,11 +1,11 @@
-// 1.20.1	2026-10-01T17:43:48.768276	Hephaestus/Tinkers' Construct Tool Definition Data Generator
+// 1.20.1	2026-10-01T19:24:22.502791	Hephaestus/Tinkers' Construct Tool Definition Data Generator
 ec981b10a69a9c9517453703391d7fbd1bf18147 data/tconstruct/tinkering/tool_definitions/kama.json
 1901012d5dc3a00c8cb1250107b8e97b7599a108 data/tconstruct/tinkering/tool_definitions/slime_chestplate.json
 46bea7c7721dc562669349e09bfdf9fefdd9cff1 data/tconstruct/tinkering/tool_definitions/excavator.json
 cc631c1d7a3d35f79553412b588e47b9c48aba85 data/tconstruct/tinkering/tool_definitions/swasher.json
 8931c0f8f21ed00dbdecc9eab11a73d3743040b7 data/tconstruct/tinkering/tool_definitions/travelers_boots.json
-9df84ff558e6e791b0ae259e2af2fc0b1b53b2a7 data/tconstruct/tinkering/tool_definitions/flint_and_brick.json
 559ac4c41f2b737f9bf6eb1628ad2e3f3ae24c69 data/tconstruct/tinkering/tool_definitions/plate_chestplate.json
+9df84ff558e6e791b0ae259e2af2fc0b1b53b2a7 data/tconstruct/tinkering/tool_definitions/flint_and_brick.json
 6086ee5d2af698a58914f4f8953a72f0f58136ff data/tconstruct/tinkering/tool_definitions/battlesign.json
 681300d2641bbe68cde7c6ed5368db3ad7a80310 data/tconstruct/tinkering/tool_definitions/cleaver.json
 a1beac2056e20fa036f81826f5a5b85633f97c66 data/tconstruct/tinkering/tool_definitions/slime_helmet.json

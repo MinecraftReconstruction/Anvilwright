@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.world.phys.Vec2;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.TConstruct;
+import net.minecraft.resources.ResourceLocation;
 import slimeknights.tconstruct.library.data.AbstractToolItemModelProvider;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.tools.item.ArmorSlotType;
@@ -53,7 +54,11 @@ public class ToolItemModelProvider extends AbstractToolItemModelProvider {
     armor("travelers", TinkerTools.travelersGear, new ArmorSlotType[] {ArmorSlotType.CHESTPLATE, ArmorSlotType.LEGGINGS, ArmorSlotType.BOOTS}, "cuirass", "metal");
     armor("plate", TinkerTools.plateArmor, "plating", "maille");
     armor("slime", TinkerTools.slimesuit, ArmorSlotType.HELMET,     "slime");
-    armor("slime", TinkerTools.slimesuit, ArmorSlotType.CHESTPLATE, "slime", "ribcage");
+    // NOTE(porting): this port keeps the upstream 3.12.1 chestplate and elytra merged into TinkerTools.slimeWings,
+    //  so the chestplate slot of the slimesuit enum is the wings item whose model has no ribcage texture. Generate
+    //  the chestplate model from the slimy_chestplate model file instead, which keeps the output identical to
+    //  upstream (that item model already exists in the resources, it is just no longer reachable through an item).
+    armor("slime", new ResourceLocation(TConstruct.MOD_ID, "slimy_chestplate"), "slime", "ribcage");
     armor("slime", TinkerTools.slimesuit, ArmorSlotType.LEGGINGS,   "slime", "shell");
     armor("slime", TinkerTools.slimesuit, ArmorSlotType.BOOTS,      "slime");
     armor("slime/wings", TinkerTools.slimeWings, "slime");

@@ -156,6 +156,10 @@ public class ToolClientEvents extends ClientEventBase {
     PlayerTickEvents.START.register(ToolClientEvents::handleKeyBindings);
     MovementInputUpdateCallback.EVENT.register(ToolClientEvents::handleInput);
     ArmorModelHelper.init();
+    ArmorModelManager.init();
+    // the atlas configuration refers to this sprite source by id, so its codec has to be registered before the
+    // first resource reload stitches the atlas
+    ShieldBannerModifierSpriteSource.register();
 
     // keybinds
     KeyBindingHelper.registerKeyBinding(HELMET_INTERACT);

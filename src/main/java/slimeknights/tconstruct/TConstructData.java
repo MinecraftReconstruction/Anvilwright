@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import slimeknights.tconstruct.fluids.TinkerFluids;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.shared.TinkerCommons;
+import slimeknights.tconstruct.shared.TinkerClient;
 import slimeknights.tconstruct.common.data.DamageTypeProvider;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.tables.TinkerTables;
@@ -22,6 +23,10 @@ public class TConstructData implements DataGeneratorEntrypoint {
   @Override
   public void onInitializeDataGenerator(FabricDataGenerator generator) {
     ExistingFileHelper helper = ExistingFileHelper.withResourcesFromArg();
+    // the armor model provider serializes the armor texture loaders, and the datagen entrypoint never runs the
+    // client initializer that registers them
+    TinkerClient.registerArmorTextureLoaders();
+    TinkerClient.registerModifierModelLoaders();
     FabricDataGenerator.Pack pack = generator.createPack();
     TConstruct.gatherData(pack, helper);
     TinkerSmeltery.gatherData(pack);
