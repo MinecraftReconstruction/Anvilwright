@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_shards/iron"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_shards/iron"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_shards/iron"
+    "tag": "forge:geore_shards/iron"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 60

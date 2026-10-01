@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:boots_plating_sand_cast",
     "tconstruct:boots_plating_red_sand_cast"

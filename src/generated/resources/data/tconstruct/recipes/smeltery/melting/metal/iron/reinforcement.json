@@ -1,18 +1,12 @@
 {
   "type": "tconstruct:melting",
-  "byproducts": [
-    {
-      "amount": 20250,
-      "fluid": "tconstruct:molten_obsidian"
-    }
-  ],
   "ingredient": {
     "item": "tconstruct:iron_reinforcement"
   },
   "result": {
-    "amount": 3000,
-    "fluid": "tconstruct:molten_iron"
+    "amount": 9000,
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
-  "time": 35
+  "time": 60
 }

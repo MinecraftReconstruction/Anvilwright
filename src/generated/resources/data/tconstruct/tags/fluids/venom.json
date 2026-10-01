@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:venom",
-    "tconstruct:flowing_venom"
+    "tconstruct:venom"
   ]
 }

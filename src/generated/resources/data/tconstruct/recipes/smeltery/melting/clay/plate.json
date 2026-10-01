@@ -3,13 +3,13 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:plates/brick"
+        "forge:plates/brick"
       ]
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:plates/brick"
+    "tag": "forge:plates/brick"
   },
   "result": {
     "amount": 20250,

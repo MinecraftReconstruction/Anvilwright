@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:osmium_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/osmium"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 22,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_osmium"
+    "tag": "forge:molten_osmium"
   },
   "result": {
-    "tag": "c:osmium_nuggets"
+    "tag": "forge:nuggets/osmium"
   }
 }

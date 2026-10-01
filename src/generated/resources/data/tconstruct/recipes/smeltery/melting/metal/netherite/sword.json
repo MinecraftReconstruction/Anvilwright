@@ -7,17 +7,12 @@
       "unit_size": 2025
     }
   ],
-  "ingredient": [
-    {
-      "item": "minecraft:netherite_sword"
-    },
-    {
-      "item": "minecraft:netherite_hoe"
-    }
-  ],
+  "ingredient": {
+    "tag": "tconstruct:melting/netherite/tools_costing_2"
+  },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_netherite",
+    "tag": "forge:molten_netherite",
     "unit_size": 1000
   },
   "temperature": 1250,

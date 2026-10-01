@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:silver_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/silver"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 60,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "result": {
-    "tag": "c:silver_ingots"
+    "tag": "forge:ingots/silver"
   }
 }

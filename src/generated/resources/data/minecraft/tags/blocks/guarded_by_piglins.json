@@ -3,10 +3,6 @@
   "values": [
     "tconstruct:cast_chest",
     "tconstruct:gold_bars",
-    "tconstruct:gold_platform",
-    "minecraft:piglin_head",
-    "tconstruct:piglin_brute_head",
-    "minecraft:piglin_wall_head",
-    "tconstruct:piglin_brute_wall_head"
+    "tconstruct:gold_platform"
   ]
 }

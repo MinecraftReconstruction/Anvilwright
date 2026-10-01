@@ -1,10 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:platinum_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/platinum",
         "c:ore_rates/dense"
       ]
     }
@@ -13,14 +12,15 @@
   "byproducts": [
     {
       "amount": 54000,
-      "fluid": "tconstruct:molten_gold"
+      "rate": "metal",
+      "tag": "forge:molten_gold"
     }
   ],
   "ingredient": {
     "fabric:type": "fabric:all",
     "ingredients": [
       {
-        "tag": "c:platinum_ores"
+        "tag": "forge:ores/platinum"
       },
       {
         "tag": "c:ore_rates/dense"
@@ -30,7 +30,7 @@
   "rate": "metal",
   "result": {
     "amount": 54000,
-    "fluid": "tconstruct:molten_platinum"
+    "tag": "forge:molten_platinum"
   },
   "temperature": 970,
   "time": 294

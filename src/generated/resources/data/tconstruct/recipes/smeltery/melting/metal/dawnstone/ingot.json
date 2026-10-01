@@ -1,21 +1,21 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:ingots/dawnstone"
     },
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "registry": "minecraft:fluid",
       "tag": "forge:molten_dawnstone"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "tag": "forge:ingots/dawnstone"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_dawnstone"
   },
   "temperature": 900,

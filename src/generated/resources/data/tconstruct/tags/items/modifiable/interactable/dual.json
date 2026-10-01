@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:fishing_rod",
     "tconstruct:sky_staff",

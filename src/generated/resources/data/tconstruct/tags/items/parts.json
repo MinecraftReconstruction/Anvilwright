@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:arrow_head",
     "tconstruct:arrow_shaft",

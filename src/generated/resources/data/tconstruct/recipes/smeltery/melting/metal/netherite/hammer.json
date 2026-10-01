@@ -1,25 +1,27 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "tools_complement:netherite_hammer"
+      ]
+    }
+  ],
   "type": "tconstruct:damagable_melting",
   "byproducts": [
     {
-      "amount": 1300,
+      "amount": 105300,
       "fluid": "tconstruct:molten_diamond",
-      "unit_size": 25
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:item_exists",
-      "item": "tools_complement:netherite_hammer"
+      "unit_size": 2025
     }
   ],
   "ingredient": {
     "item": "tools_complement:netherite_hammer"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_netherite",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 1250,
   "time": 74

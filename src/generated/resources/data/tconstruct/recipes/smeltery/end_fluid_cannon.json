@@ -6,7 +6,7 @@
       "tag": "forge:ingots/knightmetal"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "T": {
       "item": "minecraft:shulker_shell"

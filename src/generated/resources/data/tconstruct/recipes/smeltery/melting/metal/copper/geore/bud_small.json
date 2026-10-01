@@ -1,19 +1,25 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_small_buds/copper"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_small_buds/copper"
     }
   ],
-  "type": "tconstruct:melting",
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 3000,
+      "rate": "metal",
+      "tag": "forge:molten_gold"
+    }
+  ],
   "ingredient": {
-    "tag": "c:geore_small_buds/copper"
+    "tag": "forge:geore_small_buds/copper"
   },
+  "rate": "metal",
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "temperature": 500,
   "time": 50

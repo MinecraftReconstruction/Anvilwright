@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "item": "minecraft:amethyst_shard"
+    "tag": "forge:gems/amethyst"
   },
   "result": {
     "amount": 8100,

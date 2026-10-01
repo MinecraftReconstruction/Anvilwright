@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:gold_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/gold"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 33,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "result": {
-    "tag": "c:gold_coins"
+    "tag": "forge:coins/gold"
   }
 }

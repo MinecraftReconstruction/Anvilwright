@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:signalum_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/signalum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -12,12 +10,12 @@
     "tag": "tconstruct:casts/single_use/ingot"
   },
   "cast_consumed": true,
-  "cooling_time": 70,
+  "cooling_time": 66,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_signalum"
+    "tag": "forge:molten_signalum"
   },
   "result": {
-    "tag": "c:signalum_ingots"
+    "tag": "forge:ingots/signalum"
   }
 }

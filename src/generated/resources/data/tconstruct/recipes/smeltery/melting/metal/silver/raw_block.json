@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:raw_silver_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/raw_silver"
     }
   ],
   "type": "porting_lib:conditional",
@@ -12,10 +10,8 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:lead_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/lead"
         }
       ],
       "recipe": {
@@ -23,16 +19,17 @@
         "byproducts": [
           {
             "amount": 81000,
-            "fluid": "tconstruct:molten_lead"
+            "rate": "metal",
+            "tag": "forge:molten_lead"
           }
         ],
         "ingredient": {
-          "tag": "c:raw_silver_blocks"
+          "tag": "forge:storage_blocks/raw_silver"
         },
         "rate": "metal",
         "result": {
           "amount": 81000,
-          "fluid": "tconstruct:molten_silver"
+          "tag": "forge:molten_silver"
         },
         "temperature": 790,
         "time": 359
@@ -49,16 +46,17 @@
         "byproducts": [
           {
             "amount": 81000,
-            "fluid": "tconstruct:molten_gold"
+            "rate": "metal",
+            "tag": "forge:molten_gold"
           }
         ],
         "ingredient": {
-          "tag": "c:raw_silver_blocks"
+          "tag": "forge:storage_blocks/raw_silver"
         },
         "rate": "metal",
         "result": {
           "amount": 81000,
-          "fluid": "tconstruct:molten_silver"
+          "tag": "forge:molten_silver"
         },
         "temperature": 790,
         "time": 359

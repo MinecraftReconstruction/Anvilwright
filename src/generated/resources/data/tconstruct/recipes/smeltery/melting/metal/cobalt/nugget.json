@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:cobalt_nuggets"
+    "tag": "forge:nuggets/cobalt"
   },
   "result": {
     "amount": 1000,
-    "fluid": "tconstruct:molten_cobalt"
+    "tag": "forge:molten_cobalt"
   },
   "temperature": 950,
   "time": 22

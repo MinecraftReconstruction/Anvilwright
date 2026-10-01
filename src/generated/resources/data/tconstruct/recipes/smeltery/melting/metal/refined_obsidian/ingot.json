@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:refined_obsidian_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/refined_obsidian"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:refined_obsidian_ingots"
+    "tag": "forge:ingots/refined_obsidian"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_refined_obsidian"
+    "tag": "forge:molten_refined_obsidian"
   },
   "temperature": 1475,
   "time": 80

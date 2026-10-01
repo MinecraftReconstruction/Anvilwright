@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:lead_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/lead"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 25,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_lead"
+    "tag": "forge:molten_lead"
   },
   "result": {
-    "tag": "c:lead_coins"
+    "tag": "forge:coins/lead"
   }
 }

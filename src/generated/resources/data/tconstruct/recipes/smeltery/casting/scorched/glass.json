@@ -4,7 +4,7 @@
     "item": "tconstruct:scorched_bricks"
   },
   "cast_consumed": true,
-  "cooling_time": 52,
+  "cooling_time": 27,
   "fluid": {
     "amount": 8100,
     "tag": "tconstruct:molten_quartz"

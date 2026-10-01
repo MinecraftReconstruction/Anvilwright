@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tin_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/tin"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:tin_nuggets"
+    "tag": "forge:nuggets/tin"
   },
   "result": {
     "amount": 1000,
-    "fluid": "tconstruct:molten_tin"
+    "tag": "forge:molten_tin"
   },
   "temperature": 225,
   "time": 13

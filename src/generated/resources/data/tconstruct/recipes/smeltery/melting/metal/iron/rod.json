@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:iron_rods"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:rods/iron"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:iron_rods"
+    "tag": "forge:rods/iron"
   },
   "result": {
     "amount": 4500,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 12

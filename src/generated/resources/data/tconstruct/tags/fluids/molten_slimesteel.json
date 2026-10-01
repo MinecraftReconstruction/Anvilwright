@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_slimesteel",
-    "tconstruct:flowing_molten_slimesteel"
+    "tconstruct:molten_slimesteel"
   ]
 }

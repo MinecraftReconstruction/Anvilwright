@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:brass_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/brass"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 107,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_brass"
+    "tag": "forge:molten_brass"
   },
   "result": {
-    "tag": "c:brass_gears"
+    "tag": "forge:gears/brass"
   }
 }

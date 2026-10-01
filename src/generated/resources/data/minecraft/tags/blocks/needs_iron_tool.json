@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:gold_bars",
     "tconstruct:gold_platform",

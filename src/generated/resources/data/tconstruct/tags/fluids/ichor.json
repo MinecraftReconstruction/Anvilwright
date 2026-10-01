@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:ichor",
     "tconstruct:flowing_ichor"

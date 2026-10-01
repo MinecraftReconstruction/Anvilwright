@@ -5,5 +5,7 @@
     "amount": 81000,
     "tag": "tconstruct:molten_knightslime"
   },
-  "result": "tconstruct:knightslime_block"
+  "result": {
+    "tag": "forge:storage_blocks/knightslime"
+  }
 }

@@ -1,16 +1,18 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "allomancy:pewter_flakes"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "allomancy:pewter_flakes"
+      ]
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "item": "allomancy:pewter_flakes"
   },
   "result": {
-    "amount": 30,
+    "amount": 3000,
     "tag": "forge:molten_pewter"
   },
   "temperature": 400,

@@ -6,7 +6,7 @@
       "tag": "forge:ingots/cobalt"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "T": {
       "type": "tconstruct:no_container",

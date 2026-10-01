@@ -3,7 +3,7 @@
   "cast": {
     "tag": "tconstruct:casts/multi_use/ingot"
   },
-  "cooling_time": 75,
+  "cooling_time": 42,
   "fluid": {
     "amount": 20250,
     "tag": "tconstruct:scorched_stone"

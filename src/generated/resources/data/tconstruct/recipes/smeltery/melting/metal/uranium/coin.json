@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:uranium_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/uranium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:uranium_coins"
+    "tag": "forge:coins/uranium"
   },
   "result": {
     "amount": 3000,
-    "fluid": "tconstruct:molten_uranium"
+    "tag": "forge:molten_uranium"
   },
   "temperature": 830,
   "time": 41

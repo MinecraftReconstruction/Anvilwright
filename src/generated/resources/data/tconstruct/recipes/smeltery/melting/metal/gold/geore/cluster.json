@@ -1,19 +1,25 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_clusters/gold"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_clusters/gold"
     }
   ],
-  "type": "tconstruct:melting",
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 36000,
+      "rate": "metal",
+      "tag": "forge:molten_cobalt"
+    }
+  ],
   "ingredient": {
-    "tag": "c:geore_clusters/gold"
+    "tag": "forge:geore_clusters/gold"
   },
+  "rate": "metal",
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 142

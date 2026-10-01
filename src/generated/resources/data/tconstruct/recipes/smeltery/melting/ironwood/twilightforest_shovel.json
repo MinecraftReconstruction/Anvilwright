@@ -1,25 +1,27 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "twilightforest:ironwood_shovel"
+      ]
+    }
+  ],
   "type": "tconstruct:damagable_melting",
   "byproducts": [
     {
-      "amount": 10,
+      "amount": 1000,
       "tag": "forge:molten_gold",
-      "unit_size": 10
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:item_exists",
-      "item": "twilightforest:ironwood_shovel"
+      "unit_size": 1000
     }
   ],
   "ingredient": {
     "item": "twilightforest:ironwood_shovel"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_iron",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 800,
   "time": 60

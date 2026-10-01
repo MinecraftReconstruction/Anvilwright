@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:bronze_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/bronze"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 57,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_bronze"
+    "tag": "forge:molten_bronze"
   },
   "result": {
-    "tag": "c:bronze_plates"
+    "tag": "forge:plates/bronze"
   }
 }

@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:armors/boots/electrum"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "forge:armors/boots/electrum"
   },
   "result": {
-    "amount": 360,
+    "amount": 36000,
     "tag": "forge:molten_electrum",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 760,
   "time": 118

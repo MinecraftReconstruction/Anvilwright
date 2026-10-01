@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:enderium_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/enderium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:enderium_gears"
+    "tag": "forge:gears/enderium"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_enderium"
+    "tag": "forge:molten_enderium"
   },
   "temperature": 1350,
   "time": 152

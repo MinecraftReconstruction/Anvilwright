@@ -1,20 +1,18 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:signalum_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/signalum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:signalum_blocks"
+    "tag": "forge:storage_blocks/signalum"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_signalum"
+    "tag": "forge:molten_signalum"
   },
-  "temperature": 1125,
-  "time": 210
+  "temperature": 999,
+  "time": 199
 }

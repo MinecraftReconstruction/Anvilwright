@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_shards/copper"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_shards/copper"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_shards/copper"
+    "tag": "forge:geore_shards/copper"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "temperature": 500,
   "time": 50

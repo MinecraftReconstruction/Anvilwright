@@ -1,19 +1,25 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_small_buds/iron"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_small_buds/iron"
     }
   ],
-  "type": "tconstruct:melting",
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 9000,
+      "rate": "metal",
+      "tag": "forge:molten_steel"
+    }
+  ],
   "ingredient": {
-    "tag": "c:geore_small_buds/iron"
+    "tag": "forge:geore_small_buds/iron"
   },
+  "rate": "metal",
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 60

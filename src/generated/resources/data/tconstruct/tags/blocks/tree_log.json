@@ -1,5 +1,9 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:logs"
+    {
+      "id": "#minecraft:logs",
+      "required": false
+    }
   ]
 }

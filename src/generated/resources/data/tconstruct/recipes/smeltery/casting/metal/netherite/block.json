@@ -3,7 +3,9 @@
   "cooling_time": 221,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_netherite"
+    "tag": "forge:molten_netherite"
   },
-  "result": "minecraft:netherite_block"
+  "result": {
+    "tag": "forge:storage_blocks/netherite"
+  }
 }

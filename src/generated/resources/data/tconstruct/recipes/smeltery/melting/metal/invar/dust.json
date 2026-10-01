@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:invar_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/invar"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:invar_dusts"
+    "tag": "forge:dusts/invar"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_invar"
+    "tag": "forge:molten_invar"
   },
   "temperature": 900,
   "time": 47

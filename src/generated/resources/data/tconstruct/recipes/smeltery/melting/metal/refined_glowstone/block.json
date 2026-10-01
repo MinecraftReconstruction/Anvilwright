@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:refined_glowstone_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/refined_glowstone"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:refined_glowstone_blocks"
+    "tag": "forge:storage_blocks/refined_glowstone"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_refined_glowstone"
+    "tag": "forge:molten_refined_glowstone"
   },
   "temperature": 825,
   "time": 183

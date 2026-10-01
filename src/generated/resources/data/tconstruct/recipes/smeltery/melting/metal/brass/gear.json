@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:brass_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/brass"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:brass_gears"
+    "tag": "forge:gears/brass"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_brass"
+    "tag": "forge:molten_brass"
   },
   "temperature": 605,
   "time": 107

@@ -1,12 +1,4 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_nuggets"
-      ]
-    }
-  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "tconstruct:casts/single_use/nugget"
@@ -15,9 +7,9 @@
   "cooling_time": 22,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "result": {
-    "tag": "c:steel_nuggets"
+    "tag": "forge:nuggets/steel"
   }
 }

@@ -7,11 +7,8 @@
     }
   ],
   "ingredient": {
-    "fabric:type": "fabric:nbt",
-    "base": {
-      "item": "tconstruct:seared_fuel_tank"
-    },
-    "strict": true
+    "fabric:type": "tconstruct:no_container",
+    "item": "tconstruct:seared_fuel_tank"
   },
   "result": {
     "amount": 162000,

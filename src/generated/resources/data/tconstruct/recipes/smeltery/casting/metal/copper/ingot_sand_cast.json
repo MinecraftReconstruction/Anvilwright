@@ -7,7 +7,9 @@
   "cooling_time": 50,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_copper"
+    "tag": "forge:molten_copper"
   },
-  "result": "minecraft:copper_ingot"
+  "result": {
+    "tag": "forge:ingots/copper"
+  }
 }

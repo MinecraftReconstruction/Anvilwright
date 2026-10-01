@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:pewter_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/pewter"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 46,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_pewter"
+    "tag": "forge:molten_pewter"
   },
   "result": {
-    "tag": "c:pewter_ingots"
+    "tag": "forge:ingots/pewter"
   }
 }

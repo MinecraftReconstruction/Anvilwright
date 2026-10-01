@@ -1,16 +1,16 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:plates/tin"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "tag": "forge:plates/tin"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_tin"
   },
   "temperature": 225,

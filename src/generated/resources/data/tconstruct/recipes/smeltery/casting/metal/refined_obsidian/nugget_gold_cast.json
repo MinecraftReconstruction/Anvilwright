@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:refined_obsidian_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/refined_obsidian"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 27,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_refined_obsidian"
+    "tag": "forge:molten_refined_obsidian"
   },
   "result": {
-    "tag": "c:refined_obsidian_nuggets"
+    "tag": "forge:nuggets/refined_obsidian"
   }
 }

@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:damagable_melting",
   "ingredient": {
-    "item": "minecraft:golden_leggings"
+    "tag": "tconstruct:melting/gold/tools_costing_7"
   },
   "result": {
     "amount": 63000,
-    "fluid": "tconstruct:molten_gold",
+    "tag": "forge:molten_gold",
     "unit_size": 1000
   },
   "temperature": 700,

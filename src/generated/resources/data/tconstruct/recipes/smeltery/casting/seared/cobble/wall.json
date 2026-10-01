@@ -4,7 +4,7 @@
     "item": "minecraft:cobblestone_wall"
   },
   "cast_consumed": true,
-  "cooling_time": 102,
+  "cooling_time": 60,
   "fluid": {
     "amount": 40500,
     "tag": "tconstruct:molten_clay"

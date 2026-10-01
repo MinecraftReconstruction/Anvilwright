@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:sand"
+    "tag": "minecraft:smelts_to_glass"
   },
   "result": {
     "amount": 81000,

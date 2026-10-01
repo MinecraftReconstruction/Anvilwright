@@ -7,21 +7,13 @@
     }
   ],
   "ingredient": {
-    "fabric:type": "fabric:any",
-    "ingredients": [
+    "type": "tconstruct:no_container",
+    "match": [
       {
-        "fabric:type": "fabric:nbt",
-        "base": {
-          "item": "tconstruct:scorched_fuel_gauge"
-        },
-        "strict": true
+        "item": "tconstruct:scorched_fuel_gauge"
       },
       {
-        "fabric:type": "fabric:nbt",
-        "base": {
-          "item": "tconstruct:scorched_ingot_gauge"
-        },
-        "strict": true
+        "item": "tconstruct:scorched_ingot_gauge"
       }
     ]
   },

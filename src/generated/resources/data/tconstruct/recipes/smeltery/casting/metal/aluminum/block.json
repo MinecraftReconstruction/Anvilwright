@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:aluminum_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/aluminum"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 141,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "result": {
-    "tag": "c:aluminum_blocks"
+    "tag": "forge:storage_blocks/aluminum"
   }
 }

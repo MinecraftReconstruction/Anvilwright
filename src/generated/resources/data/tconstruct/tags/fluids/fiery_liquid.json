@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:fiery_liquid",
-    "tconstruct:flowing_fiery_liquid"
+    "tconstruct:fiery_liquid"
   ]
 }

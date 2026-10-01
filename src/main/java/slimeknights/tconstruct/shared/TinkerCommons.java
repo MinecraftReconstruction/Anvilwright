@@ -191,21 +191,10 @@ public final class TinkerCommons extends TinkerModule {
 
     ResourceConditions.register(TagIntersectionPresentCondition.NAME, TinkerConditons::tagIntersectionPresentPredicate);
     ResourceConditions.register(TagDifferencePresentCondition.NAME, TinkerConditons::tagDifferencePresentPredicate);
-    // block predicates
-    // and/or/inverted are registered by Mantle's predicate registry (JSON addons use the common names)
-    BlockPredicate.LOADER.register(TConstruct.getResource("requires_tool"), BlockPredicate.REQUIRES_TOOL.getLoader());
-    // entity predicates
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("any"), LivingEntityPredicate.ANY.getLoader());
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("fire_immune"), LivingEntityPredicate.FIRE_IMMUNE.getLoader());
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("water_sensitive"), LivingEntityPredicate.WATER_SENSITIVE.getLoader());
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("on_fire"), LivingEntityPredicate.ON_FIRE.getLoader());
-    LivingEntityPredicate.LOADER.register(TConstruct.getResource("mob_type"), MobTypePredicate.LOADER);
-    // register mob types
-    MobTypePredicate.MOB_TYPES.register(new ResourceLocation("undefined"), MobType.UNDEFINED);
-    MobTypePredicate.MOB_TYPES.register(new ResourceLocation("undead"), MobType.UNDEAD);
-    MobTypePredicate.MOB_TYPES.register(new ResourceLocation("arthropod"), MobType.ARTHROPOD);
-    MobTypePredicate.MOB_TYPES.register(new ResourceLocation("illager"), MobType.ILLAGER);
-    MobTypePredicate.MOB_TYPES.register(new ResourceLocation("water"), MobType.WATER);
+    // Predicates: Mantle owns all the shared predicate loaders (any/none/inverted/and/or plus the built in
+    // requires_tool, fire_immune, water_sensitive, on_fire and mob_type). Mantle's NamedComponentRegistry is a
+    // BiMap, so registering the same loader instance under a second id throws - and upstream TCon registers none
+    // of these, it only uses them from JSON. Anything TConstruct specific goes in its own module.
   }
 
   public static void gatherData(final FabricDataGenerator.Pack pack) {

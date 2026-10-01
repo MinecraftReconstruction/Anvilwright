@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:enderium_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/enderium"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 25,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_enderium"
+    "tag": "forge:molten_enderium"
   },
   "result": {
-    "tag": "c:enderium_nuggets"
+    "tag": "forge:nuggets/enderium"
   }
 }

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:zinc_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/zinc"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 16,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_zinc"
+    "tag": "forge:molten_zinc"
   },
   "result": {
-    "tag": "c:zinc_nuggets"
+    "tag": "forge:nuggets/zinc"
   }
 }

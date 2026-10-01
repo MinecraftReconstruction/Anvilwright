@@ -2,7 +2,7 @@
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 100,
+      "amount": 10000,
       "tag": "forge:molten_gold"
     }
   ],
@@ -10,7 +10,7 @@
     "item": "tconstruct:scorched_basin"
   },
   "result": {
-    "amount": 1750,
+    "amount": 141750,
     "fluid": "tconstruct:scorched_stone"
   },
   "temperature": 500,

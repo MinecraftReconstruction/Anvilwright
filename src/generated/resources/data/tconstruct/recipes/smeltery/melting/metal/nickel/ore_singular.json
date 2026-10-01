@@ -1,13 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:nickel_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/nickel"
     }
   ],
   "type": "porting_lib:conditional",
@@ -15,41 +11,32 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:platinum_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/platinum"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 6000,
-            "fluid": "tconstruct:molten_platinum"
+            "amount": 18000,
+            "rate": "metal",
+            "tag": "forge:molten_platinum"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:difference",
           "base": {
-            "tag": "c:nickel_ores"
+            "tag": "forge:ores/nickel"
           },
           "subtracted": {
-            "fabric:type": "fabric:any",
-            "ingredients": [
-              {
-                "tag": "c:ore_rates/sparse"
-              },
-              {
-                "tag": "c:ore_rates/dense"
-              }
-            ]
+            "tag": "tconstruct:non_singular_ore_rates"
           }
         },
         "rate": "metal",
         "result": {
           "amount": 18000,
-          "fluid": "tconstruct:molten_nickel"
+          "tag": "forge:molten_nickel"
         },
         "temperature": 950,
         "time": 162
@@ -66,30 +53,23 @@
         "byproducts": [
           {
             "amount": 18000,
-            "fluid": "tconstruct:molten_iron"
+            "rate": "metal",
+            "tag": "forge:molten_iron"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:difference",
           "base": {
-            "tag": "c:nickel_ores"
+            "tag": "forge:ores/nickel"
           },
           "subtracted": {
-            "fabric:type": "fabric:any",
-            "ingredients": [
-              {
-                "tag": "c:ore_rates/sparse"
-              },
-              {
-                "tag": "c:ore_rates/dense"
-              }
-            ]
+            "tag": "tconstruct:non_singular_ore_rates"
           }
         },
         "rate": "metal",
         "result": {
           "amount": 18000,
-          "fluid": "tconstruct:molten_nickel"
+          "tag": "forge:molten_nickel"
         },
         "temperature": 950,
         "time": 162

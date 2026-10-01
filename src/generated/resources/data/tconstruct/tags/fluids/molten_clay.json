@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_clay",
-    "tconstruct:flowing_molten_clay"
+    "tconstruct:molten_clay"
   ]
 }

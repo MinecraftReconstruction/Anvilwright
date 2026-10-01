@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:knightslime_ingots"
+    "tag": "forge:ingots/knightslime"
   },
   "result": {
     "amount": 9000,

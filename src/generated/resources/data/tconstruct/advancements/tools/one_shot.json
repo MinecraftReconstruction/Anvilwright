@@ -37,5 +37,5 @@
       "damage"
     ]
   ],
-  "sends_telemetry_event": false
+  "sends_telemetry_event": true
 }

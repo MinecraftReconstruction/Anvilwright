@@ -1,12 +1,12 @@
 {
   "type": "mantle:crafting_shaped_retextured",
-  "category": "misc",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "tconstruct:smeltery_bricks"
     },
     "C": {
-      "tag": "c:cobalt_ingots"
+      "tag": "c:gold_ingots"
     }
   },
   "match_all": false,
@@ -17,7 +17,5 @@
     "item": "tconstruct:seared_duct"
   },
   "show_notification": true,
-  "texture": {
-    "tag": "tconstruct:smeltery_bricks"
-  }
+  "texture": "#"
 }

@@ -465,7 +465,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // carrots and potatoes are not seeds in vanilla, so make a tag with them
     this.getOrCreateTagBuilder(TinkerTags.Items.SEEDS)
-        .add(Items.CARROT, Items.POTATO, Items.NETHER_WART, Items.SWEET_BERRIES).addTag(Tags.Items.SEEDS);
+        .add(Items.CARROT, Items.POTATO, Items.NETHER_WART, Items.SWEET_BERRIES).addOptionalTag(Tags.Items.SEEDS);
 
     // tags for modifiers
     copy(TinkerTags.Blocks.CHRYSOPHILITE_ORES, TinkerTags.Items.CHRYSOPHILITE_ORES);
@@ -498,7 +498,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
 
     // contains any ground stones
     this.getOrCreateTagBuilder(TinkerTags.Items.STONESHIELDS)
-        .add(Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE).addTag(Tags.Items.STONE).addTag(Tags.Items.COBBLESTONE).addTag(Tags.Items.SANDSTONE).addTag(Tags.Items.END_STONES).addTag(Tags.Items.GRAVEL);
+        .add(Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE).addOptionalTag(Tags.Items.STONE).addOptionalTag(Tags.Items.COBBLESTONE).addOptionalTag(Tags.Items.SANDSTONE).addOptionalTag(Tags.Items.END_STONES).addOptionalTag(Tags.Items.GRAVEL);
     this.getOrCreateTagBuilder(TinkerTags.Items.FIREBALLS).add(Items.FIRE_CHARGE);
     this.getOrCreateTagBuilder(TinkerTags.Items.TOOL_INVENTORY_BLACKLIST)
         .add(Items.BUNDLE, Items.SHULKER_BOX,
@@ -565,7 +565,7 @@ public class ItemTagProvider extends FabricTagProvider.ItemTagProvider {
     this.copy(TinkerTags.Blocks.FOUNDRY_BRICKS, TinkerTags.Items.FOUNDRY_BRICKS);
     this.copy(BlockTags.SOUL_FIRE_BASE_BLOCKS, ItemTags.SOUL_FIRE_BASE_BLOCKS);
 
-    this.getOrCreateTagBuilder(TinkerTags.Items.NON_SINGULAR_ORE_RATES).addTags(Tags.Items.ORE_RATES_DENSE, Tags.Items.ORE_RATES_SPARSE);
+    this.getOrCreateTagBuilder(TinkerTags.Items.NON_SINGULAR_ORE_RATES).addOptionalTag(Tags.Items.ORE_RATES_DENSE).addOptionalTag(Tags.Items.ORE_RATES_SPARSE);
 
     // smeltery and foundry structure blocks
     this.getOrCreateTagBuilder(TinkerTags.Items.SMELTERY)

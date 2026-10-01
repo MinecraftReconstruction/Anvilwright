@@ -2,7 +2,7 @@
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 800,
+      "amount": 64800,
       "fluid": "tconstruct:ichor"
     }
   ],
@@ -10,7 +10,7 @@
     "item": "tconstruct:ichor_slime_crystal_block"
   },
   "result": {
-    "amount": 40,
+    "amount": 3240,
     "fluid": "tconstruct:blazing_blood"
   },
   "temperature": 1500,

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:travelers_shield",
     "tconstruct:plate_shield"

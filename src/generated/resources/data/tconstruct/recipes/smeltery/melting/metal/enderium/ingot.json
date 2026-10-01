@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:enderium_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/enderium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:enderium_ingots"
+    "tag": "forge:ingots/enderium"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_enderium"
+    "tag": "forge:molten_enderium"
   },
   "temperature": 1350,
   "time": 76

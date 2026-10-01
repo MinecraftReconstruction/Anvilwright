@@ -1,18 +1,20 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "tools_complement:invar_hammer"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "tools_complement:invar_hammer"
+      ]
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "item": "tools_complement:invar_hammer"
   },
   "result": {
-    "amount": 1170,
+    "amount": 117000,
     "tag": "forge:molten_invar",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 900,
   "time": 228

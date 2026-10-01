@@ -242,7 +242,13 @@ public class FluidTagProvider extends FabricTagProvider.FluidTagProvider {
 
   /** Adds tags for an unplacable fluid */
   private void fluidTag(FluidObject<?> fluid) {
-    this.getOrCreateTagBuilder(Objects.requireNonNull(fluid.getCommonTag())).add(fluid.get());
+    // a few fluids are registered without a common tag (sky/ender slime), so only add the common tag when present
+    TagKey<Fluid> common = fluid.getCommonTag();
+    if (common != null) {
+      this.getOrCreateTagBuilder(common).add(fluid.get());
+    }
+    // the local tag is the one the rest of the mod references (tconstruct:sky_slime and friends)
+    this.getOrCreateTagBuilder(fluid.getLocalTag()).add(fluid.get());
   }
 
   /** Adds tags for a placable fluid */

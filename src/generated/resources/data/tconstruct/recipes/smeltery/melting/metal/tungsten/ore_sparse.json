@@ -1,10 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:tungsten_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/tungsten",
         "c:ore_rates/sparse"
       ]
     }
@@ -14,25 +13,24 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:platinum_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/platinum"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 3000,
-            "fluid": "tconstruct:molten_platinum"
+            "amount": 9000,
+            "rate": "metal",
+            "tag": "forge:molten_platinum"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:tungsten_ores"
+              "tag": "forge:ores/tungsten"
             },
             {
               "tag": "c:ore_rates/sparse"
@@ -42,7 +40,7 @@
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_tungsten"
+          "tag": "forge:molten_tungsten"
         },
         "temperature": 950,
         "time": 97
@@ -59,14 +57,15 @@
         "byproducts": [
           {
             "amount": 9000,
-            "fluid": "tconstruct:molten_gold"
+            "rate": "metal",
+            "tag": "forge:molten_gold"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:tungsten_ores"
+              "tag": "forge:ores/tungsten"
             },
             {
               "tag": "c:ore_rates/sparse"
@@ -76,7 +75,7 @@
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_tungsten"
+          "tag": "forge:molten_tungsten"
         },
         "temperature": 950,
         "time": 97

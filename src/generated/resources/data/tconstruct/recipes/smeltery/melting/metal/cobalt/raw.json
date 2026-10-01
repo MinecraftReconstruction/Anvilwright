@@ -2,17 +2,18 @@
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
-      "amount": 9000,
-      "fluid": "tconstruct:molten_iron"
+      "amount": 2025,
+      "fluid": "tconstruct:molten_diamond",
+      "rate": "gem"
     }
   ],
   "ingredient": {
-    "tag": "c:raw_cobalt_ores"
+    "tag": "forge:raw_materials/cobalt"
   },
   "rate": "metal",
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_cobalt"
+    "tag": "forge:molten_cobalt"
   },
   "temperature": 950,
   "time": 97

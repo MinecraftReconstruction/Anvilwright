@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:gold_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/gold"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:gold_dusts"
+    "tag": "forge:dusts/gold"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 43

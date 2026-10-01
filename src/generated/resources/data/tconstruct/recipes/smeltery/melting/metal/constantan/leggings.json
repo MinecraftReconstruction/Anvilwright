@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:armors/leggings/constantan"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "forge:armors/leggings/constantan"
   },
   "result": {
-    "amount": 630,
+    "amount": 63000,
     "tag": "forge:molten_constantan",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 920,
   "time": 169

@@ -196,7 +196,8 @@ public class MeltingRecipeBuilder extends AbstractRecipeBuilder<MeltingRecipeBui
         OreMeltingRecipe.LOADER, advancementId));
     } else if (unitSizes != null) {
       consumer.accept(new LoadableFinishedRecipe<>(
-        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, (int) unitSizes[0], List.of(Arrays.stream(unitSizes, 1, unitSizes.length).boxed().toArray(Integer[]::new))),
+        new DamageableMeltingRecipe(id, group, input, output, temperature, time, byproducts, Math.toIntExact(unitSizes[0]),
+          Arrays.stream(unitSizes, 1, unitSizes.length).mapToInt(Math::toIntExact).boxed().toList()),
         DamageableMeltingRecipe.LOADER, advancementId));
     } else {
       consumer.accept(new LoadableFinishedRecipe<>(

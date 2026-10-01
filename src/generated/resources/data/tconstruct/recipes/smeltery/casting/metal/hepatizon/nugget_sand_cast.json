@@ -7,9 +7,9 @@
   "cooling_time": 26,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_hepatizon"
+    "tag": "forge:molten_hepatizon"
   },
   "result": {
-    "tag": "c:hepatizon_nuggets"
+    "tag": "forge:nuggets/hepatizon"
   }
 }

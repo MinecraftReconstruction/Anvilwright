@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:lead_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/lead"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 87,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_lead"
+    "tag": "forge:molten_lead"
   },
   "result": {
-    "tag": "c:lead_gears"
+    "tag": "forge:gears/lead"
   }
 }

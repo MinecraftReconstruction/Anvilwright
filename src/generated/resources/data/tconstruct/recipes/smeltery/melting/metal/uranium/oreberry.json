@@ -1,16 +1,18 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "oreberriesreplanted:uranium_oreberry"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "oreberriesreplanted:uranium_oreberry"
+      ]
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "item": "oreberriesreplanted:uranium_oreberry"
   },
   "result": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_uranium"
   },
   "temperature": 830,

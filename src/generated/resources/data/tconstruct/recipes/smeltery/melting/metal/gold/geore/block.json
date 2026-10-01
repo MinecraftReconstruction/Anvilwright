@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_blocks/gold"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_blocks/gold"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_blocks/gold"
+    "tag": "forge:geore_blocks/gold"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 114

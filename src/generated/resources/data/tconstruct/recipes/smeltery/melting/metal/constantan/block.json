@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:constantan_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/constantan"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:constantan_blocks"
+    "tag": "forge:storage_blocks/constantan"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "temperature": 920,
   "time": 192

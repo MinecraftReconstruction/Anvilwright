@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:osmium_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/osmium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:osmium_dusts"
+    "tag": "forge:dusts/osmium"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_osmium"
+    "tag": "forge:molten_osmium"
   },
   "temperature": 975,
   "time": 49

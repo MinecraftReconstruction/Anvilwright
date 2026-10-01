@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:aluminum_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/aluminum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:aluminum_dusts"
+    "tag": "forge:dusts/aluminum"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "temperature": 425,
   "time": 35

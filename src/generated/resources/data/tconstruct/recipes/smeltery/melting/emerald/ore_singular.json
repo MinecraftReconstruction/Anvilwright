@@ -1,37 +1,26 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:emerald_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/emerald"
     }
   ],
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
       "amount": 8100,
-      "fluid": "tconstruct:molten_diamond"
+      "fluid": "tconstruct:molten_diamond",
+      "rate": "gem"
     }
   ],
   "ingredient": {
     "fabric:type": "fabric:difference",
     "base": {
-      "tag": "c:emerald_ores"
+      "tag": "forge:ores/emerald"
     },
     "subtracted": {
-      "fabric:type": "fabric:any",
-      "ingredients": [
-        {
-          "tag": "c:ore_rates/sparse"
-        },
-        {
-          "tag": "c:ore_rates/dense"
-        }
-      ]
+      "tag": "tconstruct:non_singular_ore_rates"
     }
   },
   "rate": "gem",
@@ -40,5 +29,5 @@
     "fluid": "tconstruct:molten_emerald"
   },
   "temperature": 934,
-  "time": 96
+  "time": 161
 }

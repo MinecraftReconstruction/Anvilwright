@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:sheetmetals/silver"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:sheetmetals/silver"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:sheetmetals/silver"
+    "tag": "forge:sheetmetals/silver"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "temperature": 790,
   "time": 60

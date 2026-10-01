@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:netherite_scrap_nuggets"
+    "tag": "forge:nuggets/netherite_scrap"
   },
   "result": {
     "amount": 1000,

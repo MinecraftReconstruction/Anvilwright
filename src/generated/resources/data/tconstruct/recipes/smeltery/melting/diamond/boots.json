@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:damagable_melting",
   "ingredient": {
-    "item": "minecraft:diamond_boots"
+    "tag": "tconstruct:melting/diamond/tools_costing_4"
   },
   "result": {
     "amount": 32400,
@@ -9,5 +9,5 @@
     "unit_size": 2025
   },
   "temperature": 1450,
-  "time": 150
+  "time": 158
 }

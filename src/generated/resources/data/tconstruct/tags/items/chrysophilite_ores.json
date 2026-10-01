@@ -1,6 +1,10 @@
 {
+  "replace": false,
   "values": [
-    "#c:gold_ores",
-    "minecraft:gilded_blackstone"
+    "minecraft:gilded_blackstone",
+    {
+      "id": "#c:gold_ores",
+      "required": false
+    }
   ]
 }

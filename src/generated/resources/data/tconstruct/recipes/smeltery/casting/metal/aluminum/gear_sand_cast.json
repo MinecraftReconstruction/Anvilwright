@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:aluminum_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/aluminum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 94,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "result": {
-    "tag": "c:aluminum_gears"
+    "tag": "forge:gears/aluminum"
   }
 }

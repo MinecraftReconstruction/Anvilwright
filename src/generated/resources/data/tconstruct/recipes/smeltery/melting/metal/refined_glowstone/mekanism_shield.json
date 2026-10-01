@@ -1,18 +1,20 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "mekanism:refined_glowstone_shield"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "mekanism:refined_glowstone_shield"
+      ]
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "item": "mekanism:refined_glowstone_shield"
   },
   "result": {
-    "amount": 540,
+    "amount": 54000,
     "tag": "forge:molten_refined_glowstone",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 825,
   "time": 149

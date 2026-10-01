@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:iron_platform",
     "#tconstruct:copper_platforms",

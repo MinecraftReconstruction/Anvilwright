@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:constantan_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/constantan"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 64,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "result": {
-    "tag": "c:constantan_plates"
+    "tag": "forge:plates/constantan"
   }
 }

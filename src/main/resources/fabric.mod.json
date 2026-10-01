@@ -48,7 +48,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": ">=${fabric_version}",
     "minecraft": ">=${minecraft_version}",
-    "mantle": ">=${mantle_version}",
+    "mantle": ">=${minecraft_version}-${mantle_version}",
     "porting_lib_accessors": ">=${port_lib_accessors_version}",
     "porting_lib_attributes": ">=${port_lib_attributes_version}",
     "porting_lib_base": ">=${port_lib_base_version}",

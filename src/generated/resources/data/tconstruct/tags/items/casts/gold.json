@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:ingot_cast",
     "tconstruct:nugget_cast",

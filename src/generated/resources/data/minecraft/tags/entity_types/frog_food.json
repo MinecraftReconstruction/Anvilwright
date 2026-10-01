@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:sky_slime",
     "tconstruct:ender_slime",

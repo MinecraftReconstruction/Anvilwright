@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:uranium_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/uranium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:uranium_dusts"
+    "tag": "forge:dusts/uranium"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_uranium"
+    "tag": "forge:molten_uranium"
   },
   "temperature": 830,
   "time": 46

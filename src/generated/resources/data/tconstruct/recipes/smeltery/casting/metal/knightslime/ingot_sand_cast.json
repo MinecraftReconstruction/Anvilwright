@@ -9,5 +9,7 @@
     "amount": 9000,
     "tag": "tconstruct:molten_knightslime"
   },
-  "result": "tconstruct:knightslime_ingot"
+  "result": {
+    "tag": "forge:ingots/knightslime"
+  }
 }

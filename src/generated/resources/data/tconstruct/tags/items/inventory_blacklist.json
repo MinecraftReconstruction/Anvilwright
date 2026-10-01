@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:bundle",
     "minecraft:shulker_box",

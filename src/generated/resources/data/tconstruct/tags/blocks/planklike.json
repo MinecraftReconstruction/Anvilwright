@@ -1,7 +1,11 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:planks",
     "tconstruct:blazewood",
-    "tconstruct:nahuatl"
+    "tconstruct:nahuatl",
+    {
+      "id": "#minecraft:planks",
+      "required": false
+    }
   ]
 }

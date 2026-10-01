@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tin_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/tin"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 23,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_tin"
+    "tag": "forge:molten_tin"
   },
   "result": {
-    "tag": "c:tin_coins"
+    "tag": "forge:coins/tin"
   }
 }

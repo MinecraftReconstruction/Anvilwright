@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:nickel_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/nickel"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:nickel_blocks"
+    "tag": "forge:storage_blocks/nickel"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_nickel"
+    "tag": "forge:molten_nickel"
   },
   "temperature": 950,
   "time": 194

@@ -5,7 +5,7 @@
   },
   "result": {
     "amount": 13500,
-    "fluid": "tconstruct:mushroom_stew"
+    "tag": "forge:mushroom_stew"
   },
   "temperature": 100,
   "time": 33

@@ -1,9 +1,8 @@
 {
   "replace": false,
   "values": [
-    "#c:magma",
-    "#tconstruct:blood",
-    "#c:ender",
+    "#forge:magma",
+    "#forge:ender",
     "#tconstruct:slime"
   ]
 }

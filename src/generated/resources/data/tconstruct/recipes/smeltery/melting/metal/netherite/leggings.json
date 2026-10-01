@@ -8,11 +8,11 @@
     }
   ],
   "ingredient": {
-    "item": "minecraft:netherite_leggings"
+    "tag": "tconstruct:melting/netherite/tools_costing_7"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_netherite",
+    "tag": "forge:molten_netherite",
     "unit_size": 1000
   },
   "temperature": 1250,

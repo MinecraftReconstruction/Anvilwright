@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:brass_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/brass"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 18,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_brass"
+    "tag": "forge:molten_brass"
   },
   "result": {
-    "tag": "c:brass_nuggets"
+    "tag": "forge:nuggets/brass"
   }
 }

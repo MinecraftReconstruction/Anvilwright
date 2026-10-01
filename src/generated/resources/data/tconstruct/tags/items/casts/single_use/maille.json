@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:maille_sand_cast",
     "tconstruct:maille_red_sand_cast"

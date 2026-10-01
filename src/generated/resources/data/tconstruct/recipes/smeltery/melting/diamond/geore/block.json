@@ -1,15 +1,13 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_blocks/diamond"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_blocks/diamond"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_blocks/diamond"
+    "tag": "forge:geore_blocks/diamond"
   },
   "result": {
     "amount": 32400,

@@ -1,16 +1,18 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "allomancy:chromium_flakes"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "allomancy:chromium_flakes"
+      ]
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "item": "allomancy:chromium_flakes"
   },
   "result": {
-    "amount": 30,
+    "amount": 3000,
     "tag": "forge:molten_chromium"
   },
   "temperature": 900,

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:silver_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/silver"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 20,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "result": {
-    "tag": "c:silver_nuggets"
+    "tag": "forge:nuggets/silver"
   }
 }

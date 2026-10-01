@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:enderium_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/enderium"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 44,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_enderium"
+    "tag": "forge:molten_enderium"
   },
   "result": {
-    "tag": "c:enderium_coins"
+    "tag": "forge:coins/enderium"
   }
 }

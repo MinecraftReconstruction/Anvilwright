@@ -72,7 +72,7 @@ public class EntityTypeTagProvider extends FabricTagProvider.EntityTypeTagProvid
       EntityType.COD, EntityType.SALMON, EntityType.TROPICAL_FISH);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_ZOMBIE).add(EntityType.ZOMBIE, EntityType.HUSK, EntityType.ZOMBIE_HORSE);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_DROWNED).add(EntityType.DROWNED);
-    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SKELETON).addTag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON_HORSE);
+    this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SKELETON).addOptionalTag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON_HORSE);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_ENDER).add(EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.ENDER_DRAGON);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_SLIME).add(EntityType.SLIME);
     this.getOrCreateTagBuilder(TinkerTags.EntityTypes.MELTABLE_MAGMA).add(EntityType.MAGMA_CUBE);

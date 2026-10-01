@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:refined_glowstone_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/refined_glowstone"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 183,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_refined_glowstone"
+    "tag": "forge:molten_refined_glowstone"
   },
   "result": {
-    "tag": "c:refined_glowstone_blocks"
+    "tag": "forge:storage_blocks/refined_glowstone"
   }
 }

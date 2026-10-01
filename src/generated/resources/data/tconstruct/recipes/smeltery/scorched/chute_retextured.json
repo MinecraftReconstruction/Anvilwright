@@ -1,6 +1,6 @@
 {
   "type": "mantle:crafting_shaped_retextured",
-  "category": "misc",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "tconstruct:foundry_bricks"
@@ -19,7 +19,5 @@
     "item": "tconstruct:scorched_chute"
   },
   "show_notification": true,
-  "texture": {
-    "tag": "tconstruct:foundry_bricks"
-  }
+  "texture": "#"
 }

@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:electrum_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/electrum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:electrum_blocks"
+    "tag": "forge:storage_blocks/electrum"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "temperature": 760,
   "time": 177

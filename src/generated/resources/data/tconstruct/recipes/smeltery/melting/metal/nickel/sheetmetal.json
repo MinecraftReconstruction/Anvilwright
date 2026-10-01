@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:sheetmetals/nickel"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:sheetmetals/nickel"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:sheetmetals/nickel"
+    "tag": "forge:sheetmetals/nickel"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_nickel"
+    "tag": "forge:molten_nickel"
   },
   "temperature": 950,
   "time": 65

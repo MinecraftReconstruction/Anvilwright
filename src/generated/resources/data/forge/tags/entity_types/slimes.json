@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:slime",
+    "minecraft:magma_cube",
+    "tconstruct:earth_slime",
+    "tconstruct:sky_slime",
+    "tconstruct:ender_slime",
+    "tconstruct:terracube"
+  ]
+}

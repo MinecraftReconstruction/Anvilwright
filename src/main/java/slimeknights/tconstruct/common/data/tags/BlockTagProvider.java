@@ -147,7 +147,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
         .addTag(TinkerMaterials.hepatizon.getBlockTag())
         .addTag(TinkerMaterials.knightmetal.getBlockTag())
         .addTag(TinkerMaterials.knightslime.getBlockTag())
-        .addTag(Tags.Blocks.STORAGE_BLOCKS_NETHERITE);
+        .addOptionalTag(Tags.Blocks.STORAGE_BLOCKS_NETHERITE);
     for (SmelteryCompat compat : SmelteryCompat.values()) {
       if (compat.getType() == CompatType.ALLOY) {
         builder.addOptionalTag(commonResource("storage_blocks/" + compat.getName()));
@@ -156,10 +156,10 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
 
     // allow using wood variants to make tables
     this.getOrCreateTagBuilder(TinkerTags.Blocks.PLANKLIKE)
-        .add(TinkerMaterials.blazewood.get(), TinkerMaterials.nahuatl.get()).addTag(BlockTags.PLANKS);
+        .add(TinkerMaterials.blazewood.get(), TinkerMaterials.nahuatl.get()).addOptionalTag(BlockTags.PLANKS);
     // things the platform connects to on the sides
     this.getOrCreateTagBuilder(TinkerTags.Blocks.PLATFORM_CONNECTIONS)
-      .addOptionalTag(new ResourceLocation("architects_palette:nubs")).add(Blocks.LEVER, Blocks.LADDER, Blocks.IRON_BARS, TinkerCommons.goldBars.get(), Blocks.TRIPWIRE_HOOK, Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.REDSTONE_WIRE).addTags(Tags.Blocks.GLASS_PANES, BlockTags.BUTTONS, Tags.Blocks.FENCES, BlockTags.WALLS, BlockTags.WALL_SIGNS);
+      .addOptionalTag(new ResourceLocation("architects_palette:nubs")).add(Blocks.LEVER, Blocks.LADDER, Blocks.IRON_BARS, TinkerCommons.goldBars.get(), Blocks.TRIPWIRE_HOOK, Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.REDSTONE_WIRE).addOptionalTag(Tags.Blocks.GLASS_PANES).addOptionalTag(BlockTags.BUTTONS).addOptionalTag(Tags.Blocks.FENCES).addOptionalTag(BlockTags.WALLS).addOptionalTag(BlockTags.WALL_SIGNS);
 
     // copper platforms
     FabricTagBuilder copperPlatforms = this.getOrCreateTagBuilder(TinkerTags.Blocks.COPPER_PLATFORMS);
@@ -182,15 +182,15 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_STACKABLE)
         .add(Blocks.SUGAR_CANE, Blocks.KELP_PLANT);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_CROPS)
-        .addOptionalTag(commonResource("crops")).add(Blocks.NETHER_WART, Blocks.SWEET_BERRY_BUSH).addTag(BlockTags.CROPS);
+        .addOptionalTag(commonResource("crops")).add(Blocks.NETHER_WART, Blocks.SWEET_BERRY_BUSH).addOptionalTag(BlockTags.CROPS);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE_INTERACT)
         .add(Blocks.SWEET_BERRY_BUSH, Blocks.CAVE_VINES, Blocks.CAVE_VINES_PLANT);
     this.getOrCreateTagBuilder(TinkerTags.Blocks.HARVESTABLE)
         .add(Blocks.PUMPKIN, Blocks.BEEHIVE, Blocks.BEE_NEST).addTag(TinkerTags.Blocks.HARVESTABLE_CROPS).addTag(TinkerTags.Blocks.HARVESTABLE_INTERACT).addTag(TinkerTags.Blocks.HARVESTABLE_STACKABLE);
     // just logs for lumber axe, but modpack makers can add more
-    this.getOrCreateTagBuilder(TinkerTags.Blocks.TREE_LOGS).addTag(BlockTags.LOGS);
+    this.getOrCreateTagBuilder(TinkerTags.Blocks.TREE_LOGS).addOptionalTag(BlockTags.LOGS);
     // blocks that drop gold and should drop more gold
-    this.getOrCreateTagBuilder(TinkerTags.Blocks.CHRYSOPHILITE_ORES).add(Blocks.GILDED_BLACKSTONE).addTag(Tags.Blocks.ORES_GOLD);
+    this.getOrCreateTagBuilder(TinkerTags.Blocks.CHRYSOPHILITE_ORES).add(Blocks.GILDED_BLACKSTONE).addOptionalTag(Tags.Blocks.ORES_GOLD);
   }
 
 
@@ -259,7 +259,7 @@ public class BlockTagProvider extends FabricTagProvider.BlockTagProvider {
     TinkerWorld.slimeDirt.forEach((type, block) -> this.getOrCreateTagBuilder(type.getBlockTag()).add(block));
     FabricTagBuilder enderBarkRoots = this.getOrCreateTagBuilder(TinkerTags.Blocks.ENDERBARK_ROOTS).add(TinkerWorld.enderbarkRoots.get());
     TinkerWorld.slimyEnderbarkRoots.forEach((type, block) -> {
-      this.getOrCreateTagBuilder(type.getDirtType().getBlockTag()).add(block);
+      this.getOrCreateTagBuilder(type.asDirt().getBlockTag()).add(block);
       enderBarkRoots.add(block);
     });
     endermanHoldable.addTag(TinkerTags.Blocks.SLIMY_SOIL);

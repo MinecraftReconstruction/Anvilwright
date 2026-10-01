@@ -1,15 +1,13 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_shards/diamond"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_shards/diamond"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_shards/diamond"
+    "tag": "forge:geore_shards/diamond"
   },
   "result": {
     "amount": 8100,

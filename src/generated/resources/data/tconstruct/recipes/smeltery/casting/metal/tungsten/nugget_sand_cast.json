@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tungsten_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/tungsten"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 22,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_tungsten"
+    "tag": "forge:molten_tungsten"
   },
   "result": {
-    "tag": "c:tungsten_nuggets"
+    "tag": "forge:nuggets/tungsten"
   }
 }

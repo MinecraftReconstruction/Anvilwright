@@ -1,9 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:saplings",
-    "#minecraft:flowers",
-    "#minecraft:crops",
-    "#minecraft:cave_vines",
     "minecraft:brown_mushroom",
     "minecraft:red_mushroom",
     "minecraft:sugar_cane",
@@ -27,6 +24,10 @@
     "tconstruct:ichor_slime_tall_grass",
     "tconstruct:blood_slime_tall_grass",
     "tconstruct:ichor_slime_fern",
-    "tconstruct:blood_slime_fern"
+    "tconstruct:blood_slime_fern",
+    "#minecraft:saplings",
+    "#minecraft:flowers",
+    "#minecraft:crops",
+    "#minecraft:cave_vines"
   ]
 }

@@ -1,19 +1,11 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_ingots"
-      ]
-    }
-  ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:steel_ingots"
+    "tag": "forge:ingots/steel"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "temperature": 950,
   "time": 65

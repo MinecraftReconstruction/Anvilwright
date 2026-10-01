@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:brass_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/brass"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:brass_nuggets"
+    "tag": "forge:nuggets/brass"
   },
   "result": {
     "amount": 1000,
-    "fluid": "tconstruct:molten_brass"
+    "tag": "forge:molten_brass"
   },
   "temperature": 605,
   "time": 18

@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:knightslime_nuggets"
+    "tag": "forge:nuggets/knightslime"
   },
   "result": {
     "amount": 1000,

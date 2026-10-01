@@ -3,9 +3,9 @@
   "cooling_time": 216,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_manyullyn"
+    "tag": "forge:molten_manyullyn"
   },
   "result": {
-    "tag": "c:manyullyn_blocks"
+    "tag": "forge:storage_blocks/manyullyn"
   }
 }

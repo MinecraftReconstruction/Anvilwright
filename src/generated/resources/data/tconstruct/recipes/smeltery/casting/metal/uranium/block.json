@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:uranium_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/uranium"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 183,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_uranium"
+    "tag": "forge:molten_uranium"
   },
   "result": {
-    "tag": "c:uranium_blocks"
+    "tag": "forge:storage_blocks/uranium"
   }
 }

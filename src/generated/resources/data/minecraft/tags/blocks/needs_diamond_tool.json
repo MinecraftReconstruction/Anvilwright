@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:obsidian_pane",
     "tconstruct:nahuatl",
@@ -26,6 +27,7 @@
     "tconstruct:sky_enderbark_roots",
     "tconstruct:ichor_enderbark_roots",
     "tconstruct:ender_enderbark_roots",
+    "tconstruct:blood_enderbark_roots",
     "tconstruct:scorched_drain",
     "tconstruct:scorched_chute",
     "tconstruct:scorched_proxy_tank",

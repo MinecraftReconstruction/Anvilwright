@@ -1,15 +1,12 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "fabric:type": "fabric:nbt",
-    "base": {
-      "item": "tconstruct:copper_can"
-    },
-    "strict": true
+    "fabric:type": "tconstruct:no_container",
+    "item": "tconstruct:copper_can"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "temperature": 500,
   "time": 50

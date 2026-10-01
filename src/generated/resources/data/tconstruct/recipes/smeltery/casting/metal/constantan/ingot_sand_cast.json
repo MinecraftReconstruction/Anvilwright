@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:constantan_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/constantan"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 64,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "result": {
-    "tag": "c:constantan_ingots"
+    "tag": "forge:ingots/constantan"
   }
 }

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:greenheart_hanging_sign",
     "tconstruct:skyroot_hanging_sign",

@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:diamond_gems"
+    "tag": "forge:gems/diamond"
   },
   "result": {
     "amount": 8100,

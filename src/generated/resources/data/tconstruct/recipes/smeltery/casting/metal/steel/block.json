@@ -1,19 +1,11 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_blocks"
-      ]
-    }
-  ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 194,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "result": {
-    "tag": "c:steel_blocks"
+    "tag": "forge:storage_blocks/steel"
   }
 }

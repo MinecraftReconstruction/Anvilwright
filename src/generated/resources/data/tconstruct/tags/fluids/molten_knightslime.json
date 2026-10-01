@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_knightslime",
-    "tconstruct:flowing_molten_knightslime"
+    "tconstruct:molten_knightslime"
   ]
 }

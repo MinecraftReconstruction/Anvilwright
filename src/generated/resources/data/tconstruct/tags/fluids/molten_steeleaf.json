@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_steeleaf",
-    "tconstruct:flowing_molten_steeleaf"
+    "tconstruct:molten_steeleaf"
   ]
 }

@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:amethyst_bronze_ingots"
+    "tag": "forge:ingots/amethyst_bronze"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_amethyst_bronze"
+    "tag": "forge:molten_amethyst_bronze"
   },
   "temperature": 820,
   "time": 61

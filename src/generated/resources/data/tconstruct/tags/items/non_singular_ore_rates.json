@@ -1,6 +1,13 @@
 {
+  "replace": false,
   "values": [
-    "#forge:ore_rates/dense",
-    "#forge:ore_rates/sparse"
+    {
+      "id": "#c:ore_rates/dense",
+      "required": false
+    },
+    {
+      "id": "#c:ore_rates/sparse",
+      "required": false
+    }
   ]
 }

@@ -1,16 +1,16 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:nuggets/nicrosil"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "tag": "forge:nuggets/nicrosil"
   },
   "result": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_nicrosil"
   },
   "temperature": 1100,

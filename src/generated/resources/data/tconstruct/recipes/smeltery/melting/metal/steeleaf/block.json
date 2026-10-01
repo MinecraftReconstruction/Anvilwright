@@ -1,16 +1,16 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:storage_blocks/steeleaf"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "tag": "forge:storage_blocks/steeleaf"
   },
   "result": {
-    "amount": 810,
+    "amount": 81000,
     "fluid": "tconstruct:molten_steeleaf"
   },
   "temperature": 934,

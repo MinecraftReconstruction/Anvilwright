@@ -1,10 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:silver_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/silver",
         "c:ore_rates/sparse"
       ]
     }
@@ -14,10 +13,8 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:lead_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/lead"
         }
       ],
       "recipe": {
@@ -25,14 +22,15 @@
         "byproducts": [
           {
             "amount": 9000,
-            "fluid": "tconstruct:molten_lead"
+            "rate": "metal",
+            "tag": "forge:molten_lead"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:silver_ores"
+              "tag": "forge:ores/silver"
             },
             {
               "tag": "c:ore_rates/sparse"
@@ -42,7 +40,7 @@
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_silver"
+          "tag": "forge:molten_silver"
         },
         "temperature": 790,
         "time": 90
@@ -59,14 +57,15 @@
         "byproducts": [
           {
             "amount": 9000,
-            "fluid": "tconstruct:molten_gold"
+            "rate": "metal",
+            "tag": "forge:molten_gold"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:silver_ores"
+              "tag": "forge:ores/silver"
             },
             {
               "tag": "c:ore_rates/sparse"
@@ -76,7 +75,7 @@
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_silver"
+          "tag": "forge:molten_silver"
         },
         "temperature": 790,
         "time": 90

@@ -7,11 +7,8 @@
     }
   ],
   "ingredient": {
-    "fabric:type": "fabric:nbt",
-    "base": {
-      "item": "tconstruct:scorched_fuel_tank"
-    },
-    "strict": true
+    "fabric:type": "tconstruct:no_container",
+    "item": "tconstruct:scorched_fuel_tank"
   },
   "result": {
     "amount": 162000,

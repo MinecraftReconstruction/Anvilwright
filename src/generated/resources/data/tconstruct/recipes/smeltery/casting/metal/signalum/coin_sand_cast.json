@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:signalum_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/signalum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -12,12 +10,12 @@
     "tag": "tconstruct:casts/single_use/coin"
   },
   "cast_consumed": true,
-  "cooling_time": 40,
+  "cooling_time": 38,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_signalum"
+    "tag": "forge:molten_signalum"
   },
   "result": {
-    "tag": "c:signalum_coins"
+    "tag": "forge:coins/signalum"
   }
 }

@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:platinum_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/platinum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:platinum_blocks"
+    "tag": "forge:storage_blocks/platinum"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_platinum"
+    "tag": "forge:molten_platinum"
   },
   "temperature": 970,
   "time": 196
