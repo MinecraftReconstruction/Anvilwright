@@ -8,18 +8,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.drawable.IDrawableAnimated.StartDirection;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
-import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.widgets.IDrawableWidget;
-import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.IRecipeWidgetTooltipCallback;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.recipe.category.AbstractRecipeCategory;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -39,8 +34,8 @@ import java.util.Collections;
 import java.util.List;
 
 /** Shared logic between melting and foundry */
-public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDisplayableMeltingRecipe> {
-  public static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
+public abstract class AbstractMeltingCategory implements IRecipeCategory<MeltingRecipe> {
+  protected static final ResourceLocation BACKGROUND_LOC = TConstruct.getResource("textures/gui/jei/melting.png");
   protected static final String KEY_COOLING_TIME = TConstruct.makeTranslationKey("jei", "melting.time");
   protected static final String KEY_TEMPERATURE = TConstruct.makeTranslationKey("jei", "temperature");
   protected static final String KEY_MULTIPLIER = TConstruct.makeTranslationKey("jei", "melting.multiplier");
@@ -57,36 +52,23 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
     });
   };
 
+  @Getter
   private final IDrawable background;
   protected final IDrawableStatic tankOverlay;
   protected final IDrawableStatic plus;
+  protected final LoadingCache<Integer,IDrawableAnimated> cachedArrows;
 
-  public AbstractMeltingCategory(IGuiHelper helper, RecipeType<IDisplayableMeltingRecipe> recipeType, Component title, IDrawable icon) {
-    super(recipeType, title, icon, 132, 40);
+  public AbstractMeltingCategory(IGuiHelper helper) {
     this.background = helper.createDrawable(BACKGROUND_LOC, 0, 0, 132, 40);
     this.tankOverlay = helper.createDrawable(BACKGROUND_LOC, 132, 0, 32, 32);
-    this.plus = helper.drawableBuilder(BACKGROUND_LOC, 132, 32, 8, 8)
-                      .addPadding(2, 2, 2, 2)
-                      .build();
-  }
-
-  @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
-    // includes both the static arrow background and animated foreground
-    int time = recipe.getTime();
-    IDrawableWidget arrow = builder.addAnimatedRecipeArrowWidget(time * 5).setPosition(56, 18);
-    arrowTooltip:
-    {
-      if (recipe.isTimeDynamic()) {
-        IRecipeSlotDrawable fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
-        if (fluid != null) {
-          arrow.setTooltip(new MeltingArrowTooltip(recipe, fluid));
-          break arrowTooltip;
-        }
+    this.plus = helper.drawableBuilder(BACKGROUND_LOC, 132, 34, 6, 6).build();
+    this.cachedArrows = CacheBuilder.newBuilder().maximumSize(25L).build(new CacheLoader<>() {
+      @Override
+      public IDrawableAnimated load(Integer meltingTime) {
+        return helper.drawableBuilder(BACKGROUND_LOC, 150, 41, 24, 17).buildAnimated(meltingTime, StartDirection.LEFT, false);
       }
-      // not dynamic or fail to find the slot? static tooltip is fine
-      arrow.setTooltip(Component.translatable(KEY_COOLING_TIME, time / 4));
-    }
+    });
+  }
 
   @Override
   public void draw(MeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
@@ -120,7 +102,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
 
   /** Adds amounts to outputs and temperatures to fuels */
   @RequiredArgsConstructor
-  public static class MeltingFluidCallback implements FluidTooltipCallback {
+  public static class MeltingFluidCallback implements IRecipeTooltipReplacement {
     public static final MeltingFluidCallback INSTANCE = new MeltingFluidCallback();
 
     /**

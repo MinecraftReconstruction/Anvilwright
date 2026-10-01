@@ -270,6 +270,5 @@ public class FluidTextureModel implements IUnbakedGeometry<FluidTextureModel> {
         return baked.getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
       return slimeknights.tconstruct.library.client.model.ModelHelper.unwrap(originalModel, Baked.class).getCachedModel(new BakedCacheKey(FluidStack.EMPTY, ModelHelper.getParticleTexture(block)));
     }
-    return new FluidTextureModel(model, fluids, retextured);
   }
 }

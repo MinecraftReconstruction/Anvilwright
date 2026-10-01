@@ -1,30 +1,35 @@
 package slimeknights.tconstruct.library.client.materials;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import lombok.extern.log4j.Log4j2;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import slimeknights.mantle.data.IEarlySafeManagerReloadListener;
 import slimeknights.mantle.data.ResourceLocationSerializer;
 import slimeknights.mantle.util.JsonHelper;
-import slimeknights.mantle.util.typed.TypedMap;
-import slimeknights.mantle.util.typed.TypedMapBuilder;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.data.spritetransformer.IColorMapping;
+import slimeknights.tconstruct.library.client.data.spritetransformer.ISpriteTransformer;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
-import slimeknights.tconstruct.library.utils.JsonUtils;
+import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
 import slimeknights.tconstruct.library.utils.Util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Loads the material render info from resource packs. Loaded independently of materials loaded in data packs, so a resource needs to exist in both lists to be used.
@@ -39,6 +44,15 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
 
   /** Folder to scan for material render info JSONS */
   public static final String FOLDER = "tinkering/materials";
+  /** GSON adapter for material info deserializing */
+  public static final Gson GSON = (new GsonBuilder())
+    .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+    .registerTypeAdapter(MaterialStatsId.class, new ResourceLocationSerializer<>(MaterialStatsId::new, TConstruct.MOD_ID))
+    .registerTypeHierarchyAdapter(ISpriteTransformer.class, ISpriteTransformer.SERIALIZER)
+    .registerTypeHierarchyAdapter(IColorMapping.class, IColorMapping.SERIALIZER)
+    .setPrettyPrinting()
+    .disableHtmlEscaping()
+    .create();
 
   /**
    * Called on mod construct to register the resource listener
@@ -77,31 +91,10 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
     return Optional.ofNullable(renderInfos.get(variantId.getId()));
   }
 
-  /** Gets the variant for the given render info path */
-  public static MaterialVariantId variant(ResourceLocation location) {
-    String path = location.getPath();
-
-    // locate variant as a subfolder, and create final ID
-    String variant = "";
-    int slashIndex = path.lastIndexOf('/');
-    if (slashIndex >= 0) {
-      variant = path.substring(slashIndex + 1);
-      path = path.substring(0, slashIndex);
-    }
-    return MaterialVariantId.create(location.getNamespace(), path, variant);
-  }
-
-  /** Creates the context for the render info parser */
-  public static TypedMap createContext(MaterialVariantId id) {
-    return TypedMapBuilder.builder().put(MaterialVariantId.CONTEXT_KEY, id).put(ContextKey.DEBUG, "Material Render Info " + id).build();
-  }
-
   @Override
   public void onReloadSafe(ResourceManager manager) {
     // first, we need to fetch all relevant JSON files
-    Map<ResourceLocation,JsonElement> jsons = new HashMap<>();
-    SimpleJsonResourceReloadListener.scanDirectory(manager, FOLDER, JsonHelper.DEFAULT_GSON, jsons);
-    // final result map
+    int trim = FOLDER.length() + 1;
     Map<MaterialVariantId,MaterialRenderInfo> map = new HashMap<>();
     for(Map.Entry<ResourceLocation, Resource> entry : manager.listResources(FOLDER, (loc) -> loc.getPath().endsWith(".json")).entrySet()) {
       // clean up ID by trimming off the extension and folder
@@ -109,11 +102,14 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
       String path = location.getPath();
       String localPath = path.substring(trim, path.length() - 5);
 
-    // iterate the files, handling parenting thanks to the data map loader
-    for(Entry<ResourceLocation, JsonElement> entry : jsons.entrySet()) {
-      // clean up ID by trimming off the extension and folder
-      ResourceLocation location = entry.getKey();
-      MaterialVariantId id = variant(location);
+      // locate variant as a subfolder, and create final ID
+      String variant = "";
+      int slashIndex = localPath.lastIndexOf('/');
+      if (slashIndex >= 0) {
+        variant = localPath.substring(slashIndex + 1);
+        localPath = localPath.substring(0, slashIndex);
+      }
+      MaterialVariantId id = MaterialVariantId.create(location.getNamespace(), localPath, variant);
 
       // read in the JSON data
       try (
@@ -129,35 +125,43 @@ public class MaterialRenderInfoLoader implements IEarlySafeManagerReloadListener
             throw new IllegalStateException("Duplicate data file ignored with ID " + id);
           }
         }
-        // parse it into material render info
-        map.put(id, RegistryDataMapLoader.parseData("Material Render Info", jsons, location, json, null, MaterialRenderInfo.LOADABLE, createContext(id)));
-      } catch (IllegalArgumentException | JsonParseException ex) {
-        log.error("Couldn't parse data file {} from {}", id, location, ex);
+      } catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {
+        log.error("Couldn't parse data file {} from {}", id, location, jsonparseexception);
       }
     }
-
     // store the list immediately, otherwise it is not in place in time for models to load
-    this.renderInfos = Map.copyOf(map);
-    if (log.isDebugEnabled() && JsonUtils.debugLogResourceValues()) {
-      log.debug("Loaded material render infos: {}", Util.toIndentedStringList(map.keySet().stream().sorted(Comparator.comparing(MaterialVariantId::getId).thenComparing(MaterialVariantId::getVariant)).toList()));
-    }
+    this.renderInfos = map;
+    log.debug("Loaded material render infos: {}", Util.toIndentedStringList(map.keySet()));
     log.info("{} material render infos loaded", map.size());
   }
 
+  /**
+   * Gets material render info based on the given JSON
+   * @param material   Material location
+   * @param json  Render info JSON data
+   * @return  Material render info data
+   */
+  private MaterialRenderInfo loadRenderInfo(MaterialVariantId material, MaterialRenderInfoJson json) {
+    // parse color
+    int color = 0xFFFFFFFF;
+    if (json.getColor() != null) {
+      color = JsonHelper.parseColor(json.getColor());
+    }
 
-  /* Helpers */
-
-  /** Checks if the given material has any of the given fallbacks. Used by {@link slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier} and {@link slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel} */
-  public boolean hasFallback(MaterialVariantId material, Set<String> fallbacks) {
-    MaterialRenderInfo info = MaterialRenderInfoLoader.INSTANCE.getRenderInfo(material).orElse(null);
-    if (info != null) {
-      for (String fallback : info.fallbacks()) {
-        if (fallbacks.contains(fallback)) {
-          return true;
-        }
+    // texture fallback to ID if not told to skip
+    ResourceLocation texture = null;
+    if (!json.isSkipUniqueTexture()) {
+      texture = json.getTexture();
+      if (texture == null) {
+        texture = material.getLocation('_');
       }
     }
-    return false;
+    // list of fallback textures
+    String[] fallback = json.getFallbacks();
+    if (fallback == null) {
+      fallback = new String[0];
+    }
+    return new MaterialRenderInfo(material, texture, fallback, color, json.getLuminosity());
   }
 
   @Override

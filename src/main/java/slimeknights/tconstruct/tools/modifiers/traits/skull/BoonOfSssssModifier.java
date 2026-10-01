@@ -1,50 +1,21 @@
 package slimeknights.tconstruct.tools.modifiers.traits.skull;
 
-import io.github.fabricators_of_create.porting_lib.event.common.PotionEvents;
-import io.github.fabricators_of_create.porting_lib.util.PotionHelper;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.library.modifiers.impl.TotalArmorLevelModifier;
-import slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.TinkerDataKey;
-import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
-import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-
-import javax.annotation.Nullable;
-
-public class BoonOfSssssModifier extends TotalArmorLevelModifier {
-  private static final TinkerDataKey<Integer> POTENT_POTIONS = TConstruct.createKey("boon_of_sssss");
-  public BoonOfSssssModifier() {
-    super(POTENT_POTIONS, true);
-    PotionEvents.POTION_ADDED.register(BoonOfSssssModifier::onPotionStart);
-  }
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import slimeknights.tconstruct.library.json.LevelingValue;
+import slimeknights.tconstruct.library.modifiers.impl.NoLevelsModifier;
+import slimeknights.tconstruct.library.modifiers.modules.behavior.AttributeModule;
+import slimeknights.tconstruct.library.modifiers.modules.util.ModifierCondition;
+import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
+import slimeknights.tconstruct.shared.TinkerAttributes;
+import slimeknights.tconstruct.tools.modules.ReduceEffectOnUnequipModule;
 
 /** @deprecated use {@link TinkerAttributes#GOOD_EFFECT_DURATION} and {@link ReduceEffectOnUnequipModule} */
 @Deprecated(forRemoval = true)
 public class BoonOfSssssModifier extends NoLevelsModifier {
   @Override
-  public void onUnequip(IToolStackView tool, int level, EquipmentChangeContext context) {
-    super.onUnequip(tool, level, context);
-    if (context.getChangedSlot() == EquipmentSlot.HEAD) {
-      IToolStackView replacement = context.getReplacementTool();
-      if (replacement == null || replacement.getModifierLevel(this) == 0) {
-        // cure effects using the helmet
-        PotionHelper.curePotionEffects(context.getEntity(), new ItemStack(tool.getItem()));
-      }
-    }
-  }
-
-  /** Called when the potion effects start to apply this effect */
-  private static void onPotionStart(LivingEntity living, MobEffectInstance newEffect, MobEffectInstance oldEffect, @Nullable Entity source) {
-    if (newEffect.getEffect().isBeneficial()) {
-      if (ModifierUtil.getTotalModifierLevel(living, POTENT_POTIONS) > 0) {
-        newEffect.duration *= 1.25f;
-        newEffect.getCurativeItems().add(new ItemStack(living.getItemBySlot(EquipmentSlot.HEAD).getItem()));
-      }
-    }
+  protected void registerHooks(Builder hookBuilder) {
+    hookBuilder.addModule(AttributeModule.builder(TinkerAttributes.GOOD_EFFECT_DURATION, Operation.MULTIPLY_BASE).eachLevel(0.25f));
+    hookBuilder.addModule(new ReduceEffectOnUnequipModule(MobEffectCategory.BENEFICIAL, LevelingValue.eachLevel(0.2f), ModifierCondition.ANY_TOOL));
   }
 }

@@ -101,6 +101,32 @@ public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDispl
     }
   }
 
+  /** Gets the text describing the required modifier level, if any. */
+  @Override
+  @Nullable
+  protected Component getVariantText(IDisplayModifierRecipe recipe) {
+    Component variant = recipe.getVariant();
+    if (variant != null) {
+      return variant;
+    }
+    IntRange level = recipe.getLevel();
+    int min = level.min();
+    int max = level.max();
+    // min being 1 means we only have a max level, we check this first as Max Level is better than exact typically
+    if (min == 1) {
+      if (max < ModifierEntry.VALID_LEVEL.max()) {
+        return Component.translatable(KEY_MAX, max);
+      }
+    } else if (min == max) {
+      return Component.translatable(KEY_EXACT, min);
+    } else if (max == ModifierEntry.VALID_LEVEL.max()) {
+      return Component.translatable(KEY_MIN, min);
+    } else {
+      return Component.translatable(KEY_RANGE, min, max);
+    }
+    return null;
+  }
+
   /** Draws the icon for the given slot type */
   private void drawSlotType(GuiGraphics graphics, @Nullable SlotType slotType, int x, int y) {
     Minecraft minecraft = Minecraft.getInstance();
@@ -118,12 +144,6 @@ public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDispl
         // failed to use the model, use missing texture
         sprite = modelManager.getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(MissingTextureAtlasSprite.getLocation());
       }
-    } else if (min == max) {
-      return Component.translatable(KEY_EXACT, min);
-    } else if (max == ModifierEntry.VALID_LEVEL.max()) {
-      return Component.translatable(KEY_MIN, min);
-    } else {
-      return Component.translatable(KEY_RANGE, min, max);
     }
     RenderSystem.setShader(GameRenderer::getPositionTexShader);
     RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
