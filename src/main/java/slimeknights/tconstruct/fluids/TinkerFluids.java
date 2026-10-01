@@ -6,6 +6,7 @@ import io.github.fabricators_of_create.porting_lib.brewing.BrewingRecipeRegistry
 import io.github.fabricators_of_create.porting_lib.fluids.sound.SoundActions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import io.github.tropheusj.milk.Milk;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -58,6 +59,7 @@ import slimeknights.tconstruct.fluids.data.FluidTooltipProvider;
 import slimeknights.tconstruct.fluids.data.FluidBlockstateModelProvider;
 import slimeknights.tconstruct.fluids.data.FluidBucketModelProvider;
 import slimeknights.tconstruct.fluids.data.FluidTextureProvider;
+import slimeknights.mantle.fluid.texture.FluidTextureCameraProvider;
 import slimeknights.tconstruct.fluids.fluids.DirectionalSlimeFluid;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidAttributes;
@@ -311,12 +313,14 @@ public final class TinkerFluids extends TinkerModule {
       .pathType(BlockPathTypes.LAVA).adjacentPathType(null);
   }
 
-  public static void gatherData(final FabricDataGenerator.Pack pack) {
+  public static void gatherData(final FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
     pack.addProvider(FluidTooltipProvider::new);
     // NOTE(porting): the merge dropped four of the five upstream providers, leaving only the tooltip provider.
     //  Without the texture provider every fluid fell back to the water sprite and the tank model crashed on the
     //  missing sprite; without the blockstate/bucket providers the fluid blocks had no blockstate at all.
-    pack.addProvider(FluidTextureProvider::new);
+    FluidTextureProvider textures = pack.addProvider(FluidTextureProvider::new);
+    // the camera textures are cut out of the still texture, so they need the texture provider's own data
+    pack.addProvider((output, registriesFuture) -> new FluidTextureCameraProvider(output, existingFileHelper, textures));
     // explicit factory types to disambiguate between the vanilla and the Fabric Pack#addProvider overloads
     FabricDataGenerator.Pack.Factory<FluidBucketModelProvider> buckets = output -> new FluidBucketModelProvider(output, TConstruct.MOD_ID);
     FabricDataGenerator.Pack.Factory<FluidBlockstateModelProvider> blockstates = output -> new FluidBlockstateModelProvider(output, TConstruct.MOD_ID);

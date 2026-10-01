@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.library.client.modifiers;
 
 import com.mojang.math.Transformation;
-import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
@@ -20,7 +19,14 @@ import java.util.function.Function;
  * @see ModifierModel
  */
 public interface IBakedModifierModel {
-  Mesh EMPTY_MESH = RendererAccess.INSTANCE.getRenderer().meshBuilder().build();
+  /**
+   * Mesh used by models that render nothing.
+   * <p>
+   * NOTE(porting): this used to be built from the renderer, which made loading this interface require the Fabric
+   * renderer to already exist - datagen has no renderer, and the modifier model loaders (which datagen has to
+   * serialize) pull this interface in. {@link Mesh} has a single abstract method, so an empty mesh is just a no-op.
+   */
+  Mesh EMPTY_MESH = quads -> {};
 
   /**
    * Gets the key to use for caching results from this modifier. Should uniquely represent this tool state for the given modifier

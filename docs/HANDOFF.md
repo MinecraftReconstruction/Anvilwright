@@ -726,3 +726,39 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 "Unofficial, AI-generated (largely vibed) ..."，与规则 2 冲突（只能写
 `Unofficial, largely AI-assisted ("vibed") port.`）。canonical 仓库的描述已经是合规措辞，
 fork 那条描述建议一并改掉（`gh repo edit MinecraftReconstruction/TinkersConstruct --description ...`）。
+
+## 20. 2026-10-01 夜：客户端冒烟 —— 紫黑物品清零（本轮交接）
+
+### 20.1 现在的状态（一句话）
+
+`runData` 绿、`runClient` 能进世界且**开创造栏不再崩**；本轮把口径升级成"客户端画得出来没有"，
+读数：**0 个模型烘焙失败、0/682 个 `tconstruct:` 物品落到 missing model、109 个紫黑格全清**。
+详细数字见 [NUMBERS.md](NUMBERS.md) 最后一节，机制差异见 [BEHAVIOUR-DIFFERENCES.md](BEHAVIOUR-DIFFERENCES.md) 36–42。
+
+### 20.2 本轮做了什么（5 个 commit，都在 `mcr/upstream-3.12.1` 且已 push）
+
+1. `9f379612e0` 流体渲染：补回被合并丢掉的流体 provider；创造栏 12 处 `TableBlockItem` 强转改防御式
+2. `735d5a7b07`（+ Mantle `c7098eb1`）修掉 109 个烘焙失败的模型：烘焙期不能用全局 atlas 取贴图
+3. `b03b62708f` 补回工具/盔甲/装饰模型 provider 与对应的 loader 注册
+4. `f40e5a3987` 补回 `TinkerCommons` 的 5 个客户端 provider（`models/item` 71 → 501，与上游对齐）
+5. 本轮最后：`FluidTextureCameraProvider`（62 张贴图）+ 文档
+
+### 20.3 新增的冒烟工具（照着用）
+
+`slimeknights.tconstruct.testing.TConstructClientSmokeTest`（`fabric.mod.json` 的 `client` 入口，**只在开发环境运行**）：
+
+- 进世界后自动跑一次，打 `[smoketest]` 行：创造栏重建 + 3281 个物品的模型解析、missing model 计数、atlas 审计；
+- 完整缺失清单写到 `run/smoketest-atlas-missing.txt`，两次运行可以直接 `diff`；
+- `ToolModel` / `FluidContainerModel` 烘焙失败时会在开发环境打**完整堆栈**（vanilla 只打一行消息，之前就是
+  因为看不到堆栈才多绕了两轮）。
+
+### 20.4 下一个 agent 从哪继续（按性价比）
+
+1. **实机截图确认三件事**（我这边键盘焦点拿不到 Minecraft 窗口，只能靠 `F2` 由人按或者看日志）：
+   盔甲层渲染（本轮才注册 `ArmorModelManager`）、书里的工具/材料图标（`gui/modifiers` 目录源本轮才接上）、
+   流体外观（本轮才有 `FluidRenderHandler`）。
+2. **药水流体的按 stack 染色**：现在用的是 `fluid_texture/potion.json` 里的固定色；上游走
+   `PotionFluidAttributes`。要接的话：注册 `FluidVariantRendering.register(potion, handler)`，getColor 从
+   stack tag 算（`PotionFluidAttributes` 里已有逻辑）。
+3. **`MaterialPaletteDebugGenerator`** 还没注册（debug 用，上游注册了，可忽略）。
+4. canonical 同步：`main`（压缩历史）还落后本轮 5 个 commit，需要重新 cherry-pick 或重压。

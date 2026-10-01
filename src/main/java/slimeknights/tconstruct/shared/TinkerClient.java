@@ -11,6 +11,13 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.crafting.RecipeManager;
 import slimeknights.mantle.registration.FluidAttributeClientHandler;
 import slimeknights.mantle.registration.FluidAttributeHandler;
+import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.DyedArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.FirstArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.FixedArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.MaterialArmorTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.MaterialHasFallbackTextureSupplier;
+import slimeknights.tconstruct.library.client.armor.texture.TrimArmorTextureSupplier;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.common.recipe.RecipeCacheInvalidator;
 import slimeknights.tconstruct.fluids.FluidClientEvents;
@@ -26,7 +33,20 @@ import slimeknights.tconstruct.library.client.data.spritetransformer.OffsettingS
 import slimeknights.tconstruct.library.client.data.spritetransformer.RecolorSpriteTransformer;
 import slimeknights.tconstruct.library.client.materials.MaterialRenderInfoLoader;
 import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.NormalModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.PotionModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.ModifierIconManager;
+import slimeknights.tconstruct.library.client.modifiers.model.BannerModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.CompoundModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.ConditionalModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.FluidModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.MaterialModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.ModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.NestedModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.TankModifierModel;
+import slimeknights.tconstruct.library.client.modifiers.model.TrimModifierModel;
+import slimeknights.tconstruct.tools.client.SlimeskullModifierModel;
 import slimeknights.tconstruct.smeltery.SmelteryClientEvents;
 import slimeknights.tconstruct.tables.TableClientEvents;
 import slimeknights.tconstruct.tables.client.PatternGuiTextureLoader;
@@ -51,6 +71,8 @@ public class TinkerClient implements ClientModInitializer {
    */
   @Override
   public void onInitializeClient() {
+    registerArmorTextureLoaders();
+    registerModifierModelLoaders();
     TinkerBook.initBook();
     // needs to register listeners early enough for minecraft to load
     ModifierIconManager.init();
@@ -87,4 +109,67 @@ public class TinkerClient implements ClientModInitializer {
     graphics.flushIfUnmanaged();
     return l;
   }
+
+  /**
+   * Registers the loaders for the armor texture layers.
+   * <p>
+   * NOTE(porting): upstream registers these in its client setup, which the datagen entrypoint never runs - but
+   * {@code ArmorModelProvider} has to serialize those loaders, so it calls this as well. Registering twice is a
+   * no-op.
+   * <p>
+   * Without this the {@code tinkering/armor_models} files cannot be parsed at runtime either, which leaves every
+   * piece of Tinkers armor without a renderer.
+   */
+  public static void registerArmorTextureLoaders() {
+    if (armorLoadersRegistered) {
+      return;
+    }
+    armorLoadersRegistered = true;
+    ArmorTextureSupplier.LOADER.register(getResource("fixed"), FixedArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("dyed"), DyedArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("first_present"), FirstArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("material"), MaterialArmorTextureSupplier.Material.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("persistent_data"), MaterialArmorTextureSupplier.PersistentData.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("trim"), TrimArmorTextureSupplier.LOADER);
+    ArmorTextureSupplier.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackTextureSupplier.LOADER);
+  }
+
+  /** True once the armor texture loaders were registered */
+  private static boolean armorLoadersRegistered;
+
+  /**
+   * Registers the loaders for the modifier models.
+   * <p>
+   * NOTE(porting): same story as {@link #registerArmorTextureLoaders()} - upstream registers these in its client
+   * setup, the datagen entrypoint does not run that, and {@code ModifierModelMapProvider} has to serialize them.
+   * Without them the {@code tinkering/modifier_models} files cannot be parsed, so no modifier renders on a tool.
+   */
+  public static void registerModifierModelLoaders() {
+    if (modifierModelLoadersRegistered) {
+      return;
+    }
+    modifierModelLoadersRegistered = true;
+    ModifierModel.LOADER.register(getResource("empty"), ModifierModel.EMPTY.getLoader());
+    ModifierModel.LOADER.register(getResource("compound"), CompoundModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("conditional"), ConditionalModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("trait"), NestedModifierModel.Trait.LOADER);
+    ModifierModel.LOADER.register(getResource("crafted"), NestedModifierModel.Crafted.LOADER);
+    ModifierModel.LOADER.register(getResource("basic"), NormalModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("dyed"), DyedModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("material_index"), MaterialModifierModel.Index.LOADER);
+    ModifierModel.LOADER.register(getResource("persistent_material"), MaterialModifierModel.PersistentData.LOADER);
+    ModifierModel.LOADER.register(getResource("dyed_material"), MaterialModifierModel.Dyed.LOADER);
+    ModifierModel.LOADER.register(getResource("potion"), PotionModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("armor_trim"), TrimModifierModel.Armor.LOADER);
+    ModifierModel.LOADER.register(getResource("custom_trim"), TrimModifierModel.Custom.LOADER);
+    ModifierModel.LOADER.register(getResource("banner"), BannerModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("fluid"), FluidModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("tank"), TankModifierModel.LOADER);
+    ModifierModel.LOADER.register(getResource("material_has_fallback"), MaterialHasFallbackModifierModel.LOADER);
+    // specialized
+    ModifierModel.LOADER.register(getResource("slimeskull"), SlimeskullModifierModel.LOADER);
+  }
+
+  /** True once the modifier model loaders were registered */
+  private static boolean modifierModelLoadersRegistered;
 }

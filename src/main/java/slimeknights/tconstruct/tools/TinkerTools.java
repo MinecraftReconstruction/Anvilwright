@@ -114,6 +114,7 @@ import slimeknights.tconstruct.tools.data.material.MaterialStatsDataProvider;
 import slimeknights.tconstruct.tools.data.material.MaterialTraitsDataProvider;
 import slimeknights.tconstruct.tools.data.sprite.TinkerMaterialSpriteProvider;
 import slimeknights.tconstruct.tools.data.sprite.TinkerPartSpriteProvider;
+import slimeknights.tconstruct.tools.data.sprite.TinkerTrimMaterialPaletteGenerator;
 import slimeknights.tconstruct.tools.item.ArmorSlotType;
 import slimeknights.tconstruct.tools.item.CrystalshotItem;
 import slimeknights.tconstruct.tools.item.CrystalshotItem.CrystalshotEntity;
@@ -408,5 +409,11 @@ public final class TinkerTools extends TinkerModule {
     pack.addProvider((output, registriesFuture) -> new GeneratorPartTextureJsonGenerator(output, TConstruct.MOD_ID, partSprites));
     pack.addProvider((output, registriesFuture) -> new MaterialPartTextureGenerator(output, existingFileHelper, partSprites, materialSprites));
     pack.addProvider((output, registriesFuture) -> new TinkerSpriteSourceGenerator(output, existingFileHelper));
+    // NOTE(porting): the merge dropped these client providers as well, which is why the armour pieces, the tool models
+    //  and the material palettes used by armour trims had no generated files at all
+    pack.addProvider((output, registriesFuture) -> new TinkerTrimMaterialPaletteGenerator(output, existingFileHelper, materialSprites));
+    pack.addProvider((output, registriesFuture) -> new ToolItemModelProvider(output, existingFileHelper));
+    pack.addProvider((output, registriesFuture) -> new ArmorModelProvider(output));
+    pack.addProvider((output, registriesFuture) -> new ModifierModelMapProvider(output));
   }
 }

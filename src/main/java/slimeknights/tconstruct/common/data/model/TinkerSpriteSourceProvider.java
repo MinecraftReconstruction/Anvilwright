@@ -43,6 +43,9 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
   @SuppressWarnings("removal")
   @Override
   protected void addSources() {
+    // the atlas refers to this source type by id, so it has to exist before the file is serialized (datagen) and
+    // before the atlas is stitched (client startup) - registering twice is a no-op
+    ShieldBannerModifierSpriteSource.register();
     ResourceLocation trimPalette = new ResourceLocation(PALETTE_FOLDER + "trim_palette");
     // map of material suffix to material paeltte for trims
     Map<String,ResourceLocation> tinkerMaterials = Arrays.stream(MaterialIds.TRIM_MATERIALS).collect(Collectors.toMap(id -> id.getNamespace() + "_" + id.getPath(), id -> id.withPrefix(PALETTE_FOLDER)));
