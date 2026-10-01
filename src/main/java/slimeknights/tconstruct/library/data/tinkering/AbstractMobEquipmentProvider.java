@@ -8,9 +8,9 @@ import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.JsonHelper;
@@ -72,7 +72,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
 
   /** Creates a builder for the given entity ID with an automtic mod ID condition */
   public MobEquipment.Builder equip(ResourceLocation entity) {
-    return equip(entity.getNamespace() + '_' + entity.getPath(), entity, new ModLoadedCondition(entity.getNamespace()));
+    return equip(entity.getNamespace() + '_' + entity.getPath(), entity, DefaultResourceConditions.allModsLoaded(entity.getNamespace()));
   }
 
 
@@ -116,7 +116,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
       json.add("equip", MobEquipment.LIST_LOADABLE.serialize(equipment.build()));
       // serialize conditions
       if (conditions.length > 0) {
-        json.add("conditions", CraftingHelper.serialize(conditions));
+        ConditionJsonProvider.write(json, conditions);
       }
       return json;
     }

@@ -1,21 +1,14 @@
 package slimeknights.tconstruct.library.tools.capability;
 
-import lombok.Getter;
+import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
@@ -52,13 +45,6 @@ public class TinkerDataCapability implements EntityComponentInitializer {
 //    }
   }
 
-  /** Gets the data capability from an entity, or null if missing */
-  @SuppressWarnings("DataFlowIssue")
-  @Nullable
-  public static TinkerDataCapability.Holder getData(LivingEntity entity) {
-    return entity.getCapability(CAPABILITY).orElse(null);
-  }
-
 
   /* Required methods */
 
@@ -92,14 +78,13 @@ public class TinkerDataCapability implements EntityComponentInitializer {
   /** Class for generic keys */
   @SuppressWarnings("unused")
   @RequiredArgsConstructor(staticName = "of")
-  public static class TinkerDataKey<T> implements IdAwareObject {
+  public static class TinkerDataKey<T> {
     /** Name for debug */
-    @Getter
-    private final ResourceLocation id;
+    private final ResourceLocation name;
 
     @Override
     public String toString() {
-      return "TinkerDataKey{" + id + '}';
+      return "TinkerDataKey{" + name + '}';
     }
   }
 
@@ -133,15 +118,7 @@ public class TinkerDataCapability implements EntityComponentInitializer {
      * @param value  Value to add
      * @param <T>    Data type
      */
-    public <T> void put(TinkerDataKey<T> key, T value) {
-      data.put(key, value);
-    }
-
-    /**
-     * Adds the given value to the float data key
-     * @param key    Key to add
-     * @param value  Value to add
-     */
+    /** Adds the value to the stored float, used for stackable data like armor levels */
     public void add(TinkerDataKey<Float> key, float value) {
       float newValue = get(key, 0f) + value;
       if (newValue == 0) {
@@ -149,6 +126,10 @@ public class TinkerDataCapability implements EntityComponentInitializer {
       } else {
         data.put(key, newValue);
       }
+    }
+
+    public <T> void put(TinkerDataKey<T> key, T value) {
+      data.put(key, value);
     }
 
     /**
@@ -167,6 +148,17 @@ public class TinkerDataCapability implements EntityComponentInitializer {
      * @return  Data or default
      */
     @SuppressWarnings("unchecked")
+    /** Gets the value from the holder, creating it if missing */
+    @SuppressWarnings("unchecked")
+    public <T> T computeIfAbsent(TinkerDataKey<T> key, Function<TinkerDataKey<?>,T> constructor) {
+      return (T) data.computeIfAbsent(key, constructor);
+    }
+
+    /** Gets the value from the holder, creating it if missing */
+    public <T, U extends TinkerDataKey<T> & Function<TinkerDataKey<?>,T>> T computeIfAbsent(U key) {
+      return computeIfAbsent(key, key);
+    }
+
     public <S, T extends S> S get(TinkerDataKey<T> key, S defaultValue) {
       return (T) data.getOrDefault(key, defaultValue);
     }
@@ -185,13 +177,8 @@ public class TinkerDataCapability implements EntityComponentInitializer {
 
     /** Gets the value from the holder, creating it if missing */
     @SuppressWarnings("unchecked")
-    public <T> T computeIfAbsent(TinkerDataKey<T> key, Function<TinkerDataKey<?>,T> constructor) {
-      return (T) data.computeIfAbsent(key, constructor);
-    }
-
-    /** Gets the value from the holder, creating it if missing */
     public <T, U extends TinkerDataKey<T> & Function<TinkerDataKey<?>,T>> T computeIfAbsent(U key) {
-      return computeIfAbsent(key, key);
+      return (T) data.computeIfAbsent(key, key);
     }
 
     /**

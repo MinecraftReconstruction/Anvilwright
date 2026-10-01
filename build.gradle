@@ -151,6 +151,11 @@ dependencies {
     // MinecraftReconstruction: no longer bundled jar-in-jar. Mantle 1.11 is the 3.12-era API and is now a
     // standalone dependency (once the merge compiles, this becomes the shipped arrangement too).
     modImplementation("slimeknights.mantle:Mantle:${minecraft_version}-${mantle_version}")
+    // MinecraftReconstruction: TCon's own code uses CCA (TinkerDataCapability, equipment watchers, the piggyback
+    // component). Mantle depends on it too, but Mantle's published POM carries no dependencies, so declare it
+    // explicitly. No include() - Mantle already ships the nested copy.
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}")
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}")
     modImplementation(include("io.github.tropheusj:milk-lib:${project.milk_lib_version}")) {
         exclude(group: "net.fabricmc.fabric-api")
     }

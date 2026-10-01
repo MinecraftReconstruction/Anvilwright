@@ -66,13 +66,6 @@ import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement.FrequencyReductionMethod;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.ForgeBiomeModifiers.AddFeaturesBiomeModifier;
-import net.minecraftforge.common.world.ForgeBiomeModifiers.AddSpawnsBiomeModifier;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.holdersets.AndHolderSet;
-import net.minecraftforge.registries.holdersets.NotHolderSet;
-import net.minecraftforge.registries.holdersets.OrHolderSet;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.GeodeItemObject;
 import slimeknights.tconstruct.common.registration.GeodeItemObject.BudSize;
@@ -134,14 +127,6 @@ import static slimeknights.tconstruct.world.TinkerWorld.placedLargeCobaltOre;
 import static slimeknights.tconstruct.world.TinkerWorld.placedSkyGeode;
 import static slimeknights.tconstruct.world.TinkerWorld.placedSmallCobaltOre;
 import static slimeknights.tconstruct.world.TinkerWorld.skyGeode;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnCobaltOre;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnEarthGeode;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnEndSlime;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnEnderGeode;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnIchorGeode;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnOverworldSlime;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnSkyGeode;
-import static slimeknights.tconstruct.world.TinkerWorld.spawnTerracube;
 
 /** Provider for all our worldgen datapack registry stuff */
 public class WorldgenProvider {
@@ -153,7 +138,6 @@ public class WorldgenProvider {
     builder.add(Registries.PLACED_FEATURE, WorldgenProvider::registerPlacedFeatures);
     builder.add(Registries.STRUCTURE, WorldgenProvider::registerStructures);
     builder.add(Registries.STRUCTURE_SET, WorldgenProvider::registerStructureSets);
-    builder.add(ForgeRegistries.Keys.BIOME_MODIFIERS, WorldgenProvider::registerBiomeModifiers);
   }
 
   /** Registers all configured features */
@@ -336,58 +320,9 @@ public class WorldgenProvider {
     context.register(endSkyIsland,         structureSet(25, 6, RandomSpreadType.LINEAR, 368963602, 0.5f, entry(structures, endSlimeIsland, 1)));
   }
 
-  /** Registers all biome modifiers */
-  private static void registerBiomeModifiers(BootstapContext<BiomeModifier> context) {
-    HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
-    HolderGetter<PlacedFeature> placed = context.lookup(Registries.PLACED_FEATURE);
-    HolderSet<Biome> overworld = biomes.getOrThrow(BiomeTags.IS_OVERWORLD);
-    HolderSet<Biome> nether = biomes.getOrThrow(BiomeTags.IS_NETHER);
-    HolderSet<Biome> end = biomes.getOrThrow(BiomeTags.IS_END);
-
-    context.register(spawnCobaltOre, new AddFeaturesBiomeModifier(nether, direct(placed.getOrThrow(TinkerWorld.placedSmallCobaltOre), placed.getOrThrow(placedLargeCobaltOre)), Decoration.UNDERGROUND_DECORATION));
-    // geodes
-    context.register(spawnEarthGeode, new AddFeaturesBiomeModifier(overworld, direct(placed.getOrThrow(placedEarthGeode)), Decoration.LOCAL_MODIFICATIONS));
-    context.register(spawnSkyGeode,   new AddFeaturesBiomeModifier(and(overworld, not(or(biomes.getOrThrow(BiomeTags.IS_OCEAN), biomes.getOrThrow(BiomeTags.IS_DEEP_OCEAN), biomes.getOrThrow(BiomeTags.IS_BEACH), biomes.getOrThrow(BiomeTags.IS_RIVER)))), direct(placed.getOrThrow(TinkerWorld.placedSkyGeode)), Decoration.LOCAL_MODIFICATIONS));
-    context.register(spawnIchorGeode, new AddFeaturesBiomeModifier(nether, direct(placed.getOrThrow(TinkerWorld.placedIchorGeode)), Decoration.LOCAL_MODIFICATIONS));
-    context.register(spawnEnderGeode, new AddFeaturesBiomeModifier(and(end, not(direct(biomes.getOrThrow(Biomes.THE_END)))), direct(placed.getOrThrow(TinkerWorld.placedEnderGeode)), Decoration.LOCAL_MODIFICATIONS));
-    // spawns
-    context.register(spawnOverworldSlime, new AddSpawnsBiomeModifier(overworld, List.of(new SpawnerData(TinkerWorld.skySlimeEntity.get(), 100, 2, 4))));
-    context.register(spawnTerracube,      new AddSpawnsBiomeModifier(and(overworld, not(biomes.getOrThrow(TinkerTags.Biomes.NO_DEFAULT_MONSTERS))), List.of(new SpawnerData(TinkerWorld.terracubeEntity.get(), 10, 2, 4))));
-    context.register(spawnEndSlime,       new AddSpawnsBiomeModifier(end,       List.of(new SpawnerData(TinkerWorld.enderSlimeEntity.get(), 10, 2, 4))));
-  }
-
-
-  /* Helpers */
-
-  /** Ands the holder sets together */
-  @SafeVarargs
-  private static <T> AndHolderSet<T> and(HolderSet<T>... sets) {
-    return new AndHolderSet<>(List.of(sets));
-  }
-
-  /** Ors the holder sets together */
-  @SafeVarargs
-  private static <T> OrHolderSet<T> or(HolderSet<T>... sets) {
-    return new OrHolderSet<>(List.of(sets));
-  }
-
-  /** Nots the set */
-  private static <T> NotHolderSet<T> not(HolderSet<T> set) {
-    // passing in null as its impossible to create the object Forge demands of us during datagen, and seems it work without it
-    return new SerializableNotHolderSet<>(set);
-  }
-
-  private static class SerializableNotHolderSet<T> extends NotHolderSet<T> {
-    public SerializableNotHolderSet(HolderSet<T> value) {
-      super(null, value);
-    }
-
-    @Override
-    public boolean canSerializeIn(HolderOwner<T> holderOwner) {
-      return true;
-    }
-  }
-
+  // NOTE(porting): upstream registers biome modifiers (features + spawns) into Forge's BIOME_MODIFIERS registry here.
+  //  Fabric has no data-driven biome modification registry, so the same additions are made in code in WorldEvents via
+  //  Fabric's BiomeModifications - see docs/BEHAVIOUR-DIFFERENCES.md.
 
   /* Configured features */
 

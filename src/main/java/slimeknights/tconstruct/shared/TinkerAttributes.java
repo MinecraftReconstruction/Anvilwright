@@ -4,20 +4,47 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import slimeknights.mantle.registration.deferred.AttributeDeferredRegister;
 import slimeknights.tconstruct.TConstruct;
-import slimeknights.tconstruct.common.config.Config;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.player.Player;
 
 public class TinkerAttributes {
   private static final AttributeDeferredRegister ATTRIBUTES = new AttributeDeferredRegister(TConstruct.MOD_ID);
 
   public TinkerAttributes() {
-    ATTRIBUTES.register(FMLJavaModLoadingContext.get().getModEventBus());
+    ATTRIBUTES.register();
+    registerEntityAttributes();
+  }
+
+  /**
+   * Attaches the TCon attributes to the player.
+   * <p>
+   * <b>Porting note:</b> upstream adds every attribute below to <em>all</em> living entity types through Forge's
+   * EntityAttributeModificationEvent. Fabric's FabricDefaultAttributeRegistry is per entity type and must supply the
+   * complete set of defaults, so it cannot express "all entities". The player is registered in full here (which is
+   * what the armor and modifier code needs) and TCon's own entities get the relevant ones in
+   * {@code TinkerWorld#registerAttributes}; entities from other mods do not receive them. Disclosed in
+   * docs/BEHAVIOUR-DIFFERENCES.md.
+   */
+  public static void registerEntityAttributes() {
+    AttributeSupplier.Builder player = Player.createAttributes()
+      .add(BOUNCY.get(), 0)
+      .add(PROTECTION_CAP.get(), 0.8)
+      .add(CHRYSOPHILITE.get(), 0)
+      .add(CRITICAL_DAMAGE.get(), 1.5)
+      .add(JUMP_BOOST.get(), 0)
+      .add(SAFE_FALL_DISTANCE.get(), 0)
+      .add(JUMP_COUNT.get(), 1)
+      .add(KNOCKBACK_MULTIPLIER.get(), 1)
+      .add(MINING_SPEED_MULTIPLIER.get(), 1)
+      .add(EXPERIENCE_MULTIPLIER.get(), 1)
+      .add(CROUCH_DAMAGE_MULTIPLIER.get(), 1)
+      .add(GOOD_EFFECT_DURATION.get(), 1)
+      .add(BAD_EFFECT_DURATION.get(), 1);
+    FabricDefaultAttributeRegistry.register(EntityType.PLAYER, player);
   }
 
   // booleans
@@ -58,46 +85,7 @@ public class TinkerAttributes {
   public static final RegistryObject<Attribute> BAD_EFFECT_DURATION = ATTRIBUTES.registerMultiplier("generic.bad_effect_duration_multiplier", false);
 
 
-  @SubscribeEvent
-  void addAttributes(EntityAttributeModificationEvent event) {
-    // player attributes
-    event.add(EntityType.PLAYER, USE_ITEM_SPEED.get());
-    event.add(EntityType.PLAYER, CRITICAL_DAMAGE.get());
-    event.add(EntityType.PLAYER, MINING_SPEED_MULTIPLIER.get());
-    event.add(EntityType.PLAYER, EXPERIENCE_MULTIPLIER.get());
-    event.add(EntityType.PLAYER, JUMP_COUNT.get());
-    // general attributes
-    addToAll(event, BOUNCY);
-    addToAll(event, PROTECTION_CAP);
-    addToAll(event, CHRYSOPHILITE);
-    addToAll(event, JUMP_BOOST);
-    addToAll(event, SAFE_FALL_DISTANCE);
-    addToAll(event, CROUCH_DAMAGE_MULTIPLIER);
-    addToAll(event, KNOCKBACK_MULTIPLIER);
-    addToAll(event, GOOD_EFFECT_DURATION);
-    addToAll(event, BAD_EFFECT_DURATION);
-  }
-
-  @SubscribeEvent
-  void commonSetup(FMLCommonSetupEvent event) {
-    event.enqueueWork(() -> {
-      // make knockback resistance syncable, as we need that info clientside
-      if (Config.COMMON.syncKnockbackResistance.get()) {
-        Attributes.KNOCKBACK_RESISTANCE.setSyncable(true);
-      }
-    });
-  }
-
-  /** Adds an attribute to all entities */
-  private static void addToAll(EntityAttributeModificationEvent event, RegistryObject<Attribute> attribute, double defaultValue) {
-    Attribute attr = attribute.get();
-    for (EntityType<? extends LivingEntity> entity : event.getTypes()) {
-      event.add(entity, attr, defaultValue);
-    }
-  }
-
-  /** Adds an attribute to all entities */
-  private static void addToAll(EntityAttributeModificationEvent event, RegistryObject<Attribute> attribute) {
-    addToAll(event, attribute, attribute.get().getDefaultValue());
-  }
+  // NOTE(porting): upstream also had a commonSetup handler making knockback resistance syncable for the client
+  //  (gated by Config.COMMON.syncKnockbackResistance). Attributes#setSyncable does not exist in vanilla/Fabric, so the
+  //  distance is stuck at its vanilla value client side. Disclosed in docs/BEHAVIOUR-DIFFERENCES.md.
 }
