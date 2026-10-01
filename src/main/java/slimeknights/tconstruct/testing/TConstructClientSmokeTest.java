@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
@@ -216,6 +217,9 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
    * and takes block items from their block, so this is the evidence for whether those layers survived the port.
    */
   private static void auditItemRenderLayers(Minecraft minecraft) {
+    // evidence for BEHAVIOUR-DIFFERENCES 7/8: knockback resistance has to be client syncable, which the knockback
+    // sling modifiers rely on
+    TConstruct.LOG.info("{}layers/ knockback resistance syncable = {}", TAG, Attributes.KNOCKBACK_RESISTANCE.isClientSyncable());
     ItemStack[] interesting = {
       new ItemStack(TinkerSmeltery.copperCan),
       TinkerFluids.moltenIron.getBucket() == null ? ItemStack.EMPTY : new ItemStack(TinkerFluids.moltenIron.getBucket()),
