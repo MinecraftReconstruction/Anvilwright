@@ -1,5 +1,8 @@
 package slimeknights.tconstruct.library.client.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.model.HumanoidModel.ArmPose;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.player.LocalPlayer;
@@ -8,12 +11,18 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 
-/** Client extensions for modifiable items. Used in non-armor items to adjust animations. */
-public class ModifiableItemClientExtension implements IClientItemExtensions {
+/**
+ * Client extensions for modifiable items. Used in non-armor items to adjust animations.
+ * <p>
+ * Forge installed this through {@code Item#initializeClient} and called
+ * {@code applyForgeHandTransform} while rendering the hand. Fabric has no such hook, so the port calls
+ * {@link #applyHandTransform} from Porting Lib's {@code RenderHandCallback} instead (see
+ * {@code ModifierClientEvents#renderHand}), which is the same point in the render pass.
+ */
+public class ModifiableItemClientExtension {
   private static final float PI = (float)Math.PI;
 
   public static final ModifiableItemClientExtension INSTANCE = new ModifiableItemClientExtension();
@@ -25,8 +34,7 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
     poseStack.translate(sideOffset * 0.56f, -0.52f + equippedProgress * -0.6f, -0.72f);
   }
 
-  @Override
-  public boolean applyForgeHandTransform(PoseStack poseStack, LocalPlayer player, HumanoidArm arm, ItemStack stack, float partialTicks, float equipProgress, float swingProgress) {
+  public boolean applyHandTransform(PoseStack poseStack, LocalPlayer player, HumanoidArm arm, ItemStack stack, float partialTicks, float equipProgress, float swingProgress) {
     // forge: why don't you give me the arm that is used on the next line???
     InteractionHand hand = arm == player.getMainArm() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
     // this code is copied from ItemInHandRenderer#renderArmWithItem with changes made for Tinker tools
@@ -160,5 +168,17 @@ public class ModifiableItemClientExtension implements IClientItemExtensions {
       // end: applyItemArmAttackTransform
     }
     return true;
+  }
+
+  /**
+   * Gets the arm pose to use for the given item.
+   * <p>
+   * Forge's {@code IClientItemExtensions#getArmPose} has no Fabric equivalent: the pose comes from vanilla's
+   * {@code HumanoidModel.ArmPose} chosen by {@code HumanoidModel#poseRightArm} based on {@code UseAnim}. Kept so the
+   * crossbow animation can be wired up if a hook shows up; see docs/BEHAVIOUR-DIFFERENCES.md #24.
+   */
+  @Nullable
+  public ArmPose getArmPose(LivingEntity living, InteractionHand hand, ItemStack stack) {
+    return null;
   }
 }

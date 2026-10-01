@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.data.tinkering;
 
+import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
@@ -83,7 +84,24 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   public CompletableFuture<?> run(CachedOutput cache) {
     addLayouts();
     List<CompletableFuture<?>> futures = new ArrayList<>();
-    allLayouts.forEach((id, builder) -> futures.add(saveThing(cache, id, builder.build())));
+    allLayouts.forEach((id, layout) -> futures.add(saveThing(cache, id, layout.serialize())));
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+  }
+
+  /** Stores the pair of conditions and builder for one layout. */
+  private record SerializeLayout(StationSlotLayout.Builder builder, List<ConditionJsonProvider> conditions) {
+    public SerializeLayout() {
+      this(StationSlotLayout.builder(), new ArrayList<>());
+    }
+
+    /** Serializes the given builder to JSON, including any conditions */
+    public JsonObject serialize() {
+      JsonObject json = StationSlotLayoutLoader.GSON.toJsonTree(builder.build()).getAsJsonObject();
+      if (!conditions.isEmpty()) {
+        // Forge stored an array of ICondition here; Fabric conditions are written with ConditionJsonProvider
+        ConditionJsonProvider.write(json, conditions.toArray(ConditionJsonProvider[]::new));
+      }
+      return json;
+    }
   }
 }

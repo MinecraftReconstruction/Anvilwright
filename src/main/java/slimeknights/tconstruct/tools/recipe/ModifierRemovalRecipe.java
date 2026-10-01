@@ -319,36 +319,12 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
         throw new IllegalStateException("Must have at least one input");
       }
       ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
-      consumer.accept(new Finished(id, advancementId));
-    }
-
-    private class Finished extends SizedFinishedRecipe {
-      public Finished(ResourceLocation ID, @Nullable ResourceLocation advancementID) {
-        super(ID, advancementID);
+      // Forge's SizedFinishedRecipe had no Mantle 1.11 equivalent; recipes are written through their loadable
+      SizedIngredient ingredient = tools;
+      if (ingredient == SizedIngredient.EMPTY) {
+        ingredient = SizedIngredient.fromTag(TinkerTags.Items.MODIFIABLE);
       }
-
-      @Override
-      public void serializeRecipeData(JsonObject json) {
-        super.serializeRecipeData(json);
-        SizedIngredient ingredient = tools;
-        if (ingredient == SizedIngredient.EMPTY) {
-          ingredient = SizedIngredient.fromTag(TinkerTags.Items.MODIFIABLE);
-        }
-        json.add("tools", ingredient.serialize());
-        if (!leftovers.isEmpty()) {
-          JsonArray array = new JsonArray();
-          for (ItemStack stack : leftovers) {
-            array.add(JsonUtils.serializeItemStack(stack));
-          }
-          json.add("leftovers", array);
-        }
-        json.add("modifier_predicate", ModifierPredicate.LOADER.serialize(modifierPredicate));
-      }
-
-      @Override
-      public RecipeSerializer<?> getType() {
-        return serializer;
-      }
+      consumer.accept(new LoadableFinishedRecipe<>(new ModifierRemovalRecipe(id, name, ingredient, inputs, leftovers, modifierPredicate), LOADER, advancementId));
     }
   }
 }

@@ -1,5 +1,8 @@
 package slimeknights.tconstruct.library.recipe.melting;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import com.google.common.collect.Streams;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -46,10 +49,10 @@ public class OreMeltingRecipe extends MeltingRecipe {
   }
 
   @Override
-  public void handleByproducts(IMeltingContainer inv, IFluidHandler handler) {
+  public void handleByproducts(IMeltingContainer inv, SlottedStorage<FluidVariant> handler) {
     // fill byproducts until we run out of space or byproducts
     for (int i = 0; i < byproducts.size(); i++) {
-      handler.fill(Config.COMMON.foundryByproductRate.applyOreBoost(byproductTypes.get(i).orElse(oreType), byproducts.get(i).get(), true), FluidAction.EXECUTE);
+      TransferUtil.insertFluid(handler, Config.COMMON.foundryByproductRate.applyOreBoost(byproductTypes.get(i).orElse(oreType), byproducts.get(i).get(), true));
     }
   }
 

@@ -25,6 +25,13 @@ public class Config {
    * Common specific configuration
    */
   public static class Common {
+    /** Method of syncing the tool inventory on open to prevent desyncs down the line. */
+    public enum ToolSyncType {
+      FULL_STACK,
+      MINIMAL,
+      DISABLED;
+    }
+
     public final BooleanValue shouldSpawnWithTinkersBook;
     public final List<ConfigurableAction> toolTweaks;
     public final BooleanValue syncKnockbackResistance;

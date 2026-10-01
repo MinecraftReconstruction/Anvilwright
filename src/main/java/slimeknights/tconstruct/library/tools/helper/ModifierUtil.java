@@ -71,6 +71,14 @@ public final class ModifierUtil {
                                                       (rand.nextFloat() - rand.nextFloat()) * 0.1F));
       target.level().addFreshEntity(ent);
     }
+  }
+
+  /** Gets the entity as a living entity, or null if they are not a living entity */
+  @Nullable
+  public static LivingEntity asLiving(@Nullable Entity entity) {
+    if (entity instanceof LivingEntity living) {
+      return living;
+    }
     return null;
   }
 

@@ -1,5 +1,8 @@
 package slimeknights.tconstruct.library.recipe.melting;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import com.google.gson.JsonObject;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import lombok.Getter;
@@ -84,11 +87,11 @@ public class MaterialMeltingRecipe implements IMeltingRecipe, IMultiRecipe<IDisp
   }
 
   @Override
-  public void handleByproducts(IMeltingContainer inv, IFluidHandler handler) {
+  public void handleByproducts(IMeltingContainer inv, SlottedStorage<FluidVariant> handler) {
     if (!byproducts.isEmpty()) {
       int cost = MaterialCastingLookup.getItemCost(inv.getStack().getItem());
       for (FluidOutput byproduct : byproducts) {
-        handler.fill(new FluidStack(byproduct.get(), byproduct.getAmount() * cost), FluidAction.EXECUTE);
+        TransferUtil.insertFluid(handler, new FluidStack(byproduct.get(), byproduct.getAmount() * cost));
       }
     }
   }

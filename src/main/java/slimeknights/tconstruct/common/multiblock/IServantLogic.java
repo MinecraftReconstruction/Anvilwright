@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public interface IServantLogic extends IForgeBlockEntity {
+public interface IServantLogic {
   /**
    * Gets the position of the master block
    * @return  Master position, null if none is set

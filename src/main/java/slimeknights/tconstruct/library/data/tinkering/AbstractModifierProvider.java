@@ -53,12 +53,12 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   }
 
   /** Adds a modifier to be saved */
-  protected void addModifier(DynamicModifier<?> id, @Nullable ConditionJsonProvider condition, @Nullable Modifier result, JsonRedirect... redirects) {
+  protected void addModifier(DynamicModifier id, @Nullable ConditionJsonProvider condition, @Nullable Modifier result, JsonRedirect... redirects) {
     addModifier(id.getId(), condition, result, redirects);
   }
 
   /** Adds a modifier to be saved */
-  protected void addModifier(DynamicModifier<?> id, @Nullable Modifier result, JsonRedirect... redirects) {
+  protected void addModifier(DynamicModifier id, @Nullable Modifier result, JsonRedirect... redirects) {
     addModifier(id, null, result, redirects);
   }
 
@@ -78,7 +78,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   }
 
   /** Sets up a builder for a composable modifier */
-  protected ComposableModifier.Builder buildModifier(DynamicModifier<?> modifier, @Nullable ConditionJsonProvider condition, JsonRedirect... redirects) {
+  protected ComposableModifier.Builder buildModifier(DynamicModifier modifier, @Nullable ConditionJsonProvider condition, JsonRedirect... redirects) {
     return buildModifier(modifier.getId(), condition, redirects);
   }
 

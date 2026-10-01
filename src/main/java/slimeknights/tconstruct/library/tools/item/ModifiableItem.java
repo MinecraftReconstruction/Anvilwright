@@ -550,11 +550,9 @@ public class ModifiableItem extends Item implements IModifiableDisplay, UseFirst
     return toolForRendering;
   }
 
-  @Override
-  public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-    consumer.accept(ModifiableItemClientExtension.INSTANCE);
-  }
-
+// TODO: PORT - Forge's initializeClient(Consumer<IClientItemExtensions>) installed the first person hand
+//  animation (ModifiableItemClientExtension). Fabric has no such hook; see ModifierClientEvents#renderHand and
+//  docs/BEHAVIOUR-DIFFERENCES.md #24.
 
   /* Misc */
 

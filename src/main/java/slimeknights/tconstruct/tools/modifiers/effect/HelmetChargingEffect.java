@@ -12,7 +12,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientMobEffectExtensions;
+import io.github.fabricators_of_create.porting_lib.entity.client.MobEffectRenderer;
+import io.github.fabricators_of_create.porting_lib.entity.extensions.MobEffectExtensions;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.GeneralInteractionModifierHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -21,7 +22,6 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /** Effect for rendering the charge up when you start using a helmet */
 public class HelmetChargingEffect extends MobEffect {
@@ -34,9 +34,11 @@ public class HelmetChargingEffect extends MobEffect {
     return new ArrayList<>();
   }
 
+  // Forge handed the client extensions out through initializeClient(Consumer); Porting Lib models the same thing as
+  // MobEffectRenderer on the effect itself
   @Override
-  public void initializeClient(Consumer<IClientMobEffectExtensions> consumer) {
-    consumer.accept(new IClientMobEffectExtensions() {
+  public MobEffectRenderer getRenderer() {
+    return new MobEffectRenderer() {
       private static final ResourceLocation BAR_KEY = TConstruct.getResource("helmet_charging_bar");
       private final Minecraft mc = Minecraft.getInstance();
 
@@ -76,7 +78,7 @@ public class HelmetChargingEffect extends MobEffect {
         }
         return true;
       }
-    });
+    };
   }
 
 

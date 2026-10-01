@@ -7,7 +7,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.common.MinecraftForge;
 import io.github.fabricators_of_create.porting_lib.entity.events.living.MobEffectEvent;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerEffect;
@@ -20,7 +19,7 @@ public class ReturningEffect extends TinkerEffect {
   private static final ResourceLocation KEY = TConstruct.getResource("returning");
   public ReturningEffect() {
     super(MobEffectCategory.NEUTRAL, 0xa92dff, true);
-    MinecraftForge.EVENT_BUS.addListener(this::onEffectAdded);
+    MobEffectEvent.ADDED.register(this::onEffectAdded);
   }
 
   /** Called to set the return position when the effect is added */

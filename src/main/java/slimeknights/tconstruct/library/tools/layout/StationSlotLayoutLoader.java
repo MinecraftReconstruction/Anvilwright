@@ -64,9 +64,6 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener im
   @Getter
   private List<StationSlotLayout> sortedSlots = Collections.emptyList();
 
-  /** Context for parsing conditions */
-  private IContext conditionContext = IContext.EMPTY;
-
   private StationSlotLayoutLoader() {
     super(GSON, FOLDER);
   }
@@ -95,7 +92,9 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener im
       try {
         // skip empty objects, allows disabling a slot at a lower datapack
         JsonObject object = GsonHelper.convertToJsonObject(value, "station_layout");
-        if (!object.entrySet().isEmpty() && CraftingHelper.processConditions(object, "conditions", conditionContext)) {
+        // Fabric applies the JSON resource conditions before this loader runs, so this only has to skip
+        // explicitly empty objects, which disable a layout at a lower datapack
+        if (!object.entrySet().isEmpty()) {
           // just need a valid slot information
           StationSlotLayout layout = GSON.fromJson(object, StationSlotLayout.class);
           int size = layout.getInputSlots().size() + (layout.getToolSlot().isHidden() ? 0 : 1);

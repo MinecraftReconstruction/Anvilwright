@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.client;
 
+import io.github.fabricators_of_create.porting_lib.entity.extensions.MobEffectExtensions;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.fabricators_of_create.porting_lib.event.client.FieldOfViewEvents;
 import io.github.fabricators_of_create.porting_lib.event.client.RenderHandCallback;
@@ -75,13 +76,17 @@ public class ModifierClientEvents {
       return;
     }
     // when firing your melee weapon with ballista, don't render it in the other hand; makes it look like you duplicated your weapon
-    InteractionHand hand = event.getHand();
     ItemStack held = player.getItemInHand(hand);
     ItemStack opposite = player.getItemInHand(Util.getOpposite(hand));
     if (!held.isEmpty() && !opposite.isEmpty() && opposite.is(TinkerTags.Items.BALLISTAS) && ModifierUtil.getPersistentInt(opposite, ModifiableBowItem.KEY_BALLISTA, 0) == ModifiableBowItem.FLAG_BALLISTA_HELD) {
       event.setCanceled(true);
       return;
     }
+
+    // TODO: PORT - modifiable items have custom first person hand animations (ModifiableItemClientExtension).
+    //  Forge installed them per item and called applyForgeHandTransform *instead of* its own transform; Porting Lib's
+    //  RenderHandCallback cancels the whole hand render, so wiring this up means re-rendering the item here first.
+    //  See docs/BEHAVIOUR-DIFFERENCES.md #24.
 
     // if the data is set, render the empty offhand
     if (offhand.isEmpty()) {
@@ -203,7 +208,8 @@ public class ModifierClientEvents {
   private static int getEffectOffset(Player player) {
     boolean hasBeneficial = false;
     for (MobEffectInstance instance : player.getActiveEffects()) {
-      if (instance.showIcon() && IClientMobEffectExtensions.of(instance).isVisibleInGui(instance)) {
+      // Forge's IClientMobEffectExtensions was a client extension lookup; Porting Lib puts the renderer on the effect
+      if (instance.showIcon() && ((MobEffectExtensions)(Object)instance.getEffect()).getRenderer().isVisibleInGui(instance)) {
         if (instance.getEffect().isBeneficial()) {
           hasBeneficial = true;
         } else {
