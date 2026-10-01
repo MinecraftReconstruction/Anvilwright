@@ -282,6 +282,19 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
 
   @Override
   public BakedModel bake(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, boolean isGui3d) {
+    try {
+      return bakeUncaught(owner, baker, spriteGetter, modelTransform, overrides, modelLocation, isGui3d);
+    } catch (RuntimeException e) {
+      // vanilla only logs the exception message when a model fails to bake, which loses the stack of our own code
+      if (net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        TConstruct.LOG.error("Failed to bake tool model {}", modelLocation, e);
+      }
+      throw e;
+    }
+  }
+
+  /** Actual implementation of {@link #bake}, separated so failures can be logged with a stack trace */
+  private BakedModel bakeUncaught(BlockModel owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, boolean isGui3d) {
     // load in modifiers
     Set<Material> allTextures = Sets.newHashSet();
     if (toolParts.isEmpty()) {
@@ -299,14 +312,14 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       for (ToolPart part : toolParts) {
         // if material variants, fetch textures from the material model
         if (part.hasMaterials()) {
-          MaterialModel.getMaterialTextures(allTextures, owner, part.getName(false, false), null);
+          MaterialModel.getMaterialTextures(allTextures, owner, spriteGetter, part.getName(false, false), null);
           if (part.hasBroken()) {
-            MaterialModel.getMaterialTextures(allTextures, owner, part.getName(true, false), null);
+            MaterialModel.getMaterialTextures(allTextures, owner, spriteGetter, part.getName(true, false), null);
           }
           if (isLarge) {
-            MaterialModel.getMaterialTextures(allTextures, owner, part.getName(false, true), null);
+            MaterialModel.getMaterialTextures(allTextures, owner, spriteGetter, part.getName(false, true), null);
             if (part.hasBroken()) {
-              MaterialModel.getMaterialTextures(allTextures, owner, part.getName(true, true), null);
+              MaterialModel.getMaterialTextures(allTextures, owner, spriteGetter, part.getName(true, true), null);
             }
           }
         } else {

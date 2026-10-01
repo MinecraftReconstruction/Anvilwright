@@ -121,8 +121,10 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
     // if water, evaporate
     boolean placed = false;
     // start with forge vaporizing
+    // NOTE(porting): Fabric fluids need not have a FluidType, so the Porting Lib vaporize hooks only apply when
+    //  one is present (see BEHAVIOUR-DIFFERENCES); vanilla vaporizing below still runs for those fluids
     FluidType fluidType = fluid.getFluidType();
-    if (fluidType.isVaporizedOnPlacement(world, target, fluidStack)) {
+    if (fluidType != null && fluidType.isVaporizedOnPlacement(world, target, fluidStack)) {
       fluidType.onVaporize(player, world, target, fluidStack);
       placed = true;
       // next, try vanilla vaporizing
@@ -199,7 +201,9 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
         // through this accessor (same accessor the fluid transfer helper uses)
         Fluid pickedUpFluid = ((BucketItemAccessor) bucketItem).port_lib$getContent();
         if (pickedUpFluid != Fluids.EMPTY) {
-          player.playSound(Objects.requireNonNullElse(pickedUpFluid.getFluidType().getSound(SoundActions.BUCKET_FILL), SoundEvents.BUCKET_FILL), 1.0F, 1.0F);
+          // NOTE(porting): the picked up fluid may not have a FluidType, so fall back to the vanilla bucket sound
+          FluidType pickedUpType = pickedUpFluid.getFluidType();
+          player.playSound(Objects.requireNonNullElse(pickedUpType == null ? null : pickedUpType.getSound(SoundActions.BUCKET_FILL), SoundEvents.BUCKET_FILL), 1.0F, 1.0F);
           // set the fluid if empty, increase the fluid if filled
           if (!world.isClientSide) {
             if (fluidStack.isEmpty()) {

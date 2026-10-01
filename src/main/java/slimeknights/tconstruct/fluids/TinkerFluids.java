@@ -55,6 +55,9 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.fluids.data.FluidTooltipProvider;
+import slimeknights.tconstruct.fluids.data.FluidBlockstateModelProvider;
+import slimeknights.tconstruct.fluids.data.FluidBucketModelProvider;
+import slimeknights.tconstruct.fluids.data.FluidTextureProvider;
 import slimeknights.tconstruct.fluids.fluids.DirectionalSlimeFluid;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.fluids.fluids.PotionFluidAttributes;
@@ -310,6 +313,15 @@ public final class TinkerFluids extends TinkerModule {
 
   public static void gatherData(final FabricDataGenerator.Pack pack) {
     pack.addProvider(FluidTooltipProvider::new);
+    // NOTE(porting): the merge dropped four of the five upstream providers, leaving only the tooltip provider.
+    //  Without the texture provider every fluid fell back to the water sprite and the tank model crashed on the
+    //  missing sprite; without the blockstate/bucket providers the fluid blocks had no blockstate at all.
+    pack.addProvider(FluidTextureProvider::new);
+    // explicit factory types to disambiguate between the vanilla and the Fabric Pack#addProvider overloads
+    FabricDataGenerator.Pack.Factory<FluidBucketModelProvider> buckets = output -> new FluidBucketModelProvider(output, TConstruct.MOD_ID);
+    FabricDataGenerator.Pack.Factory<FluidBlockstateModelProvider> blockstates = output -> new FluidBlockstateModelProvider(output, TConstruct.MOD_ID);
+    pack.addProvider(buckets);
+    pack.addProvider(blockstates);
   }
 
   public static void commonSetup() {

@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T17:16:36.306949	Hephaestus/Tinker's Construct Materials
+// 1.20.1	2026-10-01T17:43:48.75974	Hephaestus/Tinker's Construct Materials
 4f512704bc0f8020b42ade2b314a72f9dad789a7 data/tconstruct/tinkering/materials/definition/fiery.json
 0f241ff98aeb06fe5e530ef731cdd1bdd1f0962e data/tconstruct/tinkering/materials/definition/ice.json
 205de8078c1f42d4b26653bc7aa2c20521ba9421 data/tconstruct/tinkering/materials/definition/iron.json
@@ -83,8 +83,8 @@ fe5905aa355fd5f227e30ac5e88531391962155b data/tconstruct/tinkering/materials/def
 c093fa6814488ad66cd0b511072ddd47296408d4 data/tconstruct/tinkering/materials/definition/silver.json
 df4328feeea4eaa53d14ea41a8d86fb48fb067ed data/tconstruct/tinkering/materials/definition/feather.json
 4298ff3c23348c76e13719a2cfed86019eb14e1c data/tconstruct/tinkering/materials/definition/enderslimeskin.json
-1e835ea19ec2081fbda7bd6f61684ff7935fb0e0 data/tconstruct/tinkering/materials/definition/bone.json
 a7f81be0c589304a3f15566c8879d7346df1ed5e data/tconstruct/tinkering/materials/definition/ironwood.json
+1e835ea19ec2081fbda7bd6f61684ff7935fb0e0 data/tconstruct/tinkering/materials/definition/bone.json
 7b370b0b22a513cc0cf0a4305b1c065c05a509b1 data/tconstruct/tinkering/materials/definition/kobold.json
 76a3ac4731a87f83f0180c00f964cb9fd0763f47 data/tconstruct/tinkering/materials/definition/ancient.json
 5473a5b9563c1a04d48005218fe6cdaf12686c15 data/tconstruct/tinkering/materials/definition/queens_slime.json

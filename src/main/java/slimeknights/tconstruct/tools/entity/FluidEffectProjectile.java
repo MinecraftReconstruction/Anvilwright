@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -208,7 +209,9 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
       // TODO: reduce when underwater without fins
       if (!this.isNoGravity()) {
         FluidStack fluid = getFluid();
-        velocity = velocity.add(0, fluid.getFluid().getFluidType().isLighterThanAir() ? 0.06 : -0.06, 0);
+        // NOTE(porting): Fabric has no guarantee that a Fluid carries a FluidType (see BEHAVIOUR-DIFFERENCES),
+        //  so ask the Fabric attribute API rather than the Porting Lib fluid type
+        velocity = velocity.add(0, FluidVariantAttributes.isLighterThanAir(fluid.getType()) ? 0.06 : -0.06, 0);
       }
       this.setDeltaMovement(velocity);
       this.setPos(newLocation);

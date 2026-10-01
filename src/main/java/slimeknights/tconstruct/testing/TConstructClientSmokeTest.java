@@ -1,0 +1,162 @@
+package slimeknights.tconstruct.testing;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import slimeknights.tconstruct.TConstruct;
+
+import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+/**
+ * Development-only client self test for the creative inventory.
+ * <p>
+ * Two of the regressions this port hit while smoke testing only show up when the creative screen is opened: building
+ * the tab contents (which throws when a tab contains the same stack twice, or when a tab casts an item to the wrong
+ * class) and resolving the baked model of every stack that is drawn (which is where the tank/fluid container models
+ * blew up on the missing fluid sprite array). Driving that by hand means clicking through every tab, so instead this
+ * class does it once per client start and logs {@code [smoketest]} lines.
+ * <p>
+ * It only runs when Fabric reports a development environment, so a released jar is unaffected; run
+ * {@code ./gradlew runClient}, join a world and look for {@code [smoketest]} in the log.
+ */
+public class TConstructClientSmokeTest implements ClientModInitializer {
+  private static final String TAG = "[smoketest] ";
+  /** Number of failures to log in full before switching to a summary */
+  private static final int MAX_DETAILED_FAILURES = 10;
+
+  private boolean ran;
+
+  @Override
+  public void onInitializeClient() {
+    if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+      return;
+    }
+    ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+  }
+
+  private void onClientTick(Minecraft minecraft) {
+    // wait until a world is loaded, which also means the model manager finished its first reload
+    if (ran || minecraft.level == null || minecraft.player == null) {
+      return;
+    }
+    ran = true;
+    runSmokeTest(minecraft);
+  }
+
+  private void runSmokeTest(Minecraft minecraft) {
+    TConstruct.LOG.info("{}starting creative inventory smoke test", TAG);
+    int passed = 0;
+    int failed = 0;
+    List<String> failures = new ArrayList<>();
+
+    // building the tab contents is what throws on duplicated stacks and on bad item casts
+    if (CreativeModeTabs.tryRebuildTabContents(minecraft.level.enabledFeatures(), minecraft.player.canUseGameMasterBlocks(), minecraft.level.registryAccess())) {
+      passed++;
+      TConstruct.LOG.info("{}{} PASS  tab contents rebuilt", TAG, "creative/");
+    } else {
+      failed++;
+      failures.add("creative/ rebuild reported no change");
+    }
+
+    // then resolve the baked model of every icon and of every stack in every tab, the same calls the screen makes
+    ItemRenderer itemRenderer = minecraft.getItemRenderer();
+    Set<ItemStack> checked = new LinkedHashSet<>();
+    int icons = 0;
+    int stacks = 0;
+    for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+      ResourceLocation tabId = BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab);
+      List<ItemStack> toCheck = new ArrayList<>();
+      icons++;
+      toCheck.add(tab.getIconItem());
+      toCheck.addAll(tab.getDisplayItems());
+      for (ItemStack stack : toCheck) {
+        if (stack.isEmpty() || !checked.add(stack)) {
+          continue;
+        }
+        stacks++;
+        try {
+          itemRenderer.getModel(stack, minecraft.level, minecraft.player, 0);
+        } catch (Throwable e) {
+          failed++;
+          if (failures.size() < MAX_DETAILED_FAILURES) {
+            failures.add(tabId + ": " + BuiltInRegistries.ITEM.getKey(stack.getItem()) + " (" + e + ")");
+          }
+        }
+      }
+    }
+    passed += stacks;
+    TConstruct.LOG.info("{}{} PASS  model lookup for {} tab icons and {} unique stacks", TAG, "creative/", icons, stacks);
+
+    for (String failure : failures) {
+      TConstruct.LOG.error("{}{} FAIL  {}", TAG, "creative/", failure);
+    }
+    auditAtlas(minecraft);
+    TConstruct.LOG.info("{}summary: {} passed, {} failed", TAG, passed, failed);
+  }
+
+  /**
+   * Forge stitches every texture a model or the client code asks for, Fabric only stitches what the atlas config
+   * lists. Report our textures that never made it into the block atlas, since those are exactly the ones that draw
+   * as magenta/black and the ones that make a model fail to bake.
+   */
+  private static void auditAtlas(Minecraft minecraft) {
+    TextureAtlas atlas = (TextureAtlas) minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+    Map<ResourceLocation, Resource> textures = minecraft.getResourceManager()
+      .listResources("textures", location -> location.getPath().endsWith(".png") && location.getNamespace().equals(TConstruct.MOD_ID));
+
+    // group by the texture folder so the log stays readable
+    Map<String,Integer> missingByFolder = new TreeMap<>();
+    List<String> names = new ArrayList<>();
+    int total = 0;
+    for (ResourceLocation texture : textures.keySet()) {
+      String path = texture.getPath();
+      ResourceLocation spriteId = new ResourceLocation(texture.getNamespace(), path.substring("textures/".length(), path.length() - ".png".length()));
+      TextureAtlasSprite sprite = atlas.getSprite(spriteId);
+      if (sprite == null || MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name())) {
+        total++;
+        names.add(spriteId.toString());
+        int slash = spriteId.getPath().lastIndexOf('/');
+        String folder = slash < 0 ? "" : spriteId.getPath().substring(0, slash);
+        missingByFolder.merge(folder, 1, Integer::sum);
+      }
+    }
+    // dump the full list next to the log so it can be diffed between runs
+    try {
+      Path output = minecraft.gameDirectory.toPath().resolve("smoketest-atlas-missing.txt");
+      Files.write(output, names, StandardCharsets.UTF_8);
+      TConstruct.LOG.info("{}atlas/ full list written to {}", TAG, output);
+    } catch (IOException e) {
+      TConstruct.LOG.error("{}atlas/ failed to write the missing sprite list", TAG, e);
+    }
+    TConstruct.LOG.info("{}atlas/ {} of {} tconstruct textures are missing from the block atlas", TAG, total, textures.size());
+    int logged = 0;
+    for (Map.Entry<String,Integer> entry : missingByFolder.entrySet()) {
+      if (logged++ >= MAX_DETAILED_FAILURES) {
+        TConstruct.LOG.info("{}atlas/ ... and {} more folders", TAG, missingByFolder.size() - MAX_DETAILED_FAILURES);
+        break;
+      }
+      TConstruct.LOG.info("{}atlas/ {} missing in {}", TAG, entry.getValue(), entry.getKey());
+    }
+  }
+}

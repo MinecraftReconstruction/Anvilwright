@@ -28,6 +28,9 @@ public class FluidTextureProvider extends AbstractFluidTextureProvider {
     slime(TinkerFluids.ichor, "ichor");
     waterFog(slime(TinkerFluids.enderSlime, "ender"));
     slime(TinkerFluids.magma);
+    // NOTE(porting): upstream 3.12.1 dropped the blood slime type, this port keeps it (see
+    //  BEHAVIOUR-DIFFERENCES #26), which means the blood fluid needs its textures back as well
+    slime(TinkerFluids.blood);
     waterFog(slime(TinkerFluids.venom));
     moltenFog(slime(TinkerFluids.liquidSoul, "soul"));
     // food

@@ -35,6 +35,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
@@ -305,7 +306,8 @@ public class GenerateMeltingRecipesCommand {
 
     /** Creates a transfer from a fluid stack instance */
     public static MeltingResult from(FluidStack fluid) {
-      return new MeltingResult(fluid, null, Math.max(100, fluid.getFluid().getFluidType().getTemperature(fluid) - 300));
+      // NOTE(porting): Fabric fluids are not guaranteed to have a FluidType, use the Fabric attribute API
+      return new MeltingResult(fluid, null, Math.max(100, FluidVariantAttributes.getTemperature(fluid.getType()) - 300));
     }
 
     /** Creates a copy of this with the given amount */

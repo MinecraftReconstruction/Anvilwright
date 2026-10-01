@@ -23,9 +23,10 @@
     "main": [
       "slimeknights.tconstruct.TConstruct"
     ],
-    "client": [
-      "slimeknights.tconstruct.shared.TinkerClient"
-    ],
+  "client": [
+    "slimeknights.tconstruct.shared.TinkerClient",
+    "slimeknights.tconstruct.testing.TConstructClientSmokeTest"
+  ],
     "fabric-datagen": [
       "slimeknights.tconstruct.TConstructData"
     ],
