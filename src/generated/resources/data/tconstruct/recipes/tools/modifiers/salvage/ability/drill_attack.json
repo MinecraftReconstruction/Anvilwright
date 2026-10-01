@@ -4,12 +4,15 @@
   "slots": {
     "abilities": 1
   },
-  "tools": [
-    {
-      "tag": "tconstruct:modifiable/interactable/charge"
-    },
-    {
-      "tag": "tconstruct:modifiable/fishing_rods"
-    }
-  ]
+  "tools": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/interactable/charge"
+      },
+      {
+        "tag": "tconstruct:modifiable/fishing_rods"
+      }
+    ]
+  }
 }

@@ -1,14 +1,11 @@
 {
-  "type": "tconstruct:composable",
   "level_display": "tconstruct:default",
-  "tooltip_display": "always",
   "modules": [
     {
       "type": "tconstruct:attribute",
-      "unique": "tconstruct.modifier.step_up",
       "attribute": "porting_lib:step_height_addition",
+      "each_level": 0.5,
       "operation": "addition",
-      "amount": 0.5,
       "slots": [
         "feet",
         "legs",

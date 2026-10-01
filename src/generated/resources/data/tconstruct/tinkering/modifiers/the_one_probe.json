@@ -1,7 +1,13 @@
 {
   "condition": {
-    "type": "forge:mod_loaded",
-    "modid": "theoneprobe"
+    "fabric:load_conditions": [
+      {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "theoneprobe"
+        ]
+      }
+    ]
   },
   "level_display": "tconstruct:no_levels",
   "modules": [

@@ -1,6 +1,7 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "amount_needed": 4,
@@ -23,21 +24,12 @@
       "item": "tconstruct:earth_congealed_slime"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:bouncy"
-  },
+  "level": 1,
+  "result": "tconstruct:bouncy",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "fabric:type": "fabric:difference",
-    "base": {
-      "tag": "tconstruct:modifiable/armor/boots"
-    },
-    "subtracted": {
-      "item": "tconstruct:slime_boots"
-    }
+    "tag": "tconstruct:modifiable/armor/boots"
   }
 }

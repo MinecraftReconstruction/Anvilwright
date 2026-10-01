@@ -15,18 +15,10 @@
         "tag": "ceramics:terracotta_cisterns"
       },
       {
-        "fabric:type": "fabric:nbt",
-        "base": {
-          "item": "ceramics:clay_bucket"
-        },
-        "strict": true
+        "item": "ceramics:empty_clay_bucket"
       },
       {
-        "fabric:type": "fabric:nbt",
-        "base": {
-          "item": "ceramics:cracked_clay_bucket"
-        },
-        "strict": true
+        "item": "ceramics:cracked_empty_clay_bucket"
       }
     ]
   },

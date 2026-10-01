@@ -1,4 +1,19 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/osmium"
+        }
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -7,21 +22,6 @@
           "effect": "minecraft:slowness",
           "level": 2,
           "time": 200
-        }
-      ]
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
-      "values": [
-        {
-          "type": "tconstruct:config",
-          "prop": "force_integration_materials"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/osmium"
         }
       ]
     }
@@ -51,7 +51,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_osmium"
   }
 }

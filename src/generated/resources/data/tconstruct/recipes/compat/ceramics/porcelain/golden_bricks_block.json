@@ -10,8 +10,8 @@
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 125,
-      "fluid": "tconstruct:molten_gold"
+      "amount": 1000,
+      "tag": "forge:molten_gold"
     }
   ],
   "ingredient": [

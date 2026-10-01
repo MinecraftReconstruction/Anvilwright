@@ -9,11 +9,10 @@
       "item": "tconstruct:ichor_slime"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:springy"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:springy",
   "slots": {
     "upgrades": 1
   },

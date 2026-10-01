@@ -1,28 +1,28 @@
 {
-  "block_effects": [
+  "fabric:load_conditions": [
     {
-      "type": "tconstruct:melt_block",
-      "min_amount": 90,
-      "temperature": 1500
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
+      "condition": "fabric:or",
       "values": [
         {
-          "type": "tconstruct:config",
+          "condition": "tconstruct:config",
           "prop": "force_integration_materials"
         },
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/fiery"
         }
       ]
     }
   ],
+  "block_effects": [
+    {
+      "type": "tconstruct:melt_block",
+      "min_amount": 9000,
+      "temperature": 1500
+    }
+  ],
   "fluid": {
-    "amount": 50,
+    "amount": 5400,
     "tag": "tconstruct:fiery_liquid"
   }
 }

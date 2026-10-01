@@ -13,6 +13,7 @@
       ]
     },
     {
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     },
     {
@@ -32,28 +33,11 @@
       "tag": "c:copper_ingots"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:spilling"
-  },
+  "result": "tconstruct:spilling",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "fabric:type": "fabric:any",
-    "ingredients": [
-      {
-        "tag": "tconstruct:modifiable/melee"
-      },
-      {
-        "tag": "tconstruct:modifiable/armor/chestplate"
-      },
-      {
-        "tag": "tconstruct:modifiable/staffs"
-      },
-      {
-        "tag": "tconstruct:modifiable/shields"
-      }
-    ]
+    "tag": "tconstruct:modifiable/melee"
   }
 }

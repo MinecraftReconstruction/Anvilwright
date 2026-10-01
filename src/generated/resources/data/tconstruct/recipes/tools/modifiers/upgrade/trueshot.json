@@ -5,12 +5,11 @@
   "input": {
     "item": "minecraft:target"
   },
-  "max_level": 3,
-  "needed_per_level": 10,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:trueshot"
+  "level": {
+    "max": 3
   },
+  "needed_per_level": 10,
+  "result": "tconstruct:trueshot",
   "slots": {
     "upgrades": 1
   },

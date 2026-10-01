@@ -1,17 +1,10 @@
 {
   "type": "tconstruct:modifier_salvage",
-  "min_level": 1,
   "modifier": "tconstruct:bouncy",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "fabric:type": "fabric:difference",
-    "base": {
-      "tag": "tconstruct:modifiable/armor/boots"
-    },
-    "subtracted": {
-      "item": "tconstruct:slime_boots"
-    }
+    "tag": "tconstruct:modifiable/armor/boots"
   }
 }

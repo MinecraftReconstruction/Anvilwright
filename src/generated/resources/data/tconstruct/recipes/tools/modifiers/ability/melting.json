@@ -1,6 +1,7 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "item": "minecraft:blaze_rod"
@@ -28,11 +29,8 @@
       "item": "minecraft:lava_bucket"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:melting"
-  },
+  "level": 1,
+  "result": "tconstruct:melting",
   "slots": {
     "abilities": 1
   },
@@ -40,7 +38,7 @@
     "fabric:type": "fabric:any",
     "ingredients": [
       {
-        "tag": "tconstruct:modifiable/melee_or_unarmed"
+        "tag": "tconstruct:modifiable/melee"
       },
       {
         "tag": "tconstruct:modifiable/harvest"

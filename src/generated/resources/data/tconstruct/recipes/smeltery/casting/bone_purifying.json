@@ -6,8 +6,8 @@
   "cast_consumed": true,
   "cooling_time": 50,
   "fluid": {
-    "amount": 200,
-    "tag": "forge:milk"
+    "amount": 16200,
+    "tag": "c:milk"
   },
   "result": "minecraft:bone"
 }

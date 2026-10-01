@@ -15,7 +15,7 @@
   "cooling_time": 20,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_iron"
+    "tag": "tconstruct:molten_iron"
   },
   "result": "create:andesite_alloy"
 }

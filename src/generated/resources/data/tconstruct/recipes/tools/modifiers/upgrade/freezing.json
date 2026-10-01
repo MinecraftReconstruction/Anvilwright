@@ -6,15 +6,31 @@
       "item": "minecraft:powder_snow_bucket"
     }
   ],
-  "max_level": 2,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:freezing"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:freezing",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/ranged/bows"
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/melee"
+      },
+      {
+        "tag": "tconstruct:modifiable/ranged/bows"
+      },
+      {
+        "tag": "tconstruct:modifiable/fishing_rods"
+      },
+      {
+        "tag": "tconstruct:modifiable/armor/worn"
+      },
+      {
+        "tag": "tconstruct:modifiable/shields"
+      }
+    ]
   }
 }

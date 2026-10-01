@@ -5,8 +5,8 @@
   },
   "cooling_time": 20,
   "fluid": {
-    "amount": 2700,
-    "tag": "c:potion"
+    "amount": 5400,
+    "tag": "forge:potion"
   },
   "result": "minecraft:tipped_arrow"
 }

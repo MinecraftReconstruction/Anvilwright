@@ -3,46 +3,45 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:signalum_ingots"
+        "forge:ingots/signalum"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:copper_ingots"
+        "forge:ingots/copper"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:silver_ingots"
+        "forge:ingots/silver"
       ]
     },
     {
-      "condition": "fabric:fluid_tags_populated",
-      "values": [
-        "c:redstone"
-      ]
+      "condition": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "forge:redstone"
     }
   ],
   "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 27000,
-      "tag": "c:molten_copper"
+      "tag": "forge:molten_copper"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_silver"
+      "tag": "forge:molten_silver"
     },
     {
       "amount": 400,
-      "tag": "c:redstone"
+      "tag": "forge:redstone"
     }
   ],
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_signalum"
+    "tag": "forge:molten_signalum"
   },
-  "temperature": 1125
+  "temperature": 999
 }

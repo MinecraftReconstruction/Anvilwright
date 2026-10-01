@@ -3,17 +3,14 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "tag": "c:cobalt_ingots"
+      "tag": "forge:ingots/amethyst_bronze"
     },
     {
       "item": "minecraft:flint"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:fireprimer"
-  },
+  "level": 1,
+  "result": "tconstruct:fireprimer",
   "slots": {
     "upgrades": 1
   },

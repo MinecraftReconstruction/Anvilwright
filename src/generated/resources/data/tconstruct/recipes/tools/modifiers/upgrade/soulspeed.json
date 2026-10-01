@@ -12,11 +12,10 @@
       "item": "minecraft:magma_block"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:soulspeed"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:soulspeed",
   "slots": {
     "upgrades": 1
   },

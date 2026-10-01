@@ -6,18 +6,16 @@
   "inputs": [
     {
       "fabric:type": "mantle:fluid_container",
-      "fluid": {
-        "type": "mantle:fluid_container",
-        "amount": 81000,
-        "display": {
-          "item": "minecraft:milk_bucket"
-        },
-        "name": "milk:still_milk"
-      }
+      "type": "mantle:fluid_container",
+      "amount": 81000,
+      "display": {
+        "item": "minecraft:milk_bucket"
+      },
+      "fluid": "milk:still_milk"
     }
   ],
   "modifier_predicate": {
-    "type": "tconstruct:inverted",
+    "type": "mantle:inverted",
     "inverted_type": "tconstruct:tag",
     "tag": "tconstruct:invisible_ink_blacklist"
   },

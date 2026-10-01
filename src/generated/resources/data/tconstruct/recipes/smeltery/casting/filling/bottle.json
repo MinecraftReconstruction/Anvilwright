@@ -3,10 +3,9 @@
   "bottle": {
     "item": "minecraft:glass_bottle"
   },
-  "cooling_time": 0,
   "fluid": {
     "amount": 27000,
-    "tag": "c:potion"
+    "tag": "forge:potion"
   },
   "result": "minecraft:potion"
 }

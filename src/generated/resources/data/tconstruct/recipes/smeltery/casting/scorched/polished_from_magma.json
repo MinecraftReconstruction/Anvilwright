@@ -4,7 +4,7 @@
     "item": "minecraft:polished_basalt"
   },
   "cast_consumed": true,
-  "cooling_time": 60,
+  "cooling_time": 90,
   "fluid": {
     "amount": 40500,
     "tag": "tconstruct:magma"

@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:entity_melting",
-  "damage": 2,
+  "damage": 4,
   "entity": {
-    "type": "minecraft:drowned"
+    "tag": "tconstruct:meltable/drowned"
   },
   "result": {
-    "amount": 1620,
-    "fluid": "minecraft:water"
+    "amount": 1000,
+    "tag": "forge:molten_copper"
   }
 }

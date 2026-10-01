@@ -6,26 +6,23 @@
       "item": "minecraft:piston"
     },
     {
-      "tag": "c:amethyst_bronze_ingots"
+      "tag": "forge:ingots/steel"
     },
     {
       "item": "minecraft:piston"
     },
     {
-      "tag": "c:slimeball/ichor"
+      "tag": "forge:slimeball/ichor"
     },
     {
-      "tag": "c:slimeball/ichor"
+      "tag": "forge:slimeball/ichor"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:multishot"
-  },
+  "result": "tconstruct:multishot",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/ranged/bows"
+    "tag": "tconstruct:modifiable/ranged/crossbows"
   }
 }

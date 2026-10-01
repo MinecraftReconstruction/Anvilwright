@@ -1,13 +1,13 @@
 {
   "type": "tconstruct:casting_basin",
   "cast": {
-    "type": "tconstruct:block_tag",
+    "fabric:type": "tconstruct:block_tag",
     "tag": "minecraft:convertable_to_mud"
   },
   "cast_consumed": true,
-  "cooling_time": 47,
+  "cooling_time": 49,
   "fluid": {
-    "amount": 250,
+    "amount": 27000,
     "fluid": "minecraft:water"
   },
   "result": "minecraft:mud"

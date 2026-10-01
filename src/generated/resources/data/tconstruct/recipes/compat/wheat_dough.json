@@ -1,15 +1,17 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "farmersdelight:wheat_dough"
+      ]
+    }
+  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "item": "minecraft:wheat"
   },
   "cast_consumed": true,
-  "conditions": [
-    {
-      "type": "forge:item_exists",
-      "item": "farmersdelight:wheat_dough"
-    }
-  ],
   "cooling_time": 50,
   "fluid": {
     "amount": 250,

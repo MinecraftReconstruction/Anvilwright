@@ -3,15 +3,15 @@
   "inputs": [
     {
       "amount": 9000,
-      "tag": "c:molten_iron"
+      "tag": "forge:molten_iron"
     },
     {
       "amount": 40500,
-      "tag": "tconstruct:blood"
+      "tag": "tconstruct:meat_soup"
     },
     {
       "amount": 27000,
-      "tag": "c:honey"
+      "tag": "forge:honey"
     }
   ],
   "result": {

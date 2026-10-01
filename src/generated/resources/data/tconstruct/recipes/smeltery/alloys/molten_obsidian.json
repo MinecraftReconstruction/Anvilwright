@@ -2,12 +2,13 @@
   "type": "tconstruct:alloy",
   "inputs": [
     {
-      "amount": 4050,
-      "name": "minecraft:water"
+      "amount": 27000,
+      "catalyst": true,
+      "fluid": "minecraft:water"
     },
     {
       "amount": 8100,
-      "name": "minecraft:lava"
+      "fluid": "minecraft:lava"
     }
   ],
   "result": {

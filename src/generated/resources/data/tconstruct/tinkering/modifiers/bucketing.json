@@ -9,7 +9,7 @@
     },
     {
       "type": "tconstruct:stat_boost",
-      "flat": 1000.0,
+      "flat": 81000.0,
       "operation": "add",
       "stat": "tconstruct:tank_capacity"
     },

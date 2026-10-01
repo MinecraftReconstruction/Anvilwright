@@ -6,11 +6,10 @@
       "item": "minecraft:compass"
     }
   ],
-  "max_level": 5,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:magnetic"
+  "level": {
+    "max": 5
   },
+  "result": "tconstruct:magnetic",
   "slots": {
     "upgrades": 1
   },
@@ -18,7 +17,7 @@
     "fabric:type": "fabric:any",
     "ingredients": [
       {
-        "tag": "tconstruct:modifiable/melee"
+        "tag": "tconstruct:modifiable/melee/weapon"
       },
       {
         "tag": "tconstruct:modifiable/harvest"

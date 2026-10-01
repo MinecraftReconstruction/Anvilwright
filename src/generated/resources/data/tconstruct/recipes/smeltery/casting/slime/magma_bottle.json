@@ -7,7 +7,7 @@
   "cooling_time": 1,
   "fluid": {
     "amount": 20250,
-    "tag": "c:magma"
+    "tag": "forge:magma"
   },
   "result": "tconstruct:magma_bottle"
 }

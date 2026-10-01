@@ -1,4 +1,23 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/invar"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/nickel"
+        }
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -7,25 +26,6 @@
           "effect": "minecraft:hunger",
           "level": 1,
           "time": 200
-        }
-      ]
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
-      "values": [
-        {
-          "type": "tconstruct:config",
-          "prop": "force_integration_materials"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/invar"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/nickel"
         }
       ]
     }
@@ -55,7 +55,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_invar"
   }
 }

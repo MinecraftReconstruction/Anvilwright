@@ -3,19 +3,19 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:refined_obsidian_ingots"
+        "forge:ingots/refined_obsidian"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:osmium_ingots"
+        "forge:ingots/osmium"
       ]
     }
   ],
   "type": "tconstruct:casting_table",
   "cast": {
-    "tag": "c:refined_obsidian_dusts"
+    "tag": "forge:dusts/refined_obsidian"
   },
   "cast_consumed": true,
   "cooling_time": 66,
@@ -24,6 +24,6 @@
     "tag": "tconstruct:molten_osmium"
   },
   "result": {
-    "tag": "c:refined_obsidian_ingots"
+    "tag": "forge:ingots/refined_obsidian"
   }
 }

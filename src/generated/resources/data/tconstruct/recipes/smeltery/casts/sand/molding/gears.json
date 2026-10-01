@@ -3,16 +3,16 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:gears"
+        "forge:gears"
       ]
     }
   ],
   "type": "tconstruct:molding_table",
   "material": {
-    "item": "tconstruct:blank_sand_cast"
+    "tag": "tconstruct:casts/sand"
   },
   "pattern": {
-    "tag": "c:gears"
+    "tag": "forge:gears"
   },
   "result": "tconstruct:gear_sand_cast"
 }

@@ -1,16 +1,16 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "forge:ethanol"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:place_block",
       "block": "minecraft:fire",
       "sound": "minecraft:item.firecharge.use"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "registry": "minecraft:fluid",
-      "tag": "forge:ethanol"
     }
   ],
   "entity_effects": [

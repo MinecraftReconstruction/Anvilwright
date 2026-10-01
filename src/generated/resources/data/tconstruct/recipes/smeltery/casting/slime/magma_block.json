@@ -3,7 +3,7 @@
   "cooling_time": 127,
   "fluid": {
     "amount": 81000,
-    "tag": "c:magma"
+    "tag": "tconstruct:magma"
   },
   "result": "minecraft:magma_block"
 }

@@ -1,7 +1,7 @@
 {
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "registry": "minecraft:fluid",
       "tag": "forge:plantoil"
     }

@@ -1,12 +1,12 @@
 {
-  "type": "tconstruct:swappable_modifier",
-  "allow_crystal": false,
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:treated_wood"
     }
   ],
+  "type": "tconstruct:swappable_modifier",
+  "allow_crystal": false,
   "inputs": [
     {
       "tag": "forge:treated_wood"

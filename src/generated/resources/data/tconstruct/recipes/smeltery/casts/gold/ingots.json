@@ -1,25 +1,28 @@
 {
   "type": "tconstruct:casting_table",
-  "cast": [
-    {
-      "type": "forge:difference",
-      "base": {
-        "tag": "forge:ingots"
+  "cast": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "fabric:type": "fabric:difference",
+        "base": {
+          "tag": "c:ingots"
+        },
+        "subtracted": {
+          "item": "tconstruct:fake_ingot"
+        }
       },
-      "subtracted": {
+      {
+        "fabric:type": "tconstruct:material",
         "item": "tconstruct:fake_ingot"
       }
-    },
-    {
-      "type": "tconstruct:material",
-      "item": "tconstruct:fake_ingot"
-    }
-  ],
+    ]
+  },
   "cast_consumed": true,
   "cooling_time": 57,
   "fluid": {
-    "amount": 90,
-    "tag": "forge:molten_gold"
+    "amount": 9000,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "tconstruct:ingot_cast",
   "switch_slots": true

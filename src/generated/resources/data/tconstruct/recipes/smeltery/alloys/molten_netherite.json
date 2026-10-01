@@ -17,12 +17,12 @@
           },
           {
             "amount": 2000,
-            "tag": "c:molten_gold"
+            "tag": "forge:molten_gold"
           }
         ],
         "result": {
           "amount": 1000,
-          "fluid": "tconstruct:molten_netherite"
+          "tag": "forge:molten_netherite"
         },
         "temperature": 1250
       }
@@ -42,12 +42,12 @@
           },
           {
             "amount": 4000,
-            "tag": "c:molten_gold"
+            "tag": "forge:molten_gold"
           }
         ],
         "result": {
           "amount": 1000,
-          "fluid": "tconstruct:molten_netherite"
+          "tag": "forge:molten_netherite"
         },
         "temperature": 1250
       }

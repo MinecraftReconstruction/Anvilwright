@@ -3,15 +3,15 @@
   "inputs": [
     {
       "amount": 9000,
-      "tag": "c:molten_cobalt"
+      "tag": "forge:molten_cobalt"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_gold"
+      "tag": "forge:molten_gold"
     },
     {
       "amount": 20250,
-      "tag": "c:magma"
+      "tag": "forge:magma"
     }
   ],
   "result": {

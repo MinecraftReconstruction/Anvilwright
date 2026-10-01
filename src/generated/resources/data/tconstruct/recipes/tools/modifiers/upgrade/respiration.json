@@ -18,11 +18,10 @@
       "item": "minecraft:kelp"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:respiration"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:respiration",
   "slots": {
     "upgrades": 1
   },

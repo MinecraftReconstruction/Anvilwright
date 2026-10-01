@@ -3,15 +3,18 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "tag": "c:netherite_scrap_ingots"
+      "tag": "forge:ingots/netherite_scrap"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:worldbound"
-  },
+  "level": 1,
+  "result": "tconstruct:worldbound",
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "fabric:type": "fabric:difference",
+    "base": {
+      "tag": "tconstruct:modifiable"
+    },
+    "subtracted": {
+      "tag": "tconstruct:modifiable/single_use"
+    }
   }
 }

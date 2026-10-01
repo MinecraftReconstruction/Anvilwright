@@ -8,7 +8,7 @@
   ],
   "result": "tconstruct:redirected",
   "tools": {
-    "type": "tconstruct:tool_hook",
+    "fabric:type": "tconstruct:tool_hook",
     "hook": "tconstruct:rebalanced_trait",
     "tag": "tconstruct:modifiable/ammo"
   }

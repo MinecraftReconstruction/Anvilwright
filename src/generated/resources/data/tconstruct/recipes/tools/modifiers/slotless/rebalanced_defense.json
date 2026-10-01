@@ -3,27 +3,13 @@
   "allow_crystal": false,
   "inputs": [
     {
-      "ingredient": [
-        {
-          "item": "tconstruct:dragon_scale"
-        },
-        {
-          "item": "minecraft:gilded_blackstone"
-        }
-      ]
+      "tag": "forge:nuggets/cobalt"
     },
     {
-      "tag": "c:cobalt_ingots"
+      "item": "minecraft:end_crystal"
     },
     {
-      "ingredient": [
-        {
-          "item": "tconstruct:dragon_scale"
-        },
-        {
-          "item": "minecraft:gilded_blackstone"
-        }
-      ]
+      "tag": "forge:nuggets/cobalt"
     },
     {
       "item": "tconstruct:earth_slime_crystal_block"
@@ -37,13 +23,21 @@
     "value": "defense"
   },
   "tools": {
-    "fabric:type": "fabric:any",
+    "fabric:type": "fabric:all",
     "ingredients": [
       {
-        "tag": "tconstruct:modifiable/armor"
+        "fabric:type": "fabric:any",
+        "ingredients": [
+          {
+            "tag": "tconstruct:modifiable/armor"
+          },
+          {
+            "tag": "tconstruct:modifiable/held"
+          }
+        ]
       },
       {
-        "tag": "tconstruct:modifiable/held"
+        "tag": "tconstruct:modifiable/bonus_slots"
       }
     ]
   }

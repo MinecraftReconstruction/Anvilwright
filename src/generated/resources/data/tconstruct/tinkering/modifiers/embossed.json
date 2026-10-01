@@ -1,7 +1,11 @@
 {
   "condition": {
-    "type": "mantle:tag_filled",
-    "tag": "tconstruct:boss_trophies"
+    "fabric:load_conditions": [
+      {
+        "condition": "mantle:tag_filled",
+        "tag": "tconstruct:boss_trophies"
+      }
+    ]
   },
   "level_display": "tconstruct:single_level",
   "modules": [

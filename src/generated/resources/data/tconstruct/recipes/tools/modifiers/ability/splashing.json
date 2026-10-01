@@ -6,17 +6,17 @@
       "tag": "forge:bottles/splash"
     },
     {
-      "type": "tconstruct:no_container",
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     },
     {
       "tag": "forge:bottles/splash"
     },
     {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     },
     {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     }
   ],
   "result": "tconstruct:splashing",
@@ -24,8 +24,8 @@
     "abilities": 1
   },
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/durability"
       },

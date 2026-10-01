@@ -16,11 +16,8 @@
       ]
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:knockback_resistance"
-  },
+  "level": 1,
+  "result": "tconstruct:knockback_resistance",
   "slots": {
     "defense": 1
   },

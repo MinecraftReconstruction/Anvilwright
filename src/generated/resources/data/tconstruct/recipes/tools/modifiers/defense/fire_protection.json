@@ -5,11 +5,8 @@
   "input": {
     "item": "tconstruct:seared_reinforcement"
   },
-  "needed_per_level": 20,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:fire_protection"
-  },
+  "needed_per_level": 5,
+  "result": "tconstruct:fire_protection",
   "slots": {
     "defense": 1
   },

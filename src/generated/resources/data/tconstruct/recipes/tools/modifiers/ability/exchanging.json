@@ -1,12 +1,13 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "item": "minecraft:sticky_piston"
     },
     {
-      "tag": "c:hepatizon_ingots"
+      "tag": "forge:ingots/hepatizon"
     },
     {
       "item": "minecraft:sticky_piston"
@@ -18,11 +19,8 @@
       "tag": "c:ender_pearls"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:exchanging"
-  },
+  "level": 1,
+  "result": "tconstruct:exchanging",
   "slots": {
     "abilities": 1
   },

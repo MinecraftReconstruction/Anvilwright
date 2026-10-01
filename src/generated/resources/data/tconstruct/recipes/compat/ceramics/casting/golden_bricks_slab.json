@@ -12,10 +12,10 @@
     "item": "ceramics:porcelain_bricks_slab"
   },
   "cast_consumed": true,
-  "cooling_time": 5,
+  "cooling_time": 13,
   "fluid": {
-    "amount": 62,
-    "tag": "c:molten_gold"
+    "amount": 500,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "ceramics:golden_bricks_slab"
 }

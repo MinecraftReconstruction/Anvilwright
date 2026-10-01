@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.recipe.melting;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -62,17 +63,17 @@ public interface IMeltingRecipe extends ICustomOutputRecipe<IMeltingContainer> {
 
   /** Gets the temperature for a fluid */
   static int getTemperature(Fluid fluid) {
-    return fluid.getFluidType().getTemperature() - 300;
+    return FluidVariantAttributes.getTemperature(FluidVariant.of(fluid)) - 300;
   }
 
   /** Gets the temperature for a fluid */
   static int getTemperature(FluidStack fluid) {
-    return fluid.getFluid().getFluidType().getTemperature(fluid) - 300;
+    return FluidVariantAttributes.getTemperature(fluid.getType()) - 300;
   }
 
   /** Gets the temperature for a fluid */
   static int getTemperature(FluidObject<?> fluid) {
-    return fluid.getType().getTemperature() - 300;
+    return FluidVariantAttributes.getTemperature(FluidVariant.of(fluid.get())) - 300;
   }
 
   /**

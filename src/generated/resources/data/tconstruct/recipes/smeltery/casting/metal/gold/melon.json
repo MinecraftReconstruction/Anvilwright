@@ -7,7 +7,7 @@
   "cooling_time": 54,
   "fluid": {
     "amount": 8000,
-    "tag": "c:molten_gold"
+    "tag": "tconstruct:molten_gold"
   },
   "result": "minecraft:glistering_melon_slice"
 }

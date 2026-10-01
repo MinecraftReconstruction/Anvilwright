@@ -3,16 +3,16 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:wires"
+        "forge:wires"
       ]
     }
   ],
   "type": "tconstruct:molding_table",
   "material": {
-    "item": "tconstruct:blank_sand_cast"
+    "tag": "tconstruct:casts/sand"
   },
   "pattern": {
-    "tag": "c:wires"
+    "tag": "forge:wires"
   },
   "result": "tconstruct:wire_sand_cast"
 }

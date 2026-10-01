@@ -1,18 +1,18 @@
 {
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:or",
+      "condition": "fabric:or",
       "values": [
         {
-          "type": "tconstruct:config",
+          "condition": "tconstruct:config",
           "prop": "force_integration_materials"
         },
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/bronze"
         },
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/tin"
         }
       ]
@@ -41,7 +41,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_bronze"
   }
 }

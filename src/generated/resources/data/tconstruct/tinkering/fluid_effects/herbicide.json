@@ -1,4 +1,11 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "forge:herbicide"
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:offset",
@@ -69,13 +76,6 @@
       "effect": {
         "type": "tconstruct:remove_block"
       }
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "registry": "minecraft:fluid",
-      "tag": "forge:herbicide"
     }
   ],
   "fluid": {

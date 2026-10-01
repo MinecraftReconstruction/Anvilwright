@@ -6,6 +6,7 @@
       "tag": "c:dusts/redstone"
     },
     {
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     },
     {
@@ -18,10 +19,7 @@
       "tag": "c:copper_ingots"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:wetting"
-  },
+  "result": "tconstruct:wetting",
   "slots": {
     "abilities": 1
   },

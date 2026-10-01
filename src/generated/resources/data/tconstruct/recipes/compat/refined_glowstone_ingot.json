@@ -3,13 +3,13 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:refined_glowstone_ingots"
+        "forge:ingots/refined_glowstone"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:osmium_ingots"
+        "forge:ingots/osmium"
       ]
     }
   ],
@@ -24,6 +24,6 @@
     "tag": "tconstruct:molten_osmium"
   },
   "result": {
-    "tag": "c:refined_glowstone_ingots"
+    "tag": "forge:ingots/refined_glowstone"
   }
 }

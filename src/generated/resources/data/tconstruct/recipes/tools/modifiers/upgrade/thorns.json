@@ -5,12 +5,11 @@
   "input": {
     "item": "minecraft:cactus"
   },
-  "max_level": 3,
-  "needed_per_level": 25,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:thorns"
+  "level": {
+    "max": 3
   },
+  "needed_per_level": 25,
+  "result": "tconstruct:thorns",
   "slots": {
     "upgrades": 1
   },

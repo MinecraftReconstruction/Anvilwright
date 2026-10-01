@@ -4,10 +4,10 @@
     "tag": "tconstruct:casts/single_use/ingot"
   },
   "cast_consumed": true,
-  "cooling_time": 72,
+  "cooling_time": 2400,
   "fluid": {
-    "amount": 9000,
-    "tag": "tconstruct:molten_soulsteel"
+    "amount": 27000,
+    "tag": "c:milk"
   },
-  "result": "tconstruct:soulsteel_ingot"
+  "result": "tconstruct:cheese_ingot"
 }

@@ -30,7 +30,7 @@
     }
   ],
   "fluid": {
-    "amount": 20,
+    "amount": 2000,
     "tag": "tconstruct:molten_knightslime"
   }
 }

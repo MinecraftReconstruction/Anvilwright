@@ -3,13 +3,13 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "tag": "forge:string"
+      "tag": "c:string"
     },
     {
-      "tag": "forge:rods/wooden"
+      "tag": "c:wooden_rods"
     },
     {
-      "tag": "forge:string"
+      "tag": "c:string"
     }
   ],
   "level": 1,

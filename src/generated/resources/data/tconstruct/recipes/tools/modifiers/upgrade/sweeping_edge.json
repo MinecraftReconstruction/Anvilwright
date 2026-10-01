@@ -5,12 +5,11 @@
   "input": {
     "item": "minecraft:chain"
   },
-  "max_level": 3,
-  "needed_per_level": 18,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:sweeping_edge"
+  "level": {
+    "max": 3
   },
+  "needed_per_level": 5,
+  "result": "tconstruct:sweeping_edge",
   "slots": {
     "upgrades": 1
   },

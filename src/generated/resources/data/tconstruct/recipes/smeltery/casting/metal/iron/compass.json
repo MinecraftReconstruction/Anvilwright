@@ -7,7 +7,7 @@
   "cooling_time": 120,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_iron"
+    "tag": "tconstruct:molten_iron"
   },
   "result": "minecraft:compass"
 }

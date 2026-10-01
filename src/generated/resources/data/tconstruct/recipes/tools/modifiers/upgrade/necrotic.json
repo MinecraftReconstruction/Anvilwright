@@ -3,20 +3,19 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "item": "tconstruct:necrotic_bone"
+      "tag": "forge:wither_bones"
     },
     {
-      "item": "tconstruct:blood_congealed_slime"
+      "item": "tconstruct:ichor_congealed_slime"
     },
     {
       "item": "minecraft:ghast_tear"
     }
   ],
-  "max_level": 5,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:necrotic"
+  "level": {
+    "max": 5
   },
+  "result": "tconstruct:necrotic",
   "slots": {
     "upgrades": 1
   },
@@ -24,10 +23,13 @@
     "fabric:type": "fabric:any",
     "ingredients": [
       {
-        "tag": "tconstruct:modifiable/melee_or_unarmed"
+        "tag": "tconstruct:modifiable/melee"
       },
       {
         "tag": "tconstruct:modifiable/ranged/bows"
+      },
+      {
+        "tag": "tconstruct:modifiable/fishing_rods"
       }
     ]
   }

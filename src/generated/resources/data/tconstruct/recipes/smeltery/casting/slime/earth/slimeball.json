@@ -3,7 +3,7 @@
   "cooling_time": 46,
   "fluid": {
     "amount": 20250,
-    "tag": "c:slime"
+    "tag": "tconstruct:earth_slime"
   },
   "result": "minecraft:slime_ball"
 }

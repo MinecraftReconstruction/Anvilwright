@@ -7,7 +7,7 @@
   "cooling_time": 161,
   "fluid": {
     "amount": 72000,
-    "tag": "c:molten_gold"
+    "tag": "tconstruct:molten_gold"
   },
   "result": "minecraft:golden_apple"
 }

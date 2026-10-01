@@ -1,12 +1,12 @@
 {
-  "type": "tconstruct:swappable_modifier",
-  "allow_crystal": false,
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:ingots/ironwood"
     }
   ],
+  "type": "tconstruct:swappable_modifier",
+  "allow_crystal": false,
   "inputs": [
     {
       "tag": "forge:ingots/ironwood"

@@ -15,7 +15,7 @@
   "cooling_time": 16,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_zinc"
+    "tag": "tconstruct:molten_zinc"
   },
   "result": "create:andesite_alloy"
 }

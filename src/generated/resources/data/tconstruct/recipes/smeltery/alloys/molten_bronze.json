@@ -3,13 +3,22 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:bronze_ingots"
+        "forge:ingots/tin"
       ]
     },
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:tin_ingots"
+        {
+          "condition": "tconstruct:config",
+          "prop": "allow_ingotless_alloys"
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/bronze"
+          ]
+        }
       ]
     }
   ],
@@ -17,16 +26,16 @@
   "inputs": [
     {
       "amount": 27000,
-      "tag": "c:molten_copper"
+      "tag": "forge:molten_copper"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_tin"
+      "tag": "forge:molten_tin"
     }
   ],
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_bronze"
+    "tag": "forge:molten_bronze"
   },
   "temperature": 700
 }

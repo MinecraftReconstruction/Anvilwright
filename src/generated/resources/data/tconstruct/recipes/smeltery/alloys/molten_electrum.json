@@ -3,13 +3,22 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:electrum_ingots"
+        "forge:ingots/silver"
       ]
     },
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:silver_ingots"
+        {
+          "condition": "tconstruct:config",
+          "prop": "allow_ingotless_alloys"
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/electrum"
+          ]
+        }
       ]
     }
   ],
@@ -17,16 +26,16 @@
   "inputs": [
     {
       "amount": 9000,
-      "tag": "c:molten_gold"
+      "tag": "forge:molten_gold"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_silver"
+      "tag": "forge:molten_silver"
     }
   ],
   "result": {
     "amount": 18000,
-    "fluid": "tconstruct:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "temperature": 760
 }

@@ -4,14 +4,14 @@
   "check_trait_level": true,
   "inputs": [
     {
-      "type": "tconstruct:material",
+      "fabric:type": "tconstruct:material",
       "item": "tconstruct:bow_limb"
     },
     {
       "tag": "forge:ingots/cinderslime"
     },
     {
-      "type": "tconstruct:material",
+      "fabric:type": "tconstruct:material",
       "item": "tconstruct:bow_grip"
     }
   ],
@@ -21,22 +21,25 @@
     "abilities": 1
   },
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/durability"
       },
       {
         "tag": "tconstruct:modifiable/interactable/charge"
       },
-      [
-        {
-          "tag": "tconstruct:modifiable/melee/weapon"
-        },
-        {
-          "tag": "tconstruct:modifiable/harvest"
-        }
-      ]
+      {
+        "fabric:type": "fabric:any",
+        "ingredients": [
+          {
+            "tag": "tconstruct:modifiable/melee/weapon"
+          },
+          {
+            "tag": "tconstruct:modifiable/harvest"
+          }
+        ]
+      }
     ]
   }
 }

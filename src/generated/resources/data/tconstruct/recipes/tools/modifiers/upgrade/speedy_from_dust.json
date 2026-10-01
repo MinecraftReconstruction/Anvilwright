@@ -5,12 +5,11 @@
   "input": {
     "tag": "c:dusts/redstone"
   },
-  "max_level": 3,
-  "needed_per_level": 45,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:speedy"
+  "level": {
+    "max": 3
   },
+  "needed_per_level": 45,
+  "result": "tconstruct:speedy",
   "slots": {
     "upgrades": 1
   },

@@ -6,22 +6,22 @@
       "item": "minecraft:piston"
     },
     {
-      "tag": "c:queens_slime_ingots"
+      "tag": "forge:ingots/queens_slime"
     },
     {
       "item": "minecraft:piston"
     },
     {
-      "tag": "c:slimeball/ender"
+      "tag": "forge:slimeball/ender"
     },
     {
-      "tag": "c:slimeball/ender"
+      "tag": "forge:slimeball/ender"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:reach"
+  "level": {
+    "max": 2
   },
+  "result": "tconstruct:reach",
   "slots": {
     "abilities": 1
   },

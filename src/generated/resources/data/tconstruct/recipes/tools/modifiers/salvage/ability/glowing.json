@@ -1,6 +1,5 @@
 {
   "type": "tconstruct:modifier_salvage",
-  "min_level": 1,
   "modifier": "tconstruct:glowing",
   "slots": {
     "abilities": 1
@@ -12,7 +11,15 @@
         "tag": "tconstruct:modifiable/durability"
       },
       {
-        "tag": "tconstruct:modifiable/interactable"
+        "fabric:type": "fabric:any",
+        "ingredients": [
+          {
+            "tag": "tconstruct:modifiable/interactable"
+          },
+          {
+            "tag": "tconstruct:modifiable/armor/boots"
+          }
+        ]
       }
     ]
   }

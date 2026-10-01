@@ -42,7 +42,7 @@
     }
   ],
   "fluid": {
-    "amount": 250,
+    "amount": 20250,
     "tag": "tconstruct:molten_clay"
   }
 }

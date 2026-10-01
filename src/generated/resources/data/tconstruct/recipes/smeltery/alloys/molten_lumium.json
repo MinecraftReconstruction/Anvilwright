@@ -3,46 +3,45 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:lumium_ingots"
+        "forge:ingots/lumium"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:tin_ingots"
+        "forge:ingots/tin"
       ]
     },
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:silver_ingots"
+        "forge:ingots/silver"
       ]
     },
     {
-      "condition": "fabric:fluid_tags_populated",
-      "values": [
-        "c:glowstone"
-      ]
+      "condition": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "forge:glowstone"
     }
   ],
   "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 27000,
-      "tag": "c:molten_tin"
+      "tag": "forge:molten_tin"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_silver"
+      "tag": "forge:molten_silver"
     },
     {
       "amount": 40500,
-      "tag": "c:glowstone"
+      "tag": "forge:glowstone"
     }
   ],
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_lumium"
+    "tag": "forge:molten_lumium"
   },
   "temperature": 1050
 }

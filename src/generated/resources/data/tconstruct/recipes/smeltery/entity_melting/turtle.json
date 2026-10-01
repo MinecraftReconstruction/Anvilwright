@@ -5,7 +5,7 @@
     "tag": "forge:turtles"
   },
   "result": {
-    "amount": 25,
+    "amount": 2700,
     "nbt": {
       "Potion": "minecraft:turtle_master"
     },

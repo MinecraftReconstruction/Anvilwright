@@ -3,7 +3,7 @@
   "cooling_time": 74,
   "fluid": {
     "amount": 20250,
-    "tag": "c:ender"
+    "tag": "tconstruct:molten_ender"
   },
   "result": "minecraft:ender_pearl"
 }

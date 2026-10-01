@@ -33,7 +33,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_hepatizon"
   }
 }

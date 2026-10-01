@@ -9,7 +9,7 @@
     }
   ],
   "fluid": {
-    "amount": 100,
-    "tag": "forge:milk"
+    "amount": 10800,
+    "tag": "c:milk"
   }
 }

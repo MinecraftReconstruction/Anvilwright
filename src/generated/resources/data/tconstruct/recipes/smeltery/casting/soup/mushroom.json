@@ -7,7 +7,7 @@
   "cooling_time": 1,
   "fluid": {
     "amount": 20250,
-    "tag": "c:mushroom_stew"
+    "tag": "forge:mushroom_stew"
   },
   "result": "minecraft:mushroom_stew"
 }

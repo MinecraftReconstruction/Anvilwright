@@ -1,6 +1,7 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "item": "minecraft:shulker_shell"
@@ -18,25 +19,8 @@
       "tag": "c:netherite_ingots"
     }
   ],
-  "max_level": 1,
-  "requirements": {
-    "error": "recipe.tconstruct.modifier.unbreakable_requirements",
-    "matches_needed": 2,
-    "options": [
-      {
-        "level": 1,
-        "name": "tconstruct:netherite"
-      },
-      {
-        "level": 5,
-        "name": "tconstruct:reinforced"
-      }
-    ]
-  },
-  "result": {
-    "level": 1,
-    "name": "tconstruct:unbreakable"
-  },
+  "level": 1,
+  "result": "tconstruct:unbreakable",
   "slots": {
     "abilities": 1
   },

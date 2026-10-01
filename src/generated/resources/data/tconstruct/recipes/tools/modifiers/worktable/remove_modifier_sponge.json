@@ -9,8 +9,11 @@
     "minecraft:sponge"
   ],
   "modifier_predicate": {
-    "type": "tconstruct:always"
+    "type": "mantle:inverted",
+    "inverted_type": "tconstruct:tag",
+    "tag": "tconstruct:remove_blacklist"
   },
+  "name": "modifiers",
   "tools": {
     "tag": "tconstruct:modifiable"
   }

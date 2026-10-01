@@ -29,7 +29,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "tconstruct:molten_knightmetal"
   }
 }

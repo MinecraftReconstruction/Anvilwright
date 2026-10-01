@@ -3,14 +3,18 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "item": "minecraft:enchanted_golden_apple"
+      "ingredient": [
+        {
+          "item": "minecraft:enchanted_golden_apple"
+        },
+        {
+          "item": "minecraft:nether_star"
+        }
+      ]
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:shiny"
-  },
+  "level": 1,
+  "result": "tconstruct:shiny",
   "tools": {
     "tag": "tconstruct:modifiable"
   }
