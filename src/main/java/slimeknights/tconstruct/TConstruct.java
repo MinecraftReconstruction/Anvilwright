@@ -1,6 +1,8 @@
 package slimeknights.tconstruct;
 
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
+import io.github.fabricators_of_create.porting_lib.config.ConfigEvents;
+import io.github.fabricators_of_create.porting_lib.config.ConfigType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -104,6 +106,12 @@ public class TConstruct implements ModInitializer {
     instance = this;
 
     Config.init();
+    // reads a config value, so it has to wait for the config to load
+    ConfigEvents.LOADING.register(config -> {
+      if (config.getModId().equals(MOD_ID) && config.getType() == ConfigType.COMMON) {
+        TinkerAttributes.syncKnockbackResistance();
+      }
+    });
     TinkerItemDisplays.init();
     MaterialRegistry.init();
 

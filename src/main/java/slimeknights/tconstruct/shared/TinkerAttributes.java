@@ -4,6 +4,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import slimeknights.tconstruct.common.config.Config;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import slimeknights.mantle.registration.deferred.AttributeDeferredRegister;
 import slimeknights.tconstruct.TConstruct;
@@ -97,7 +98,16 @@ public class TinkerAttributes {
   public static final RegistryObject<Attribute> BAD_EFFECT_DURATION = ATTRIBUTES.registerMultiplier("generic.bad_effect_duration_multiplier", false);
 
 
-  // NOTE(porting): upstream also had a commonSetup handler making knockback resistance syncable for the client
-  //  (gated by Config.COMMON.syncKnockbackResistance). Attributes#setSyncable does not exist in vanilla/Fabric, so the
-  //  distance is stuck at its vanilla value client side. Disclosed in docs/BEHAVIOUR-DIFFERENCES.md.
+  /**
+   * Makes knockback resistance sync to the client, which modifiers such as springing and flinging rely on.
+   * <p>
+   * NOTE(porting): an earlier port note claimed vanilla has no {@code Attribute#setSyncable}; that is wrong, vanilla
+   * 1.20.1 has it and {@code ServerEntity} filters the synced attributes through {@code isClientSyncable()}. The call
+   * is made when the config loads, since Porting Lib only fills in config values at that point.
+   */
+  public static void syncKnockbackResistance() {
+    if (Config.COMMON.syncKnockbackResistance.get()) {
+      Attributes.KNOCKBACK_RESISTANCE.setSyncable(true);
+    }
+  }
 }

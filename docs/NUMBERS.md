@@ -523,6 +523,7 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 | TCon #39 无 FluidType 流体的汽化 | 功能缺失 | **闭合** | Mantle `FluidTypes.getType` 给这类流体一个默认 type，钩子对所有流体可达 |
 | Mantle #5 `PlayerDestroyItemEvent` | 功能缺失 | **闭合为 N/A** | Fabric 上没有任何代码能订阅该事件，本来就无可观察差异 |
 | Mantle #13 书本结构预览的渲染层 | 功能缺失 | **闭合** | 新增 `ModelLayers`（记录每层 RenderType+quads）+ `StructureElement` 逐层绘制 |
+| TCon #7/#8 击退抗性客户端同步 | 功能缺失 | **闭合** | 原注释误以为 vanilla 没有 `Attribute#setSyncable`；实际有，补回 `setSyncable(true)` 后 `[smoketest] layers/ knockback resistance syncable = true` |
 | Mantle #6/#14 模型渲染类型 | 功能缺失 | **已缩小** | 层信息不再丢弃（`MantleItemLayerModel`/`NBTKeyModel`/TCon 的两个流体模型都记录），Fabric 侧由物品/方块层落地；Fabric 本身没有逐 quad 渲染层 |
 
 ### 顺手修掉的**真 bug**（不属于"行为差异"，是内容加载失败）
