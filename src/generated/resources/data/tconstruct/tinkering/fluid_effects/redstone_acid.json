@@ -1,4 +1,12 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "immersiveengineering"
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -12,12 +20,6 @@
     },
     {
       "type": "tconstruct:weather"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:mod_loaded",
-      "modid": "immersiveengineering"
     }
   ],
   "entity_effects": [

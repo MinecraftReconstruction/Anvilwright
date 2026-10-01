@@ -1,19 +1,26 @@
 {
   "condition": {
-    "type": "forge:or",
-    "values": [
+    "fabric:load_conditions": [
       {
-        "type": "tconstruct:config",
-        "prop": "force_integration_materials"
-      },
-      {
-        "type": "mantle:tag_filled",
-        "tag": "forge:treated_wood"
-      },
-      {
-        "type": "mantle:tag_filled",
-        "registry": "minecraft:fluid",
-        "tag": "forge:creosote"
+        "condition": "fabric:or",
+        "values": [
+          {
+            "condition": "tconstruct:config",
+            "prop": "force_integration_materials"
+          },
+          {
+            "condition": "fabric:item_tags_populated",
+            "values": [
+              "forge:treated_wood"
+            ]
+          },
+          {
+            "condition": "fabric:fluid_tags_populated",
+            "values": [
+              "forge:creosote"
+            ]
+          }
+        ]
       }
     ]
   },

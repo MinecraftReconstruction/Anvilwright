@@ -1,18 +1,22 @@
 {
-  "type": "forge:conditional",
+  "type": "porting_lib:conditional",
   "recipes": [
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:and",
+          "condition": "fabric:and",
           "values": [
             {
-              "type": "mantle:tag_filled",
-              "tag": "forge:ingots/chromium"
+              "condition": "fabric:tags_populated",
+              "values": [
+                "forge:ingots/chromium"
+              ]
             },
             {
-              "type": "mantle:tag_filled",
-              "tag": "forge:ingots/nickel"
+              "condition": "fabric:tags_populated",
+              "values": [
+                "forge:ingots/nickel"
+              ]
             }
           ]
         }
@@ -21,33 +25,35 @@
         "type": "tconstruct:alloy",
         "inputs": [
           {
-            "amount": 180,
+            "amount": 18000,
             "tag": "forge:molten_nickel"
           },
           {
-            "amount": 90,
+            "amount": 9000,
             "tag": "forge:molten_chromium"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_quartz"
           }
         ],
         "result": {
-          "amount": 360,
+          "amount": 36000,
           "tag": "forge:molten_nicrosil"
         },
         "temperature": 1100
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:and",
+          "condition": "fabric:and",
           "values": [
             {
-              "type": "mantle:tag_filled",
-              "tag": "forge:ingots/nickel"
+              "condition": "fabric:tags_populated",
+              "values": [
+                "forge:ingots/nickel"
+              ]
             }
           ]
         }
@@ -56,80 +62,84 @@
         "type": "tconstruct:alloy",
         "inputs": [
           {
-            "amount": 180,
+            "amount": 18000,
             "tag": "forge:molten_nickel"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_emerald"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_quartz"
           }
         ],
         "result": {
-          "amount": 360,
+          "amount": 36000,
           "tag": "forge:molten_nicrosil"
         },
         "temperature": 1100
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/chromium"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/chromium"
+          ]
         }
       ],
       "recipe": {
         "type": "tconstruct:alloy",
         "inputs": [
           {
-            "amount": 180,
+            "amount": 18000,
             "tag": "forge:molten_chromium"
           },
           {
-            "amount": 90,
+            "amount": 9000,
             "tag": "forge:molten_iron"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_quartz"
           }
         ],
         "result": {
-          "amount": 360,
+          "amount": 36000,
           "tag": "forge:molten_nicrosil"
         },
         "temperature": 1100
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/tin"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/tin"
+          ]
         }
       ],
       "recipe": {
         "type": "tconstruct:alloy",
         "inputs": [
           {
-            "amount": 180,
+            "amount": 18000,
             "tag": "forge:molten_tin"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_emerald"
           },
           {
-            "amount": 100,
+            "amount": 8100,
             "tag": "tconstruct:molten_quartz"
           }
         ],
         "result": {
-          "amount": 360,
+          "amount": 36000,
           "tag": "forge:molten_nicrosil"
         },
         "temperature": 1100

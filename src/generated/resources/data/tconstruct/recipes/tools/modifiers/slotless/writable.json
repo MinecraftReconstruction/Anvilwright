@@ -6,12 +6,9 @@
       "item": "minecraft:writable_book"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:writable"
-  },
+  "level": 1,
+  "result": "tconstruct:writable",
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "tag": "tconstruct:modifiable/bonus_slots"
   }
 }

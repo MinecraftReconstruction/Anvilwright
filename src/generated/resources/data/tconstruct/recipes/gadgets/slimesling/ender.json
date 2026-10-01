@@ -7,7 +7,7 @@
       "item": "minecraft:string"
     },
     "L": {
-      "tag": "c:slimeball/ender"
+      "tag": "forge:slimeball/ender"
     },
     "X": {
       "item": "tconstruct:ender_congealed_slime"

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/lead"
+        "recipe": "forge:common/slime/lead"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/lead"
+      "forge:common/slime/lead"
     ]
   },
   "sends_telemetry_event": false

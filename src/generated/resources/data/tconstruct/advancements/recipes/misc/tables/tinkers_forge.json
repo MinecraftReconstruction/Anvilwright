@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:tables/tinkers_forge"
+        "recipe": "forge:tables/tinkers_forge"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:tables/tinkers_forge"
+      "forge:tables/tinkers_forge"
     ]
   },
   "sends_telemetry_event": false

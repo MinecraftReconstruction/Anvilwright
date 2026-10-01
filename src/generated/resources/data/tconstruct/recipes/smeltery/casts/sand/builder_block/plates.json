@@ -1,14 +1,16 @@
 {
-  "type": "tconstruct:item_part_builder",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:plates"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:plates"
+      ]
     }
   ],
+  "type": "tconstruct:item_part_builder",
   "pattern": "tconstruct:plate",
   "pattern_item": {
-    "tag": "forge:sand/colorless"
+    "tag": "c:colorless_sand"
   },
   "result": {
     "count": 4,

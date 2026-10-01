@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:material_fluid",
   "fluid": {
-    "amount": 200,
+    "amount": 16200,
     "tag": "tconstruct:blazing_blood"
   },
   "input": "tconstruct:slimewood#bloodshroom",

@@ -6,21 +6,12 @@
     },
     {
       "item": "tconstruct:husk_head"
-    },
-    {
-      "item": "minecraft:piglin_head"
-    },
-    {
-      "item": "tconstruct:piglin_brute_head"
-    },
-    {
-      "item": "tconstruct:zombified_piglin_head"
     }
   ],
   "result": {
-    "amount": 40500,
-    "fluid": "tconstruct:blood"
+    "amount": 9000,
+    "tag": "forge:molten_iron"
   },
-  "temperature": 36,
-  "time": 64
+  "temperature": 800,
+  "time": 60
 }

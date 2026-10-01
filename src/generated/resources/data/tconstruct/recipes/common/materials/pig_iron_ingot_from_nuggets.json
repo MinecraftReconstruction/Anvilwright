@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
+  "category": "misc",
   "group": "tconstruct:pig_iron_ingot",
   "key": {
     "#": {
-      "tag": "c:pig_iron_nuggets"
+      "tag": "forge:nuggets/pig_iron"
     },
     "*": {
       "item": "tconstruct:pig_iron_nugget"

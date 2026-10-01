@@ -1,9 +1,20 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:constantan_ingots"
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:constantan_ingots"
+          ]
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:nickel_ingots"
+          ]
+        }
       ]
     }
   ],

@@ -12,10 +12,10 @@
       "item": "tconstruct:ender_slime_crystal_cluster"
     },
     {
-      "tag": "c:manyullyn_ingots"
+      "tag": "forge:ingots/manyullyn"
     },
     {
-      "tag": "c:manyullyn_ingots"
+      "tag": "forge:ingots/manyullyn"
     }
   ],
   "result": {

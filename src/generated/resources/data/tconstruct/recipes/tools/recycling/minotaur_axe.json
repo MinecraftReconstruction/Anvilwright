@@ -1,11 +1,13 @@
 {
-  "type": "tconstruct:part_builder_tool_recycling",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "twilightforest"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "twilightforest"
+      ]
     }
   ],
+  "type": "tconstruct:part_builder_tool_recycling",
   "parts": [
     "tconstruct:small_axe_head",
     "tconstruct:repair_kit",

@@ -26,17 +26,14 @@
       ]
     },
     {
-      "tag": "c:ender_pearls"
+      "tag": "forge:ingots/steel"
     },
     {
-      "tag": "c:ender_pearls"
+      "tag": "forge:ingots/steel"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:bucketing"
-  },
+  "level": 1,
+  "result": "tconstruct:bucketing",
   "slots": {
     "abilities": 1
   },

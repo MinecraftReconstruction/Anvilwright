@@ -4,6 +4,7 @@
     "tag": "c:iron_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:iron_ingots"
   },
   "material": "tconstruct:iron",

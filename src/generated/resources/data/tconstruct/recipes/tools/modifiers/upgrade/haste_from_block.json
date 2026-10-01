@@ -6,12 +6,11 @@
     "tag": "c:redstone_blocks"
   },
   "leftover": "minecraft:redstone",
-  "max_level": 5,
-  "needed_per_level": 45,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:haste"
+  "level": {
+    "max": 5
   },
+  "needed_per_level": 45,
+  "result": "tconstruct:haste",
   "slots": {
     "upgrades": 1
   },

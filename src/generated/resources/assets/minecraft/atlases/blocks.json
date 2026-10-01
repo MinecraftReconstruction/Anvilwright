@@ -2,7 +2,19 @@
   "sources": [
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/sleeves"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/pockets"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/trident"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
     },
     {
       "type": "minecraft:single",
@@ -34,6 +46,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/flinging"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/frost_walker"
     },
     {
@@ -42,15 +58,15 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/trim"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/ranged/punch"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/melee/dual_wielding"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/modifiers/armor/path_maker"
     },
     {
       "type": "minecraft:single",
@@ -94,11 +110,15 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:item/totem_of_undying"
+      "resource": "minecraft:item/echo_shard"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/splashing"
     },
     {
       "type": "minecraft:single",
@@ -115,6 +135,14 @@
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/held/stripping"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/blunted"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/drill_attack"
     },
     {
       "type": "minecraft:single",
@@ -138,11 +166,35 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/returning"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/bow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/ballista"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/held/pathing"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:item/materials/reinforcement/iron"
+      "resource": "tconstruct:gui/modifiers/ranged/sliver"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:item/materials/reinforcement/emerald"
     },
     {
       "type": "minecraft:single",
@@ -154,11 +206,23 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/spitting"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/knockback_resistance"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/sticky"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/melee/channeling"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/workbench"
     },
     {
       "type": "minecraft:single",
@@ -170,11 +234,39 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/elytra"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/plus"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "headlight:item/headlight"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/bonking"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/fortune"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/dragonborn"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/embossed"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/plus"
     },
     {
       "type": "minecraft:single",
@@ -190,15 +282,19 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/modifiers/armor/plowing"
-    },
-    {
-      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/ranged/impaling"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/revitalizing"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/dragon_breath"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/plus"
     },
     {
       "type": "minecraft:single",
@@ -211,6 +307,14 @@
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/projectile_protection"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/forecast"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/plus"
     },
     {
       "type": "minecraft:single",
@@ -286,11 +390,31 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/campfire"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/hopper"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/blast_protection"
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:item/golden_apple"
+      "resource": "tconstruct:gui/modifiers/armor/feather_falling"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/gilded"
     },
     {
       "type": "minecraft:single",
@@ -298,7 +422,19 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/lure"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/slimeball"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/held/tilling"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/warping"
     },
     {
       "type": "minecraft:single",
@@ -342,6 +478,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/swift_sneak"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:item/materials/silky_cloth"
     },
     {
@@ -382,6 +522,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/melee/piercing"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/depth_strider"
     },
     {
@@ -414,6 +558,18 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/held/springing"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/fishing_rod"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/double_jump"
     },
     {
@@ -430,6 +586,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/banner"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/melee/bane_of_sssss"
     },
     {
@@ -442,6 +602,18 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/tropical_fish"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/blockade"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/melee_protection"
     },
     {
@@ -450,7 +622,43 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/crafting_table"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/grapple"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/recovery_compass_16"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/harvest/blasting"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/brush"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "theoneprobe:item/probe"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/ranged/bounce"
     },
     {
       "type": "minecraft:single",
@@ -506,6 +714,14 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "minecraft:item/filled_map"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/book"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "minecraft:item/bucket"
     },
     {
@@ -522,19 +738,15 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "minecraft:item/end_crystal"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/modifiers/plus"
-    },
-    {
-      "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/armor/embellishment"
     },
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/modifiers/harvest/magnetic"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/modifiers/armor/bursting"
     },
     {
       "type": "minecraft:single",
@@ -550,7 +762,7 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/modifiers/rebalanced"
+      "resource": "minecraft:item/end_crystal"
     },
     {
       "type": "minecraft:single",
@@ -594,7 +806,23 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/arrow"
+      "resource": "tconstruct:gui/tinker_pattern/small_blade"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shard"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/small_axe_head"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/rod"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/gear"
     },
     {
       "type": "minecraft:single",
@@ -602,47 +830,11 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/bow_grip"
+      "resource": "tconstruct:gui/tinker_pattern/arrow_head"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/bow_limb"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/bowstring"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/broad_axe_head"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/broad_blade"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/button_repair"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/dust"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/gem"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/hammer_head"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/ingot"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/item_frame"
+      "resource": "tconstruct:gui/tinker_pattern/tough_binding"
     },
     {
       "type": "minecraft:single",
@@ -650,7 +842,27 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/large_blade"
+      "resource": "tconstruct:gui/tinker_pattern/tool_binding"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/arrow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/broad_blade"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/chestplate_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/maille"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/wire"
     },
     {
       "type": "minecraft:single",
@@ -658,7 +870,119 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/ribcage"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/leggings_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/bow_limb"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/boots_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/button_repair"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/plate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/scale"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/gem"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/pattern"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/laces"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/crystal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shuriken"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/broad_axe_head"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/fletching"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/tool_handle"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/arrow_shaft"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/arrow_part"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/coin"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/bowstring"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/tipped_arrow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/nugget"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shell"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/thrown_ammo"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/plate_armor"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shield_plus"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/repair_kit"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/slimeball"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shield"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/feather"
     },
     {
       "type": "minecraft:single",
@@ -670,35 +994,51 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shield_core"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/result"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/dust"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/tough_handle"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/map"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/quartz"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/repair_kit"
+      "resource": "tconstruct:gui/tinker_pattern/hammer_head"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/round_plate"
+      "resource": "tconstruct:gui/tinker_pattern/item_frame"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/shield"
+      "resource": "tconstruct:gui/tinker_pattern/ingot"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/shield_plus"
+      "resource": "tconstruct:gui/tinker_pattern/bow_grip"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/small_axe_head"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/small_blade"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tipped_arrow"
+      "resource": "tconstruct:gui/tinker_pattern/helmet_plating"
     },
     {
       "type": "minecraft:single",
@@ -706,15 +1046,11 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tool_binding"
+      "resource": "tconstruct:gui/tinker_pattern/fire"
     },
     {
       "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tool_handle"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tough_handle"
+      "resource": "tconstruct:gui/tinker_pattern/adze_head"
     }
   ]
 }

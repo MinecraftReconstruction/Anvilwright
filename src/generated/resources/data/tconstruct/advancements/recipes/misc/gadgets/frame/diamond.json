@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:gadgets/frame/diamond"
+        "recipe": "forge:gadgets/frame/diamond"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:gadgets/frame/diamond"
+      "forge:gadgets/frame/diamond"
     ]
   },
   "sends_telemetry_event": false

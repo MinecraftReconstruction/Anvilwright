@@ -84,6 +84,9 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 import static slimeknights.tconstruct.TConstruct.getResource;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
 import net.minecraft.world.item.CreativeModeTab;
+import slimeknights.mantle.data.predicate.damage.DamageSourcePredicate;
+import slimeknights.mantle.data.predicate.item.ItemPredicate;
+import slimeknights.mantle.data.predicate.fluid.FluidPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
 import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 import slimeknights.mantle.data.predicate.entity.MobTypePredicate;
@@ -191,6 +194,32 @@ public final class TinkerCommons extends TinkerModule {
 
     ResourceConditions.register(TagIntersectionPresentCondition.NAME, TinkerConditons::tagIntersectionPresentPredicate);
     ResourceConditions.register(TagDifferencePresentCondition.NAME, TinkerConditons::tagDifferencePresentPredicate);
+    // TConstruct specific predicates. Mantle's registry owns the shared entry points (any/none/inverted/and/or
+    // plus requires_tool, fire_immune, water_sensitive, on_fire and mob_type), so only our own loaders go here -
+    // Mantle's NamedComponentRegistry is a BiMap and refuses to register one loader instance under two ids.
+    DamageSourcePredicate.LOADER.register(TConstruct.getResource("direct"), TinkerPredicate.DIRECT_DAMAGE.getLoader());
+    // entity
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("airborne"), TinkerPredicate.AIRBORNE.getLoader());
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("targeting_block"), TinkerPredicate.TARGETING_BLOCK.getLoader());
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("full_health"), TinkerPredicate.FULL_HEALTH.getLoader());
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("variable_range"), EntityVariableRangePredicate.LOADER);
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("has_effect"), HasMobEffectPredicate.LOADER);
+    LivingEntityPredicate.LOADER.register(TConstruct.getResource("block_at_feet"), BlockAtFeetEntityPredicate.LOADER);
+    // item
+    ItemPredicate.LOADER.register(TConstruct.getResource("arrow"), TinkerPredicate.ARROW.getLoader());
+    ItemPredicate.LOADER.register(TConstruct.getResource("bucket"), TinkerPredicate.BUCKET.getLoader());
+    ItemPredicate.LOADER.register(TConstruct.getResource("map"), TinkerPredicate.MAP.getLoader());
+    ItemPredicate.LOADER.register(TConstruct.getResource("can_melt"), TinkerPredicate.CAN_MELT_ITEM.getLoader());
+    ItemPredicate.LOADER.register(TConstruct.getResource("castable"), TinkerPredicate.CASTABLE.getLoader());
+    // block
+    BlockPredicate.LOADER.register(TConstruct.getResource("blocks_motion"), TinkerPredicate.BLOCKS_MOTION.getLoader());
+    BlockPredicate.LOADER.register(TConstruct.getResource("can_be_replaced"), TinkerPredicate.CAN_BE_REPLACED.getLoader());
+    BlockPredicate.LOADER.register(TConstruct.getResource("bush"), TinkerPredicate.BUSH.getLoader());
+    BlockPredicate.LOADER.register(TConstruct.getResource("can_melt"), TinkerPredicate.CAN_MELT_BLOCK.getLoader());
+    BlockPredicate.LOADER.register(TConstruct.getResource("harvest_tier"), HarvestTierPredicate.LOADER);
+    BlockPredicate.LOADER.register(TConstruct.getResource("variable_range"), BlockVariableRangePredicate.LOADER);
+    // fluid
+    FluidPredicate.LOADER.register(TConstruct.getResource("fuel"), TinkerPredicate.FUEL.getLoader());
     // Predicates: Mantle owns all the shared predicate loaders (any/none/inverted/and/or plus the built in
     // requires_tool, fire_immune, water_sensitive, on_fire and mob_type). Mantle's NamedComponentRegistry is a
     // BiMap, so registering the same loader instance under a second id throws - and upstream TCon registers none

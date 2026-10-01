@@ -11,7 +11,7 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:uranium_ingots"
+              "forge:ingots/uranium"
             ]
           }
         ]
@@ -19,7 +19,7 @@
     ]
   },
   "craftable": true,
-  "tier": 3,
+  "hidden": false,
   "sortOrder": 7,
-  "hidden": false
+  "tier": 3
 }

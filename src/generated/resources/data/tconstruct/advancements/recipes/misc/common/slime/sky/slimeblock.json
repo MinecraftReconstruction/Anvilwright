@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "c:slimeball/sky"
+            "tag": "forge:slimeball/sky"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/sky/slimeblock"
+        "recipe": "forge:common/slime/sky/slimeblock"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/sky/slimeblock"
+      "forge:common/slime/sky/slimeblock"
     ]
   },
   "sends_telemetry_event": false

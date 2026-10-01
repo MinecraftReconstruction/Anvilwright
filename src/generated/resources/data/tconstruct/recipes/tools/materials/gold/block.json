@@ -4,6 +4,7 @@
     "tag": "c:gold_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:gold_ingots"
   },
   "material": "tconstruct:gold",

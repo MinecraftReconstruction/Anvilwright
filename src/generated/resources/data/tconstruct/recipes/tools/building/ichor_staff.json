@@ -6,7 +6,7 @@
       "item": "tconstruct:ichor_slime_crystal"
     },
     "I": {
-      "tag": "c:queens_slime_ingots"
+      "tag": "forge:ingots/queens_slime"
     },
     "W": {
       "tag": "tconstruct:bloodshroom_logs"

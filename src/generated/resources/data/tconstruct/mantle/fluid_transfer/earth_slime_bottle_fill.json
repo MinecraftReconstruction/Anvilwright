@@ -1,11 +1,11 @@
 {
   "type": "mantle:fill_item",
+  "fluid": {
+    "amount": 27000,
+    "tag": "forge:slime"
+  },
   "input": {
     "item": "minecraft:glass_bottle"
   },
-  "filled": "tconstruct:earth_slime_bottle",
-  "fluid": {
-    "tag": "c:slime",
-    "amount": 27000
-  }
+  "result": "tconstruct:earth_slime_bottle"
 }

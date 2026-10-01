@@ -6,6 +6,7 @@
       "item": "minecraft:glass_bottle"
     },
     {
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     },
     {
@@ -18,10 +19,7 @@
       "tag": "c:copper_ingots"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:slurping"
-  },
+  "result": "tconstruct:slurping",
   "slots": {
     "abilities": 1
   },
@@ -32,7 +30,7 @@
         "tag": "tconstruct:modifiable/armor/helmets"
       },
       {
-        "tag": "tconstruct:modifiable/staffs"
+        "tag": "tconstruct:modifiable/interactable/charge"
       }
     ]
   }

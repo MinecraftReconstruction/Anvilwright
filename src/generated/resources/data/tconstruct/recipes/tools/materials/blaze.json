@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:rods/blaze"
+    "tag": "c:blaze_rods"
   },
   "material": "tconstruct:blaze",
   "needed": 1,

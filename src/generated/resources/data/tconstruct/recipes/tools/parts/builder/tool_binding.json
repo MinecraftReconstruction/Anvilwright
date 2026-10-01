@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 1,
-  "pattern": "tconstruct:tool_binding",
+  "pattern": "forge:tool_binding",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

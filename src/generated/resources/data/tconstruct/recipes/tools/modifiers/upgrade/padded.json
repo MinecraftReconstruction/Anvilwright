@@ -12,15 +12,14 @@
       "item": "minecraft:leather"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:padded"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:padded",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/melee_or_unarmed"
+    "tag": "tconstruct:modifiable/melee"
   }
 }

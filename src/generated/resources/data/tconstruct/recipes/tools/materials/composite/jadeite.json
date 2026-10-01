@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:material_fluid",
   "fluid": {
-    "amount": 100,
+    "amount": 8100,
     "tag": "tconstruct:molten_emerald"
   },
   "input": "tconstruct:blaze",

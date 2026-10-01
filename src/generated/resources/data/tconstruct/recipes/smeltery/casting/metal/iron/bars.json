@@ -3,7 +3,7 @@
   "cooling_time": 35,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_iron"
+    "tag": "tconstruct:molten_iron"
   },
   "result": "minecraft:iron_bars"
 }

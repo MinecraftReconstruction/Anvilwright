@@ -1,14 +1,16 @@
 {
-  "type": "tconstruct:item_part_builder",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:gears"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:gears"
+      ]
     }
   ],
+  "type": "tconstruct:item_part_builder",
   "pattern": "tconstruct:gear",
   "pattern_item": {
-    "tag": "forge:sand/red"
+    "tag": "c:red_sand"
   },
   "result": {
     "count": 4,

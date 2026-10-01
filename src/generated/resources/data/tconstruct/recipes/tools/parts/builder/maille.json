@@ -1,15 +1,18 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 2,
-  "pattern": "tconstruct:maille",
-  "pattern_item": [
-    {
-      "tag": "tconstruct:patterns/default"
-    },
-    {
-      "item": "tconstruct:maille_cast"
-    }
-  ],
+  "pattern": "forge:maille",
+  "pattern_item": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:patterns/default"
+      },
+      {
+        "item": "tconstruct:maille_cast"
+      }
+    ]
+  },
   "result": {
     "item": "tconstruct:maille"
   }

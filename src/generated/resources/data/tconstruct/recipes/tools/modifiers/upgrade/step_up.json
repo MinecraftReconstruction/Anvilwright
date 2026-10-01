@@ -18,11 +18,10 @@
       "item": "minecraft:scaffolding"
     }
   ],
-  "max_level": 2,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:step_up"
+  "level": {
+    "max": 2
   },
+  "result": "tconstruct:step_up",
   "slots": {
     "upgrades": 1
   },

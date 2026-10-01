@@ -5,16 +5,15 @@
   "input": {
     "item": "minecraft:pufferfish"
   },
-  "max_level": 5,
-  "needed_per_level": 20,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:antiaquatic"
+  "level": {
+    "max": 5
   },
+  "needed_per_level": 5,
+  "result": "tconstruct:antiaquatic",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/melee_or_unarmed"
+    "tag": "tconstruct:modifiable/melee"
   }
 }

@@ -1,11 +1,13 @@
 {
-  "type": "tconstruct:modifier_salvage",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "headlight"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "headlight"
+      ]
     }
   ],
+  "type": "tconstruct:modifier_salvage",
   "modifier": "tconstruct:headlight",
   "slots": {
     "upgrades": 1

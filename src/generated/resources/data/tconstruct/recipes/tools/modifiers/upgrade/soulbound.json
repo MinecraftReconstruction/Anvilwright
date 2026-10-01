@@ -3,25 +3,21 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "ingredient": [
-        {
-          "item": "minecraft:totem_of_undying"
-        },
-        {
-          "item": "minecraft:nether_star"
-        }
-      ]
+      "item": "minecraft:echo_shard"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:soulbound"
-  },
+  "level": 1,
+  "result": "tconstruct:soulbound",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "fabric:type": "fabric:difference",
+    "base": {
+      "tag": "tconstruct:modifiable"
+    },
+    "subtracted": {
+      "tag": "tconstruct:modifiable/single_use"
+    }
   }
 }

@@ -8,6 +8,7 @@ import net.minecraft.world.level.material.MapColor;
 import slimeknights.mantle.registration.object.FenceBuildingBlockObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.mantle.registration.object.MetalItemObject;
+import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.library.json.predicate.material.MaterialDefinitionPredicate;
 import slimeknights.tconstruct.library.json.predicate.material.MaterialHasPartPredicate;
@@ -78,6 +79,18 @@ public final class TinkerMaterials extends TinkerModule {
     CustomIngredientSerializer.register(BlockTagIngredient.SERIALIZER);
     CustomIngredientSerializer.register(InstrumentIngredient.SERIALIZER);
     CustomIngredientSerializer.register(ToolHookIngredient.Serializer.INSTANCE);
+
+    // material predicates (upstream registers these alongside the recipe serializers)
+    MaterialPredicate.LOADER.register(TConstruct.getResource("variant"), MaterialVariantPredicate.LOADER);
+    MaterialPredicate.LOADER.register(TConstruct.getResource("id"), MaterialIdPredicate.LOADER);
+    MaterialPredicate.LOADER.register(TConstruct.getResource("has_part"), MaterialHasPartPredicate.LOADER);
+    MaterialPredicate.LOADER.register(TConstruct.getResource("stat_type"), MaterialStatTypePredicate.LOADER);
+    MaterialPredicate.LOADER.register(TConstruct.getResource("castable"), MaterialPredicate.CASTABLE.getLoader());
+    MaterialPredicate.LOADER.register(TConstruct.getResource("composite"), MaterialPredicate.COMPOSITE.getLoader());
+    MaterialPredicate.LOADER.register(TConstruct.getResource("craftable"), MaterialDefinitionPredicate.CRAFTABLE.getLoader());
+    MaterialPredicate.LOADER.register(TConstruct.getResource("not_hidden"), MaterialDefinitionPredicate.NOT_HIDDEN.getLoader());
+    MaterialPredicate.LOADER.register(TConstruct.getResource("registered"), MaterialDefinitionPredicate.REGISTERED.getLoader());
+    MaterialPredicate.LOADER.register(TConstruct.getResource("tier"), MaterialTierPredicate.LOADER);
   }
 
   public TinkerMaterials() {

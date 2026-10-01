@@ -1,32 +1,42 @@
 {
   "condition": {
-    "type": "forge:or",
-    "values": [
+    "fabric:load_conditions": [
       {
-        "type": "tconstruct:config",
-        "prop": "force_integration_materials"
-      },
-      {
-        "type": "mantle:tag_filled",
-        "tag": "forge:ingots/pewter"
-      },
-      {
-        "type": "forge:and",
+        "condition": "fabric:or",
         "values": [
           {
-            "type": "tconstruct:config",
-            "prop": "allow_ingotless_alloys"
+            "condition": "tconstruct:config",
+            "prop": "force_integration_materials"
           },
           {
-            "type": "forge:or",
+            "condition": "fabric:item_tags_populated",
+            "values": [
+              "forge:ingots/pewter"
+            ]
+          },
+          {
+            "condition": "fabric:and",
             "values": [
               {
-                "type": "mantle:tag_filled",
-                "tag": "forge:ingots/tin"
+                "condition": "tconstruct:config",
+                "prop": "allow_ingotless_alloys"
               },
               {
-                "type": "mantle:tag_filled",
-                "tag": "forge:ingots/lead"
+                "condition": "fabric:or",
+                "values": [
+                  {
+                    "condition": "fabric:item_tags_populated",
+                    "values": [
+                      "forge:ingots/tin"
+                    ]
+                  },
+                  {
+                    "condition": "fabric:item_tags_populated",
+                    "values": [
+                      "forge:ingots/lead"
+                    ]
+                  }
+                ]
               }
             ]
           }

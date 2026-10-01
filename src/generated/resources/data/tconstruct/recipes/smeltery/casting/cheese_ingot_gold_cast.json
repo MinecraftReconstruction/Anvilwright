@@ -5,8 +5,8 @@
   },
   "cooling_time": 2400,
   "fluid": {
-    "amount": 250,
-    "tag": "forge:milk"
+    "amount": 27000,
+    "tag": "c:milk"
   },
   "result": "tconstruct:cheese_ingot"
 }

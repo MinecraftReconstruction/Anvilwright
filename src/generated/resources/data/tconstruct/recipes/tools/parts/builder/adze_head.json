@@ -1,15 +1,18 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 2,
-  "pattern": "tconstruct:adze_head",
-  "pattern_item": [
-    {
-      "tag": "tconstruct:patterns/default"
-    },
-    {
-      "item": "tconstruct:adze_head_cast"
-    }
-  ],
+  "pattern": "forge:adze_head",
+  "pattern_item": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:patterns/default"
+      },
+      {
+        "item": "tconstruct:adze_head_cast"
+      }
+    ]
+  },
   "result": {
     "item": "tconstruct:adze_head"
   }

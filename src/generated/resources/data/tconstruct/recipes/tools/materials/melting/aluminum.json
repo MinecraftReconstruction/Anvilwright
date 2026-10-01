@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:aluminum_ingots"
+        "forge:aluminum_ingots"
       ]
     }
   ],

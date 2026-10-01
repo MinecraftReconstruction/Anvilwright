@@ -1,13 +1,15 @@
 {
-  "type": "tconstruct:material_fluid",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/cadmium"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:ingots/cadmium"
+      ]
     }
   ],
+  "type": "tconstruct:material_fluid",
   "fluid": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_cadmium"
   },
   "input": "tconstruct:rock",

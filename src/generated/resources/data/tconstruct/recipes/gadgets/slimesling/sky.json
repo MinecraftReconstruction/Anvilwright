@@ -7,7 +7,7 @@
       "item": "minecraft:string"
     },
     "L": {
-      "tag": "c:slimeball/sky"
+      "tag": "forge:slimeball/sky"
     },
     "X": {
       "item": "tconstruct:sky_congealed_slime"

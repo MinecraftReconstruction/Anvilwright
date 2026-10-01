@@ -10,7 +10,7 @@
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 5062,
+      "amount": 4050,
       "fluid": "tconstruct:molten_glass"
     }
   ],

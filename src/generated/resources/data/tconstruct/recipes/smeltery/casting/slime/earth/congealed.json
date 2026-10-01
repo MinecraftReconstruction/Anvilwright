@@ -3,7 +3,7 @@
   "cooling_time": 92,
   "fluid": {
     "amount": 81000,
-    "tag": "c:slime"
+    "tag": "tconstruct:earth_slime"
   },
   "result": "tconstruct:earth_congealed_slime"
 }

@@ -9,15 +9,14 @@
       "item": "tconstruct:sky_slime"
     }
   ],
-  "max_level": 5,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:punch"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:punch",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/ranged"
+    "tag": "tconstruct:modifiable/ranged/launcher"
   }
 }

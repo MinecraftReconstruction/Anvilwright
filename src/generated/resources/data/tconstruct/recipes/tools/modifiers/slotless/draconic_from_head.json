@@ -6,12 +6,15 @@
       "item": "minecraft:dragon_head"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:draconic"
-  },
+  "level": 1,
+  "result": "tconstruct:draconic",
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "fabric:type": "fabric:difference",
+    "base": {
+      "tag": "tconstruct:modifiable/bonus_slots"
+    },
+    "subtracted": {
+      "tag": "tconstruct:modifiable/skulls"
+    }
   }
 }

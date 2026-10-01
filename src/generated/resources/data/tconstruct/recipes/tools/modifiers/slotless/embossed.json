@@ -1,12 +1,12 @@
 {
-  "type": "tconstruct:modifier",
-  "allow_crystal": true,
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "tconstruct:boss_trophies"
     }
   ],
+  "type": "tconstruct:modifier",
+  "allow_crystal": true,
   "inputs": [
     {
       "tag": "tconstruct:boss_trophies"

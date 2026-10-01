@@ -12,11 +12,10 @@
       "tag": "minecraft:fishes"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:depth_strider"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:depth_strider",
   "slots": {
     "upgrades": 1
   },

@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 2,
-  "pattern": "tconstruct:bow_grip",
+  "pattern": "forge:bow_grip",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

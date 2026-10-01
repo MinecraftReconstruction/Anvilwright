@@ -1,15 +1,18 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:pewter_ingots"
-      ]
-    },
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:lead_ingots"
+        {
+          "condition": "tconstruct:config",
+          "prop": "allow_ingotless_alloys"
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/pewter"
+          ]
+        }
       ]
     }
   ],
@@ -18,9 +21,20 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
+          "condition": "fabric:and",
           "values": [
-            "c:tin_ingots"
+            {
+              "condition": "fabric:tags_populated",
+              "values": [
+                "forge:ingots/lead"
+              ]
+            },
+            {
+              "condition": "fabric:tags_populated",
+              "values": [
+                "forge:ingots/tin"
+              ]
+            }
           ]
         }
       ],
@@ -28,17 +42,17 @@
         "type": "tconstruct:alloy",
         "inputs": [
           {
-            "amount": 18000,
-            "tag": "c:molten_tin"
+            "amount": 27000,
+            "tag": "forge:molten_tin"
           },
           {
             "amount": 9000,
-            "tag": "c:molten_lead"
+            "tag": "forge:molten_lead"
           }
         ],
         "result": {
-          "amount": 27000,
-          "fluid": "tconstruct:molten_pewter"
+          "amount": 36000,
+          "tag": "forge:molten_pewter"
         },
         "temperature": 400
       }
@@ -46,7 +60,38 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "porting_lib:true"
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/tin"
+          ]
+        }
+      ],
+      "recipe": {
+        "type": "tconstruct:alloy",
+        "inputs": [
+          {
+            "amount": 27000,
+            "tag": "forge:molten_tin"
+          },
+          {
+            "amount": 9000,
+            "tag": "forge:molten_iron"
+          }
+        ],
+        "result": {
+          "amount": 36000,
+          "tag": "forge:molten_pewter"
+        },
+        "temperature": 400
+      }
+    },
+    {
+      "fabric:load_conditions": [
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/lead"
+          ]
         }
       ],
       "recipe": {
@@ -54,16 +99,16 @@
         "inputs": [
           {
             "amount": 9000,
-            "tag": "c:molten_iron"
+            "tag": "forge:molten_iron"
           },
           {
             "amount": 9000,
-            "tag": "c:molten_lead"
+            "tag": "forge:molten_lead"
           }
         ],
         "result": {
           "amount": 18000,
-          "fluid": "tconstruct:molten_pewter"
+          "tag": "forge:molten_pewter"
         },
         "temperature": 400
       }

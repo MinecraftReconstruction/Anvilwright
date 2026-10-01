@@ -4,7 +4,7 @@
     "item": "tconstruct:soul_glass_pane"
   },
   "cast_consumed": true,
-  "cooling_time": 42,
+  "cooling_time": 80,
   "fluid": {
     "amount": 20250,
     "tag": "tconstruct:seared_stone"

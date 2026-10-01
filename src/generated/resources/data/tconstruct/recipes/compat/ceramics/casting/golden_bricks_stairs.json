@@ -12,10 +12,10 @@
     "item": "ceramics:porcelain_bricks_stairs"
   },
   "cast_consumed": true,
-  "cooling_time": 7,
+  "cooling_time": 19,
   "fluid": {
-    "amount": 125,
-    "tag": "c:molten_gold"
+    "amount": 1000,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "ceramics:golden_bricks_stairs"
 }

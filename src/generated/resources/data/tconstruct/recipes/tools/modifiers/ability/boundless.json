@@ -22,11 +22,8 @@
       "item": "tconstruct:ichor_slime_crystal"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:boundless"
-  },
+  "level": 1,
+  "result": "tconstruct:boundless",
   "slots": {
     "abilities": 1
   },

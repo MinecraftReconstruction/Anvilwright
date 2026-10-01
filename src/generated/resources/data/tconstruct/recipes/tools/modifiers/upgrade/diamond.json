@@ -6,11 +6,8 @@
       "tag": "c:diamonds"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:diamond"
-  },
+  "level": 1,
+  "result": "tconstruct:diamond",
   "slots": {
     "upgrades": 1
   },

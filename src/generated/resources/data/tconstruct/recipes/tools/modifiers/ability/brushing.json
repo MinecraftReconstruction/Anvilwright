@@ -4,10 +4,10 @@
   "check_trait_level": true,
   "inputs": [
     {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     }
   ],
   "level": 1,
@@ -16,8 +16,8 @@
     "abilities": 1
   },
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/durability"
       },

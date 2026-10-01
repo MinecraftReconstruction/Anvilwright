@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:plates/brick"
+        "forge:plates/brick"
       ]
     }
   ],
@@ -18,6 +18,6 @@
     "tag": "tconstruct:molten_clay"
   },
   "result": {
-    "tag": "c:plates/brick"
+    "tag": "forge:plates/brick"
   }
 }

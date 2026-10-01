@@ -6,14 +6,14 @@
       "item": "minecraft:dragon_head"
     },
     {
-      "tag": "forge:slimeballs"
+      "tag": "c:slimeballs"
     }
   ],
   "level": 1,
   "result": "tconstruct:draconic",
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/bonus_slots"
       },

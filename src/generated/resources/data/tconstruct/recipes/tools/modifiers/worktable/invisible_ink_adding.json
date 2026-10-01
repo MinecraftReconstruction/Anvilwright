@@ -5,18 +5,17 @@
   "data_key": "tconstruct:invisible_modifiers",
   "inputs": [
     {
-      "fabric:type": "fabric:nbt",
-      "base": {
-        "item": "minecraft:potion"
+      "fabric:type": "mantle:fluid_container",
+      "type": "mantle:fluid_container",
+      "amount": 27000,
+      "display": {
+        "item": "tconstruct:sky_slime_bottle"
       },
-      "nbt": {
-        "Potion": "minecraft:invisibility"
-      },
-      "strict": false
+      "tag": "tconstruct:sky_slime"
     }
   ],
   "modifier_predicate": {
-    "type": "tconstruct:inverted",
+    "type": "mantle:inverted",
     "inverted_type": "tconstruct:tag",
     "tag": "tconstruct:invisible_ink_blacklist"
   },

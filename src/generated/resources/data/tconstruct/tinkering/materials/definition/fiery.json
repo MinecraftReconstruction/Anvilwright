@@ -1,14 +1,20 @@
 {
   "condition": {
-    "type": "forge:or",
-    "values": [
+    "fabric:load_conditions": [
       {
-        "type": "tconstruct:config",
-        "prop": "force_integration_materials"
-      },
-      {
-        "type": "mantle:tag_filled",
-        "tag": "forge:ingots/fiery"
+        "condition": "fabric:or",
+        "values": [
+          {
+            "condition": "tconstruct:config",
+            "prop": "force_integration_materials"
+          },
+          {
+            "condition": "fabric:item_tags_populated",
+            "values": [
+              "forge:ingots/fiery"
+            ]
+          }
+        ]
       }
     ]
   },

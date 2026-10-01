@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:invar_nuggets"
+        "forge:invar_nuggets"
       ]
     }
   ],

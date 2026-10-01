@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 2,
-  "pattern": "tconstruct:repair_kit",
+  "pattern": "forge:repair_kit",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

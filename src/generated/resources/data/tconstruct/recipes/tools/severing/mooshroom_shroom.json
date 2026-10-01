@@ -1,4 +1,5 @@
 {
   "type": "tconstruct:mooshroom_demushrooming",
-  "category": "misc"
+  "looting_bonus": 0.01,
+  "per_level_chance": 0.05
 }

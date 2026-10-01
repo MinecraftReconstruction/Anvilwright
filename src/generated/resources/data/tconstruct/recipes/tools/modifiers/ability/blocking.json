@@ -1,12 +1,13 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "tag": "minecraft:planks"
     },
     {
-      "tag": "c:cobalt_ingots"
+      "tag": "forge:ingots/steel"
     },
     {
       "tag": "minecraft:planks"
@@ -18,21 +19,34 @@
       "tag": "minecraft:planks"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:blocking"
-  },
+  "level": 1,
+  "result": "tconstruct:blocking",
   "slots": {
     "abilities": 1
   },
   "tools": {
     "fabric:type": "fabric:difference",
     "base": {
-      "tag": "tconstruct:modifiable/interactable/right"
+      "fabric:type": "fabric:all",
+      "ingredients": [
+        {
+          "tag": "tconstruct:modifiable/interactable/charge"
+        },
+        {
+          "tag": "tconstruct:modifiable/durability"
+        }
+      ]
     },
     "subtracted": {
-      "tag": "tconstruct:modifiable/melee/parry"
+      "fabric:type": "fabric:any",
+      "ingredients": [
+        {
+          "tag": "tconstruct:modifiable/melee/parry"
+        },
+        {
+          "tag": "tconstruct:modifiable/shields"
+        }
+      ]
     }
   }
 }

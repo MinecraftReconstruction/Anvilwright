@@ -3,13 +3,11 @@
   "allow_crystal": true,
   "inputs": [
     {
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:tank"
-  },
+  "result": "tconstruct:tank",
   "slots": {
     "upgrades": 1
   },
@@ -17,19 +15,10 @@
     "fabric:type": "fabric:any",
     "ingredients": [
       {
-        "tag": "tconstruct:modifiable/interactable"
+        "tag": "tconstruct:modifiable/held"
       },
       {
-        "tag": "tconstruct:modifiable/armor/helmets"
-      },
-      {
-        "tag": "tconstruct:modifiable/armor/chestplate"
-      },
-      {
-        "tag": "tconstruct:modifiable/armor/leggings"
-      },
-      {
-        "tag": "tconstruct:modifiable/shields"
+        "tag": "tconstruct:modifiable/armor"
       }
     ]
   }

@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "type": "tconstruct:instrument",
+    "fabric:type": "tconstruct:instrument",
     "instrument": "minecraft:feel_goat_horn",
     "item": "minecraft:goat_horn"
   },

@@ -9,15 +9,22 @@
       "item": "minecraft:slime_block"
     }
   ],
-  "max_level": 3,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:knockback"
+  "level": {
+    "max": 3
   },
+  "result": "tconstruct:knockback",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/melee"
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/melee"
+      },
+      {
+        "tag": "tconstruct:modifiable/armor/chestplate"
+      }
+    ]
   }
 }

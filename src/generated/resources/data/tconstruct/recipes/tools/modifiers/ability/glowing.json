@@ -1,6 +1,7 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "item": "minecraft:glowstone"
@@ -12,11 +13,8 @@
       "item": "minecraft:shroomlight"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:glowing"
-  },
+  "level": 1,
+  "result": "tconstruct:glowing",
   "slots": {
     "abilities": 1
   },
@@ -27,7 +25,15 @@
         "tag": "tconstruct:modifiable/durability"
       },
       {
-        "tag": "tconstruct:modifiable/interactable"
+        "fabric:type": "fabric:any",
+        "ingredients": [
+          {
+            "tag": "tconstruct:modifiable/interactable"
+          },
+          {
+            "tag": "tconstruct:modifiable/armor/boots"
+          }
+        ]
       }
     ]
   }

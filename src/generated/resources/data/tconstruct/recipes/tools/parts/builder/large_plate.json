@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 4,
-  "pattern": "tconstruct:large_plate",
+  "pattern": "forge:large_plate",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

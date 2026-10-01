@@ -2,10 +2,10 @@
   "type": "tconstruct:entity_melting",
   "damage": 2,
   "entity": {
-    "type": "minecraft:bee"
+    "tag": "forge:bees"
   },
   "result": {
     "amount": 2700,
-    "fluid": "tconstruct:honey"
+    "tag": "forge:honey"
   }
 }

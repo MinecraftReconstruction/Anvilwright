@@ -4,7 +4,7 @@
     "item": "minecraft:flint"
   },
   "cast_consumed": true,
-  "cooling_time": 30,
+  "cooling_time": 51,
   "fluid": {
     "amount": 10125,
     "tag": "tconstruct:molten_clay"

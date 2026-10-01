@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:electrum_ingots"
+        "forge:electrum_ingots"
       ]
     }
   ],

@@ -1,9 +1,18 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "tag": "c:copper_blocks"
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "c:copper_blocks"
+      },
+      {
+        "item": "minecraft:waxed_copper_block"
+      }
+    ]
   },
   "leftover": {
+    "count": 1,
     "tag": "c:copper_ingots"
   },
   "material": "tconstruct:copper",

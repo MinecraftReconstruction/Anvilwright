@@ -11,7 +11,22 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:brass_ingots"
+              "forge:ingots/plated_slimewood"
+            ]
+          },
+          {
+            "condition": "fabric:and",
+            "values": [
+              {
+                "condition": "tconstruct:config",
+                "prop": "allow_ingotless_alloys"
+              },
+              {
+                "condition": "fabric:item_tags_populated",
+                "values": [
+                  "forge:ingots/zinc"
+                ]
+              }
             ]
           }
         ]
@@ -19,7 +34,7 @@
     ]
   },
   "craftable": false,
-  "tier": 3,
+  "hidden": false,
   "sortOrder": 8,
-  "hidden": false
+  "tier": 3
 }

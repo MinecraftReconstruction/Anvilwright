@@ -1,4 +1,5 @@
 {
   "type": "tconstruct:player_beheading",
-  "category": "misc"
+  "looting_bonus": 0.02,
+  "per_level_chance": 0.1
 }

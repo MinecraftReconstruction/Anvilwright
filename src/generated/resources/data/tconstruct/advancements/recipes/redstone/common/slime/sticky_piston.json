@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:common/slime/sticky_piston"
+        "recipe": "forge:common/slime/sticky_piston"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:common/slime/sticky_piston"
+      "forge:common/slime/sticky_piston"
     ]
   },
   "sends_telemetry_event": false

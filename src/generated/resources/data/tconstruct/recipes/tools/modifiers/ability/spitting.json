@@ -4,14 +4,14 @@
   "check_trait_level": true,
   "inputs": [
     {
-      "type": "tconstruct:material",
+      "fabric:type": "tconstruct:material",
       "item": "tconstruct:bow_limb"
     },
     {
       "item": "tconstruct:seared_fluid_cannon"
     },
     {
-      "type": "tconstruct:material",
+      "fabric:type": "tconstruct:material",
       "item": "tconstruct:bow_limb"
     }
   ],
@@ -23,8 +23,8 @@
     "abilities": 1
   },
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/durability"
       },

@@ -1,13 +1,15 @@
 {
-  "type": "tconstruct:material_fluid",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/fiery"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:ingots/fiery"
+      ]
     }
   ],
+  "type": "tconstruct:material_fluid",
   "fluid": {
-    "amount": 250,
+    "amount": 27000,
     "tag": "tconstruct:fiery_liquid"
   },
   "input": "tconstruct:iron",

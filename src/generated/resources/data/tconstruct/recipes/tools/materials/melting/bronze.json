@@ -1,9 +1,20 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:bronze_ingots"
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:bronze_ingots"
+          ]
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:tin_ingots"
+          ]
+        }
       ]
     }
   ],

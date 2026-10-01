@@ -18,15 +18,19 @@
       "item": "tconstruct:sky_slime_vine"
     }
   ],
-  "max_level": 2,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:trick_quiver"
-  },
+  "result": "tconstruct:trick_quiver",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/ranged/bows"
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/ranged/bows"
+      },
+      {
+        "tag": "tconstruct:modifiable/interactable"
+      }
+    ]
   }
 }

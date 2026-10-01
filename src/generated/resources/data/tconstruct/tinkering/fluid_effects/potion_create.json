@@ -1,4 +1,12 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "create"
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:potion_cloud",
@@ -20,12 +28,6 @@
         "Bottle": "LINGERING"
       },
       "scale": 0.75
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:mod_loaded",
-      "modid": "create"
     }
   ],
   "entity_effects": [
@@ -52,7 +54,7 @@
     }
   ],
   "fluid": {
-    "amount": 50,
+    "amount": 5400,
     "fluid": "create:potion"
   },
   "hidden": true

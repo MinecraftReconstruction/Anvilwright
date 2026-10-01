@@ -6,29 +6,32 @@
       "item": "minecraft:cactus"
     },
     {
-      "type": "tconstruct:no_container",
+      "fabric:type": "tconstruct:no_container",
       "tag": "tconstruct:tanks"
     },
     {
       "item": "minecraft:cactus"
     },
     {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     },
     {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     }
   ],
   "result": "tconstruct:bursting",
   "slots": {
     "abilities": 1
   },
-  "tools": [
-    {
-      "tag": "tconstruct:modifiable/armor/chestplate"
-    },
-    {
-      "tag": "tconstruct:modifiable/shields"
-    }
-  ]
+  "tools": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/armor/chestplate"
+      },
+      {
+        "tag": "tconstruct:modifiable/shields"
+      }
+    ]
+  }
 }

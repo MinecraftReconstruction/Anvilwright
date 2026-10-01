@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
-  "group": "minecraft:copper_ingot",
+  "category": "misc",
+  "group": "tconstruct:copper_ingot",
   "key": {
     "#": {
-      "tag": "c:copper_nuggets"
+      "tag": "forge:nuggets/copper"
     },
     "*": {
       "item": "tconstruct:copper_nugget"

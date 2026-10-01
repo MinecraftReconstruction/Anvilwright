@@ -9,16 +9,14 @@
   ],
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "item": "theoneprobe:probe"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:the_one_probe"
-  },
+  "level": 1,
+  "result": "tconstruct:the_one_probe",
   "slots": {
     "upgrades": 1
   },

@@ -3,24 +3,23 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "item": "minecraft:end_rod"
+      "item": "minecraft:pointed_dripstone"
     },
     {
-      "item": "minecraft:end_rod"
+      "item": "minecraft:pointed_dripstone"
     },
     {
-      "item": "minecraft:end_rod"
+      "item": "minecraft:pointed_dripstone"
     }
   ],
-  "max_level": 4,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:impaling"
+  "level": {
+    "max": 4
   },
+  "result": "tconstruct:impaling",
   "slots": {
     "upgrades": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable/ranged/bows"
+    "tag": "tconstruct:modifiable/ranged/crossbows"
   }
 }

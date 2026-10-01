@@ -3,12 +3,13 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "ingredient": [
+      "fabric:type": "fabric:any",
+      "ingredients": [
         {
-          "tag": "forge:ores/diamond"
+          "tag": "c:diamond_ores"
         },
         {
-          "tag": "forge:ores/emerald"
+          "tag": "c:emerald_ores"
         },
         {
           "tag": "forge:ores/cobalt"

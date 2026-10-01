@@ -1,4 +1,27 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/pewter"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/tin"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/lead"
+        }
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -7,29 +30,6 @@
           "effect": "minecraft:strength",
           "level": 1,
           "time": 140
-        }
-      ]
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
-      "values": [
-        {
-          "type": "tconstruct:config",
-          "prop": "force_integration_materials"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/pewter"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/tin"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/lead"
         }
       ]
     }
@@ -59,7 +59,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_pewter"
   }
 }

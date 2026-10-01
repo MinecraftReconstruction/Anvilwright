@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:material_fluid",
   "fluid": {
-    "amount": 50,
+    "amount": 5400,
     "tag": "tconstruct:venom"
   },
   "hide_in_book": true,

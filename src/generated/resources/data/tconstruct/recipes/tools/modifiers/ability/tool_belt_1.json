@@ -1,6 +1,6 @@
 {
   "type": "tconstruct:modifier",
-  "allow_crystal": false,
+  "allow_crystal": true,
   "inputs": [
     {
       "item": "minecraft:leather"
@@ -12,11 +12,8 @@
       "item": "minecraft:leather"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:tool_belt"
-  },
+  "level": 1,
+  "result": "tconstruct:tool_belt",
   "slots": {
     "abilities": 1
   },

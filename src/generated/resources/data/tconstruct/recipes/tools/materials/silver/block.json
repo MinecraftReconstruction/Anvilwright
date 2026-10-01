@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:silver_blocks"
+        "forge:silver_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:silver_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:silver_ingots"
   },
   "material": "tconstruct:silver",

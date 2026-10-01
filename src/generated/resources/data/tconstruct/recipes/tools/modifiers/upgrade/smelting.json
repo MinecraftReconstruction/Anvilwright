@@ -13,12 +13,15 @@
   "slots": {
     "upgrades": 1
   },
-  "tools": [
-    {
-      "tag": "tconstruct:modifiable/interactable"
-    },
-    {
-      "tag": "tconstruct:modifiable/armor/worn"
-    }
-  ]
+  "tools": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "tag": "tconstruct:modifiable/interactable"
+      },
+      {
+        "tag": "tconstruct:modifiable/armor/worn"
+      }
+    ]
+  }
 }

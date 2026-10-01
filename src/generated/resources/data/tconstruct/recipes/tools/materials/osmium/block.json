@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:osmium_blocks"
+        "forge:osmium_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:osmium_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:osmium_ingots"
   },
   "material": "tconstruct:osmium",

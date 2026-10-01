@@ -3,20 +3,23 @@
   "material": {
     "tag": "tconstruct:casts/sand"
   },
-  "pattern": [
-    {
-      "type": "forge:difference",
-      "base": {
-        "tag": "forge:ingots"
+  "pattern": {
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "fabric:type": "fabric:difference",
+        "base": {
+          "tag": "c:ingots"
+        },
+        "subtracted": {
+          "item": "tconstruct:fake_ingot"
+        }
       },
-      "subtracted": {
+      {
+        "fabric:type": "tconstruct:material",
         "item": "tconstruct:fake_ingot"
       }
-    },
-    {
-      "type": "tconstruct:material",
-      "item": "tconstruct:fake_ingot"
-    }
-  ],
+    ]
+  },
   "result": "tconstruct:ingot_sand_cast"
 }

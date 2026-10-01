@@ -109,6 +109,7 @@ public class TConstruct implements ModInitializer {
     // initialize modules, done this way rather than with annotations to give us control over the order
     // base
     new TinkerCommons();
+    new TinkerAttributes();
     new TinkerMaterials();
     new TinkerFluids();
     new TinkerGadgets();

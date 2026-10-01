@@ -14,8 +14,8 @@
     "upgrades": 1
   },
   "tools": {
-    "type": "forge:intersection",
-    "children": [
+    "fabric:type": "fabric:all",
+    "ingredients": [
       {
         "tag": "tconstruct:modifiable/interactable/charge"
       },

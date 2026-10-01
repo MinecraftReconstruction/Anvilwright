@@ -1,11 +1,13 @@
 {
-  "type": "tconstruct:item_part_builder",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:wires"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:wires"
+      ]
     }
   ],
+  "type": "tconstruct:item_part_builder",
   "pattern": "tconstruct:wire",
   "pattern_item": {
     "tag": "tconstruct:casts/sand"

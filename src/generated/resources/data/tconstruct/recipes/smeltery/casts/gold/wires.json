@@ -1,19 +1,21 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:wires"
+      ]
+    }
+  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "forge:wires"
   },
   "cast_consumed": true,
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:wires"
-    }
-  ],
   "cooling_time": 57,
   "fluid": {
-    "amount": 90,
-    "tag": "forge:molten_gold"
+    "amount": 9000,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "tconstruct:wire_cast",
   "switch_slots": true

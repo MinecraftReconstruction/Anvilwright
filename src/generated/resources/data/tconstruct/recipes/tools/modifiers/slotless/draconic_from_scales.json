@@ -3,13 +3,13 @@
   "allow_crystal": false,
   "inputs": [
     {
-      "item": "minecraft:wither_rose"
+      "item": "minecraft:dragon_breath"
     },
     {
       "item": "tconstruct:dragon_scale"
     },
     {
-      "item": "minecraft:wither_rose"
+      "item": "minecraft:dragon_breath"
     },
     {
       "item": "tconstruct:dragon_scale"
@@ -18,12 +18,9 @@
       "item": "tconstruct:dragon_scale"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:draconic"
-  },
+  "level": 1,
+  "result": "tconstruct:draconic",
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "tag": "tconstruct:modifiable/bonus_slots"
   }
 }

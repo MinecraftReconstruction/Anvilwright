@@ -1,0 +1,15 @@
+{
+  "type": "tconstruct:part_builder_tool_recycling",
+  "pattern": {
+    "tag": "tconstruct:patterns"
+  },
+  "tools": {
+    "fabric:type": "fabric:difference",
+    "base": {
+      "tag": "tconstruct:modifiable/multipart"
+    },
+    "subtracted": {
+      "tag": "tconstruct:modifiable/unsalvageable"
+    }
+  }
+}

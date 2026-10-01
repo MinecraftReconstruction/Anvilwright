@@ -1,6 +1,7 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "tag": "c:string"
@@ -12,11 +13,8 @@
       "tag": "c:string"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:zoom"
-  },
+  "level": 1,
+  "result": "tconstruct:zoom",
   "slots": {
     "upgrades": 1
   },
@@ -27,7 +25,7 @@
         "tag": "tconstruct:modifiable/armor/helmets"
       },
       {
-        "tag": "tconstruct:modifiable/interactable/right"
+        "tag": "tconstruct:modifiable/interactable/charge"
       }
     ]
   }

@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:bronze_ingots"
+        "forge:bronze_ingots"
       ]
     }
   ],

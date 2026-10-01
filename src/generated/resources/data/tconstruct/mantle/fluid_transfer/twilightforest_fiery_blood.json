@@ -1,13 +1,15 @@
 {
-  "type": "mantle:empty_item",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "twilightforest:fiery_blood"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "twilightforest:fiery_blood"
+      ]
     }
   ],
+  "type": "mantle:empty_item",
   "fluid": {
-    "amount": 250,
+    "amount": 27000,
     "fluid": "tconstruct:fiery_liquid"
   },
   "input": {

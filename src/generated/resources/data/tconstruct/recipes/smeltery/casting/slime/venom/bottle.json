@@ -6,8 +6,8 @@
   "cast_consumed": true,
   "cooling_time": 1,
   "fluid": {
-    "amount": 20250,
-    "tag": "tconstruct:blood"
+    "amount": 27000,
+    "tag": "tconstruct:venom"
   },
-  "result": "tconstruct:blood_bottle"
+  "result": "tconstruct:venom_bottle"
 }

@@ -4,7 +4,7 @@
     "tag": "tconstruct:casts/sand"
   },
   "pattern": {
-    "type": "tconstruct:material",
+    "fabric:type": "tconstruct:material",
     "item": "tconstruct:maille"
   },
   "result": "tconstruct:maille_sand_cast"

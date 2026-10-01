@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
+  "category": "misc",
   "group": "tconstruct:queens_slime_block",
   "key": {
     "#": {
-      "tag": "c:queens_slime_ingots"
+      "tag": "forge:ingots/queens_slime"
     },
     "*": {
       "item": "tconstruct:queens_slime_ingot"

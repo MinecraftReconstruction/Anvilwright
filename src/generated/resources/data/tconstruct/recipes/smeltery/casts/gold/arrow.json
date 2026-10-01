@@ -6,8 +6,8 @@
   "cast_consumed": true,
   "cooling_time": 57,
   "fluid": {
-    "amount": 90,
-    "tag": "forge:molten_gold"
+    "amount": 9000,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "tconstruct:arrow_cast"
 }

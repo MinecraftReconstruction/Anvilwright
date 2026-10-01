@@ -3,27 +3,13 @@
   "allow_crystal": false,
   "inputs": [
     {
-      "ingredient": [
-        {
-          "item": "tconstruct:dragon_scale"
-        },
-        {
-          "item": "minecraft:gilded_blackstone"
-        }
-      ]
+      "tag": "forge:nuggets/queens_slime"
     },
     {
-      "tag": "c:queens_slime_ingots"
+      "item": "minecraft:end_crystal"
     },
     {
-      "ingredient": [
-        {
-          "item": "tconstruct:dragon_scale"
-        },
-        {
-          "item": "minecraft:gilded_blackstone"
-        }
-      ]
+      "tag": "forge:nuggets/queens_slime"
     },
     {
       "item": "tconstruct:ichor_slime_crystal_block"
@@ -37,6 +23,6 @@
     "value": "abilities"
   },
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "tag": "tconstruct:modifiable/bonus_slots"
   }
 }

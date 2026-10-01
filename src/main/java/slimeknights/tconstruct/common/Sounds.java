@@ -1,7 +1,10 @@
 package slimeknights.tconstruct.common;
 
 import lombok.Getter;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.SoundType;
@@ -75,12 +78,18 @@ public enum Sounds {
     return SoundEvent.createVariableRangeEvent(TConstruct.getResource(name));
   }
 
+  /** Registration helper, upstream does this in Forge's sound registry event */
+  private static SoundEvent registerSound(String name) {
+    ResourceLocation id = TConstruct.getResource(name);
+    return Registry.register(BuiltInRegistries.SOUND_EVENT, id, createEvent(name));
+  }
+
   Sounds(String name) {
-    sound = createEvent(name);
+    sound = registerSound(name);
   }
 
   Sounds() {
-    sound = createEvent(name().toLowerCase(Locale.US));
+    sound = registerSound(name().toLowerCase(Locale.US));
   }
 
   // NOTE(porting): upstream registers these through Forge's RegisterEvent; this port registers each sound

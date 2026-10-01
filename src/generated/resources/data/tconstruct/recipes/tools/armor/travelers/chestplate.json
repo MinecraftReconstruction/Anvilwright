@@ -2,38 +2,38 @@
   "type": "tconstruct:crafting_shaped_materials",
   "category": "equipment",
   "key": {
-    "c": [
-      {
-        "type": "tconstruct:material_value",
-        "material": {
-          "type": "mantle:and",
-          "predicates": [
-            {
-              "type": "mantle:or",
-              "predicates": [
-                "tconstruct:castable",
-                "tconstruct:composite"
-              ]
-            },
-            {
-              "type": "tconstruct:stat_type",
-              "stat_type": "tconstruct:plating_chestplate"
-            }
-          ]
+    "c": {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+        {
+          "fabric:type": "tconstruct:material_value",
+          "material": {
+            "type": "mantle:and",
+            "predicates": [
+              {
+                "type": "mantle:or",
+                "predicates": [
+                  "tconstruct:castable",
+                  "tconstruct:composite"
+                ]
+              },
+              {
+                "type": "tconstruct:stat_type",
+                "stat_type": "tconstruct:plating_chestplate"
+              }
+            ]
+          },
+          "value": 1.0
         },
-        "value": 1.0
-      },
-      {
-        "type": "tconstruct:material",
-        "item": "tconstruct:fake_ingot",
-        "material": {
-          "type": "tconstruct:stat_type",
-          "stat_type": "tconstruct:plating_chestplate"
+        {
+          "fabric:type": "tconstruct:material",
+          "item": "tconstruct:fake_ingot",
+          "material": "MaterialStatTypePredicate[statType=tconstruct:plating_chestplate]"
         }
-      }
-    ],
+      ]
+    },
     "l": {
-      "type": "tconstruct:material_value",
+      "fabric:type": "tconstruct:material_value",
       "material": {
         "type": "tconstruct:stat_type",
         "stat_type": "tconstruct:cuirass"
@@ -41,7 +41,7 @@
       "value": 1.0
     },
     "s": {
-      "tag": "forge:string"
+      "tag": "c:string"
     }
   },
   "parts": "cl",

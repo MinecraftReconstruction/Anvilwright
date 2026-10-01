@@ -4,9 +4,9 @@
     "tag": "minecraft:wooden_stairs"
   },
   "cast_consumed": true,
-  "cooling_time": 111,
+  "cooling_time": 99,
   "fluid": {
-    "amount": 250,
+    "amount": 20250,
     "tag": "tconstruct:molten_obsidian"
   },
   "result": "tconstruct:nahuatl_stairs"

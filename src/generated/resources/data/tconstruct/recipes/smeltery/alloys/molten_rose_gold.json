@@ -3,16 +3,16 @@
   "inputs": [
     {
       "amount": 9000,
-      "tag": "c:molten_copper"
+      "tag": "forge:molten_copper"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_gold"
+      "tag": "forge:molten_gold"
     }
   ],
   "result": {
     "amount": 18000,
-    "fluid": "tconstruct:molten_rose_gold"
+    "tag": "forge:molten_rose_gold"
   },
   "temperature": 550
 }

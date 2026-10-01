@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:gadgets/fancy_frame/reversed_gold"
+        "recipe": "forge:gadgets/fancy_frame/reversed_gold"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:gadgets/fancy_frame/reversed_gold"
+      "forge:gadgets/fancy_frame/reversed_gold"
     ]
   },
   "sends_telemetry_event": false

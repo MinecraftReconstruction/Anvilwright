@@ -8,6 +8,6 @@
     }
   ],
   "type": "tconstruct:table_filling",
-  "container": "ceramics:cracked_clay_bucket",
+  "container": "ceramics:cracked_empty_clay_bucket",
   "fluid_amount": 81000
 }

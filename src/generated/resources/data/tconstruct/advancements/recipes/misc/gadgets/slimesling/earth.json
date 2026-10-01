@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "c:slimeball/earth"
+            "tag": "forge:slimeball/earth"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tconstruct:gadgets/slimesling/earth"
+        "recipe": "forge:gadgets/slimesling/earth"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "tconstruct:gadgets/slimesling/earth"
+      "forge:gadgets/slimesling/earth"
     ]
   },
   "sends_telemetry_event": false

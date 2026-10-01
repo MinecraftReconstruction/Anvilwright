@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/cinderslime"
+    "tag": "c:cinderslime_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/cinderslime"
+    "tag": "c:cinderslime_ingots"
   },
   "material": "tconstruct:cinderslime",
   "needed": 1,

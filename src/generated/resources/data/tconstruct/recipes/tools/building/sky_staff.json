@@ -6,7 +6,7 @@
       "item": "tconstruct:sky_slime_crystal"
     },
     "I": {
-      "tag": "c:rose_gold_ingots"
+      "tag": "forge:ingots/rose_gold"
     },
     "W": {
       "tag": "tconstruct:skyroot_logs"

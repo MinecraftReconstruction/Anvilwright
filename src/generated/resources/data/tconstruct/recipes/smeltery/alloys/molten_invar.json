@@ -3,13 +3,22 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:invar_ingots"
+        "forge:ingots/nickel"
       ]
     },
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:nickel_ingots"
+        {
+          "condition": "tconstruct:config",
+          "prop": "allow_ingotless_alloys"
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/invar"
+          ]
+        }
       ]
     }
   ],
@@ -17,16 +26,16 @@
   "inputs": [
     {
       "amount": 18000,
-      "tag": "c:molten_iron"
+      "tag": "forge:molten_iron"
     },
     {
       "amount": 9000,
-      "tag": "c:molten_nickel"
+      "tag": "forge:molten_nickel"
     }
   ],
   "result": {
     "amount": 27000,
-    "fluid": "tconstruct:molten_invar"
+    "tag": "forge:molten_invar"
   },
   "temperature": 900
 }

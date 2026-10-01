@@ -11,7 +11,22 @@
           {
             "condition": "fabric:item_tags_populated",
             "values": [
-              "c:invar_ingots"
+              "forge:ingots/invar"
+            ]
+          },
+          {
+            "condition": "fabric:and",
+            "values": [
+              {
+                "condition": "tconstruct:config",
+                "prop": "allow_ingotless_alloys"
+              },
+              {
+                "condition": "fabric:item_tags_populated",
+                "values": [
+                  "forge:ingots/nickel"
+                ]
+              }
             ]
           }
         ]
@@ -19,7 +34,7 @@
     ]
   },
   "craftable": false,
-  "tier": 3,
+  "hidden": false,
   "sortOrder": 7,
-  "hidden": false
+  "tier": 3
 }

@@ -3,7 +3,7 @@
   "cooling_time": 98,
   "fluid": {
     "amount": 108000,
-    "tag": "c:honey"
+    "tag": "tconstruct:honey"
   },
   "result": "minecraft:honey_block"
 }

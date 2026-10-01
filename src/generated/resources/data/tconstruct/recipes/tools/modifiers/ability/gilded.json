@@ -3,17 +3,14 @@
   "allow_crystal": true,
   "inputs": [
     {
-      "item": "minecraft:golden_apple"
+      "item": "minecraft:gilded_blackstone"
     }
   ],
-  "result": {
-    "level": 1,
-    "name": "tconstruct:gilded"
-  },
+  "result": "tconstruct:gilded",
   "slots": {
     "abilities": 1
   },
   "tools": {
-    "tag": "tconstruct:modifiable"
+    "tag": "tconstruct:modifiable/bonus_slots"
   }
 }

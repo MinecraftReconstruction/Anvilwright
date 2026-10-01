@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:lead_blocks"
+        "forge:lead_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:lead_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:lead_ingots"
   },
   "material": "tconstruct:lead",

@@ -1,16 +1,27 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:electrum_ingots"
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:electrum_ingots"
+          ]
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:silver_ingots"
+          ]
+        }
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "output": "tconstruct:electrum",
   "temperature": 760

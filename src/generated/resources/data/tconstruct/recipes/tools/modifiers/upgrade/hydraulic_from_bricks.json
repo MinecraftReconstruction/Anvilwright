@@ -6,12 +6,11 @@
     "item": "minecraft:prismarine_bricks"
   },
   "leftover": "minecraft:prismarine_shard",
-  "max_level": 5,
-  "needed_per_level": 36,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:hydraulic"
+  "level": {
+    "max": 5
   },
+  "needed_per_level": 36,
+  "result": "tconstruct:hydraulic",
   "slots": {
     "upgrades": 1
   },

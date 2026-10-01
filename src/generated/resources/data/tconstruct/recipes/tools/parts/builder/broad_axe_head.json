@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 8,
-  "pattern": "tconstruct:broad_axe_head",
+  "pattern": "forge:broad_axe_head",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

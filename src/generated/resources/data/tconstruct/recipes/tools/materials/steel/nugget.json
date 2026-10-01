@@ -1,12 +1,4 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_nuggets"
-      ]
-    }
-  ],
   "type": "tconstruct:material",
   "ingredient": {
     "tag": "c:steel_nuggets"

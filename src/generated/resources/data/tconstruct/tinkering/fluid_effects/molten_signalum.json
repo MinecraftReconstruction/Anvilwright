@@ -1,4 +1,19 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/signalum"
+        }
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:explosion",
@@ -14,21 +29,6 @@
         "each_level": 1.0,
         "flat": 1.0
       }
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
-      "values": [
-        {
-          "type": "tconstruct:config",
-          "prop": "force_integration_materials"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/signalum"
-        }
-      ]
     }
   ],
   "entity_effects": [
@@ -49,7 +49,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_signalum"
   }
 }

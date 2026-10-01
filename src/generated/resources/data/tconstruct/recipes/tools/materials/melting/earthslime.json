@@ -2,8 +2,8 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:earthslime",
   "result": {
-    "amount": 250,
-    "tag": "forge:slime"
+    "amount": 20250,
+    "fluid": "tconstruct:earth_slime"
   },
   "temperature": 50
 }

@@ -1,4 +1,23 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:or",
+      "values": [
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/electrum"
+        },
+        {
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/silver"
+        }
+      ]
+    }
+  ],
   "block_effects": [
     {
       "type": "tconstruct:mob_effect_cloud",
@@ -7,25 +26,6 @@
           "effect": "minecraft:haste",
           "level": 1,
           "time": 160
-        }
-      ]
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:or",
-      "values": [
-        {
-          "type": "tconstruct:config",
-          "prop": "force_integration_materials"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/electrum"
-        },
-        {
-          "type": "mantle:tag_filled",
-          "tag": "forge:ingots/silver"
         }
       ]
     }
@@ -48,7 +48,7 @@
     }
   ],
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_electrum"
   }
 }

@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:invar_blocks"
+        "forge:invar_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:invar_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:invar_ingots"
   },
   "material": "tconstruct:invar",

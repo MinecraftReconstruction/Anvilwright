@@ -1,22 +1,20 @@
 {
   "type": "tconstruct:modifier",
   "allow_crystal": true,
+  "check_trait_level": true,
   "inputs": [
     {
       "tag": "minecraft:planks"
     },
     {
-      "tag": "c:cobalt_ingots"
+      "tag": "forge:ingots/steel"
     },
     {
       "tag": "minecraft:planks"
     }
   ],
-  "max_level": 1,
-  "result": {
-    "level": 1,
-    "name": "tconstruct:parrying"
-  },
+  "level": 1,
+  "result": "tconstruct:parrying",
   "slots": {
     "abilities": 1
   },

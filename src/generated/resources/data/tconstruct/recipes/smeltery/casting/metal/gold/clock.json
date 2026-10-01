@@ -7,7 +7,7 @@
   "cooling_time": 114,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_gold"
+    "tag": "tconstruct:molten_gold"
   },
   "result": "minecraft:clock"
 }

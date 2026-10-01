@@ -10,16 +10,16 @@
   "tools": {
     "ingredient": [
       {
-        "item": "tconstruct:travelers_helmet"
-      },
-      {
-        "item": "tconstruct:travelers_chestplate"
+        "item": "tconstruct:travelers_boots"
       },
       {
         "item": "tconstruct:travelers_leggings"
       },
       {
-        "item": "tconstruct:travelers_boots"
+        "item": "tconstruct:travelers_chestplate"
+      },
+      {
+        "item": "tconstruct:travelers_helmet"
       }
     ]
   }
