@@ -1,18 +1,18 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/fiery"
+    }
+  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "forge:ingots/iron"
   },
   "cast_consumed": true,
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/fiery"
-    }
-  ],
-  "cooling_time": 134,
+  "cooling_time": 139,
   "fluid": {
-    "amount": 250,
+    "amount": 27000,
     "tag": "tconstruct:fiery_liquid"
   },
   "result": {

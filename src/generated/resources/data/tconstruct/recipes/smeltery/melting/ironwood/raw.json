@@ -1,22 +1,22 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:raw_materials/ironwood"
+    }
+  ],
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 10,
+      "amount": 1000,
       "tag": "forge:molten_gold"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:raw_materials/ironwood"
     }
   ],
   "ingredient": {
     "tag": "forge:raw_materials/ironwood"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_iron"
   },
   "temperature": 800,

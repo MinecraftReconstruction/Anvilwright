@@ -1,23 +1,23 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/dawnstone"
+    },
+    {
+      "condition": "mantle:tag_filled",
+      "registry": "minecraft:fluid",
+      "tag": "forge:molten_dawnstone"
+    }
+  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "tconstruct:casts/single_use/nugget"
   },
   "cast_consumed": true,
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:nuggets/dawnstone"
-    },
-    {
-      "type": "mantle:tag_filled",
-      "registry": "minecraft:fluid",
-      "tag": "forge:molten_dawnstone"
-    }
-  ],
   "cooling_time": 21,
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "forge:molten_dawnstone"
   },
   "result": {

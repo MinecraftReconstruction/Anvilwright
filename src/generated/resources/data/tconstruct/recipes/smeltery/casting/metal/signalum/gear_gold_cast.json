@@ -1,22 +1,20 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:signalum_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/signalum"
     }
   ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "tconstruct:casts/multi_use/gear"
   },
-  "cooling_time": 140,
+  "cooling_time": 133,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_signalum"
+    "tag": "forge:molten_signalum"
   },
   "result": {
-    "tag": "c:signalum_gears"
+    "tag": "forge:gears/signalum"
   }
 }

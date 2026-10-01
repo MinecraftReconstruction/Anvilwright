@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:electrum_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/electrum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 59,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "result": {
-    "tag": "c:electrum_plates"
+    "tag": "forge:plates/electrum"
   }
 }

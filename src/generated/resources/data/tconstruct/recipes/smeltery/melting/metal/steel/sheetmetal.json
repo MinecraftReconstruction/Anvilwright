@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:sheetmetals/steel"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:sheetmetals/steel"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:sheetmetals/steel"
+    "tag": "forge:sheetmetals/steel"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "temperature": 950,
   "time": 65

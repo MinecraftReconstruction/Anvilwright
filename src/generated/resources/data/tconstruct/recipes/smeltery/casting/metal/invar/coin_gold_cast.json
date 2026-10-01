@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:invar_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/invar"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 37,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_invar"
+    "tag": "forge:molten_invar"
   },
   "result": {
-    "tag": "c:invar_coins"
+    "tag": "forge:coins/invar"
   }
 }

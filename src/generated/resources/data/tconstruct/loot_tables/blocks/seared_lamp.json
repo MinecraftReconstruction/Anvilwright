@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "tconstruct:lavawood"
+          "name": "tconstruct:seared_lamp"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "tconstruct:blocks/lavawood"
+  "random_sequence": "tconstruct:blocks/seared_lamp"
 }

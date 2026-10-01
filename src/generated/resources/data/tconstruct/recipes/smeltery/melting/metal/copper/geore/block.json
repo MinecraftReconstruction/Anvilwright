@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_blocks/copper"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_blocks/copper"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_blocks/copper"
+    "tag": "forge:geore_blocks/copper"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "temperature": 500,
   "time": 100

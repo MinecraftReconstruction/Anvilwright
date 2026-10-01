@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_duralumin",
-    "tconstruct:flowing_molten_duralumin"
+    "tconstruct:molten_duralumin"
   ]
 }

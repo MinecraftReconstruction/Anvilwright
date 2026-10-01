@@ -3,13 +3,13 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:dusts/obsidian"
+        "forge:dusts/obsidian"
       ]
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:dusts/obsidian"
+    "tag": "forge:dusts/obsidian"
   },
   "result": {
     "amount": 20250,

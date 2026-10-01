@@ -1,43 +1,32 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:gold_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/gold"
     }
   ],
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
       "amount": 18000,
-      "fluid": "tconstruct:molten_copper"
+      "rate": "metal",
+      "tag": "forge:molten_cobalt"
     }
   ],
   "ingredient": {
     "fabric:type": "fabric:difference",
     "base": {
-      "tag": "c:gold_ores"
+      "tag": "forge:ores/gold"
     },
     "subtracted": {
-      "fabric:type": "fabric:any",
-      "ingredients": [
-        {
-          "tag": "c:ore_rates/sparse"
-        },
-        {
-          "tag": "c:ore_rates/dense"
-        }
-      ]
+      "tag": "tconstruct:non_singular_ore_rates"
     }
   },
   "rate": "metal",
   "result": {
     "amount": 18000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 142

@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:bronze_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/bronze"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:bronze_nuggets"
+    "tag": "forge:nuggets/bronze"
   },
   "result": {
     "amount": 1000,
-    "fluid": "tconstruct:molten_bronze"
+    "tag": "forge:molten_bronze"
   },
   "temperature": 700,
   "time": 19

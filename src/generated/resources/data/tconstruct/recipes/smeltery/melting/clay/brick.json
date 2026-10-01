@@ -1,7 +1,15 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "item": "minecraft:brick"
+    "fabric:type": "fabric:any",
+    "ingredients": [
+      {
+        "item": "minecraft:brick"
+      },
+      {
+        "tag": "minecraft:decorated_pot_sherds"
+      }
+    ]
   },
   "result": {
     "amount": 20250,

@@ -1,19 +1,25 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_clusters/iron"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_clusters/iron"
     }
   ],
-  "type": "tconstruct:melting",
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 36000,
+      "rate": "metal",
+      "tag": "forge:molten_steel"
+    }
+  ],
   "ingredient": {
-    "tag": "c:geore_clusters/iron"
+    "tag": "forge:geore_clusters/iron"
   },
+  "rate": "metal",
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 150

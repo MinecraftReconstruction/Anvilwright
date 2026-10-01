@@ -1,22 +1,22 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/fiery"
+    }
+  ],
   "type": "tconstruct:melting",
   "byproducts": [
     {
-      "amount": 810,
+      "amount": 81000,
       "tag": "forge:molten_iron"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/fiery"
     }
   ],
   "ingredient": {
     "tag": "forge:storage_blocks/fiery"
   },
   "result": {
-    "amount": 2250,
+    "amount": 243000,
     "fluid": "tconstruct:fiery_liquid"
   },
   "temperature": 1500,

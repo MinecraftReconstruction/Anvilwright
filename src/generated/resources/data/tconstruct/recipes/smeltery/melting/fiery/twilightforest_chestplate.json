@@ -1,25 +1,27 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "values": [
+        "twilightforest:fiery_chestplate"
+      ]
+    }
+  ],
   "type": "tconstruct:damagable_melting",
   "byproducts": [
     {
-      "amount": 720,
+      "amount": 72000,
       "tag": "forge:molten_iron",
-      "unit_size": 10
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:item_exists",
-      "item": "twilightforest:fiery_chestplate"
+      "unit_size": 1000
     }
   ],
   "ingredient": {
     "item": "twilightforest:fiery_chestplate"
   },
   "result": {
-    "amount": 2000,
+    "amount": 216000,
     "fluid": "tconstruct:fiery_liquid",
-    "unit_size": 50
+    "unit_size": 5400
   },
   "temperature": 1500,
   "time": 227

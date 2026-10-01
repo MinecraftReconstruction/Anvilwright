@@ -1,17 +1,17 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/quartz"
+    }
+  ],
   "type": "tconstruct:casting_table",
   "cast": {
     "tag": "tconstruct:casts/multi_use/gear"
   },
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:gears/quartz"
-    }
-  ],
-  "cooling_time": 115,
+  "cooling_time": 104,
   "fluid": {
-    "amount": 400,
+    "amount": 32400,
     "tag": "tconstruct:molten_quartz"
   },
   "result": {

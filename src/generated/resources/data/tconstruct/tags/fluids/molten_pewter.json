@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_pewter",
-    "tconstruct:flowing_molten_pewter"
+    "tconstruct:molten_pewter"
   ]
 }

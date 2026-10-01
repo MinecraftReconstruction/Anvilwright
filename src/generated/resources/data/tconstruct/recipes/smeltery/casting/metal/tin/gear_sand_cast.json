@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tin_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/tin"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 78,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_tin"
+    "tag": "forge:molten_tin"
   },
   "result": {
-    "tag": "c:tin_gears"
+    "tag": "forge:gears/tin"
   }
 }

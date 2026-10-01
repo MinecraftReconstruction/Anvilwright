@@ -1,6 +1,6 @@
 {
   "type": "mantle:crafting_shaped_retextured",
-  "category": "misc",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "tconstruct:smeltery_bricks"
@@ -19,7 +19,5 @@
     "item": "tconstruct:seared_chute"
   },
   "show_notification": true,
-  "texture": {
-    "tag": "tconstruct:smeltery_bricks"
-  }
+  "texture": "#"
 }

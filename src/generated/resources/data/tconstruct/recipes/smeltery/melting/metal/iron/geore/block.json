@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_blocks/iron"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_blocks/iron"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_blocks/iron"
+    "tag": "forge:geore_blocks/iron"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 120

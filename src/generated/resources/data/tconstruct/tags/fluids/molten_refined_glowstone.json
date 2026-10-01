@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_refined_glowstone",
-    "tconstruct:flowing_molten_refined_glowstone"
+    "tconstruct:molten_refined_glowstone"
   ]
 }

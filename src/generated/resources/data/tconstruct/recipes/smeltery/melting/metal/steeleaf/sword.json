@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "tconstruct:melting/steeleaf/tools_costing_2"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "tconstruct:melting/steeleaf/tools_costing_2"
   },
   "result": {
-    "amount": 180,
+    "amount": 18000,
     "fluid": "tconstruct:molten_steeleaf",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 934,
   "time": 91

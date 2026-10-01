@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:invar_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/invar"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 21,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_invar"
+    "tag": "forge:molten_invar"
   },
   "result": {
-    "tag": "c:invar_nuggets"
+    "tag": "forge:nuggets/invar"
   }
 }

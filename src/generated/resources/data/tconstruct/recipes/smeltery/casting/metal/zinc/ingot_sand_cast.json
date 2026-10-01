@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:zinc_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/zinc"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 47,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_zinc"
+    "tag": "forge:molten_zinc"
   },
   "result": {
-    "tag": "c:zinc_ingots"
+    "tag": "forge:ingots/zinc"
   }
 }

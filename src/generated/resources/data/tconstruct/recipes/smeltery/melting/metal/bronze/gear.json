@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:bronze_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/bronze"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:bronze_gears"
+    "tag": "forge:gears/bronze"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_bronze"
+    "tag": "forge:molten_bronze"
   },
   "temperature": 700,
   "time": 114

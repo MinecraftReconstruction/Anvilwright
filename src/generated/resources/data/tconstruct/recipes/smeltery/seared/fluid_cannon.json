@@ -3,10 +3,10 @@
   "category": "redstone",
   "key": {
     "C": {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "T": {
       "type": "tconstruct:no_container",

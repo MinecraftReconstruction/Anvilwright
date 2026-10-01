@@ -1,44 +1,79 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:tin_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/tin"
     }
   ],
-  "type": "tconstruct:ore_melting",
-  "byproducts": [
+  "type": "porting_lib:conditional",
+  "recipes": [
     {
-      "amount": 18000,
-      "fluid": "tconstruct:molten_copper"
-    }
-  ],
-  "ingredient": {
-    "fabric:type": "fabric:difference",
-    "base": {
-      "tag": "c:tin_ores"
-    },
-    "subtracted": {
-      "fabric:type": "fabric:any",
-      "ingredients": [
+      "fabric:load_conditions": [
         {
-          "tag": "c:ore_rates/sparse"
-        },
-        {
-          "tag": "c:ore_rates/dense"
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/nickel"
         }
-      ]
+      ],
+      "recipe": {
+        "type": "tconstruct:ore_melting",
+        "byproducts": [
+          {
+            "amount": 18000,
+            "rate": "metal",
+            "tag": "forge:molten_nickel"
+          }
+        ],
+        "ingredient": {
+          "fabric:type": "fabric:difference",
+          "base": {
+            "tag": "forge:ores/tin"
+          },
+          "subtracted": {
+            "tag": "tconstruct:non_singular_ore_rates"
+          }
+        },
+        "rate": "metal",
+        "result": {
+          "amount": 18000,
+          "tag": "forge:molten_tin"
+        },
+        "temperature": 225,
+        "time": 98
+      }
+    },
+    {
+      "fabric:load_conditions": [
+        {
+          "condition": "porting_lib:true"
+        }
+      ],
+      "recipe": {
+        "type": "tconstruct:ore_melting",
+        "byproducts": [
+          {
+            "amount": 18000,
+            "rate": "metal",
+            "tag": "forge:molten_copper"
+          }
+        ],
+        "ingredient": {
+          "fabric:type": "fabric:difference",
+          "base": {
+            "tag": "forge:ores/tin"
+          },
+          "subtracted": {
+            "tag": "tconstruct:non_singular_ore_rates"
+          }
+        },
+        "rate": "metal",
+        "result": {
+          "amount": 18000,
+          "tag": "forge:molten_tin"
+        },
+        "temperature": 225,
+        "time": 98
+      }
     }
-  },
-  "rate": "metal",
-  "result": {
-    "amount": 18000,
-    "fluid": "tconstruct:molten_tin"
-  },
-  "temperature": 225,
-  "time": 98
+  ]
 }

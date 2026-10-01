@@ -1,17 +1,17 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_combination_filled",
+      "condition": "mantle:tag_combination_filled",
       "ignore": "tconstruct:non_singular_ore_rates",
       "match": "forge:ores/cadmium"
     }
   ],
+  "type": "porting_lib:conditional",
   "recipes": [
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/lead"
         }
       ],
@@ -19,13 +19,13 @@
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 180,
+            "amount": 18000,
             "rate": "metal",
             "tag": "forge:molten_lead"
           }
         ],
         "ingredient": {
-          "type": "forge:difference",
+          "fabric:type": "fabric:difference",
           "base": {
             "tag": "forge:ores/cadmium"
           },
@@ -35,7 +35,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 180,
+          "amount": 18000,
           "tag": "forge:molten_cadmium"
         },
         "temperature": 294,
@@ -43,22 +43,22 @@
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:true"
+          "condition": "porting_lib:true"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 180,
+            "amount": 18000,
             "rate": "metal",
             "tag": "forge:molten_copper"
           }
         ],
         "ingredient": {
-          "type": "forge:difference",
+          "fabric:type": "fabric:difference",
           "base": {
             "tag": "forge:ores/cadmium"
           },
@@ -68,7 +68,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 180,
+          "amount": 18000,
           "tag": "forge:molten_cadmium"
         },
         "temperature": 294,

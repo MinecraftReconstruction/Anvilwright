@@ -4,7 +4,7 @@
     "tag": "tconstruct:foundry_bricks"
   },
   "cast_consumed": true,
-  "cooling_time": 199,
+  "cooling_time": 84,
   "fluid": {
     "amount": 81000,
     "tag": "tconstruct:molten_obsidian"

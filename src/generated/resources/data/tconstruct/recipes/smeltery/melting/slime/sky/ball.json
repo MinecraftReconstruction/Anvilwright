@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:slimeball/sky"
+    "tag": "forge:slimeball/sky"
   },
   "result": {
     "amount": 20250,

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:aluminum_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/aluminum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 47,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "result": {
-    "tag": "c:aluminum_ingots"
+    "tag": "forge:ingots/aluminum"
   }
 }

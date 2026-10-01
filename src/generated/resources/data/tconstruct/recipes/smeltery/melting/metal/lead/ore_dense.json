@@ -1,10 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:lead_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/lead",
         "c:ore_rates/dense"
       ]
     }
@@ -14,10 +13,8 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:silver_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/silver"
         }
       ],
       "recipe": {
@@ -25,14 +22,15 @@
         "byproducts": [
           {
             "amount": 54000,
-            "fluid": "tconstruct:molten_silver"
+            "rate": "metal",
+            "tag": "forge:molten_silver"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:lead_ores"
+              "tag": "forge:ores/lead"
             },
             {
               "tag": "c:ore_rates/dense"
@@ -42,7 +40,7 @@
         "rate": "metal",
         "result": {
           "amount": 54000,
-          "fluid": "tconstruct:molten_lead"
+          "tag": "forge:molten_lead"
         },
         "temperature": 330,
         "time": 195
@@ -59,14 +57,15 @@
         "byproducts": [
           {
             "amount": 54000,
-            "fluid": "tconstruct:molten_gold"
+            "rate": "metal",
+            "tag": "forge:molten_gold"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:all",
           "ingredients": [
             {
-              "tag": "c:lead_ores"
+              "tag": "forge:ores/lead"
             },
             {
               "tag": "c:ore_rates/dense"
@@ -76,7 +75,7 @@
         "rate": "metal",
         "result": {
           "amount": 54000,
-          "fluid": "tconstruct:molten_lead"
+          "tag": "forge:molten_lead"
         },
         "temperature": 330,
         "time": 195

@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_bendalloy",
-    "tconstruct:flowing_molten_bendalloy"
+    "tconstruct:molten_bendalloy"
   ]
 }

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:rose_gold_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/rose_gold"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 103,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_rose_gold"
+    "tag": "forge:molten_rose_gold"
   },
   "result": {
-    "tag": "c:rose_gold_gears"
+    "tag": "forge:gears/rose_gold"
   }
 }

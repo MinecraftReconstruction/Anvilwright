@@ -7,9 +7,9 @@
   "cooling_time": 24,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_manyullyn"
+    "tag": "forge:molten_manyullyn"
   },
   "result": {
-    "tag": "c:manyullyn_nuggets"
+    "tag": "forge:nuggets/manyullyn"
   }
 }

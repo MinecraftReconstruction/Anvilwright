@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_lead",
-    "tconstruct:flowing_molten_lead"
+    "tconstruct:molten_lead"
   ]
 }

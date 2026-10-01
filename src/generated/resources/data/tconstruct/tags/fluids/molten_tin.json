@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_tin",
-    "tconstruct:flowing_molten_tin"
+    "tconstruct:molten_tin"
   ]
 }

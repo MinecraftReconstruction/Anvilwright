@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "tconstruct:blood_slime"
+          "name": "tconstruct:cheese_block"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "tconstruct:blocks/blood_slime"
+  "random_sequence": "tconstruct:blocks/cheese_block"
 }

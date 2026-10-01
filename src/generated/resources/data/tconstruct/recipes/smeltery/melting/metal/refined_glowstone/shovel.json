@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:tools/shovels/refined_glowstone"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "forge:tools/shovels/refined_glowstone"
   },
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_refined_glowstone",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 825,
   "time": 61

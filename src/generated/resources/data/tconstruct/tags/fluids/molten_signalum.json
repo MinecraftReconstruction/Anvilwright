@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_signalum",
-    "tconstruct:flowing_molten_signalum"
+    "tconstruct:molten_signalum"
   ]
 }

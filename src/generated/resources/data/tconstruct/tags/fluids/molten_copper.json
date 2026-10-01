@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_copper",
-    "tconstruct:flowing_molten_copper"
+    "tconstruct:molten_copper"
   ]
 }

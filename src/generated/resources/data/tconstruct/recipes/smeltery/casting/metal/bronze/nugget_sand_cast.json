@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:bronze_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/bronze"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 19,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_bronze"
+    "tag": "forge:molten_bronze"
   },
   "result": {
-    "tag": "c:bronze_nuggets"
+    "tag": "forge:nuggets/bronze"
   }
 }

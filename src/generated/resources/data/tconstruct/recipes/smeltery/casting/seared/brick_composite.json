@@ -1,10 +1,10 @@
 {
   "type": "tconstruct:casting_table",
   "cast": {
-    "item": "minecraft:stone_button"
+    "item": "minecraft:flint"
   },
   "cast_consumed": true,
-  "cooling_time": 51,
+  "cooling_time": 30,
   "fluid": {
     "amount": 10125,
     "tag": "tconstruct:molten_clay"

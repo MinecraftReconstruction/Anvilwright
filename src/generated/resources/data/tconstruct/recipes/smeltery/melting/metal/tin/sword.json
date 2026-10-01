@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "tconstruct:melting/tin/tools_costing_2"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "tconstruct:melting/tin/tools_costing_2"
   },
   "result": {
-    "amount": 180,
+    "amount": 18000,
     "tag": "forge:molten_tin",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 225,
   "time": 55

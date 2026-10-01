@@ -4,10 +4,10 @@
     "tag": "tconstruct:smeltery_bricks"
   },
   "cast_consumed": true,
-  "cooling_time": 100,
+  "cooling_time": 56,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_copper"
+    "tag": "tconstruct:molten_copper"
   },
   "result": "tconstruct:smeltery_controller"
 }

@@ -1,10 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:aluminum_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/aluminum",
         "c:ore_rates/dense"
       ]
     }
@@ -13,14 +12,15 @@
   "byproducts": [
     {
       "amount": 54000,
-      "fluid": "tconstruct:molten_iron"
+      "rate": "metal",
+      "tag": "forge:molten_iron"
     }
   ],
   "ingredient": {
     "fabric:type": "fabric:all",
     "ingredients": [
       {
-        "tag": "c:aluminum_ores"
+        "tag": "forge:ores/aluminum"
       },
       {
         "tag": "c:ore_rates/dense"
@@ -30,7 +30,7 @@
   "rate": "metal",
   "result": {
     "amount": 54000,
-    "fluid": "tconstruct:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "temperature": 425,
   "time": 212

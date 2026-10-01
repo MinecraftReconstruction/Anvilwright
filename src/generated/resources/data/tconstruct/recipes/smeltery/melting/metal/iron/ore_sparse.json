@@ -1,86 +1,37 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "tconstruct:tag_intersection_present",
-      "registry": "minecraft:item",
-      "tags": [
-        "c:iron_ores",
+      "condition": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/iron",
         "c:ore_rates/sparse"
       ]
     }
   ],
-  "type": "porting_lib:conditional",
-  "recipes": [
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
     {
-      "fabric:load_conditions": [
-        {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:nickel_ingots"
-          ]
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 9000,
-            "fluid": "tconstruct:molten_nickel"
-          }
-        ],
-        "ingredient": {
-          "fabric:type": "fabric:all",
-          "ingredients": [
-            {
-              "tag": "c:iron_ores"
-            },
-            {
-              "tag": "c:ore_rates/sparse"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 9000,
-          "fluid": "tconstruct:molten_iron"
-        },
-        "temperature": 800,
-        "time": 90
-      }
-    },
-    {
-      "fabric:load_conditions": [
-        {
-          "condition": "porting_lib:true"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 9000,
-            "fluid": "tconstruct:molten_copper"
-          }
-        ],
-        "ingredient": {
-          "fabric:type": "fabric:all",
-          "ingredients": [
-            {
-              "tag": "c:iron_ores"
-            },
-            {
-              "tag": "c:ore_rates/sparse"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 9000,
-          "fluid": "tconstruct:molten_iron"
-        },
-        "temperature": 800,
-        "time": 90
-      }
+      "amount": 9000,
+      "rate": "metal",
+      "tag": "forge:molten_steel"
     }
-  ]
+  ],
+  "ingredient": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "forge:ores/iron"
+      },
+      {
+        "tag": "c:ore_rates/sparse"
+      }
+    ]
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 9000,
+    "tag": "forge:molten_iron"
+  },
+  "temperature": 800,
+  "time": 90
 }

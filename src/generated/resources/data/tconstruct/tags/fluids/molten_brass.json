@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_brass",
-    "tconstruct:flowing_molten_brass"
+    "tconstruct:molten_brass"
   ]
 }

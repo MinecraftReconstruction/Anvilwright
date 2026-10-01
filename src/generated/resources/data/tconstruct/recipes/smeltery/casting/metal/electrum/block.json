@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:electrum_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/electrum"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 177,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "result": {
-    "tag": "c:electrum_blocks"
+    "tag": "forge:storage_blocks/electrum"
   }
 }

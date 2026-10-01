@@ -1,43 +1,32 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:cobalt_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/cobalt"
     }
   ],
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
-      "amount": 18000,
-      "fluid": "tconstruct:molten_iron"
+      "amount": 4050,
+      "fluid": "tconstruct:molten_diamond",
+      "rate": "gem"
     }
   ],
   "ingredient": {
     "fabric:type": "fabric:difference",
     "base": {
-      "tag": "c:cobalt_ores"
+      "tag": "forge:ores/cobalt"
     },
     "subtracted": {
-      "fabric:type": "fabric:any",
-      "ingredients": [
-        {
-          "tag": "c:ore_rates/sparse"
-        },
-        {
-          "tag": "c:ore_rates/dense"
-        }
-      ]
+      "tag": "tconstruct:non_singular_ore_rates"
     }
   },
   "rate": "metal",
   "result": {
     "amount": 18000,
-    "fluid": "tconstruct:molten_cobalt"
+    "tag": "forge:molten_cobalt"
   },
   "temperature": 950,
   "time": 162

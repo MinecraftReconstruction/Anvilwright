@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:damagable_melting",
   "ingredient": {
-    "item": "minecraft:iron_leggings"
+    "tag": "tconstruct:melting/iron/tools_costing_7"
   },
   "result": {
     "amount": 63000,
-    "fluid": "tconstruct:molten_iron",
+    "tag": "forge:molten_iron",
     "unit_size": 1000
   },
   "temperature": 800,

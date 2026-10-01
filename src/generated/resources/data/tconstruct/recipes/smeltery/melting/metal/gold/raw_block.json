@@ -3,16 +3,17 @@
   "byproducts": [
     {
       "amount": 81000,
-      "fluid": "tconstruct:molten_copper"
+      "rate": "metal",
+      "tag": "forge:molten_cobalt"
     }
   ],
   "ingredient": {
-    "tag": "c:raw_gold_blocks"
+    "tag": "forge:storage_blocks/raw_gold"
   },
   "rate": "metal",
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 341

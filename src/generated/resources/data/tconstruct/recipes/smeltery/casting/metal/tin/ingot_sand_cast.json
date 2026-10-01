@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tin_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/tin"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 39,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_tin"
+    "tag": "forge:molten_tin"
   },
   "result": {
-    "tag": "c:tin_ingots"
+    "tag": "forge:ingots/tin"
   }
 }

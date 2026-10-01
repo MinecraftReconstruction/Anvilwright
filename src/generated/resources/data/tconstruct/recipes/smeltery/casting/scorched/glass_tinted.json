@@ -1,12 +1,12 @@
 {
   "type": "tconstruct:casting_basin",
   "cast": {
-    "tag": "forge:glass/tinted"
+    "tag": "c:tinted_glass"
   },
   "cast_consumed": true,
-  "cooling_time": 166,
+  "cooling_time": 84,
   "fluid": {
-    "amount": 1000,
+    "amount": 81000,
     "tag": "tconstruct:scorched_stone"
   },
   "result": "tconstruct:scorched_tinted_glass"

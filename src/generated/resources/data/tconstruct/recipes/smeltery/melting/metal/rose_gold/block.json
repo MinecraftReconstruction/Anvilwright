@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:rose_gold_blocks"
+    "tag": "forge:storage_blocks/rose_gold"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_rose_gold"
+    "tag": "forge:molten_rose_gold"
   },
   "temperature": 550,
   "time": 155

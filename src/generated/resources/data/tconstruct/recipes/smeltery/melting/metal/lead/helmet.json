@@ -1,18 +1,18 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:armors/helmets/lead"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "forge:armors/helmets/lead"
   },
   "result": {
-    "amount": 450,
+    "amount": 45000,
     "tag": "forge:molten_lead",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 330,
   "time": 97

@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "tconstruct:mud_bricks"
+          "name": "tconstruct:steel_block"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "tconstruct:blocks/mud_bricks"
+  "random_sequence": "tconstruct:blocks/steel_block"
 }

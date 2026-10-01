@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:brass_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/brass"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 161,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_brass"
+    "tag": "forge:molten_brass"
   },
   "result": {
-    "tag": "c:brass_blocks"
+    "tag": "forge:storage_blocks/brass"
   }
 }

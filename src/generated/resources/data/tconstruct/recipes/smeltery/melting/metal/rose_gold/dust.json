@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:rose_gold_dusts"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:dusts/rose_gold"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:rose_gold_dusts"
+    "tag": "forge:dusts/rose_gold"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_rose_gold"
+    "tag": "forge:molten_rose_gold"
   },
   "temperature": 550,
   "time": 39

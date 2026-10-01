@@ -3,16 +3,17 @@
   "byproducts": [
     {
       "amount": 3000,
-      "fluid": "tconstruct:molten_gold"
+      "rate": "metal",
+      "tag": "forge:molten_gold"
     }
   ],
   "ingredient": {
-    "tag": "c:raw_copper_ores"
+    "tag": "forge:raw_materials/copper"
   },
   "rate": "metal",
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "temperature": 500,
   "time": 75

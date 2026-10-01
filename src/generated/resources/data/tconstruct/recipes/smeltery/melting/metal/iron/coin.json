@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:iron_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/iron"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:iron_coins"
+    "tag": "forge:coins/iron"
   },
   "result": {
     "amount": 3000,
-    "fluid": "tconstruct:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "temperature": 800,
   "time": 40

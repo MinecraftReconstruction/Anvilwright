@@ -2,7 +2,7 @@
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
-      "amount": 600,
+      "amount": 48600,
       "fluid": "tconstruct:ichor"
     }
   ],
@@ -11,7 +11,7 @@
   },
   "rate": "gem",
   "result": {
-    "amount": 30,
+    "amount": 2430,
     "fluid": "tconstruct:blazing_blood"
   },
   "temperature": 1500,

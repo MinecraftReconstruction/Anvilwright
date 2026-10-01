@@ -8,5 +8,7 @@
     "amount": 1000,
     "tag": "tconstruct:molten_slimesteel"
   },
-  "result": "tconstruct:slimesteel_nugget"
+  "result": {
+    "tag": "forge:nuggets/slimesteel"
+  }
 }

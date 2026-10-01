@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:iron_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/iron"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 60,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_iron"
+    "tag": "forge:molten_iron"
   },
   "result": {
-    "tag": "c:iron_plates"
+    "tag": "forge:plates/iron"
   }
 }

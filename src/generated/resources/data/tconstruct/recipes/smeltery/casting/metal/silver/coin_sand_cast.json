@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:silver_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/silver"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 35,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "result": {
-    "tag": "c:silver_coins"
+    "tag": "forge:coins/silver"
   }
 }

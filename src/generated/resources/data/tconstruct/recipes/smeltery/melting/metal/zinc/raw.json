@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:raw_zinc_ores"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:raw_materials/zinc"
     }
   ],
   "type": "porting_lib:conditional",
@@ -12,10 +10,8 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:tin_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/tin"
         }
       ],
       "recipe": {
@@ -23,16 +19,17 @@
         "byproducts": [
           {
             "amount": 9000,
-            "fluid": "tconstruct:molten_tin"
+            "rate": "metal",
+            "tag": "forge:molten_tin"
           }
         ],
         "ingredient": {
-          "tag": "c:raw_zinc_ores"
+          "tag": "forge:raw_materials/zinc"
         },
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_zinc"
+          "tag": "forge:molten_zinc"
         },
         "temperature": 420,
         "time": 70
@@ -49,16 +46,17 @@
         "byproducts": [
           {
             "amount": 9000,
-            "fluid": "tconstruct:molten_copper"
+            "rate": "metal",
+            "tag": "forge:molten_copper"
           }
         ],
         "ingredient": {
-          "tag": "c:raw_zinc_ores"
+          "tag": "forge:raw_materials/zinc"
         },
         "rate": "metal",
         "result": {
           "amount": 9000,
-          "fluid": "tconstruct:molten_zinc"
+          "tag": "forge:molten_zinc"
         },
         "temperature": 420,
         "time": 70

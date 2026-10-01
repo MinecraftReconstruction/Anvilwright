@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:meat_soup",
-    "tconstruct:flowing_meat_soup"
+    "tconstruct:meat_soup"
   ]
 }

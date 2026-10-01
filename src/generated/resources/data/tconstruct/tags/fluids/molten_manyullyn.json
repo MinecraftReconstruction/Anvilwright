@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_manyullyn",
-    "tconstruct:flowing_molten_manyullyn"
+    "tconstruct:molten_manyullyn"
   ]
 }

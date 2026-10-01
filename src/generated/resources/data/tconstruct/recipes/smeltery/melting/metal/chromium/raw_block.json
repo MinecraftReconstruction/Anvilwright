@@ -1,16 +1,16 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:storage_blocks/raw_chromium"
     }
   ],
+  "type": "porting_lib:conditional",
   "recipes": [
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/aluminum"
         }
       ],
@@ -18,7 +18,7 @@
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 810,
+            "amount": 81000,
             "rate": "metal",
             "tag": "forge:molten_aluminum"
           }
@@ -28,7 +28,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 810,
+          "amount": 81000,
           "tag": "forge:molten_chromium"
         },
         "temperature": 900,
@@ -36,16 +36,16 @@
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:true"
+          "condition": "porting_lib:true"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 810,
+            "amount": 81000,
             "rate": "metal",
             "tag": "forge:molten_iron"
           }
@@ -55,7 +55,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 810,
+          "amount": 81000,
           "tag": "forge:molten_chromium"
         },
         "temperature": 900,

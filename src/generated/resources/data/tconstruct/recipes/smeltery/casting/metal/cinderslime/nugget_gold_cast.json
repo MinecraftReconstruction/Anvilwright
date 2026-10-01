@@ -5,7 +5,7 @@
   },
   "cooling_time": 23,
   "fluid": {
-    "amount": 10,
+    "amount": 1000,
     "tag": "tconstruct:molten_cinderslime"
   },
   "result": {

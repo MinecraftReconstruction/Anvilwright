@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:electrum_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/electrum"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 20,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "result": {
-    "tag": "c:electrum_nuggets"
+    "tag": "forge:nuggets/electrum"
   }
 }

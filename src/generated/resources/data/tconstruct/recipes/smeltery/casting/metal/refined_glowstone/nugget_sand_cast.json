@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:refined_glowstone_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/refined_glowstone"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 20,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_refined_glowstone"
+    "tag": "forge:molten_refined_glowstone"
   },
   "result": {
-    "tag": "c:refined_glowstone_nuggets"
+    "tag": "forge:nuggets/refined_glowstone"
   }
 }

@@ -1,13 +1,14 @@
 {
-  "rewards": {
-    "loot": [
-      "tconstruct:gameplay/starting_book"
-    ]
-  },
+  "fabric:load_conditions": [
+    {
+      "condition": "tconstruct:config",
+      "prop": "spawn_with_book"
+    }
+  ],
   "criteria": {
     "tick": {
-      "trigger": "minecraft:tick",
-      "conditions": {}
+      "conditions": {},
+      "trigger": "minecraft:tick"
     }
   },
   "requirements": [
@@ -15,11 +16,10 @@
       "tick"
     ]
   ],
-  "sends_telemetry_event": true,
-  "fabric:load_conditions": [
-    {
-      "condition": "tconstruct:config",
-      "prop": "spawn_with_book"
-    }
-  ]
+  "rewards": {
+    "loot": [
+      "tconstruct:gameplay/starting_book"
+    ]
+  },
+  "sends_telemetry_event": true
 }

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:uranium_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/uranium"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 61,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_uranium"
+    "tag": "forge:molten_uranium"
   },
   "result": {
-    "tag": "c:uranium_plates"
+    "tag": "forge:plates/uranium"
   }
 }

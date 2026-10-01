@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:mushroom_stew",
-    "tconstruct:flowing_mushroom_stew"
+    "tconstruct:mushroom_stew"
   ]
 }

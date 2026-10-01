@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:gold_ingots"
+    "tag": "forge:ingots/gold"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_gold"
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
   "time": 57

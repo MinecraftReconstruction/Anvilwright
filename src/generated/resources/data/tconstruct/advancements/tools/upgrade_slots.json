@@ -1,55 +1,75 @@
 {
   "parent": "tconstruct:tools/modified",
+  "criteria": {
+    "has_modified": {
+      "conditions": {
+        "items": [
+          {
+            "type": "tconstruct:tool_stack",
+            "predicate": {
+              "type": "mantle:and",
+              "predicates": [
+                {
+                  "type": "tconstruct:has_modifier",
+                  "check": "upgrades",
+                  "modifier": {
+                    "type": "tconstruct:single",
+                    "modifier": "tconstruct:writable"
+                  }
+                },
+                {
+                  "type": "tconstruct:has_modifier",
+                  "check": "upgrades",
+                  "modifier": {
+                    "type": "tconstruct:single",
+                    "modifier": "tconstruct:recapitated"
+                  }
+                },
+                {
+                  "type": "tconstruct:has_modifier",
+                  "check": "upgrades",
+                  "modifier": {
+                    "type": "tconstruct:single",
+                    "modifier": "tconstruct:harmonious"
+                  }
+                },
+                {
+                  "type": "tconstruct:has_modifier",
+                  "check": "upgrades",
+                  "modifier": {
+                    "type": "tconstruct:single",
+                    "modifier": "tconstruct:forecast"
+                  }
+                },
+                {
+                  "type": "tconstruct:has_modifier",
+                  "check": "upgrades",
+                  "modifier": {
+                    "type": "tconstruct:single",
+                    "modifier": "tconstruct:gilded"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
   "display": {
-    "icon": {
-      "item": "minecraft:writable_book"
-    },
-    "title": {
-      "translate": "advancements.tconstruct.tools.upgrade_slots.title"
-    },
+    "announce_to_chat": true,
     "description": {
       "translate": "advancements.tconstruct.tools.upgrade_slots.description"
     },
     "frame": "challenge",
+    "hidden": false,
+    "icon": {
+      "item": "minecraft:writable_book"
+    },
     "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "criteria": {
-    "has_modified": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "type": "tconstruct:tool",
-            "upgrades": {
-              "options": [
-                {
-                  "name": "tconstruct:writable",
-                  "level": 1
-                },
-                {
-                  "name": "tconstruct:recapitated",
-                  "level": 1
-                },
-                {
-                  "name": "tconstruct:harmonious",
-                  "level": 1
-                },
-                {
-                  "name": "tconstruct:resurrected",
-                  "level": 1
-                },
-                {
-                  "name": "tconstruct:gilded",
-                  "level": 1
-                }
-              ],
-              "matches_needed": 5
-            }
-          }
-        ]
-      }
+    "title": {
+      "translate": "advancements.tconstruct.tools.upgrade_slots.title"
     }
   },
   "requirements": [

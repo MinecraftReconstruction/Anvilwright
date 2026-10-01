@@ -5,7 +5,7 @@
   },
   "result": {
     "amount": 5400,
-    "fluid": "tconstruct:beetroot_soup"
+    "tag": "forge:beetroot_soup"
   },
   "temperature": 100,
   "time": 33

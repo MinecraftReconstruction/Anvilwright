@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:lead_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/lead"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 43,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_lead"
+    "tag": "forge:molten_lead"
   },
   "result": {
-    "tag": "c:lead_ingots"
+    "tag": "forge:ingots/lead"
   }
 }

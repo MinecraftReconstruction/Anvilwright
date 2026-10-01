@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_wires"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:wires/steel"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:steel_wires"
+    "tag": "forge:wires/steel"
   },
   "result": {
     "amount": 4500,
-    "fluid": "tconstruct:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "temperature": 950,
   "time": 13

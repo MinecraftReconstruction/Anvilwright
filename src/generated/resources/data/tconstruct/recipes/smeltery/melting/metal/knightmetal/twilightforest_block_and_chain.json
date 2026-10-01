@@ -1,18 +1,20 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:item_exists",
-      "item": "twilightforest:block_and_chain"
+      "condition": "fabric:registry_contains",
+      "values": [
+        "twilightforest:block_and_chain"
+      ]
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "item": "twilightforest:block_and_chain"
   },
   "result": {
-    "amount": 1440,
+    "amount": 144000,
     "fluid": "tconstruct:molten_knightmetal",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 1300,
   "time": 300

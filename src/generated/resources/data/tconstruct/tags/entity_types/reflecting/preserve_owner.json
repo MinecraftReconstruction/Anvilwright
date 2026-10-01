@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:fishing_bobber",
     "tconstruct:fishing_bobber",

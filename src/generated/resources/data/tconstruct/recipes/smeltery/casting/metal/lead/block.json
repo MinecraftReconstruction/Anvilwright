@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:lead_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/lead"
     }
   ],
   "type": "tconstruct:casting_basin",
   "cooling_time": 130,
   "fluid": {
     "amount": 81000,
-    "tag": "c:molten_lead"
+    "tag": "forge:molten_lead"
   },
   "result": {
-    "tag": "c:lead_blocks"
+    "tag": "forge:storage_blocks/lead"
   }
 }

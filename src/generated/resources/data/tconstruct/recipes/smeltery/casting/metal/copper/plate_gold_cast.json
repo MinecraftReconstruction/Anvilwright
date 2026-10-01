@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:copper_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/copper"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 50,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "result": {
-    "tag": "c:copper_plates"
+    "tag": "forge:plates/copper"
   }
 }

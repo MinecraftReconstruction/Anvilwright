@@ -1,16 +1,16 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:raw_materials/pewter"
     }
   ],
+  "type": "porting_lib:conditional",
   "recipes": [
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/tin"
         }
       ],
@@ -18,7 +18,7 @@
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 90,
+            "amount": 9000,
             "rate": "metal",
             "tag": "forge:molten_tin"
           }
@@ -28,7 +28,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 90,
+          "amount": 9000,
           "tag": "forge:molten_pewter"
         },
         "temperature": 400,
@@ -36,9 +36,9 @@
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/lead"
         }
       ],
@@ -46,7 +46,7 @@
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 90,
+            "amount": 9000,
             "rate": "metal",
             "tag": "forge:molten_lead"
           }
@@ -56,7 +56,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 90,
+          "amount": 9000,
           "tag": "forge:molten_pewter"
         },
         "temperature": 400,
@@ -64,16 +64,16 @@
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:true"
+          "condition": "porting_lib:true"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 90,
+            "amount": 9000,
             "rate": "metal",
             "tag": "forge:molten_iron"
           }
@@ -83,7 +83,7 @@
         },
         "rate": "metal",
         "result": {
-          "amount": 90,
+          "amount": 9000,
           "tag": "forge:molten_pewter"
         },
         "temperature": 400,

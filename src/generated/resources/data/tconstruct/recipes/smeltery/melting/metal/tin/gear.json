@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tin_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/tin"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:tin_gears"
+    "tag": "forge:gears/tin"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_tin"
+    "tag": "forge:molten_tin"
   },
   "temperature": 225,
   "time": 78

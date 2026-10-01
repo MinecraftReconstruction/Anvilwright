@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:sheetmetals/aluminum"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:sheetmetals/aluminum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:sheetmetals/aluminum"
+    "tag": "forge:sheetmetals/aluminum"
   },
   "result": {
     "amount": 9000,
-    "fluid": "tconstruct:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "temperature": 425,
   "time": 47

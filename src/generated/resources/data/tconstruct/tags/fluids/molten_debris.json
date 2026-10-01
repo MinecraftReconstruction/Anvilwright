@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_debris",
-    "tconstruct:flowing_molten_debris"
+    "tconstruct:molten_debris"
   ]
 }

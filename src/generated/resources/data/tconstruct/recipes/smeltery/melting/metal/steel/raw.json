@@ -1,16 +1,16 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:raw_materials/steel"
+    }
+  ],
   "type": "tconstruct:ore_melting",
   "byproducts": [
     {
-      "amount": 90,
+      "amount": 9000,
       "rate": "metal",
       "tag": "forge:molten_iron"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:raw_materials/steel"
     }
   ],
   "ingredient": {
@@ -18,7 +18,7 @@
   },
   "rate": "metal",
   "result": {
-    "amount": 90,
+    "amount": 9000,
     "tag": "forge:molten_steel"
   },
   "temperature": 950,

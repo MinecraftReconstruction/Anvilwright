@@ -6,9 +6,9 @@
   "cooling_time": 61,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_amethyst_bronze"
+    "tag": "forge:molten_amethyst_bronze"
   },
   "result": {
-    "tag": "c:amethyst_bronze_ingots"
+    "tag": "forge:ingots/amethyst_bronze"
   }
 }

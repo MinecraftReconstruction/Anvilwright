@@ -7,15 +7,12 @@
     },
     {
       "amount": 3000,
-      "fluid": "tconstruct:molten_iron"
+      "tag": "forge:molten_iron"
     }
   ],
   "ingredient": {
-    "fabric:type": "fabric:nbt",
-    "base": {
-      "item": "tconstruct:seared_lantern"
-    },
-    "strict": true
+    "fabric:type": "tconstruct:no_container",
+    "item": "tconstruct:seared_lantern"
   },
   "result": {
     "amount": 40500,

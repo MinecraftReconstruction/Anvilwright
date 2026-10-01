@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_enderium",
-    "tconstruct:flowing_molten_enderium"
+    "tconstruct:molten_enderium"
   ]
 }

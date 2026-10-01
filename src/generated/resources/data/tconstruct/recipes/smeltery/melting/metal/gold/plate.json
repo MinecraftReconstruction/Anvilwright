@@ -1,12 +1,18 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/gold"
+    }
+  ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "item": "minecraft:light_weighted_pressure_plate"
+    "tag": "forge:plates/gold"
   },
   "result": {
-    "amount": 18000,
-    "fluid": "tconstruct:molten_gold"
+    "amount": 9000,
+    "tag": "forge:molten_gold"
   },
   "temperature": 700,
-  "time": 80
+  "time": 57
 }

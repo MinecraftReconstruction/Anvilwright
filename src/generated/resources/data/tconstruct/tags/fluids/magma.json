@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:magma",
-    "tconstruct:flowing_magma"
+    "tconstruct:magma"
   ]
 }

@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_wires"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:wires/steel"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 46,
   "fluid": {
     "amount": 4500,
-    "tag": "c:molten_steel"
+    "tag": "forge:molten_steel"
   },
   "result": {
-    "tag": "c:steel_wires"
+    "tag": "forge:wires/steel"
   }
 }

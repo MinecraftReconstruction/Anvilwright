@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:silver_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/silver"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:silver_blocks"
+    "tag": "forge:storage_blocks/silver"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "temperature": 790,
   "time": 179

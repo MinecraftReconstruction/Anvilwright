@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_tungsten",
-    "tconstruct:flowing_molten_tungsten"
+    "tconstruct:molten_tungsten"
   ]
 }

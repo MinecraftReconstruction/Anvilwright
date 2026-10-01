@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:enderium_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/enderium"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:enderium_coins"
+    "tag": "forge:coins/enderium"
   },
   "result": {
     "amount": 3000,
-    "fluid": "tconstruct:molten_enderium"
+    "tag": "forge:molten_enderium"
   },
   "temperature": 1350,
   "time": 51

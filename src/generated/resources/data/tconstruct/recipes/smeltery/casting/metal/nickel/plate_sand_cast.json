@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:nickel_plates"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:plates/nickel"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 65,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_nickel"
+    "tag": "forge:molten_nickel"
   },
   "result": {
-    "tag": "c:nickel_plates"
+    "tag": "forge:plates/nickel"
   }
 }

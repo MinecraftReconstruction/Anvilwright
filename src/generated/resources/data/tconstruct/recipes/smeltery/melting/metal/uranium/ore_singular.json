@@ -1,13 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "c:uranium_ores",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "c:ore_rates/sparse",
-        "c:ore_rates/dense"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:non_singular_ore_rates",
+      "match": "forge:ores/uranium"
     }
   ],
   "type": "porting_lib:conditional",
@@ -15,10 +11,8 @@
     {
       "fabric:load_conditions": [
         {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:lead_ingots"
-          ]
+          "condition": "mantle:tag_filled",
+          "tag": "forge:ingots/lead"
         }
       ],
       "recipe": {
@@ -26,30 +20,23 @@
         "byproducts": [
           {
             "amount": 18000,
-            "fluid": "tconstruct:molten_lead"
+            "rate": "metal",
+            "tag": "forge:molten_lead"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:difference",
           "base": {
-            "tag": "c:uranium_ores"
+            "tag": "forge:ores/uranium"
           },
           "subtracted": {
-            "fabric:type": "fabric:any",
-            "ingredients": [
-              {
-                "tag": "c:ore_rates/sparse"
-              },
-              {
-                "tag": "c:ore_rates/dense"
-              }
-            ]
+            "tag": "tconstruct:non_singular_ore_rates"
           }
         },
         "rate": "metal",
         "result": {
           "amount": 18000,
-          "fluid": "tconstruct:molten_uranium"
+          "tag": "forge:molten_uranium"
         },
         "temperature": 830,
         "time": 153
@@ -66,30 +53,23 @@
         "byproducts": [
           {
             "amount": 18000,
-            "fluid": "tconstruct:molten_copper"
+            "rate": "metal",
+            "tag": "forge:molten_copper"
           }
         ],
         "ingredient": {
           "fabric:type": "fabric:difference",
           "base": {
-            "tag": "c:uranium_ores"
+            "tag": "forge:ores/uranium"
           },
           "subtracted": {
-            "fabric:type": "fabric:any",
-            "ingredients": [
-              {
-                "tag": "c:ore_rates/sparse"
-              },
-              {
-                "tag": "c:ore_rates/dense"
-              }
-            ]
+            "tag": "tconstruct:non_singular_ore_rates"
           }
         },
         "rate": "metal",
         "result": {
           "amount": 18000,
-          "fluid": "tconstruct:molten_uranium"
+          "tag": "forge:molten_uranium"
         },
         "temperature": 830,
         "time": 153

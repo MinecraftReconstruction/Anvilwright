@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:constantan_nuggets"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:nuggets/constantan"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 21,
   "fluid": {
     "amount": 1000,
-    "tag": "c:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "result": {
-    "tag": "c:constantan_nuggets"
+    "tag": "forge:nuggets/constantan"
   }
 }

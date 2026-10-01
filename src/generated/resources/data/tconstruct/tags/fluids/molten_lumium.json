@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_lumium",
-    "tconstruct:flowing_molten_lumium"
+    "tconstruct:molten_lumium"
   ]
 }

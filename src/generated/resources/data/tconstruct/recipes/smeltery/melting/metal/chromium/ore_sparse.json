@@ -1,19 +1,19 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_combination_filled",
+      "condition": "mantle:tag_combination_filled",
       "match": [
         "forge:ores/chromium",
-        "forge:ore_rates/sparse"
+        "c:ore_rates/sparse"
       ]
     }
   ],
+  "type": "porting_lib:conditional",
   "recipes": [
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "mantle:tag_filled",
+          "condition": "mantle:tag_filled",
           "tag": "forge:ingots/aluminum"
         }
       ],
@@ -21,25 +21,25 @@
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 90,
+            "amount": 9000,
             "rate": "metal",
             "tag": "forge:molten_aluminum"
           }
         ],
         "ingredient": {
-          "type": "forge:intersection",
-          "children": [
+          "fabric:type": "fabric:all",
+          "ingredients": [
             {
               "tag": "forge:ores/chromium"
             },
             {
-              "tag": "forge:ore_rates/sparse"
+              "tag": "c:ore_rates/sparse"
             }
           ]
         },
         "rate": "metal",
         "result": {
-          "amount": 90,
+          "amount": 9000,
           "tag": "forge:molten_chromium"
         },
         "temperature": 900,
@@ -47,34 +47,34 @@
       }
     },
     {
-      "conditions": [
+      "fabric:load_conditions": [
         {
-          "type": "forge:true"
+          "condition": "porting_lib:true"
         }
       ],
       "recipe": {
         "type": "tconstruct:ore_melting",
         "byproducts": [
           {
-            "amount": 90,
+            "amount": 9000,
             "rate": "metal",
             "tag": "forge:molten_iron"
           }
         ],
         "ingredient": {
-          "type": "forge:intersection",
-          "children": [
+          "fabric:type": "fabric:all",
+          "ingredients": [
             {
               "tag": "forge:ores/chromium"
             },
             {
-              "tag": "forge:ore_rates/sparse"
+              "tag": "c:ore_rates/sparse"
             }
           ]
         },
         "rate": "metal",
         "result": {
-          "amount": 90,
+          "amount": 9000,
           "tag": "forge:molten_chromium"
         },
         "temperature": 900,

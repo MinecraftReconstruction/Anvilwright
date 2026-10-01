@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:tungsten_ingots"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:ingots/tungsten"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 65,
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_tungsten"
+    "tag": "forge:molten_tungsten"
   },
   "result": {
-    "tag": "c:tungsten_ingots"
+    "tag": "forge:ingots/tungsten"
   }
 }

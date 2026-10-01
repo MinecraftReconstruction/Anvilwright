@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:constantan_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/constantan"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:constantan_coins"
+    "tag": "forge:coins/constantan"
   },
   "result": {
     "amount": 3000,
-    "fluid": "tconstruct:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "temperature": 920,
   "time": 43

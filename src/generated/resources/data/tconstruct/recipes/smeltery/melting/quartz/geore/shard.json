@@ -1,15 +1,13 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_shards/quartz"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_shards/quartz"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:geore_shards/quartz"
+    "tag": "forge:geore_shards/quartz"
   },
   "result": {
     "amount": 8100,

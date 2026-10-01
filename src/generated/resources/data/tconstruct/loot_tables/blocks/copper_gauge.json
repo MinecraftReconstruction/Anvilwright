@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "tconstruct:lavawood_stairs"
+          "name": "tconstruct:copper_gauge"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "tconstruct:blocks/lavawood_stairs"
+  "random_sequence": "tconstruct:blocks/copper_gauge"
 }

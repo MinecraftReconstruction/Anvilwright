@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:pewter_blocks"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/pewter"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:pewter_blocks"
+    "tag": "forge:storage_blocks/pewter"
   },
   "result": {
     "amount": 81000,
-    "fluid": "tconstruct:molten_pewter"
+    "tag": "forge:molten_pewter"
   },
   "temperature": 400,
   "time": 139

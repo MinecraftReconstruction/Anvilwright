@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:copper_coins"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:coins/copper"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -14,9 +12,9 @@
   "cooling_time": 29,
   "fluid": {
     "amount": 3000,
-    "tag": "c:molten_copper"
+    "tag": "forge:molten_copper"
   },
   "result": {
-    "tag": "c:copper_coins"
+    "tag": "forge:coins/copper"
   }
 }

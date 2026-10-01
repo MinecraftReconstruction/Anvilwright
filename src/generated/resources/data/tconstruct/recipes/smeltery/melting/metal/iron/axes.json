@@ -1,16 +1,11 @@
 {
   "type": "tconstruct:damagable_melting",
-  "ingredient": [
-    {
-      "item": "minecraft:iron_axe"
-    },
-    {
-      "item": "minecraft:iron_pickaxe"
-    }
-  ],
+  "ingredient": {
+    "tag": "tconstruct:melting/iron/tools_costing_3"
+  },
   "result": {
     "amount": 27000,
-    "fluid": "tconstruct:molten_iron",
+    "tag": "forge:molten_iron",
     "unit_size": 1000
   },
   "temperature": 800,

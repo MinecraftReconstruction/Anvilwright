@@ -1,60 +1,20 @@
 {
-  "type": "porting_lib:conditional",
-  "recipes": [
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
     {
-      "fabric:load_conditions": [
-        {
-          "condition": "fabric:tags_populated",
-          "values": [
-            "c:nickel_ingots"
-          ]
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 81000,
-            "fluid": "tconstruct:molten_nickel"
-          }
-        ],
-        "ingredient": {
-          "tag": "c:raw_iron_blocks"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 81000,
-          "fluid": "tconstruct:molten_iron"
-        },
-        "temperature": 800,
-        "time": 361
-      }
-    },
-    {
-      "fabric:load_conditions": [
-        {
-          "condition": "porting_lib:true"
-        }
-      ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 81000,
-            "fluid": "tconstruct:molten_copper"
-          }
-        ],
-        "ingredient": {
-          "tag": "c:raw_iron_blocks"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 81000,
-          "fluid": "tconstruct:molten_iron"
-        },
-        "temperature": 800,
-        "time": 361
-      }
+      "amount": 81000,
+      "rate": "metal",
+      "tag": "forge:molten_steel"
     }
-  ]
+  ],
+  "ingredient": {
+    "tag": "forge:storage_blocks/raw_iron"
+  },
+  "rate": "metal",
+  "result": {
+    "amount": 81000,
+    "tag": "forge:molten_iron"
+  },
+  "temperature": 800,
+  "time": 361
 }

@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:rose_gold_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/rose_gold"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:rose_gold_gears"
+    "tag": "forge:gears/rose_gold"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_rose_gold"
+    "tag": "forge:molten_rose_gold"
   },
   "temperature": 550,
   "time": 103

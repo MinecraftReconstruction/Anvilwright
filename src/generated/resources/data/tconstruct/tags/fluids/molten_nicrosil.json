@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_nicrosil",
-    "tconstruct:flowing_molten_nicrosil"
+    "tconstruct:molten_nicrosil"
   ]
 }

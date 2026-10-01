@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:electrum_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/electrum"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:electrum_gears"
+    "tag": "forge:gears/electrum"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_electrum"
+    "tag": "forge:molten_electrum"
   },
   "temperature": 760,
   "time": 118

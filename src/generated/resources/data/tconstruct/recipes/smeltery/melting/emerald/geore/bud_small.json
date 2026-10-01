@@ -1,16 +1,22 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:geore_small_buds/emerald"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:geore_small_buds/emerald"
     }
   ],
-  "type": "tconstruct:melting",
+  "type": "tconstruct:ore_melting",
+  "byproducts": [
+    {
+      "amount": 8100,
+      "fluid": "tconstruct:molten_diamond",
+      "rate": "gem"
+    }
+  ],
   "ingredient": {
-    "tag": "c:geore_small_buds/emerald"
+    "tag": "forge:geore_small_buds/emerald"
   },
+  "rate": "gem",
   "result": {
     "amount": 8100,
     "fluid": "tconstruct:molten_emerald"

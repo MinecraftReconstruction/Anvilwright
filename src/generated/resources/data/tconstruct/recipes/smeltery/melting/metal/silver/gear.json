@@ -1,19 +1,17 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:silver_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/silver"
     }
   ],
   "type": "tconstruct:melting",
   "ingredient": {
-    "tag": "c:silver_gears"
+    "tag": "forge:gears/silver"
   },
   "result": {
     "amount": 36000,
-    "fluid": "tconstruct:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "temperature": 790,
   "time": 120

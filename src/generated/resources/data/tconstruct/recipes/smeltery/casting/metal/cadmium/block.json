@@ -1,14 +1,14 @@
 {
-  "type": "tconstruct:casting_basin",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
+      "condition": "mantle:tag_filled",
       "tag": "forge:storage_blocks/cadmium"
     }
   ],
+  "type": "tconstruct:casting_basin",
   "cooling_time": 126,
   "fluid": {
-    "amount": 810,
+    "amount": 81000,
     "tag": "forge:molten_cadmium"
   },
   "result": {

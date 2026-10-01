@@ -1,10 +1,8 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:netherite_gears"
-      ]
+      "condition": "mantle:tag_filled",
+      "tag": "forge:gears/netherite"
     }
   ],
   "type": "tconstruct:casting_table",
@@ -15,9 +13,9 @@
   "cooling_time": 147,
   "fluid": {
     "amount": 36000,
-    "tag": "c:molten_netherite"
+    "tag": "forge:molten_netherite"
   },
   "result": {
-    "tag": "c:netherite_gears"
+    "tag": "forge:gears/netherite"
   }
 }

@@ -1,6 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "tconstruct:molten_knightmetal",
-    "tconstruct:flowing_molten_knightmetal"
+    "tconstruct:molten_knightmetal"
   ]
 }

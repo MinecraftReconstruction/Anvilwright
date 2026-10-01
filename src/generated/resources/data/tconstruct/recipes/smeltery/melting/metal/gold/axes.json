@@ -1,16 +1,11 @@
 {
   "type": "tconstruct:damagable_melting",
-  "ingredient": [
-    {
-      "item": "minecraft:golden_axe"
-    },
-    {
-      "item": "minecraft:golden_pickaxe"
-    }
-  ],
+  "ingredient": {
+    "tag": "tconstruct:melting/gold/tools_costing_3"
+  },
   "result": {
     "amount": 27000,
-    "fluid": "tconstruct:molten_gold",
+    "tag": "forge:molten_gold",
     "unit_size": 1000
   },
   "temperature": 700,

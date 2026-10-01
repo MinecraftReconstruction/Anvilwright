@@ -4,10 +4,12 @@
     "tag": "tconstruct:casts/single_use/nugget"
   },
   "cast_consumed": true,
-  "cooling_time": 24,
+  "cooling_time": 23,
   "fluid": {
     "amount": 1000,
-    "tag": "tconstruct:molten_soulsteel"
+    "tag": "tconstruct:molten_cinderslime"
   },
-  "result": "tconstruct:soulsteel_nugget"
+  "result": {
+    "tag": "forge:nuggets/cinderslime"
+  }
 }

@@ -1,25 +1,25 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "mantle:tag_filled",
+      "tag": "tconstruct:melting/ironwood/tools_costing_3"
+    }
+  ],
   "type": "tconstruct:damagable_melting",
   "byproducts": [
     {
-      "amount": 30,
+      "amount": 3000,
       "tag": "forge:molten_gold",
-      "unit_size": 10
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "tconstruct:melting/ironwood/tools_costing_3"
+      "unit_size": 1000
     }
   ],
   "ingredient": {
     "tag": "tconstruct:melting/ironwood/tools_costing_3"
   },
   "result": {
-    "amount": 270,
+    "amount": 27000,
     "tag": "forge:molten_iron",
-    "unit_size": 10
+    "unit_size": 1000
   },
   "temperature": 800,
   "time": 104
