@@ -57,9 +57,6 @@ public class TinkerTabs {
   }
 
   public static void buildGeneralTab(CreativeModeTab.ItemDisplayParameters params, CreativeModeTab.Output output) {
-    output.accept(TinkerCommons.mudBricks);
-    output.accept(TinkerCommons.mudBricks.getSlab());
-    output.accept(TinkerCommons.mudBricks.getStairs());
     output.accept(TinkerCommons.clearGlass);
     output.accept(TinkerCommons.clearTintedGlass);
     output.accept(TinkerCommons.clearGlassPane);
@@ -71,9 +68,6 @@ public class TinkerTabs {
     });
     output.accept(TinkerCommons.soulGlass);
     output.accept(TinkerCommons.soulGlassPane);
-    output.accept(TinkerCommons.lavawood);
-    output.accept(TinkerCommons.lavawood.getSlab());
-    output.accept(TinkerCommons.lavawood.getStairs());
     output.accept(TinkerMaterials.blazewood);
     output.accept(TinkerMaterials.blazewood.getSlab());
     output.accept(TinkerMaterials.blazewood.getStairs());
@@ -190,7 +184,6 @@ public class TinkerTabs {
     output.accept(TinkerGadgets.magmaCake);
     output.accept(TinkerGadgets.piggyBackpack);
     TinkerGadgets.itemFrame.forEach((frameType, fancyItemFrameItem) -> output.accept(fancyItemFrameItem));
-    TinkerGadgets.slimeSling.forEach((slimeType, baseSlimeSlingItem) -> output.accept(baseSlimeSlingItem));
     output.accept(TinkerGadgets.glowBall);
     output.accept(TinkerGadgets.efln);
     output.accept(TinkerGadgets.quartzShuriken);
@@ -496,7 +489,7 @@ public class TinkerTabs {
 
   public static void init() {
     Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_GENERAL, SupplierCreativeTab.create(TConstruct.MOD_ID, "general", () -> new ItemStack(TinkerCommons.slimeball.get(SlimeType.SKY))).displayItems(TinkerTabs::buildGeneralTab).build());
-    Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_GADGETS, SupplierCreativeTab.create(TConstruct.MOD_ID, "gadgets", () -> new ItemStack(TinkerGadgets.slimeSling.get(SlimeType.EARTH))).displayItems(TinkerTabs::buildGadgetTab).build());
+    Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_GADGETS, SupplierCreativeTab.create(TConstruct.MOD_ID, "gadgets", () -> new ItemStack(TinkerGadgets.piggyBackpack)).displayItems(TinkerTabs::buildGadgetTab).build());
     Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_WORLD, SupplierCreativeTab.create(TConstruct.MOD_ID, "world", () -> new ItemStack(TinkerWorld.cobaltOre)).displayItems(TinkerTabs::buildWorldTab).build());
     Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_TOOL_PARTS, SupplierCreativeTab.create(TConstruct.MOD_ID, "tool_parts", () -> {
       List<IMaterial> materials = new ArrayList<>(MaterialRegistry.getInstance().getVisibleMaterials());

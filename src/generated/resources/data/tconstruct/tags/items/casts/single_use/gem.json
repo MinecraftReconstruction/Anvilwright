@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:gem_sand_cast",
     "tconstruct:gem_red_sand_cast"

@@ -483,3 +483,19 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 | `b03b62708f` | 补回 `ToolItemModelProvider` / `ArmorModelProvider` / `TinkerTrimMaterialPaletteGenerator` / `ModifierModelMapProvider`，精灵图源合并进已注册的 provider，补注册盔甲与装饰模型 loader |
 | `f40e5a3987` | 补回 `TinkerCommons` 的 5 个客户端 provider（`models/item` 71 → 501，与上游对齐）+ `TinkerData` 让 existing-file-helper 也能看到 Porting Lib 的资源 |
 | （本轮最后） | `FluidTextureCameraProvider`（62 张相机贴图）+ 本文档 |
+
+### 2026-10-01 深夜：冒烟审计抓出来的最后一批紫黑格（已修，未跑热测试）
+
+把审计从"物品有没有模型"扩到"物品的模型有没有画到缺失贴图"+"物品有没有语言键"之后，一次客户端运行就列出了全部剩余问题：
+
+| 审计 | 修前 | 修后（静态判断题，热测试暂缓） |
+|---|---|---|
+| `models/` 用 missing model 的物品 | 0 / 678 | 0 / 678 |
+| `sprites/` 画到缺失贴图的物品 | **7**：`mud_bricks`、`mud_bricks_slab`、`mud_bricks_stairs`、`lavawood`、`lavawood_slab`、`lavawood_stairs`、`ichor_bottle` | 0（两个方块整组删除、灵浆瓶 id 对齐上游） |
+| `lang/` 没有翻译的物品 | **10**：上述 6 个方块物品 + `blood_slime`、`blood_congealed_slime`、`blood_enderbark_roots`、`blood_slime_ball`、`blood_bottle`、`blood_bucket`、`ichor_bottle` | 0（血内容按旧 fork 的英文名补回，见 BEHAVIOUR-DIFFERENCES #26/#43/#44） |
+
+另外补了 mod 元数据（Mod Menu 卡片）：名字从 fork 的 `Hephaestus` 改成
+`Tinkers' Construct (Unofficial Fabric Port)`、版本号基准从 `3.6.4` 改成 **`3.12.1`**
+（现在是 `1.20.1-3.12.1.DEV.<hash>`）、补了 128×128 的方形 `icon.png`
+（Mod Menu 要求方形，fork 的 `logo.png` 是 600×100，所以一直显示灰色问号）、
+来源/issue 指向 canonical 仓库、authors 加上 `MinecraftReconstruction`。

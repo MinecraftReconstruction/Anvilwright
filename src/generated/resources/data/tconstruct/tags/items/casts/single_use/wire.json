@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:wire_sand_cast",
     "tconstruct:wire_red_sand_cast"

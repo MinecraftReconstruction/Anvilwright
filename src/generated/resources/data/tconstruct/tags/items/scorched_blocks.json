@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:scorched_stone",
     "tconstruct:polished_scorched_stone",

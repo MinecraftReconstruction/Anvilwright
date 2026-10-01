@@ -7,9 +7,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -114,6 +119,8 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
       TConstruct.LOG.error("{}{} FAIL  {}", TAG, "creative/", failure);
     }
     auditItemModels(minecraft);
+    auditItemSprites(minecraft);
+    auditTranslations(minecraft);
     auditAtlas(minecraft);
     TConstruct.LOG.info("{}summary: {} passed, {} failed", TAG, passed, failed);
   }
@@ -147,6 +154,82 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
    * lists. Report our textures that never made it into the block atlas, since those are exactly the ones that draw
    * as magenta/black and the ones that make a model fail to bake.
    */
+  /**
+   * Counts items whose baked model draws at least one missing sprite. {@link #auditItemModels} only catches items with
+   * no model at all: an item whose model exists but asks for a texture that was never created bakes fine and then
+   * draws as the magenta/black checker, which is the other half of what players report as a broken item.
+   */
+  private static void auditItemSprites(Minecraft minecraft) {
+    TextureAtlas atlas = (TextureAtlas) minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+    RandomSource random = RandomSource.create(42);
+    int total = 0;
+    List<String> broken = new ArrayList<>();
+    for (Item item : BuiltInRegistries.ITEM) {
+      ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+      if (!id.getNamespace().equals(TConstruct.MOD_ID)) {
+        continue;
+      }
+      total++;
+      BakedModel model = minecraft.getItemRenderer().getModel(new ItemStack(item), minecraft.level, minecraft.player, 0);
+      if (hasMissingSprite(model, atlas, random)) {
+        broken.add(id.getPath());
+      }
+    }
+    TConstruct.LOG.info("{}sprites/ {}/{} tconstruct items draw a missing texture", TAG, broken.size(), total);
+    for (int i = 0; i < broken.size() && i < MAX_DETAILED_FAILURES; i++) {
+      TConstruct.LOG.info("{}sprites/   {}", TAG, broken.get(i));
+    }
+  }
+
+  /** Checks the particle icon and every quad of the model for the missing sprite */
+  private static boolean hasMissingSprite(BakedModel model, TextureAtlas atlas, RandomSource random) {
+    if (isMissing(atlas, model.getParticleIcon())) {
+      return true;
+    }
+    for (Direction direction : Direction.values()) {
+      for (BakedQuad quad : model.getQuads(null, direction, random)) {
+        if (isMissing(atlas, quad.getSprite())) {
+          return true;
+        }
+      }
+    }
+    for (BakedQuad quad : model.getQuads(null, null, random)) {
+      if (isMissing(atlas, quad.getSprite())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean isMissing(TextureAtlas atlas, @Nullable TextureAtlasSprite sprite) {
+    return sprite == null || MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name());
+  }
+
+  /**
+   * Reports items and blocks whose description resolves to the raw translation key, which is what shows up as
+   * "block.tconstruct.lavawood" in a tooltip when a language entry is missing.
+   */
+  private static void auditTranslations(Minecraft minecraft) {
+    List<String> untranslated = new ArrayList<>();
+    int total = 0;
+    for (Item item : BuiltInRegistries.ITEM) {
+      ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+      if (!id.getNamespace().equals(TConstruct.MOD_ID)) {
+        continue;
+      }
+      total++;
+      String key = item.getDescriptionId();
+      String translated = Component.translatable(key).getString();
+      if (translated.equals(key)) {
+        untranslated.add(key);
+      }
+    }
+    TConstruct.LOG.info("{}lang/ {}/{} tconstruct items have no translation", TAG, untranslated.size(), total);
+    for (int i = 0; i < untranslated.size() && i < MAX_DETAILED_FAILURES; i++) {
+      TConstruct.LOG.info("{}lang/   {}", TAG, untranslated.get(i));
+    }
+  }
+
   private static void auditAtlas(Minecraft minecraft) {
     TextureAtlas atlas = (TextureAtlas) minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
     Map<ResourceLocation, Resource> textures = minecraft.getResourceManager()

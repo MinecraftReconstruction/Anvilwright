@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:plate_sand_cast",
     "tconstruct:plate_red_sand_cast"

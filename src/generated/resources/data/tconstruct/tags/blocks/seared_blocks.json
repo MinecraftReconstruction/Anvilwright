@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:seared_stone",
     "tconstruct:seared_cracked_bricks",

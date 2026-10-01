@@ -48,11 +48,6 @@ import slimeknights.tconstruct.gadgets.item.ShootProjectileDispenserBehavior;
 import slimeknights.tconstruct.gadgets.item.ShurikenItem;
 import slimeknights.tconstruct.shared.TinkerFood;
 import slimeknights.tconstruct.world.block.FoliageType;
-import slimeknights.tconstruct.gadgets.item.slimesling.BaseSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.EarthSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.EnderSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.IchorSlimeSlingItem;
-import slimeknights.tconstruct.gadgets.item.slimesling.SkySlimeSlingItem;
 import slimeknights.tconstruct.shared.block.SlimeType;
 import java.util.function.Function;
 
@@ -63,7 +58,6 @@ import java.util.function.Function;
 @SuppressWarnings("unused")
 public final class TinkerGadgets extends TinkerModule {
   public TinkerGadgets() {
-//    slimeSling.values(); // Force enums to register
   }
 
   /*
@@ -89,14 +83,9 @@ public final class TinkerGadgets extends TinkerModule {
   public static final ItemObject<PiggyBackPackItem> piggyBackpack = ITEMS_DEFFERED.register("piggy_backpack", () -> new PiggyBackPackItem(new Properties().stacksTo(16)));
   public static final EnumObject<FrameType,FancyItemFrameItem> itemFrame = ITEMS_DEFFERED.registerEnum(FrameType.values(), "item_frame", (type) -> new FancyItemFrameItem(GADGET_PROPS, (world, pos, dir) -> new FancyItemFrameEntity(world, pos, dir, type)));
   public static final EnumObject<FancyArmorStandEntity.StandType,FancyArmorStandItem> armorStand = ITEMS_DEFFERED.registerEnum(FancyArmorStandEntity.StandType.values(), "armor_stand", type -> new FancyArmorStandItem(new Item.Properties().stacksTo(16), type));
-  // slime tools
-  private static final Item.Properties SLING_PROPS = new Item.Properties().stacksTo(1).durability(250);
-  public static final EnumObject<SlimeType, BaseSlimeSlingItem> slimeSling = new EnumObject.Builder<SlimeType, BaseSlimeSlingItem>(SlimeType.class)
-    .put(SlimeType.EARTH, ITEMS_DEFFERED.register("earth_slime_sling", () -> new EarthSlimeSlingItem(SLING_PROPS)))
-    .put(SlimeType.SKY, ITEMS_DEFFERED.register("sky_slime_sling", () -> new SkySlimeSlingItem(SLING_PROPS)))
-    .put(SlimeType.ICHOR, ITEMS_DEFFERED.register("ichor_slime_sling", () -> new IchorSlimeSlingItem(SLING_PROPS)))
-    .put(SlimeType.ENDER, ITEMS_DEFFERED.register("ender_slime_sling", () -> new EnderSlimeSlingItem(SLING_PROPS)))
-    .build();
+  // NOTE(porting): upstream 3.12.1 removed the slime sling items ("Remove slime slings - they are now modifiers"),
+  //  but the 3.12.1 merge brought the item registrations back without their models and textures, which is why the
+  //  earth slime sling (and with it the whole Gadgets tab icon) drew as the magenta missing model. Dropped again.
   // throwballs
   private static final Item.Properties THROWABLE_PROPS = new Item.Properties().stacksTo(16)/*.tab(TAB_GADGETS)*/;
   public static final ItemObject<GlowBallItem> glowBall = ITEMS_DEFFERED.register("glow_ball", () -> new GlowBallItem(THROWABLE_PROPS));

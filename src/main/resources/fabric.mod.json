@@ -3,18 +3,23 @@
   "id": "tconstruct",
   "version": "${version}",
 
-  "name": "Hephaestus",
-  "description": "A little of this, a little of that, a lot of tinkering, and a lot of tools.",
+  "name": "Tinkers' Construct (Unofficial Fabric Port)",
+  "description": "Unofficial Fabric port of SlimeKnights' Tinkers' Construct 3.12.1 for Minecraft 1.20.1. Upstream code and assets belong to SlimeKnights and AlphaMode; this port is maintained by MinecraftReconstruction.",
   "authors": [
     "Slime Knights",
-    "AlphaMode"
+    "AlphaMode",
+    "MinecraftReconstruction"
+  ],
+  "contributors": [
+    "MinecraftReconstruction migration team"
   ],
   "contact": {
-    "sources": "https://github.com/Alpha-s-Stuff/TinkersConstruct"
+    "sources": "https://github.com/MinecraftReconstruction/TinkersConstruct-Fabric",
+    "issues": "https://github.com/MinecraftReconstruction/TinkersConstruct-Fabric/issues"
   },
 
   "license": "MIT",
-  "icon": "logo.png",
+  "icon": "icon.png",
   "mixins": [
     "hephaestus.mixins.json"
   ],
@@ -81,7 +86,6 @@
       "tconstruct:persistent_data",
       "tconstruct:modifier_data",
       "tconstruct:modifiers"
-    ],
-    "banner": "Mantle.png"
+    ]
   }
 }

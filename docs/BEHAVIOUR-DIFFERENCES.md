@@ -50,6 +50,8 @@
 | 40 | 流体统计（`StatLoadable`）的显示名 | 上游直接取 `Fluid#getFluidType().getDescription()` | 同样因为 FluidType 可能为 null，本移植在 null 时回退到 Fabric 属性 API 的 `FluidVariantAttributes#getName` | **等价**（都有名字，来源不同） | 只看 `/tconstruct stats` 之类的显示文案 | 未验证 |
 | 41 | 血史莱姆流体的贴图（第 26 条的配套） | 上游 3.12.1 没有血流体，所以它的 `FluidTextureProvider` 也没有血条目 | 本移植保留了血史莱姆（见第 26 条），因此给 `FluidTextureProvider` 补回 `slime(TinkerFluids.blood)`，并从 git 历史恢复被"移除血"那次提交删掉的 `textures/fluid/slime/blood/{still,flowing}.png(+.mcmeta)` | **功能多余**（与第 26 条同源） | 血流体的贴图/动画；不补的话血流体的流体纹理 JSON 会指向不存在的贴图 | 未验证（贴图已生成，未实机看） |
 | 42 | 生成模型里"史莱姆胸甲"的来源 | 上游 3.12.1 的胸甲物品是 `slimy_chestplate`，`ToolItemModelProvider` 从它的模型生成 `item/armor/slime/chestplate_broken` | 本移植把胸甲与鞘翅合并成了 `slime_wings`（见第 26/28 条的移植取向），于是那条生成代码会去读 `slime_wings` 的模型并因为找不到 `ribcage` 贴图报错。改成直接用 `slimy_chestplate` **模型文件**（该文件仍在资源里，只是不再有对应物品）生成同一个输出 | **等价**（生成结果与上游逐字节同一套：501 vs 499，多出的两个是本移植的血内容） | 只有 `tinkering` datagen；运行期不受影响 | 已验证（生成物集合与上游 3.12.1 对齐） |
+| 43 | `mud_bricks` / `lavawood` 方块 | 上游 3.12.1 **没有**这两个方块（`lavawood` 已被 `blazewood` 取代，`mud_bricks` 只留下过时的语言键） | 本移植的 `TinkerCommons` 注册了它们，且**从 fork 时代起就没有 blockstate/模型/贴图**——在创造栏里就是紫黑格、tooltip 显示原始键（`block.tconstruct.lavawood_stairs`）。已按上游删掉（含掉落表、创造栏条目） | **删除移植多余内容（向上游对齐）** | 这两个方块此前就不可用（没有模型与掉落表以外的一切），删除不影响任何可用内容 | 已验证（2026-10-01：`runData` 绿；物品级审计不再列出它们） |
+| 44 | 灵浆瓶的物品 id | 上游用 `registerEnum(SlimeType.values(), "slime_bottle", ...)` 注册四种史莱姆瓶，id 是 `earth_slime_bottle` / `sky_slime_bottle` / `ender_slime_bottle` / `ichor_slime_bottle` | fork 把灵浆那一种单独注册成了 `ichor_bottle`，而模型/贴图/语言键全都叫 `ichor_slime_bottle`（它们来自上游），于是这个物品画成紫黑格。已把 id 改回 `ichor_slime_bottle` | **等价**（id 向上游对齐） | 存档里若存在旧 id `tconstruct:ichor_bottle` 的物品会变成空物品（该物品此前不可见，实际风险极低） | 已验证（物品级审计不再列出） |
 
 ## 如何更新本文件
 

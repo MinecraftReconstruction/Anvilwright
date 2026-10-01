@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:ichor_slime_leaves",
     "tconstruct:blood_slime_leaves"

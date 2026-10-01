@@ -1,5 +1,5 @@
 {
-  "parent": "tconstruct:world/tinkers_gadgetry",
+  "parent": "tconstruct:world/slime_collector",
   "criteria": {
     "used_pack": {
       "conditions": {

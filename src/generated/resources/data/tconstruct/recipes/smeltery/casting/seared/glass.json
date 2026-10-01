@@ -4,7 +4,7 @@
     "tag": "c:colorless_glass"
   },
   "cast_consumed": true,
-  "cooling_time": 84,
+  "cooling_time": 160,
   "fluid": {
     "amount": 81000,
     "tag": "tconstruct:seared_stone"

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:magma_fluid",
     "tconstruct:blazing_blood_fluid"
