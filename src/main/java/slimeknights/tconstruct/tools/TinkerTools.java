@@ -30,7 +30,7 @@ import slimeknights.tconstruct.library.client.data.material.GeneratorPartTexture
 import slimeknights.tconstruct.library.client.data.material.MaterialPartTextureGenerator;
 import slimeknights.tconstruct.library.json.loot.AddToolDataFunction;
 import slimeknights.tconstruct.library.materials.RandomMaterial;
-import slimeknights.tconstruct.library.modifiers.TinkerHooks;
+import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.ToolPredicate;
@@ -179,7 +179,7 @@ public final class TinkerTools extends TinkerModule {
     for (ConfigurableAction action : Config.COMMON.damageSourceTweaks) {
       action.run();
     }
-    TinkerHooks.init();
+    ModifierHooks.init();
     ToolModuleHooks.init();
   }
 

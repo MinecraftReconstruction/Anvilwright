@@ -459,3 +459,38 @@ $JDK17/bin/javac -encoding UTF-8 -proc:full -processorpath "$AP" -cp "src/main/j
 所以**当前 820 这个数字不能当作"真实剩余工作量"**。策略上：
 先把 `cannot find symbol: package net.minecraftforge.*` 这类**根因**清掉，
 每清一批就重新看 `PartRecipe` / `MaterialVariant` 这批文件是否自己好了，不要单独去"修"它们。
+
+### 2026-09-29 · 根因集群清理 —— 790 → 548
+
+按"每轮挑一个**根因**、清完立刻重测"的顺序推进，中途每一批都 commit+push。
+
+| commit | 做了什么 | 错误数 |
+|---|---|---|
+| `41beeca7b7` | 补回合并时丢掉的 import（112 个） | 790 → 624 |
+| `0e721bfe1d` | import 指向已搬迁类的重写（`RandomMaterial`/武器攻击模块/`PotionFluidEffect`/`EnumObject`） | 624 → 615 |
+| `fcd9f4bc22` | `shared.TinkerDamageTypes`→`common.`、`world.item.ItemLike`→`world.level.`、JEI `IRecipeTooltipReplacement` 路径 | 615 → 599 |
+| `8c9dccaae6` | 补回 `IdentifiableISafeManagerReloadListener`（Mantle 1.20 合并丢掉的适配器，现放在 TCon `library/utils`） | 599 → 588 |
+| `fdd58bf5fb` | 收尾 `TinkerHooks`→`ModifierHooks`；`ModifierLootingHandler` 半成品方法重写；删 `Airborne`/`Maintained` | 588 → 580 |
+| `b1e6f1f27f` | 传送事件改挂 Porting Lib 的 `EntityEvents.Teleport` | 580 → 564 |
+| `7238c99bc3` | 再删 9 个上游已移除的 modifier 类 | 564 → 553 |
+| `235a68daa2` | 删掉 3.12 之前的整套岛屿（island）实现 | 553 → 548 |
+
+**方法论（可复制）**
+
+1. **补 import 是可以自动化的**。从编译日志里抓 `symbol: class X` → 在源码树 + `slimeknights.mantle` 源码里找同名类；
+   只有一个候选、且该包名在 `good prefix`（vanilla / JDK / Lombok / Porting Lib / Fabric API / 自家类）内才动手。
+   还要**排除 Forge-only 前缀**（`net.minecraftforge.*`、`mezz.jei.api.forge.*`）——否则会往里塞根本不存在的 import。
+2. **判断"这个 import 到底存不存在"要查 jar**。用 `compileClasspath` 里的 160 个 jar 建一个 4.1 万个类的索引
+   （`unzip -Z1`，把 `Outer$Inner` 也写成 `Outer.Inner`），否则 `net.minecraft.world.item.ItemLike` 这种
+   "看起来像 vanilla 但 1.20 已经搬走"的 import 会被误判成存在。
+3. **重写 import 时禁止跨包乱猜**：候选必须与原 FQN 段数相同、且前 3 段相同。否则
+   `AttributeModifier.Operation` 会被改到 `com.llamalad7...Operation` 这种莫名其妙的地方。
+4. **同名类有两个（JEI/REI 各一份）就跳过**，不要猜。
+5. **"上游已删 + 全树无引用"= 放心删**。用 `git ls-tree v3.12.1.231` 判定"上游已删"，再用
+   "当前磁盘上没有别的文件提到它的 FQN"判定无引用。靠这一条这轮删掉了 9 个 modifier 类和 13 个岛屿类。
+   ⚠️ 注意排除 `mixin/*`（靠 mixin json 引用）和 `plugin/rei/**`（Fabric 专属实现，只在 extra 集合内部互相引用）。
+6. 不要凭"某个文件报错少"判断它没事：`ModifierLootingHandler` 报 0 条错误，实际里面躺着
+   `event.getEntity()` 这种编译不过的残留代码（javac 跳过了它的方法体检查）。**改完文件后一定看总数。**
+
+**仍然没解开的**：`PartRecipe` 看不到 Lombok 生成物（见上一节），`getVariant()`/`getId()`/`getCraftingResult()`
+这一批共 ~28 条错误都属于它，**先别单独去修**。

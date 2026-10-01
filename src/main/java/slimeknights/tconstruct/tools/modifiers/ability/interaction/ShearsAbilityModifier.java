@@ -94,7 +94,7 @@ public class ShearsAbilityModifier extends NoLevelsModifier implements EntityInt
   /** Runs the hook after shearing an entity */
   private static void runShearHook(IToolStackView tool, Player player, Entity entity, boolean isTarget) {
     for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(TinkerHooks.SHEAR_ENTITY).afterShearEntity(tool, entry, player, entity, isTarget);
+      entry.getHook(ModifierHooks.SHEAR_ENTITY).afterShearEntity(tool, entry, player, entity, isTarget);
     }
   }
 

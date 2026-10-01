@@ -80,7 +80,7 @@ public class InteractionHandler {
       ToolStack tool = ToolStack.from(stack);
       for (ModifierEntry entry : tool.getModifierList()) {
       // exit on first successful result
-      InteractionResult result = entry.getHook(TinkerHooks.ENTITY_INTERACT).beforeEntityUse(tool, entry, player, target, hand, source);
+      InteractionResult result = entry.getHook(ModifierHooks.ENTITY_INTERACT).beforeEntityUse(tool, entry, player, target, hand, source);
       if (result.consumesAction()) {
         return result;
         }
@@ -163,7 +163,7 @@ public class InteractionHandler {
 
         // first, before block use (in forge, onItemUseFirst)
         /*if (event.getUseItem() != Result.DENY)*/ {
-          InteractionResult result = onBlockUse(context, tool, chestplate, entry -> entry.getHook(TinkerHooks.BLOCK_INTERACT).beforeBlockUse(tool, entry, context, InteractionSource.ARMOR));
+          InteractionResult result = onBlockUse(context, tool, chestplate, entry -> entry.getHook(ModifierHooks.BLOCK_INTERACT).beforeBlockUse(tool, entry, context, InteractionSource.ARMOR));
           if (result.consumesAction()) {
             return result;
           }
