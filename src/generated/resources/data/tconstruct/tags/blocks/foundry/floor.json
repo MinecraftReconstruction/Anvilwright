@@ -1,9 +1,10 @@
 {
+  "replace": false,
   "values": [
-    "#tconstruct:scorched_blocks",
     "tconstruct:scorched_lamp",
     "tconstruct:scorched_drain",
     "tconstruct:scorched_chute",
-    "tconstruct:scorched_duct"
+    "tconstruct:scorched_duct",
+    "#tconstruct:scorched_blocks"
   ]
 }

@@ -1,9 +1,13 @@
 {
+  "replace": false,
   "values": [
-    "#c:seeds",
     "minecraft:carrot",
     "minecraft:potato",
     "minecraft:nether_wart",
-    "minecraft:sweet_berries"
+    "minecraft:sweet_berries",
+    {
+      "id": "#c:seeds",
+      "required": false
+    }
   ]
 }

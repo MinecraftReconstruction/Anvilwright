@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:molten_cinderslime",
     "tconstruct:flowing_molten_cinderslime"

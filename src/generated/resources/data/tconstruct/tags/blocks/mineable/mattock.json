@@ -1,7 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:mineable/shovel",
-    "#minecraft:logs",
     "minecraft:azalea",
     "minecraft:bamboo",
     "minecraft:glow_lichen",
@@ -16,6 +15,8 @@
     "minecraft:cocoa",
     "minecraft:brown_mushroom_block",
     "minecraft:mushroom_stem",
-    "minecraft:red_mushroom_block"
+    "minecraft:red_mushroom_block",
+    "#minecraft:mineable/shovel",
+    "#minecraft:logs"
   ]
 }

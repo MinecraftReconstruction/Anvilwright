@@ -1,8 +1,9 @@
 {
+  "replace": false,
   "values": [
-    "#tconstruct:congealed_slime",
     "tconstruct:grout",
     "tconstruct:nether_grout",
+    "#tconstruct:congealed_slime",
     "tconstruct:ichor_slime_sapling",
     "tconstruct:blood_slime_sapling",
     "#tconstruct:slimy_soil"

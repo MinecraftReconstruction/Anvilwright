@@ -3,6 +3,9 @@
   "values": [
     "tconstruct:blazewood",
     "tconstruct:nahuatl",
-    "#minecraft:planks"
+    {
+      "id": "#minecraft:planks",
+      "required": false
+    }
   ]
 }

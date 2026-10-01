@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:sweet_berry_bush",
     "minecraft:cave_vines",

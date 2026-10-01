@@ -1,7 +1,13 @@
 {
   "replace": false,
   "values": [
+    "minecraft:glowstone",
+    "minecraft:redstone_lamp",
+    "minecraft:sea_lantern",
+    "minecraft:beacon",
     "#minecraft:mineable/hoe",
-    "#c:mineable/sword"
+    "#forge:mineable/sword",
+    "#c:glass_blocks",
+    "#c:glass_panes"
   ]
 }

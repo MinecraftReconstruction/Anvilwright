@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#minecraft:oak_logs",
     "#minecraft:spruce_logs",
@@ -10,8 +11,6 @@
     "#minecraft:cherry_logs",
     "#minecraft:crimson_stems",
     "#minecraft:warped_stems",
-    "#tconstruct:slimy_logs",
-    "#minecraft:mangrove_logs",
-    "#minecraft:cherry_logs"
+    "#tconstruct:slimy_logs"
   ]
 }

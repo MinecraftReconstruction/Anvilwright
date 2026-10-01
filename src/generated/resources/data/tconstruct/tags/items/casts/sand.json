@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:blank_sand_cast",
     "tconstruct:ingot_sand_cast",

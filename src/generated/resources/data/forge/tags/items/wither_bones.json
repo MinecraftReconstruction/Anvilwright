@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "tconstruct:necrotic_bone",
+    "#forge:bones/wither"
+  ]
+}

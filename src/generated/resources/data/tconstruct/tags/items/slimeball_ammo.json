@@ -1,9 +1,11 @@
 {
+  "replace": false,
   "values": [
     "#forge:slimeball/earth",
     "#forge:slimeball/sky",
     "#forge:slimeball/ichor",
     "#forge:slimeball/ender",
+    "#forge:slimeball/blood",
     "minecraft:magma_cream"
   ]
 }

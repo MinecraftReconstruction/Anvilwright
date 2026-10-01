@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:shuriken",
     "tconstruct:throwing_axe"

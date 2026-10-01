@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:javelin",
     "#tconstruct:modifiable/ranged/launcher",

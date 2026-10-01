@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:slimesteel_ingot",
     "tconstruct:amethyst_bronze_ingot",

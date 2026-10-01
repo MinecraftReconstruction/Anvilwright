@@ -1,10 +1,14 @@
 {
+  "replace": false,
   "values": [
+    {
+      "id": "#forge:crops",
+      "required": false
+    },
     "minecraft:nether_wart",
     "minecraft:sweet_berry_bush",
-    "#minecraft:crops",
     {
-      "id": "#c:crops",
+      "id": "#minecraft:crops",
       "required": false
     }
   ]

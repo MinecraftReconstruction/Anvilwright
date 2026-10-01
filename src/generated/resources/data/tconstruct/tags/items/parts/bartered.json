@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:pick_head",
     "tconstruct:hammer_head",

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:crystalshot",
     "tconstruct:molten_soulsteel_bucket",

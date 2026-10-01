@@ -1,9 +1,14 @@
 {
   "replace": false,
   "values": [
-    "#c:cobalt_ingots",
-    "#c:queens_slime_ingots",
-    "#c:manyullyn_ingots",
-    "#c:hepatizon_ingots"
+    "#forge:ingots/steel",
+    "#forge:ingots/cobalt",
+    "#forge:ingots/slimesteel",
+    "#forge:ingots/cinderslime",
+    "#forge:ingots/queens_slime",
+    "#forge:ingots/manyullyn",
+    "#forge:ingots/hepatizon",
+    "#forge:ingots/knightmetal",
+    "#forge:ingots/knightslime"
   ]
 }
