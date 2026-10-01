@@ -20,9 +20,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialManager;
@@ -54,7 +51,20 @@ public class TinkerTags {
     Potions.init();
     CreativeTabs.init();
     Instruments.init();
-    MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, TagsUpdatedEvent.class, event -> tagsLoaded = true);
+    // Forge used TagsUpdatedEvent to flip this flag. Fabric has no tag-load event for this purpose and the flag
+    // is only read to decide whether tag lookups are safe yet, so it is set when the server resources reload.
+    net.fabricmc.fabric.api.resource.ResourceManagerHelper.get(net.minecraft.server.packs.PackType.SERVER_DATA)
+      .registerReloadListener(new net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener() {
+        @Override
+        public net.minecraft.resources.ResourceLocation getFabricId() {
+          return slimeknights.tconstruct.TConstruct.getResource("tags_loaded");
+        }
+
+        @Override
+        public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager resourceManager) {
+          tagsLoaded = true;
+        }
+      });
   }
 
   /** Resource location of the hidden from recipe tags used in JEI. */

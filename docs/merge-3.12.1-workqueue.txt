@@ -1,21 +1,13 @@
 # 3.12.1 Fabric port - error work queue
-# real errors: 224 in 103 files   (reported: 356)
+# real errors: 167 in 91 files   (reported: 299)
 # phantom (Lombok, only in the default log): 132
 # "real" = reported by both stop policies, so it is a genuine compile error
 # NOTE: this list is a LOWER BOUND - javac only checks the classes it reaches (see docs/HANDOFF.md)
 # format: real <tab> phantom <tab> origin <tab> path
 
-9	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/SolidFuelModule.java
-8	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MultitankFuelModule.java
 6	0	divergent	src/main/java/slimeknights/tconstruct/library/json/loot/equipment/MobEquipmentManager.java
-6	0	divergent	src/main/java/slimeknights/tconstruct/library/tools/capability/ToolEnergyCapability.java
-6	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/CastingTankBlockEntity.java
-6	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/tank/ProxyItemTank.java
-6	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/menu/HeatingStructureContainerMenu.java
 5	0	divergent	src/main/java/slimeknights/tconstruct/fluids/TinkerFluids.java
 5	0	divergent	src/main/java/slimeknights/tconstruct/library/modifiers/fluid/FluidEffectManager.java
-5	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/FluidCannonBlockEntity.java
-5	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/GaugeBlockEntity.java
 5	0	divergent	src/main/java/slimeknights/tconstruct/tools/entity/FluidEffectProjectile.java
 4	0	upstream-identical	src/main/java/slimeknights/tconstruct/common/data/FakeRegistryEntry.java
 4	0	divergent	src/main/java/slimeknights/tconstruct/gadgets/client/FancyItemFrameRenderer.java
@@ -32,7 +24,6 @@
 3	0	upstream-identical	src/main/java/slimeknights/tconstruct/plugin/jei/util/GuiContainerTankHandler.java
 3	0	divergent	src/main/java/slimeknights/tconstruct/plugin/jei/util/TankHidingIngredientListener.java
 3	0	divergent	src/main/java/slimeknights/tconstruct/shared/command/subcommand/GenerateMeltingRecipesCommand.java
-3	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/ProxyTankBlockEntity.java
 3	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/data/SmelteryCompat.java
 3	0	not-in-upstream	src/main/java/slimeknights/tconstruct/tools/MeleeHarvestToolStatsBuilder.java
 2	0	divergent	src/main/java/slimeknights/tconstruct/common/TinkerEffect.java
@@ -89,10 +80,7 @@
 1	0	divergent	src/main/java/slimeknights/tconstruct/shared/effect/ReturningEffect.java
 1	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/SmelteryClientEvents.java
 1	0	upstream-identical	src/main/java/slimeknights/tconstruct/smeltery/block/CastingTankBlock.java
-1	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/ITankBlockEntity.java
-1	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/block/entity/inventory/DuctTankWrapper.java
 1	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/client/render/FaucetBlockEntityRenderer.java
-1	0	divergent	src/main/java/slimeknights/tconstruct/smeltery/client/render/GaugeBlockEntityRenderer.java
 1	1	divergent	src/main/java/slimeknights/tconstruct/tables/TableClientEvents.java
 1	0	divergent	src/main/java/slimeknights/tconstruct/tools/TinkerModifiers.java
 1	0	divergent	src/main/java/slimeknights/tconstruct/tools/client/RayTracer.java

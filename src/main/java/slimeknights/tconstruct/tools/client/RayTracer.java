@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
+import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
 
 // TOOD: can this be removed?
 public class RayTracer {

@@ -13,9 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import io.github.fabricators_of_create.porting_lib.attributes.PortingLibAttributes;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.shared.TinkerAttributes;
 
@@ -30,8 +29,8 @@ public class AntigravityEffect extends TinkerEffect {
 
   public AntigravityEffect() {
     super(MobEffectCategory.HARMFUL, 0xff970d, true);
-    this.addAttributeModifier(ForgeMod.ENTITY_GRAVITY.get(), "5bd6b8c8-8de9-4357-a74e-afb2a8f00c20", -2, Operation.MULTIPLY_TOTAL);
-    MinecraftForge.EVENT_BUS.addListener(this::onLivingJump);
+    this.addAttributeModifier(PortingLibAttributes.ENTITY_GRAVITY, "5bd6b8c8-8de9-4357-a74e-afb2a8f00c20", -2, Operation.MULTIPLY_TOTAL);
+    LivingEntityEvents.JUMP.register(this::onLivingJump);
   }
 
   @Override
@@ -56,7 +55,7 @@ public class AntigravityEffect extends TinkerEffect {
   @Override
   public void applyEffectTick(LivingEntity living, int amplifier) {
     // ensure we are actually under the effects of antigrav, might have a double negative
-    if (living.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()) < 0) {
+    if (living.getAttributeValue(PortingLibAttributes.ENTITY_GRAVITY) < 0) {
       Level level = living.level();
       if (!living.level().isClientSide) {
         // 6100 meters is when it starts becoming hard to breathe, assuming world height is 320
@@ -118,10 +117,9 @@ public class AntigravityEffect extends TinkerEffect {
   }
 
   /** Handles making the player jump down instead of up */
-  private void onLivingJump(LivingJumpEvent event) {
+  private void onLivingJump(LivingEntity entity) {
     // handles jumping down instead of up
-    LivingEntity entity = event.getEntity();
-    if (entity.hasEffect(this) && entity.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()) < 0) {
+    if (entity.hasEffect(this) && entity.getAttributeValue(PortingLibAttributes.ENTITY_GRAVITY) < 0) {
       Vec3 movement = entity.getDeltaMovement();
       entity.setDeltaMovement(movement.x, -movement.y, movement.z);
     }
@@ -132,7 +130,7 @@ public class AntigravityEffect extends TinkerEffect {
     // must be on the ground, not swimming, not on a ladder, and have antigravity to jump
     // jump reversal is handled in ModifierEvents to ensure ordering between that and the attribute boost
     if (player.verticalCollision && !player.verticalCollisionBelow && !player.isInWaterOrBubble()
-      && player.hasEffect(this) && player.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()) < 0 && !player.onClimbable()) {
+      && player.hasEffect(this) && player.getAttributeValue(PortingLibAttributes.ENTITY_GRAVITY) < 0 && !player.onClimbable()) {
       player.jumpFromGround();
       return true;
     }

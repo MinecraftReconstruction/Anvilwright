@@ -20,14 +20,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import slimeknights.mantle.client.model.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer;
@@ -37,6 +37,8 @@ import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.utils.NBTTags;
+import slimeknights.mantle.fabric.transfer.InventoryStorage;
+import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.shared.block.entity.TableBlockEntity;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.CastingTankBlock;
@@ -46,7 +48,7 @@ import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.I
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, WorldlyContainer {
+public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlockEntity.ITankInventoryBlockEntity, SidedStorageBlockEntity, WorldlyContainer {
   /** Max capacity for the tank */
   public static final int DEFAULT_CAPACITY = FluidType.BUCKET_VOLUME * 4;
   // slots
@@ -57,8 +59,8 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   /** Internal fluid tank instance */
   @Getter
   protected final FluidTankAnimated tank;
-  /** Capability holder for the tank */
-  private final LazyOptional<IFluidHandler> fluidHolder;
+  /** Item storage over this container, exposed to pipes as the sided item capability */
+  private SlottedStackStorage itemHandler;
   /** Last redstone state of the block */
   private boolean lastRedstone = false;
   /** Last comparator strength to reduce block updates */
@@ -99,8 +101,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   protected CastingTankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, ITankBlock block) {
     super(type, pos, state, NAME, 2, 1);
     tank = new FluidTankAnimated(block.getCapacity(), this);
-    fluidHolder = LazyOptional.of(() -> tank);
-    itemHandler = new SidedInvWrapper(this, Direction.DOWN);
+    itemHandler = InventoryStorage.of(this, Direction.DOWN);
   }
 
   /**
@@ -234,19 +235,16 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
    * Tank methods
    */
 
+  @Nullable
   @Override
-  @Nonnull
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER) {
-      return fluidHolder.cast();
-    }
-    return super.getCapability(capability, facing);
+  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+    return tank;
   }
 
+  @Nullable
   @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    fluidHolder.invalidate();
+  public Storage<ItemVariant> getItemStorage(@Nullable Direction direction) {
+    return itemHandler;
   }
 
   @Nonnull
@@ -263,7 +261,8 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
     tryToProcessItem();
     if (this.level != null) {
       TankBlockEntity.updateLight(this, tank);
-      this.requestModelDataUpdate();
+      // refresh the render data; Forge's requestModelDataUpdate() does not exist on Fabric
+      RetexturedHelper.onTextureUpdated(this);
     }
   }
 

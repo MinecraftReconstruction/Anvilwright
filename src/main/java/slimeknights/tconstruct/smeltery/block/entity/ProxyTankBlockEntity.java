@@ -10,9 +10,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.mantle.fluid.FluidTransferHelper;
@@ -23,12 +24,10 @@ import slimeknights.tconstruct.smeltery.block.entity.tank.ProxyItemTank;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 /** Block entity with a tank that proxies to the nested item handler */
-public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTankUpdater {
+public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTankUpdater, SidedStorageBlockEntity {
   /** Direct access to the fluid handler and item handler */
   @Getter
   private final ProxyItemTank<ProxyTankBlockEntity> itemTank = new ProxyItemTank<>(this);
-  /** Capability instance for both items and fluids */
-  private final LazyOptional<ProxyItemTank<?>> capability = LazyOptional.of(() -> itemTank);
   /** Last comparator strength to reduce block updates */
   private int lastStrength = -1;
   protected ProxyTankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -42,18 +41,16 @@ public class ProxyTankBlockEntity extends MantleBlockEntity implements IFluidTan
 
   /* Capability */
 
+  @Nullable
   @Override
-  public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-    if (cap == ForgeCapabilities.ITEM_HANDLER || cap == ForgeCapabilities.FLUID_HANDLER) {
-      return capability.cast();
-    }
-    return super.getCapability(cap, side);
+  public Storage<FluidVariant> getFluidStorage(@Nullable Direction direction) {
+    return itemTank;
   }
 
+  @Nullable
   @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    capability.invalidate();
+  public Storage<ItemVariant> getItemStorage(@Nullable Direction direction) {
+    return itemTank;
   }
 
 

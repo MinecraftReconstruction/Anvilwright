@@ -1,7 +1,7 @@
 # 接力文件 —— Tinkers' Construct 3.12.1 → Fabric
 
-> 最后更新：2026-09-29（第二轮）　|　分支 `mcr/upstream-3.12.1`　|　当时 HEAD `3b45a0462e`
-> |　**剩余 224 条真错误**（Gradle 口径报 362，其中 132 条是假错误，见第 7 节）
+> 最后更新：2026-09-29（第二轮）　|　分支 `mcr/upstream-3.12.1`　|　当时 HEAD `e53ca1632b`
+> |　**剩余 167 条真错误**（Gradle 口径报 299，其中 132 条是假错误，见第 7 节；另有**整文件级的隐藏错误**，见 4.3）
 > 性质见 [ATTRIBUTION.md](../ATTRIBUTION.md)。本文件是**给下一个接手的人 / AI 智能体**的入口，
 > 细节都在 [MERGE-3.12.1.md](MERGE-3.12.1.md)（按时间倒序的日志 + 方法论）里。
 
@@ -9,7 +9,7 @@
 
 1. **现状**：Tinkers' Construct（Fabric 版，源自 Alpha-s-Stuff 的 Hephaestus）已经**合并了上游 3.12.1 的整棵源码树**，
    正在逐个把 Forge API 换成 Fabric / Porting Lib。**目前编译不过，所以还不能热测试。**
-   错误数：**真错误 224 条 / 103 个文件**（Gradle 报 362，扣掉 132 条假错误）。
+   错误数：**真错误 167 条 / 91 个文件**（Gradle 报 299，扣掉 132 条假错误）。
 2. **你的任务**：把真错误降到 0（并用第 4 节的方法确认"没有再冒出隐藏文件"）→ 跑 `runServer` 热测试 →
    按 [BEHAVIOUR-DIFFERENCES.md](BEHAVIOUR-DIFFERENCES.md) 逐条验证，然后才谈发布。
 3. **规矩**：每个里程碑 **commit 并 push**；任何非语义等价改动都要登记到行为差异表。
@@ -73,6 +73,24 @@ javac 只对**它真正走到的类**做检查。实测：2063 个源文件里�
 **结论**：随着真错误被修掉，之前被隐藏的文件会浮出来，**总数会阶段性上涨**。
 看到数字涨了先别慌 —— 对比 workqueue 里"新出现的文件"就知道是不是这个原因。
 
+### 4.3 ⚠️⚠️ **整文件**都可以是隐藏的（比 4.2 严重得多）
+
+4.2 说的是"某个方法体没被检查"。实测下来，**javac 会整文件跳过**：
+
+| 文件 | 全量日志 | 单独编译 | 说明 |
+|---|---|---|---|
+| `TinkerNetwork.java` | **0 条** | ~30 条 | 网络层的 API 漂移（`NetworkDirection` 包名、`SimpleChannel.initServerListener(channel)` 变成静态、`ISimplePacket` 不再是 `S2CPacket`）——**所有发包都是坏的** |
+| `FuelModule.java` | **0 条** | 43 条 | 缺 `tankSupplier`/`mainTank`/`NULL_POS`/`reset()`（上游把 multitank 逻辑合进基类时漏了） |
+| `MelterContainerMenu.java` | **0 条** | 9 条 | 还在用 `IFluidHandler` |
+| `ModifiableArmorItem.java` | 0（当时） | 14 条 | 合并残留 |
+
+**判据**：`scripts/port/scanhidden.sh` —— 扫"正文里出现 Forge 独有类型名、但全量日志里 0 错"的文件。
+加 `--check` 会逐个单独编译确认（**注意**：单独编译对**跨文件**的 Lombok 生成物（`getXxx()`、生成构造器）仍会报假错误，
+所以见到 `getTemperature()`/`constructor X cannot be applied` 这类先怀疑是假错误，去看目标类有没有 Lombok 注解）。
+
+**纪律**：改完一批之后，除了跑 `workqueue.py`，再跑一次 `scanhidden.sh`；**动过的文件要单独编译一次**，
+否则会以为改完了、其实那一批压根没进统计。
+
 ## 5. 已验证的移植配方（照这个来，收益最高）
 
 ### 配方 1：**上游文件 + 只换管道**（收益最高）
@@ -125,6 +143,7 @@ scripts/port/fastcompile.sh                   # 直接 javac 全量（18s）→ 
 scripts/port/fastcompile.sh --gen .port/gen.txt   # 换停止策略，用来找重复定义
 python3 scripts/port/workqueue.py             # 取交集/差集 → 重写 docs/merge-3.12.1-workqueue.txt
 python3 scripts/port/summarize.py [log]       # 按缺失包/缺失符号/最差文件归类
+scripts/port/scanhidden.sh [--check]          # 找"全量日志里 0 错但其实是编译不过"的隐藏文件（见 4.3）
 ./gradlew -I scripts/port/printcp.gradle printCompileCp && python3 scripts/port/jarindex.py
 python3 scripts/port/portfix.py               # 默认 dry run
 python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 删死 import
@@ -164,14 +183,19 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
 
 | 顺序 | 家族 | 剩余 | 说明 |
 |---|---|---|---|
-| 1 | **Forge capability / 流体调用点** | ~45 | 单罐抽象层本轮已经铺好了（`SimpleFluidTank`/`FluidTankBase`/`ScaledFluidTank`/`EmptyFluidHandlerItem` 都能编译），剩下的是**调用点**：`FluidUpgradeModule`、`MultitankFuelModule`(8)、`SolidFuelModule`(9)、`ProxyItemTank`(6)、`GaugeBlockEntity`(5)、`FluidCannonBlockEntity`(5)、`CastingTankBlockEntity`(6)、`DuctTankWrapper` 等要改用 `Storage<FluidVariant>` + `TransactionContext`，或把 holder 的类型从 `FluidTank` 换成 `SimpleFluidTank`。`ForgeCapabilities.*` → `FluidStorage.SIDED` / `ItemStorage.SIDED` |
+| 1 | **工具 capability 的 Fabric 化**（原第 1 批的剩余，**隐藏文件为主**） | ~40 | `ToolFluidCapability`(13)、`ToolInventoryCapability`(12)、`ToolCapabilityProvider`（它现在只留了 `clearCache()`，能力靠 `ModifiableItem` 里的 `FluidStorage.ITEM.registerForItems` / `ItemItemStorages.ITEM` 提供）、`ContainerFillingRecipeBuilder`(5)、`ModifiableArmorItem`(14) |
 | 2 | **客制化 item client extension** | ~13 | `IClientItemExtensions` 在 Fabric **没有对应物**（Porting Lib 也没有）。涉及第一/第三人称工具动画、盔甲模型、`ArmorModelManager`、`ModifiableItemClientExtension`、`FancyItemFrameRenderer`。要在 Fabric 上用 `ItemRendererRegistry`（+ 盔甲模型的现有路径）重写，**必须视觉比对** |
-| 3 | **Forge 事件残留** | ~25 | `net.minecraftforge.event*`：`AntigravityEffect`、`FakeRegistryEntry`、`TinkerTags`、`AddReloadListenerEvent`、`FinalizeSpawn` 等，逐个换成 Fabric API |
+| 3 | **Forge 事件残留**（原第 2 批） | ~30 | `net.minecraftforge.event*`(13)、`common.crafting.conditions`(7)、`registries`(4)、`eventbus`(4)、`common`(15)：`AntigravityEffect`、`FakeRegistryEntry`、`TinkerTags`、`AddReloadListenerEvent`、`FinalizeSpawn`、`AbstractModifierProvider` 等，逐个换成 Fabric API |
 | 4 | **JEI 插件** | ~10 | `mezz.jei.api.forge.ForgeTypes` → `mezz.jei.api.fabric.constants.FabricTypes.FLUID_STACK`；成分类型从 `FluidStack` 变 `IJeiFluidIngredient`，**不是纯改名** |
-| 5 | **流体效果/投掷物** | ~10 | `TinkerFluids`、`SlimeFluidType`、`FluidEffectManager`、`FluidEffectProjectile` 等，`FluidType`/`ForgeFlowingFluid` 的 Fabric 对应物 |
+| 5 | **流体类型** | ~13 | `TinkerFluids`(5)、`SlimeFluidType`(3)、`FluidEffectManager`(5)、`FluidEffectProjectile`(5)：`FluidType`/`ForgeFlowingFluid` 的 Fabric 对应物 |
 | 6 | **Mantle loadable 残留** | ~8 | `IGenericLoader` 还剩 `StatPredicate`/`ToolPredicate` 这一族（1.9 的 `GenericLoaderRegistry` → 1.11 的 `Loadable`/`RecordLoadable`） |
 | 7 | **Lombok 假错误** | 132（报告数） | 见第 7 节，**别单独修** |
-| 8 | 其余零散 | ~110 | 每文件 1–4 条 |
+| 8 | 其余零散 | ~80 | 每文件 1–4 条 |
+
+**第 1 批（原计划里的"流体/capability"）本轮已经做完了**：单罐抽象层、`GaugeBlockEntity`、`CastingTankBlockEntity`、
+`FluidCannonBlockEntity`、`ProxyTankBlockEntity`、`ProxyItemTank`、`DuctTankWrapper`、`FuelModule`、
+`MultitankFuelModule`、`SolidFuelModule`、两个熔炉菜单、`TinkerNetwork`、`ToolEnergyCapability` 都已改到 Fabric API。
+**第 2 批（Forge 事件/条件/注册表）还没动**，就是上表第 3 行。
 
 ## 9. 编译通过之后（发布路线）
 
@@ -197,7 +221,7 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
 | `scripts/port/*` | 编译/批量修复脚本，见第 6 节 |
 | `~/Desktop/repo/mr-mantle-fabric/docs/*` | Mantle 侧的同一套文档（STATUS / BEHAVIOUR-DIFFERENCES / I18N） |
 
-## 11. 本轮完成（2026-09-29 第二轮，报告数 462 → 362 / 真错误 319 → 224）
+## 11. 本轮完成（2026-09-29 第二轮，报告数 462 → 299 / 真错误 ~319 → 167）
 
 四个 checkpoint（每个都已 push，`git ls-remote` 核对过）：
 
@@ -207,6 +231,9 @@ python3 scripts/port/portfix.py --apply       # 补 import / 改搬迁 import / 
 | `5cedfca395` | 删掉上游 3.12.1 已删且无 JSON 使用的 `CastingModel`/`MelterModel`/`TableModel`、无引用的 `GenericRegistryEntrySerializer`；`AlloyRecipe` 补回上游的 `record AlloyIngredient` | 426 → 401 |
 | `34ef2b472a` | **`TinkerTools` 的注册表按上游重写**（工具定义模块 / 工具属性 / 两套谓词），删掉 4 个只被旧注册块引用的 `harvest`/`aoe` 类；`ToolModuleHooks`→`ToolHooks` | 401 → 375 |
 | `3b45a0462e` | 单罐流体抽象层改到 Fabric 形状：`SimpleFluidTank` 不再继承 Forge、`FluidTankBase` 实现它并保留 `onContentsChanged` 语义、`EmptyFluidHandlerItem`/`ScaledFluidTank` 重写；补回 `ToolInventoryCapability.CraftingType` | 375 → 361 |
+| `1e3b0e6f03` | 冶炼炉方块实体能力改到 Fabric lookup API：`GaugeBlockEntity`/`CastingTankBlockEntity`/`FluidCannonBlockEntity`/`ProxyTankBlockEntity` 用 `SidedStorageBlockEntity`，`ProxyItemTank` 变成物品内流体罐的 `Storage<FluidVariant>`，`DuctTankWrapper` 走 `SlottedStorage`，新增 `EmptyFluidStorage`（Forge `EmptyFluidHandler.INSTANCE` 的替代） | 362 → 327 |
+| `dc535af3a2` | 燃料模块收尾：`FuelModule` 补回 `tankSupplier`/`mainTank`/`NULL_POS`/`reset()`、`SOLID_TEMPERATURE` 换成上游写法；`MultitankFuelModule` 变成 `Storage<FluidVariant>`、`SolidFuelModule` 只剩单罐位置 + 物品燃料显示；两个熔炉菜单跟着改 | 327 → 310 |
+| `e53ca1632b` | **修好网络层**（`TinkerNetwork` 的 `NetworkDirection` 包名 / 静态 `initServerListener` / `S2CPacket` 三处漂移，之前**所有发包都是坏的**）+ 去掉 Forge 能量 capability（行为差异 #18） | 310 → 304 |
 
 顺带修掉的**真 bug**（不只是编译问题）：
 

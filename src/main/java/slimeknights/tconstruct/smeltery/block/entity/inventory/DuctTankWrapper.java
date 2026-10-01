@@ -16,7 +16,7 @@ public class DuctTankWrapper implements SlottedStorage<FluidVariant> { // Fabric
   private final DuctItemHandler itemHandler;
   private int[] tankMapping;
 
-  public DuctTankWrapper(IFluidHandler parent, DuctItemHandler itemHandler) {
+  public DuctTankWrapper(SlottedStorage<FluidVariant> parent, DuctItemHandler itemHandler) {
     this.parent = parent;
     this.itemHandler = itemHandler;
     // clear cache when the fluid changes or the smeltery list changes
@@ -31,10 +31,10 @@ public class DuctTankWrapper implements SlottedStorage<FluidVariant> { // Fabric
   private int[] getTankMapping() {
     if (tankMapping == null) {
       FluidStack filter = itemHandler.getFluid();
-      int count = parent.getTanks();
+      int count = parent.getSlotCount();
       if (filter.isEmpty()) {
-        FluidStack last = parent.getFluidInTank(count - 1);
-        if (last.isEmpty()) {
+        FluidVariant last = parent.getSlot(count - 1).getResource();
+        if (last.isBlank()) {
           tankMapping = new int[] { count - 1 };
         } else {
           tankMapping = new int[0];
@@ -42,8 +42,8 @@ public class DuctTankWrapper implements SlottedStorage<FluidVariant> { // Fabric
       } else {
         IntList list = new IntArrayList(count);
         for (int i = 0; i < count; i++) {
-          FluidStack contained = parent.getFluidInTank(i);
-          if (contained.isEmpty() || filter.isFluidEqual(contained)) {
+          FluidVariant contained = parent.getSlot(i).getResource();
+          if (contained.isBlank() || filter.isFluidEqual(contained)) {
             list.add(i);
           }
         }

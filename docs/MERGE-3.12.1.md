@@ -6,6 +6,39 @@
 
 ---
 
+## 2026-09-29（第二轮后半）· 按"真/假 + 隐藏文件"三口径推进 —— 报告 362 → 299 / 真 224 → 167
+
+这一轮先做了"流体/capability"整批，随后发现 **javac 会整文件跳过**，于是补了 `scanhidden.sh` 并把隐藏文件一起修。
+
+| commit | 内容 | 数字 |
+|---|---|---|
+| `1e3b0e6f03` | 冶炼炉 BE 能力改 Fabric lookup（`SidedStorageBlockEntity`）、`ProxyItemTank` → 物品内流体罐的 `Storage<FluidVariant>`、新 `EmptyFluidStorage` | 362 → 327 |
+| `dc535af3a2` | 燃料模块收尾（`FuelModule` 补字段、`MultitankFuelModule`/`SolidFuelModule` 改 Fabric、两个熔炉菜单） | 327 → 310 |
+| `e53ca1632b` | `TinkerNetwork` 三处 API 漂移（**网络层之前是坏的**）+ 能量 capability 去 Forge 化（差异 #18） | 310 → 304（+ 隐藏文件） |
+
+### 新纪律：改文件之前先确认它有没有进统计
+
+`scanhidden.sh` 的判据是"正文含 Forge 独有类型名、但全量日志 0 错"。实测这些文件的全量日志与实际差距：
+
+| 文件 | 全量日志 | 单独编译 |
+|---|---|---|
+| `FuelModule` | 0 | 43 |
+| `TinkerNetwork` | 0 | ~30 |
+| `ModifierWorktable`/`MelterContainerMenu`/`AlloyerContainerMenu` | 0 | 9 / 9 / 11 |
+| `ModifiableArmorItem` | 0（修前） | 14 |
+
+⚠️ 单独编译**不能**用来判真假：跨文件的 Lombok 生成物（`getXxx()`、生成构造器）在单独编译时也会报"找不到"。
+判据是去看目标类有没有对应注解。
+
+### 这一轮修掉的"运行期才会炸"的问题（编译上只是几条 import）
+
+1. **`TinkerNetwork` 的发包路径全是坏的**（`NetworkDirection` 用了 Porting Lib 的包、`SimpleChannel.init*Listener` 已改静态、
+   `ISimplePacket` 不再是 `S2CPacket`）——任何数据同步都不会工作。
+2. `FuelModule` 缺 `tankSupplier`/`mainTank`/`NULL_POS`/`reset()`/`SOLID_TEMPERATURE`：冶炼炉/熔炉/合金炉的找燃料逻辑。
+3. `HeatingStructureBlockEntity.updateDisplayFluid` 不再赋值 `displayFluid`（见上一节）。
+
+---
+
 ## 2026-09-29（第二轮）· 按"真错误"口径推进 —— 报告 462 → 362 / 真错误 319 → 224
 
 这一轮先定案了第 7 节的 Lombok 问题（结论见下一节），然后按家族推进，四个 checkpoint 都已 push：

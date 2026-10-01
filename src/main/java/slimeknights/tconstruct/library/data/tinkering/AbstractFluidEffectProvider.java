@@ -19,8 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import io.github.fabricators_of_create.porting_lib.util.CraftingHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.common.crafting.conditions.OrCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
@@ -141,7 +140,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Adds a conditional fluid effect */
   protected Builder compatFluid(String modId, TagKey<Fluid> fluid, int amount) {
-    return addFluid(fluid, amount).addCondition(new ModLoadedCondition(modId));
+    return addFluid(fluid, amount).addCondition(DefaultResourceConditions.allModsLoaded(modId));
   }
 
   /** Adds a conditional fluid effect */
@@ -226,7 +225,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
       for (int i = 0; i < names.length; i++) {
         conditions[i+1] = new TagFilledCondition<>(ItemTags.create(commonResource("ingots/" + names[i])));
       }
-      return addCondition(new OrCondition(conditions));
+      return addCondition(DefaultResourceConditions.or(conditions));
     }
 
     /** Adds an effect to the given fluid */

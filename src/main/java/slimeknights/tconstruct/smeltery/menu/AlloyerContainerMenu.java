@@ -4,7 +4,9 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackSto
 import lombok.Getter;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import slimeknights.tconstruct.library.fluid.EmptyFluidStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -78,18 +80,18 @@ public class AlloyerContainerMenu extends TriggeringBaseContainerMenu<AlloyerBlo
     if (id >= 0 && !held.isEmpty() && !player.isSpectator()) {
       if (!player.level().isClientSide && tile != null) {
         int index = id / 2;
-        IFluidHandler handler;
+        Storage<FluidVariant> handler;
         // first index is the internal tank
         if (index == 0) {
           handler = tile.getTank();
         } else if (index == 1) {
-          handler = tile.getFuelModule().getTank();
+          handler = tile.getFuelModule().getTankStorage();
         } else {
           // index 2 and onwards is a handler tank
           handler = tile.getAlloyTank().getFluidHandler(index - 2);
         }
         // invalid index would make the handler empty through the alloy tank
-        if (handler != EmptyFluidHandler.INSTANCE) {
+        if (handler != EmptyFluidStorage.INSTANCE) {
           // even numbers are fill, odd are drain
           TransferResult result = FluidTransferHelper.interactWithStack(handler, held, (id & 1) == 0 ? TransferDirection.FILL_ITEM : TransferDirection.EMPTY_ITEM);
           setCarried(FluidTransferHelper.handleUIResult(player, held, result));

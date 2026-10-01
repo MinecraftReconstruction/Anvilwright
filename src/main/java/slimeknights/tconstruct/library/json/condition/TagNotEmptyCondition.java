@@ -13,7 +13,6 @@ import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.util.RegistryHelper;
 import slimeknights.tconstruct.TConstruct;
@@ -38,17 +37,12 @@ public class TagNotEmptyCondition<T> implements LootItemCondition, ConditionJson
   }
 
   @Override
-  public boolean test(IContext context) {
-    return !context.getTag(tag).isEmpty();
-  }
-
-  @Override
   public boolean test(LootContext context) {
     Registry<T> registry = RegistryHelper.getRegistry(tag.registry());
     return registry != null && registry.getTagOrEmpty(tag).iterator().hasNext();
   }
 
-  public static class ConditionSerializer implements Serializer<TagNotEmptyCondition<?>>, IConditionSerializer<TagNotEmptyCondition<?>> {
+  public static class ConditionSerializer implements Serializer<TagNotEmptyCondition<?>> {
     /** Helper to deal with generics */
     private static <T> TagKey<T> createKey(JsonObject json) {
       ResourceKey<? extends Registry<T>> registry = ResourceKey.createRegistryKey(JsonHelper.getResourceLocation(json, "registry"));

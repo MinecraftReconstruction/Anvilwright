@@ -1,7 +1,5 @@
 package slimeknights.tconstruct.common.network;
 
-import io.github.fabricators_of_create.porting_lib.util.NetworkDirection;
-import me.pepperbell.simplenetworking.S2CPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
@@ -13,6 +11,8 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelAccessor;
 import slimeknights.mantle.network.NetworkWrapper;
+import slimeknights.mantle.network.channel.NetworkDirection;
+import slimeknights.mantle.network.channel.SimpleChannel;
 import slimeknights.mantle.network.packet.ISimplePacket;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.materials.definition.UpdateMaterialsPacket;
@@ -81,9 +81,9 @@ public class TinkerNetwork extends NetworkWrapper {
       return;
     }
     instance = new TinkerNetwork();
-    instance.network.initServerListener();
+    SimpleChannel.initServerListener(instance.network);
     if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
-      instance.network.initClientListener();
+      SimpleChannel.initClientListener(instance.network);
 
 
     // shared
@@ -146,9 +146,9 @@ public class TinkerNetwork extends NetworkWrapper {
    * @param world     World instance
    * @param position  Target position
    */
-  public void sendToClientsAround(S2CPacket msg, @Nullable LevelAccessor world, BlockPos position) {
+  public void sendToClientsAround(Object msg, @Nullable LevelAccessor world, BlockPos position) {
     if (world instanceof ServerLevel server) {
-      network.sendToClientsAround(msg, server, new Vec3i(position.getX(), position.getY(), position.getZ()), 20);
+      super.sendToClientsAround(msg, server, position);
     }
   }
 
@@ -158,8 +158,8 @@ public class TinkerNetwork extends NetworkWrapper {
    * @param entity  Entity to check
    */
   @Override
-  public void sendToTrackingAndSelf(S2CPacket msg, Entity entity) {
-    this.network.sendToClientsTrackingAndSelf(msg, entity);
+  public void sendToTrackingAndSelf(Object msg, Entity entity) {
+    super.sendToTrackingAndSelf(msg, entity);
   }
 
   /**
@@ -168,8 +168,8 @@ public class TinkerNetwork extends NetworkWrapper {
    * @param entity  Entity to check
    */
   @Override
-  public void sendToTracking(ISimplePacket msg, Entity entity) {
-    this.network.sendToClientsTracking(msg, entity);
+  public void sendToTracking(Object msg, Entity entity) {
+    super.sendToTracking(msg, entity);
   }
 
   /**
@@ -178,7 +178,7 @@ public class TinkerNetwork extends NetworkWrapper {
    * @param playerList      Player list to use if main player is null
    * @param msg             Message to send
    */
-  public void sendToPlayerList(@Nullable ServerPlayer targetedPlayer, PlayerList playerList, S2CPacket msg) {
+  public void sendToPlayerList(@Nullable ServerPlayer targetedPlayer, PlayerList playerList, Object msg) {
     if (targetedPlayer != null) {
       sendTo(msg, targetedPlayer);
     } else {

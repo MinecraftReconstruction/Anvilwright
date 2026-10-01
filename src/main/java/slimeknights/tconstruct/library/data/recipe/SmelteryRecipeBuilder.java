@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -17,10 +18,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import io.github.fabricators_of_create.porting_lib.data.ConditionalRecipe;
-import net.minecraftforge.common.crafting.DifferenceIngredient;
-import net.minecraftforge.common.crafting.IntersectionIngredient;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
-import net.minecraftforge.common.crafting.conditions.ItemExistsCondition;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import io.github.fabricators_of_create.porting_lib.util.TrueCondition;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
@@ -263,7 +263,7 @@ public class SmelteryRecipeBuilder {
     for (IByproduct byproduct : unitByproducts) {
       builder.addByproduct(byproduct.getFluid(scale));
     }
-    builder.save(withCondition(new ItemExistsCondition(itemName)), location(meltingFolder, output));
+    builder.save(withCondition(DefaultResourceConditions.registryContains(Registries.ITEM, itemName)), location(meltingFolder, output));
   }
 
   /** Adds a recipe for melting an item from a tag */
@@ -294,11 +294,11 @@ public class SmelteryRecipeBuilder {
     Ingredient ingredient;
     // not everyone sets size, so treat singular as the fallback, means we want anything in the tag that is not sparse or dense
     if (size == Tags.Items.ORE_RATES_SINGULAR) {
-      ingredient = DifferenceIngredient.of(baseIngredient, Ingredient.of(TinkerTags.Items.NON_SINGULAR_ORE_RATES));
+      ingredient = DefaultCustomIngredients.difference(baseIngredient, Ingredient.of(TinkerTags.Items.NON_SINGULAR_ORE_RATES));
       wrapped = withCondition(TagCombinationCondition.difference(itemTag(tagName), TinkerTags.Items.NON_SINGULAR_ORE_RATES));
       // size tag means we want an intersection between the tag and that size
     } else if (size != null) {
-      ingredient = IntersectionIngredient.of(baseIngredient, Ingredient.of(size));
+      ingredient = DefaultCustomIngredients.all(baseIngredient, Ingredient.of(size));
       wrapped = withCondition(TagCombinationCondition.intersection(itemTag(tagName), size));
       // default only need it to be in the tag
     } else {

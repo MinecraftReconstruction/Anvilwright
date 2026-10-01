@@ -5,7 +5,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import slimeknights.mantle.client.render.FluidCuboid;
 import slimeknights.mantle.client.render.FluidRenderer;
 import slimeknights.mantle.client.render.MantleRenderTypes;
@@ -21,9 +23,9 @@ public class GaugeBlockEntityRenderer implements BlockEntityRenderer<GaugeBlockE
   public void render(GaugeBlockEntity tile, float pPartialTick, PoseStack matrices, MultiBufferSource buffer, int light, int pPackedOverlay) {
     List<FluidCuboid> fluids = FluidCuboid.REGISTRY.get(tile.getBlockState(), List.of());
     if (!fluids.isEmpty()) {
-      IFluidHandler tank = tile.getTank();
-      if (tank.getTanks() > 0) {
-        FluidStack fluid = tank.getFluidInTank(0);
+      Storage<FluidVariant> tank = tile.getTank();
+      FluidStack fluid = TransferUtil.firstOrEmpty(tank);
+      if (!fluid.isEmpty()) {
         if (!fluids.isEmpty()) {
           FluidRenderer.renderCuboids(matrices, buffer.getBuffer(MantleRenderTypes.FLUID), fluids, fluid, light);
         }

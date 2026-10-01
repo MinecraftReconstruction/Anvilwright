@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.IForgeShearable;
 import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
-import net.minecraftforge.eventbus.api.Event.Result;
+import io.github.fabricators_of_create.porting_lib.core.event.BaseEvent.Result;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.ToolShearEvent;

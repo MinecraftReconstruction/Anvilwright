@@ -1,6 +1,10 @@
 package slimeknights.tconstruct.smeltery.menu;
 
 import lombok.Getter;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -9,9 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import slimeknights.mantle.fluid.FluidTransferHelper;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
 import slimeknights.mantle.fluid.transfer.IFluidContainerTransfer.TransferDirection;
@@ -44,7 +46,7 @@ public class HeatingStructureContainerMenu extends TriggeringMultiModuleContaine
     if (inv != null && structure != null) {
       // slots for emptying/filling buckets - do first but filtered
       if (!inv.player.level().isClientSide) {
-        IFluidHandler tank = structure.getTank();
+        Storage<FluidVariant> tank = structure.getTank();
         addSlot(new BucketInputSlot(bucketContainer, 125, 46, tank, this, inv.player));
         bucketResultSlot = addSlot(new BucketResultSlot(bucketContainer, 125, 104, tank, this, inv.player));
       } else {
@@ -186,16 +188,17 @@ public class HeatingStructureContainerMenu extends TriggeringMultiModuleContaine
 
     @Override
     public boolean mayPlace(ItemStack stack) {
-      return FluidContainerTransferManager.INSTANCE.mayHaveTransfer(stack) || stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent();
+      return FluidContainerTransferManager.INSTANCE.mayHaveTransfer(stack)
+        || FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack)) != null;
     }
   }
 
   /** Bucket input slot - used serverside only to handle draining the bucket when placed in the slot */
   public static class BucketInputSlot extends BucketSlot {
-    private final IFluidHandler tank;
+    private final Storage<FluidVariant> tank;
     private final TransferDirectionSupplier directionSupplier;
     private final Player player;
-    public BucketInputSlot(Container pContainer, int pX, int pY, IFluidHandler tank, TransferDirectionSupplier directionSupplier, Player player) {
+    public BucketInputSlot(Container pContainer, int pX, int pY, Storage<FluidVariant> tank, TransferDirectionSupplier directionSupplier, Player player) {
       super(pContainer, 0, pX, pY);
       this.tank = tank;
       this.directionSupplier = directionSupplier;
@@ -229,10 +232,10 @@ public class HeatingStructureContainerMenu extends TriggeringMultiModuleContaine
 
   /** Bucket result slot - used serverside to trigger fluid transfer when the slot is emptied */
   public static class BucketResultSlot extends ResultSlot {
-    private final IFluidHandler tank;
+    private final Storage<FluidVariant> tank;
     private final TransferDirectionSupplier directionSupplier;
     private final Player player;
-    public BucketResultSlot(Container pContainer, int pX, int pY, IFluidHandler tank, TransferDirectionSupplier directionSupplier, Player player) {
+    public BucketResultSlot(Container pContainer, int pX, int pY, Storage<FluidVariant> tank, TransferDirectionSupplier directionSupplier, Player player) {
       super(pContainer, 1, pX, pY);
       this.tank = tank;
       this.directionSupplier = directionSupplier;

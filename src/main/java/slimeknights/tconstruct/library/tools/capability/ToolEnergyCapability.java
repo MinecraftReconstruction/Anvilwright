@@ -2,10 +2,6 @@ package slimeknights.tconstruct.library.tools.capability;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.modifiers.modules.build.ModifierTraitModule;
@@ -17,8 +13,17 @@ import slimeknights.tconstruct.tools.TinkerModifiers;
 
 import java.util.function.Supplier;
 
-/** Standard implementation of energy capability on a tool. Not currently used in the mod directly, but should help addons have more unity. */
-public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) implements IEnergyStorage {
+/**
+ * Standard implementation of energy capability on a tool. Not currently used in the mod directly, but should help
+ * addons have more unity.
+ * <p>
+ * ⚠️ Upstream implements Forge's {@code IEnergyStorage}. Fabric's Transfer API has no energy type of its own - the
+ * energy API lives in a separate library ({@code team.reborn.energy.api}) that is not on this project's classpath,
+ * so the Forge interface is dropped and these stay as plain methods on the record. Addons that piped energy in
+ * through the Forge capability cannot do so here until an energy API is added (see
+ * docs/BEHAVIOUR-DIFFERENCES.md #18).
+ */
+public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) {
   /** Format string to display energy amounts, used internally by the stat */
   public static final String ENERGY_FORMAT = TConstruct.makeDescriptionId("tool_stat", "energy");
   /** Stat marking the max capacity */
@@ -72,7 +77,6 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
     }
   }
 
-  @Override
   public int receiveEnergy(int maxReceive, boolean simulate) {
     if (maxReceive <= 0) {
       return 0;
@@ -86,7 +90,6 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
     return filled;
   }
 
-  @Override
   public int extractEnergy(int maxExtract, boolean simulate) {
     if (maxExtract <= 0) {
       return 0;
@@ -106,39 +109,33 @@ public record ToolEnergyCapability(Supplier<? extends IToolStackView> tool) impl
     return drained;
   }
 
-  @Override
   public int getEnergyStored() {
     return getEnergy(tool.get());
   }
 
-  @Override
   public int getMaxEnergyStored() {
     return getMaxEnergy(tool.get());
   }
 
-  @Override
   public boolean canExtract() {
     return true;
   }
 
-  @Override
   public boolean canReceive() {
     return true;
   }
 
-  /** Provider instance for a fluid cap */
+  /** Provider instance for an energy cap. Fabric has no energy API on the classpath, see the class javadoc. */
   public static class Provider implements IToolCapabilityProvider {
-    private final LazyOptional<IEnergyStorage> energyCap;
+    private final Supplier<? extends IToolStackView> toolStack;
+
     public Provider(Supplier<? extends IToolStackView> toolStack) {
-      this.energyCap = LazyOptional.of(() -> new ToolEnergyCapability(toolStack));
+      this.toolStack = toolStack;
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(IToolStackView tool, Capability<T> cap) {
-      if (cap == ForgeCapabilities.ENERGY && tool.getStats().getInt(MAX_STAT) > 0) {
-        return energyCap.cast();
-      }
-      return LazyOptional.empty();
+    /** The energy handler for this tool, for code that already held a provider reference */
+    public ToolEnergyCapability getEnergy() {
+      return new ToolEnergyCapability(toolStack);
     }
   }
 }
