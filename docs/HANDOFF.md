@@ -698,3 +698,31 @@ Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已
 3. `runData` → 把 `src/generated` 与上游 3.12.1 做结构化 diff（最能抓语义错误）。
 4. `runServer`（验 `tinkering/tool_definitions`、冶炼炉方块实体）→ `runClient`（验盔甲/工具渲染、JEI）。
 5. 最后：canonical 非 fork 仓库 + 两条分支（细粒度 checkpoint / 压成 15–20 个逻辑提交，压缩版设默认分支）。
+
+## 25. 2026-10-01：canonical 仓库与分支约定（已建好）
+
+| 仓库 | 作用 | 分支 |
+|---|---|---|
+| **`MinecraftReconstruction/TinkersConstruct-Fabric`**（非 fork，public） | **canonical**，发布用 | **`main`（默认）** = 20 个逻辑提交；`checkpoints` = 143 个细粒度 checkpoint |
+| `MinecraftReconstruction/TinkersConstruct`（fork） | 对外同步/浏览用的 fork 基线 | `mcr/upstream-3.12.1` = 细粒度开发分支 |
+| `SlimeKnights/TinkersConstruct`（upstream remote） | 上游只读参考 | tag `v3.12.1.231` |
+
+**推送方式**：本地 `git remote add canonical ...`（已加好），日常在 `mcr/upstream-3.12.1` 上提交并
+`git push origin` 与 `git push canonical mcr/upstream-3.12.1:checkpoints`；文档类改动 cherry-pick 到 `main`。
+
+**压缩分支怎么来的**（可复现）：`main` 从合并提交 `c1877b30fb` 起，按逻辑把 143 个 checkpoint 分成 20 组，
+每组用 `git read-tree --reset -u <该组最后一个 commit>` + `git commit` 生成。已核对
+`git diff --name-only checkpoints main` = **0**（两边代码树完全一致，只有历史形状不同）。
+
+**commit 计数（回答"我们做了多少"）**
+
+| 口径 | 条数 |
+|---|---|
+| 分支总提交（含上游 2012 年起的全部历史） | 11043 |
+| 我们写的（`--author=Winston_Huang`） | 150 |
+| 其中 3.12.1 合并点之后的移植工作 | **143**（2026-09-29 → 10-01） |
+
+**⚠️ 待办**：fork 仓库 `MinecraftReconstruction/TinkersConstruct` 的 **描述**里目前写着
+"Unofficial, AI-generated (largely vibed) ..."，与规则 2 冲突（只能写
+`Unofficial, largely AI-assisted ("vibed") port.`）。canonical 仓库的描述已经是合规措辞，
+fork 那条描述建议一并改掉（`gh repo edit MinecraftReconstruction/TinkersConstruct --description ...`）。
