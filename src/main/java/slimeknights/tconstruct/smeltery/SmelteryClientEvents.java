@@ -103,5 +103,6 @@ public class SmelteryClientEvents extends ClientEventBase {
     loaders.put(TConstruct.getResource("channel"), ChannelModel.LOADER);
     loaders.put(TConstruct.getResource("fluid_texture"), FluidTextureModel.LOADER);
     loaders.put(TConstruct.getResource("copper_can"), CopperCanModel.LOADER);
+    loaders.put(TConstruct.getResource("fluid_container"), slimeknights.tconstruct.library.client.model.FluidContainerModel.LOADER);
   }
 }
