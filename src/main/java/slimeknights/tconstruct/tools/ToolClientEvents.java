@@ -302,7 +302,7 @@ public class ToolClientEvents extends ClientEventBase {
     if (player.isUsingItem() && !player.isPassenger()) {
       ItemStack using = player.getUseItem();
       // start with the attribute
-      double speed = player.getAttributeValue(TinkerAttributes.USE_ITEM_SPEED.get());
+      double speed = TinkerAttributes.getValue(player, TinkerAttributes.USE_ITEM_SPEED.get());
       // start by calculating tool stat, not an attribute to ensure both hands get their say
       if (using.is(TinkerTags.Items.HELD)) {
         ToolStack tool = ToolStack.from(using);

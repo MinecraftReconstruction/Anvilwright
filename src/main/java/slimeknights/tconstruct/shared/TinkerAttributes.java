@@ -14,6 +14,18 @@ import net.minecraft.world.entity.player.Player;
 public class TinkerAttributes {
   private static final AttributeDeferredRegister ATTRIBUTES = new AttributeDeferredRegister(TConstruct.MOD_ID);
 
+  /**
+   * Reads an attribute value, returning 0 when the entity does not carry the attribute.
+   * <p>
+   * Fabric's attribute registry is per entity type and cannot express "every entity" (see
+   * BEHAVIOUR-DIFFERENCES #6), so our attributes only exist on the player and TCon's own entities. Any mob that
+   * jumps or takes fall damage still runs through these code paths, so they have to tolerate a missing attribute.
+   */
+  public static double getValue(net.minecraft.world.entity.LivingEntity entity, net.minecraft.world.entity.ai.attributes.Attribute attribute) {
+    net.minecraft.world.entity.ai.attributes.AttributeInstance instance = entity.getAttribute(attribute);
+    return instance == null ? 0 : instance.getValue();
+  }
+
   public TinkerAttributes() {
     ATTRIBUTES.register();
     registerEntityAttributes();

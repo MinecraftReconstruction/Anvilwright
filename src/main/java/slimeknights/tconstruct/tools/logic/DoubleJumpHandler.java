@@ -53,7 +53,7 @@ public class DoubleJumpHandler {
     // validate preconditions, no using when swimming, elytra, or on the ground
     if (!entity.onGround() && !entity.onClimbable() && !entity.isInWaterOrBubble()) {
       // determine max jumps
-      int extraJumps = Mth.floor(entity.getAttributeValue(TinkerAttributes.JUMP_COUNT.get())) - 1;
+      int extraJumps = Mth.floor(TinkerAttributes.getValue(entity, TinkerAttributes.JUMP_COUNT.get())) - 1;
       if (extraJumps > 0) {
         // check that we can take more jumps
         ModDataNBT data = new ModDataNBT(PersistentDataCapability.getOrWarn(entity));
