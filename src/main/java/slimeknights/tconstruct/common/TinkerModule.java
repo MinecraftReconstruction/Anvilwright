@@ -69,7 +69,6 @@ public abstract class TinkerModule {
   protected static final FluidDeferredRegisterExtension FLUIDS = new FluidDeferredRegisterExtension(TConstruct.MOD_ID);
   protected static final EnumDeferredRegister<MobEffect> MOB_EFFECTS = new EnumDeferredRegister<>(Registries.MOB_EFFECT, TConstruct.MOD_ID);
   protected static final SynchronizedDeferredRegister<ParticleType<?>> PARTICLE_TYPES = SynchronizedDeferredRegister.create(Registries.PARTICLE_TYPE, TConstruct.MOD_ID);
-  protected static final SynchronizedDeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZERS = SynchronizedDeferredRegister.create(Keys.ENTITY_DATA_SERIALIZERS, TConstruct.MOD_ID);
   protected static final SynchronizedDeferredRegister<CreativeModeTab> CREATIVE_TABS = SynchronizedDeferredRegister.create(Registries.CREATIVE_MODE_TAB, TConstruct.MOD_ID);
   // gameplay instances
   protected static final BlockEntityTypeDeferredRegister BLOCK_ENTITIES = new BlockEntityTypeDeferredRegister(TConstruct.MOD_ID);
@@ -77,7 +76,7 @@ public abstract class TinkerModule {
   protected static final MenuTypeDeferredRegister MENUS = new MenuTypeDeferredRegister(TConstruct.MOD_ID);
   // datapacks
   protected static final SynchronizedDeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = SynchronizedDeferredRegister.create(Registries.RECIPE_SERIALIZER, TConstruct.MOD_ID);
-  protected static final SynchronizedDeferredRegister<Codec<? extends IGlobalLootModifier>> GLOBAL_LOOT_MODIFIERS = SynchronizedDeferredRegister.create(Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, TConstruct.MOD_ID);
+  protected static final SynchronizedDeferredRegister<Codec<? extends IGlobalLootModifier>> GLOBAL_LOOT_MODIFIERS = SynchronizedDeferredRegister.create(PortingLibLoot.GLOBAL_LOOT_MODIFIER_SERIALIZERS_KEY, TConstruct.MOD_ID);
   protected static final SynchronizedDeferredRegister<LootItemConditionType> LOOT_CONDITIONS = SynchronizedDeferredRegister.create(Registries.LOOT_CONDITION_TYPE, TConstruct.MOD_ID);
   protected static final SynchronizedDeferredRegister<LootItemFunctionType> LOOT_FUNCTIONS = SynchronizedDeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, TConstruct.MOD_ID);
   protected static final SynchronizedDeferredRegister<LootPoolEntryType> LOOT_ENTRIES = SynchronizedDeferredRegister.create(Registries.LOOT_POOL_ENTRY_TYPE, TConstruct.MOD_ID);
@@ -92,26 +91,26 @@ public abstract class TinkerModule {
 
   /** Called during construction to initialize the registers for this mod */
   public static void initRegisters() {
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    // Fabric has no mod event bus: Mantle's deferred registers install themselves into the vanilla
+    // registries (and the Fabric ones) when register() is called with no arguments
     // gameplay singleton
-    BLOCKS.register(bus);
-    ITEMS.register(bus);
-    FLUIDS.register(bus);
-    MOB_EFFECTS.register(bus);
-    PARTICLE_TYPES.register(bus);
-    DATA_SERIALIZERS.register(bus);
-    CREATIVE_TABS.register(bus);
+    BLOCKS.register();
+    ITEMS.register();
+    FLUIDS.register();
+    MOB_EFFECTS.register();
+    PARTICLE_TYPES.register();
+    CREATIVE_TABS.register();
     // gameplay instance
-    BLOCK_ENTITIES.register(bus);
-    ENTITIES.register(bus);
-    MENUS.register(bus);
+    BLOCK_ENTITIES.register();
+    ENTITIES.register();
+    MENUS.register();
     // datapacks
-    RECIPE_SERIALIZERS.register(bus);
-    GLOBAL_LOOT_MODIFIERS.register(bus);
-    LOOT_CONDITIONS.register(bus);
-    LOOT_FUNCTIONS.register(bus);
-    LOOT_ENTRIES.register(bus);
-    TinkerRecipeTypes.init(bus);
+    RECIPE_SERIALIZERS.register();
+    GLOBAL_LOOT_MODIFIERS.register();
+    LOOT_CONDITIONS.register();
+    LOOT_FUNCTIONS.register();
+    LOOT_ENTRIES.register();
+    TinkerRecipeTypes.init();
   }
 
   /**

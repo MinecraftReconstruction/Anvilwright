@@ -73,6 +73,34 @@ javac 只对**它真正走到的类**做检查。实测：2063 个源文件里�
 **结论**：随着真错误被修掉，之前被隐藏的文件会浮出来，**总数会阶段性上涨**。
 看到数字涨了先别慌 —— 对比 workqueue 里"新出现的文件"就知道是不是这个原因。
 
+### 4.2.1 ⚠️⚠️⚠️ 全量单次编译的数字是**任意的**，别再拿它当进度条
+
+2026-09-29 实测的**决定性反例**：同一棵树，只因为我把 3 个新文件（`RetexturedBlockItem`、
+`SupplierCreativeTab`、`MaterialRenderInfoJson`）加进 `find` 出来的文件列表，
+
+| 编译的文件列表 | 报告错误数 | 被检查的文件数 |
+|---|---|---|
+| 去掉那 3 个文件 | **5** | ~50 |
+| 包含那 3 个文件 | **3572** | ~505 |
+
+也就是说 javac 的"提前停手"边界对文件列表/顺序极其敏感，**单次全量的总数可以是几倍到几十倍的偏差**。
+这一轮里 `462 → 43 → 5` 的"进度"其实就是在这个浮动的边界上测出来的：数字下降既包含真实修复，
+也包含"这次恰好只检查了很少的文件"。
+
+**可靠的数法**：`scripts/port/truecount.sh` —— 按**包目录**分块编译（每块的文件全部显式传入，
+保证这一块被完整检查），只统计属于该块的错误再求和。代价约 15–30 分钟，用来做里程碑级的真值测量。
+第一次跑出来的分布（112/299 块时）已经暴露出一大片此前从未被检查过的代码：
+
+```
+351  slimeknights/tconstruct/common/data/tags      <- 标签 datagen
+ 91  slimeknights/tconstruct/common/data/loot
+ 13  slimeknights/tconstruct/common/data/render
+  7  slimeknights/tconstruct/common/data/model
+```
+
+这些 datagen provider 用的是**旧 API**（`modResource` / `getForgeTag` / `getRegistryName` / `hotBuilder` /
+`melting(...)` 等），上游 1.11 已经换掉了。**这是目前最大的一块剩余工作**，之前所有轮次都没看见它。
+
 ### 4.3 ⚠️⚠️ **整文件**都可以是隐藏的（比 4.2 严重得多）
 
 4.2 说的是"某个方法体没被检查"。实测下来，**javac 会整文件跳过**：

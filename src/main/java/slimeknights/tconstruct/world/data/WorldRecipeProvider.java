@@ -46,7 +46,7 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
 
     // does not need green as its the fallback
     for (SlimeType slimeType : SlimeType.TINKER) {
-      ResourceLocation name = modResource("common/slime/" + slimeType.getSerializedName() + "/congealed");
+      ResourceLocation name = commonResource("common/slime/" + slimeType.getSerializedName() + "/congealed");
       ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerWorld.congealedSlime.get(slimeType))
                          .define('#', slimeType.getSlimeballTag())
                          .pattern("##")
@@ -54,7 +54,7 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
                          .unlockedBy("has_item", has(slimeType.getSlimeballTag()))
                          .group("tconstruct:congealed_slime")
                          .save(consumer, name);
-      ResourceLocation blockName = modResource("common/slime/" + slimeType.getSerializedName() + "/slimeblock");
+      ResourceLocation blockName = commonResource("common/slime/" + slimeType.getSerializedName() + "/slimeblock");
       ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerWorld.slime.get(slimeType))
                          .define('#', slimeType.getSlimeballTag())
                          .pattern("###")
@@ -87,7 +87,7 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
                        .define('#', Tags.Items.SLIMEBALLS)
                        .define('P', Blocks.PISTON)
                        .unlockedBy("has_slime_ball", has(Tags.Items.SLIMEBALLS))
-                       .save(slimeConsumer, modResource("common/slime/sticky_piston"));
+                       .save(slimeConsumer, commonResource("common/slime/sticky_piston"));
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Items.LEAD, 2)
                        .define('~', Items.STRING)
                        .define('O', Tags.Items.SLIMEBALLS)
@@ -95,12 +95,12 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
                        .pattern("~O ")
                        .pattern("  ~")
                        .unlockedBy("has_slime_ball", has(Tags.Items.SLIMEBALLS))
-                       .save(slimeConsumer, modResource("common/slime/lead"));
+                       .save(slimeConsumer, commonResource("common/slime/lead"));
     ShapelessRecipeBuilder.shapeless(RecipeCategory.BREWING, Items.MAGMA_CREAM)
                           .requires(Items.BLAZE_POWDER)
                           .requires(Tags.Items.SLIMEBALLS)
                           .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                          .save(slimeConsumer, modResource("common/slime/magma_cream"));
+                          .save(slimeConsumer, commonResource("common/slime/magma_cream"));
 
     // wood
     String woodFolder = "world/wood/";
@@ -123,11 +123,11 @@ public class WorldRecipeProvider extends BaseRecipeProvider implements ICommonRe
                        .pattern("##")
                        .unlockedBy("has_item", has(geode.asItem()))
                        .group("tconstruct:slime_crystal_block")
-                       .save(consumer, modResource(folder + "crystal_block"));
+                       .save(consumer, commonResource(folder + "crystal_block"));
     SimpleCookingRecipeBuilder.blasting(Ingredient.of(geode), RecipeCategory.MISC, TinkerCommons.slimeball.get(slime), 0.2f, 200)
                               .unlockedBy("has_crystal", has(geode))
                               .group("tconstruct:slime_crystal")
-                              .save(consumer, modResource(folder + "crystal_smelting"));
+                              .save(consumer, commonResource(folder + "crystal_smelting"));
     ItemLike dirt = TinkerWorld.slimeDirt.get(slime);
     SimpleCookingRecipeBuilder.blasting(Ingredient.of(dirt), RecipeCategory.MISC, geode, 0.2f, 400)
                               .unlockedBy("has_dirt", has(dirt))
