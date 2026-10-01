@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "tconstruct:bleed",
+    "tconstruct:bleeding",
     "tconstruct:player_attack_magic",
     "tconstruct:mob_attack_magic"
   ]

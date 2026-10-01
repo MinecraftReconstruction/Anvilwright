@@ -24,6 +24,14 @@ import static slimeknights.tconstruct.common.TinkerDamageTypes.MELEE_FISHING_HOO
 import static slimeknights.tconstruct.common.TinkerDamageTypes.MELEE_THROWN;
 import static slimeknights.tconstruct.common.TinkerDamageTypes.MELEE_THROWN_TOOL;
 import static slimeknights.tconstruct.common.TinkerDamageTypes.MOB_EXPLOSION;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.PLAYER_ATTACK_BYPASS_ARMOR;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.MOB_ATTACK_BYPASS_ARMOR;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.PLAYER_ATTACK_EXPLOSION;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.MOB_ATTACK_EXPLOSION;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.PLAYER_ATTACK_FIRE;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.MOB_ATTACK_FIRE;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.PLAYER_ATTACK_MAGIC;
+import static slimeknights.tconstruct.common.TinkerDamageTypes.MOB_ATTACK_MAGIC;
 import static slimeknights.tconstruct.common.TinkerDamageTypes.PIERCING;
 import static slimeknights.tconstruct.common.TinkerDamageTypes.SELF_DESTRUCT;
 import static slimeknights.tconstruct.common.TinkerDamageTypes.SHOCK;
@@ -71,6 +79,16 @@ public class DamageTypeProvider implements RegistrySetBuilder.RegistryBootstrap<
     register(context, FLUID_MAGIC, new DamageType(prefix("fluid.magic"), 0.1f, DamageEffects.HURT));
     register(context, WATER, new DamageType(prefix("fluid.water"), 0.1f, DamageEffects.DROWNING));
     register(context, FLUID_SPIKE, new DamageType(prefix("fluid.spike"), 0.1f, DamageEffects.THORNS));
+
+    // fork content: attack variants used by the fluid damage system to tell player and mob attacks apart
+    context.register(PLAYER_ATTACK_BYPASS_ARMOR, new DamageType(prefix("player_attack_bypass_armor"), 0.1f));
+    context.register(MOB_ATTACK_BYPASS_ARMOR, new DamageType(prefix("mob_attack_bypass_armor"), 0.1f));
+    context.register(PLAYER_ATTACK_EXPLOSION, new DamageType(prefix("player_attack_explosion"), DamageScaling.NEVER, 0.1f));
+    context.register(MOB_ATTACK_EXPLOSION, new DamageType(prefix("mob_attack_explosion"), DamageScaling.NEVER, 0.1f));
+    context.register(PLAYER_ATTACK_FIRE, new DamageType(prefix("player_attack_fire"), DamageScaling.NEVER, 0.1f, DamageEffects.BURNING));
+    context.register(MOB_ATTACK_FIRE, new DamageType(prefix("mob_attack_fire"), DamageScaling.NEVER, 0.1f, DamageEffects.BURNING));
+    context.register(PLAYER_ATTACK_MAGIC, new DamageType(prefix("player_attack_magic"), DamageScaling.NEVER, 0.1f));
+    context.register(MOB_ATTACK_MAGIC, new DamageType(prefix("mob_attack_magic"), DamageScaling.NEVER, 0.1f));
   }
 
   /** Registers a damage type pair for a fluid effect */

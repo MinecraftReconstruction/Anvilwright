@@ -11,7 +11,7 @@
         "fabric:type": "fabric:any",
         "ingredients": [
           {
-            "tag": "c:workbenches"
+            "tag": "forge:workbenches"
           },
           {
             "tag": "tconstruct:tables"
