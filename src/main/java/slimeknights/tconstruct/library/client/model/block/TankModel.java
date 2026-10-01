@@ -68,7 +68,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
   protected static final ResourceLocation BAKE_LOCATION = TConstruct.getResource("dynamic_model_baking");
 
   /** Shared loader instance */
-  public static final IGeometryLoader<TankModel> LOADER = TankModel::deserialize;
+  public static final IGeometryLoader<TankModel> LOADER = new Loader();
 
   protected final SimpleBlockModel model;
   @Nullable
