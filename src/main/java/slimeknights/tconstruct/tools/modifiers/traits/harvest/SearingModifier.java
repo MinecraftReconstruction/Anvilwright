@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 public class SearingModifier extends Modifier {
   /** Container for melting recipe lookup */

@@ -20,6 +20,7 @@ import slimeknights.mantle.client.TooltipKey;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Well maintained for Tinkers Bronze */
 public class MaintainedModifier extends Modifier implements ConditionalStatModifierHook {

@@ -164,6 +164,63 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 | 删除只有 Forge 版的可选集成（jsonthings 21 文件 + diet + IE） | **1594** | 见提交历史 |
 | **合并上游 Mantle 1.20**（Mantle 侧，见下） | **1539** | `mantle_version` 切到 `1.11.DEV.ad2e7db0` |
 | hook/module 体系第一波：257 个「上游版本不含 Forge API」的文件直接取上游 | **1494**（当前） | 358 个相关文件里的 257 个 |
+| 「管线类」文件按套路迁移：`TinkerModifiers` → `TinkerTables`/`DisplayCastingRecipe`/`PartRecipe` → datagen provider（+ 补 `model_generators` 模块）→ `ToolActions` 残留 → `TinkerModule` → `TinkerStationBlockEntity` | **1302**（当前） | 每批都 commit |
+
+## 当前剩余 1302 个错误的分类（2026-09-29）
+
+| 类别 | 错误 | 文件 | 说明 |
+|---|---|---|---|
+| **F. 其它 / 级联** | 797 | 292 | 绝大多数是下面几类的级联：某个类型解析失败后同文件的后续错误都会归到这里。**按类别清掉下面几类，F 会跟着塌** |
+| **B. Forge 事件 / capability / datagen** | 314 | 122 | 事件映射表见下节；capability 需要换成 Fabric 的 lookup API 或 Porting Lib |
+| **A. Forge 流体 API** | 63 | 32 | `IFluidHandler` 的语义（`Transaction`/`StorageUtil`），`FluidAction` 已用垫片顶掉 |
+| **D. hook / module 体系** | 57 | 35 | 剩余的是「上游版本含 Forge API」的那 79 个文件里的 |
+| **C. Mantle API** | 49 | 24 | 主要是 `IGenericLoader` → Mantle 1.11 的 `RecordLoadable`/`IHaveLoader` 体系 |
+| **E. 可选兼容** | 22 | 15 | JEI 的 `api.forge`、`IClientItemExtensions` 之类 |
+
+**建议顺序**：B（映射表已备齐）→ D（35 个文件，其中 `ModifierEvents` 最大）→ C（loader API）→ A（流体语义）→ E。
+
+## ⏩ 接手点（B/D 进行中，2026-09-29 晚）
+
+当前 **1291 errors**。已经做完的 B 类零散项：`BreakSpeed` 的 import（24 个文件）、
+Forge→Porting Lib 的 `ToolActions`（11 个文件）、`TinkerModule` 的注册表映射、
+`TinkerStationBlockEntity` 的四个 Forge 钩子。
+
+**接下来最值得做的两块，各自都有现成模板**：
+
+### 1. 自定义 ingredient（B 类里约 30 个错误，6 个文件）
+
+3.12 新增了 `library/recipe/ingredient/{BlockTagIngredient,InstrumentIngredient,MaterialValueIngredient,
+NoContainerIngredient,ToolHookIngredient,NestedIngredient}.java`，它们用 Forge 的
+`IIngredientSerializer`/`CraftingHelper`，Fabric 上没有这套 API。
+
+**模板就在我们端口里**：`library/recipe/ingredient/MaterialIngredient.java`（1.20.1 分支）
+用的是 Fabric API 的 **`net.fabricmc.fabric.api.recipe.v1.ingredient.CustomIngredient` +
+`CustomIngredientSerializer`**，并且把 JSON 写成 `"fabric:type": ...`（和我们在书本 JSON 里做的
+`forge:nbt` → `fabric:nbt` 归一化是同一套东西）。照它改即可。
+
+### 2. 客户端模型 API（B 类里约 45 个错误，3 个文件）
+
+`library/client/model/tools/MaterialBlockModel.java`、`library/client/model/UniqueGuiModel.java`、
+`library/client/model/FluidContainerModel.java` 都是 3.12 新增文件，用 Forge 的
+`IGeometryBakingContext`（还有 `ExtraTextureContext` 那种"包一层 context 换贴图"的写法）。
+
+**模板在 Mantle 侧**（我们刚合并过的那个仓库）：
+
+- `MantleItemLayerModel` / `SimpleBlockModel`：`resolveParents(..., BlockModel owner)`、
+  `bake(BlockModel owner, ..., ResourceLocation location, boolean isGui3d)` —— Porting Lib 2.3.16
+  的 `IUnbakedGeometry` 就是这套签名；Forge 的 `RenderTypeGroup`/`getMaterial` 概念已经不存在，
+  贴图直接从 `owner.getMaterial(name)` 取
+- 文档见 Mantle 仓库的 [docs/BEHAVIOUR-DIFFERENCES.md](https://github.com/MinecraftReconstruction/Mantle-Fabric/blob/mcr/mantle-1.11/docs/BEHAVIOUR-DIFFERENCES.md) 第 6/13/14/15 条
+  （逐层 render type 无法传递，是已知且已披露的保真缺口）
+
+### 3. 再往后
+
+- **D 类**：`tools/logic/{ModifierEvents,ToolEvents,InteractionHandler,EquipmentChangeWatcher,...}`，
+  事件映射表见上一节；`ModifierEvents` 是 3.12 新增的中央事件类，要**和它托管的那批 modifier 一起迁**，
+  否则会重复触发（我们的 `BouncyModifier`/`DoubleJumpModifier`/`EnderferenceModifier`/`DragonbornModifier`
+  里各有一份同样的处理）
+- **C 类**：`IGenericLoader` → Mantle 1.11 的 `RecordLoadable`/`IHaveLoader`
+- **A 类**：`IFluidHandler` 的 simulate/execute 语义
 
 ## hook 体系迁移的分批实测（358 个文件）
 

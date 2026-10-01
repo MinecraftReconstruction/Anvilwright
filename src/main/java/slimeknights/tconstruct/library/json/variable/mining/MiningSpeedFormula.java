@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Variable context for {@link slimeknights.tconstruct.library.modifiers.modules.mining.ConditionalMiningSpeedModule} */
 public record MiningSpeedFormula(ModifierFormula formula, List<MiningSpeedVariable> variables, String[] variableNames, boolean percent) implements VariableFormula<MiningSpeedVariable> {

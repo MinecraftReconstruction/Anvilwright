@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import slimeknights.mantle.client.TooltipKey;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 // TODO: convert into a module
 public class DwarvenModifier extends Modifier implements ConditionalStatModifierHook, BreakSpeedModifierHook, TooltipModifierHook {

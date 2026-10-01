@@ -74,6 +74,7 @@ import slimeknights.tconstruct.tools.modifiers.upgrades.armor.HasteModifier;
 
 import java.util.List;
 import java.util.Objects;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /**
  * Event subscriber for tool events

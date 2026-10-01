@@ -7,6 +7,7 @@ import slimeknights.tconstruct.library.modifiers.hook.display.TooltipModifierHoo
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import java.util.Collection;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /**
  * Hook used to increase mining speed of a block conditioned on the environment or the player.

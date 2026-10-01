@@ -12,7 +12,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.IForgeShearable;
 import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
-import net.minecraftforge.common.ToolActions;
+import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
 import net.minecraftforge.eventbus.api.Event.Result;
 import slimeknights.mantle.data.loadable.primitive.FloatLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;

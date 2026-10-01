@@ -24,6 +24,7 @@ import slimeknights.tconstruct.library.tools.stat.ToolStats;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import io.github.fabricators_of_create.porting_lib.entity.events.PlayerEvents.BreakSpeed;
 
 /** Module for boosting the speed of block breaking conditioned on a block state predicate */
 public record ConditionalMiningSpeedModule(IJsonPredicate<BlockState> predicate, boolean requireEffective, float bonus) implements BreakSpeedModifierHook, TooltipModifierHook, ModifierModule {
