@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:osmium_nuggets"
+        "forge:osmium_nuggets"
       ]
     }
   ],

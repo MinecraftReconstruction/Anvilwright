@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:constantan_nuggets"
+        "forge:constantan_nuggets"
       ]
     }
   ],

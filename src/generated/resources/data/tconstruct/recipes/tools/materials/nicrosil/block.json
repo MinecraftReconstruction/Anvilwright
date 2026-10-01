@@ -1,17 +1,19 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/nicrosil"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:nicrosil_blocks"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/nicrosil"
+    "tag": "c:nicrosil_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/nicrosil"
+    "tag": "c:nicrosil_ingots"
   },
   "material": "tconstruct:nicrosil",
   "needed": 1,

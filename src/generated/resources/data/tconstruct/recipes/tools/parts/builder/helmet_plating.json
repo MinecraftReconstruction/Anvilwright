@@ -3,13 +3,16 @@
   "cost": 3,
   "material": "tconstruct:rock",
   "pattern": "tconstruct:helmet_plating",
-  "pattern_item": [
-    {
-      "tag": "tconstruct:patterns/default"
-    },
-    {
-      "item": "tconstruct:helmet_plating_cast"
-    }
-  ],
+  "pattern_item": {
+    "fabric:type": "fabric:all",
+    "ingredients": [
+      {
+        "tag": "tconstruct:patterns/default"
+      },
+      {
+        "item": "tconstruct:helmet_plating_cast"
+      }
+    ]
+  },
   "result": "tconstruct:helmet_plating_dummy"
 }

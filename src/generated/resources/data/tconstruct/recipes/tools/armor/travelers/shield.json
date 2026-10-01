@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "c": {
-      "type": "tconstruct:material_value",
+      "fabric:type": "tconstruct:material_value",
       "material": {
         "type": "tconstruct:stat_type",
         "stat_type": "tconstruct:shield_core"
@@ -11,7 +11,7 @@
       "value": 1.0
     },
     "l": {
-      "type": "tconstruct:material_value",
+      "fabric:type": "tconstruct:material_value",
       "material": {
         "type": "tconstruct:stat_type",
         "stat_type": "tconstruct:cuirass"
@@ -19,7 +19,7 @@
       "value": 1.0
     },
     "s": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:wooden_rods"
     }
   },
   "parts": "cl",

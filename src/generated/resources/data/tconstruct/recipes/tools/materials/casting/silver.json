@@ -3,14 +3,14 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:silver_ingots"
+        "forge:silver_ingots"
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_silver"
+    "tag": "forge:molten_silver"
   },
   "output": "tconstruct:silver",
   "temperature": 790

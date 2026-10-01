@@ -1,17 +1,10 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_blocks"
-      ]
-    }
-  ],
   "type": "tconstruct:material",
   "ingredient": {
     "tag": "c:steel_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:steel_ingots"
   },
   "material": "tconstruct:steel",

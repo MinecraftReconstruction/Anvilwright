@@ -1,16 +1,27 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:constantan_ingots"
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:constantan_ingots"
+          ]
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:nickel_ingots"
+          ]
+        }
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_constantan"
+    "tag": "forge:molten_constantan"
   },
   "output": "tconstruct:constantan",
   "temperature": 920

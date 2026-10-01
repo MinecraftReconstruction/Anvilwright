@@ -1,17 +1,19 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/ironwood"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:ironwood_blocks"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/ironwood"
+    "tag": "c:ironwood_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/ironwood"
+    "tag": "c:ironwood_ingots"
   },
   "material": "tconstruct:ironwood",
   "needed": 1,

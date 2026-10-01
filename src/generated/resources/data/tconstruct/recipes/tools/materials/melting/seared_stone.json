@@ -2,7 +2,7 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:seared_stone",
   "result": {
-    "amount": 40500,
+    "amount": 20250,
     "fluid": "tconstruct:seared_stone"
   },
   "temperature": 600

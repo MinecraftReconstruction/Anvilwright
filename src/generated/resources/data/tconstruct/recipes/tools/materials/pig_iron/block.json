@@ -4,6 +4,7 @@
     "tag": "c:pig_iron_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:pig_iron_ingots"
   },
   "material": "tconstruct:pig_iron",

@@ -1,17 +1,19 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/steeleaf"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:steeleaf_blocks"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/steeleaf"
+    "tag": "c:steeleaf_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/steeleaf"
+    "tag": "c:steeleaf_ingots"
   },
   "material": "tconstruct:steeleaf",
   "needed": 1,

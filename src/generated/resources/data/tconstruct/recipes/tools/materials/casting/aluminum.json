@@ -3,14 +3,14 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:aluminum_ingots"
+        "forge:aluminum_ingots"
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_aluminum"
+    "tag": "forge:molten_aluminum"
   },
   "output": "tconstruct:aluminum",
   "temperature": 425

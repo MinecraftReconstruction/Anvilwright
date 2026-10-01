@@ -22,7 +22,7 @@
   ],
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/copper"
+    "tag": "c:copper_ingots"
   },
   "material": "tconstruct:copper#oxidized",
   "needed": 1,

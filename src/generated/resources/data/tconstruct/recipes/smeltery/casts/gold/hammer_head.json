@@ -1,14 +1,14 @@
 {
   "type": "tconstruct:casting_table",
   "cast": {
-    "type": "tconstruct:material",
+    "fabric:type": "tconstruct:material",
     "item": "tconstruct:hammer_head"
   },
   "cast_consumed": true,
   "cooling_time": 57,
   "fluid": {
-    "amount": 90,
-    "tag": "forge:molten_gold"
+    "amount": 9000,
+    "tag": "tconstruct:molten_gold"
   },
   "result": "tconstruct:hammer_head_cast",
   "switch_slots": true

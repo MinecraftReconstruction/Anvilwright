@@ -3,14 +3,14 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:lead_ingots"
+        "forge:lead_ingots"
       ]
     }
   ],
   "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 9000,
-    "tag": "c:molten_lead"
+    "tag": "forge:molten_lead"
   },
   "output": "tconstruct:lead",
   "temperature": 330

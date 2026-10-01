@@ -1,12 +1,4 @@
 {
-  "fabric:load_conditions": [
-    {
-      "condition": "fabric:tags_populated",
-      "values": [
-        "c:steel_ingots"
-      ]
-    }
-  ],
   "type": "tconstruct:material_melting",
   "input": "tconstruct:steel",
   "result": {

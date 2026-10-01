@@ -1,12 +1,9 @@
 {
   "fabric:load_conditions": [
     {
-      "base": "minecraft:planks",
-      "condition": "tconstruct:tag_difference_present",
-      "registry": "minecraft:item",
-      "subtracted": [
-        "tconstruct:wood_variants/planks"
-      ]
+      "condition": "mantle:tag_combination_filled",
+      "ignore": "tconstruct:wood_variants/planks",
+      "match": "minecraft:planks"
     }
   ],
   "type": "tconstruct:material",

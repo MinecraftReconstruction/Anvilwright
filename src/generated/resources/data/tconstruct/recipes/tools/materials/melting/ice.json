@@ -2,7 +2,7 @@
   "type": "tconstruct:material_melting",
   "input": "tconstruct:ice",
   "result": {
-    "amount": 9000,
+    "amount": 729000,
     "fluid": "minecraft:water"
   },
   "temperature": 10

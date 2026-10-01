@@ -1,13 +1,15 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/ironwood"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:ironwood_ingots"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:ingots/ironwood"
+    "tag": "c:ironwood_ingots"
   },
   "material": "tconstruct:ironwood",
   "needed": 1,

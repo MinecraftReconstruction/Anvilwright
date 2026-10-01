@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:silver_nuggets"
+        "forge:silver_nuggets"
       ]
     }
   ],

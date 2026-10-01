@@ -1,9 +1,18 @@
 {
   "fabric:load_conditions": [
     {
-      "condition": "fabric:tags_populated",
+      "condition": "fabric:or",
       "values": [
-        "c:uranium_ingots"
+        {
+          "condition": "tconstruct:config",
+          "prop": "force_integration_materials"
+        },
+        {
+          "condition": "fabric:tags_populated",
+          "values": [
+            "forge:ingots/uranium"
+          ]
+        }
       ]
     }
   ],

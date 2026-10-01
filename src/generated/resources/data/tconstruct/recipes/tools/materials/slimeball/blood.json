@@ -1,9 +1,9 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:diorite"
+    "tag": "forge:slimeball/blood"
   },
-  "material": "tconstruct:rock#diorite",
+  "material": "tconstruct:slimeball#blood",
   "needed": 1,
   "value": 1
 }

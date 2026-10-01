@@ -1,7 +1,7 @@
 {
   "type": "tconstruct:part_builder",
   "cost": 8,
-  "pattern": "tconstruct:hammer_head",
+  "pattern": "forge:hammer_head",
   "pattern_item": {
     "fabric:type": "fabric:any",
     "ingredients": [

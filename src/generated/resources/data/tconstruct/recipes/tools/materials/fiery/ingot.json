@@ -1,13 +1,15 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:ingots/fiery"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:fiery_ingots"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:ingots/fiery"
+    "tag": "c:fiery_ingots"
   },
   "material": "tconstruct:fiery",
   "needed": 1,

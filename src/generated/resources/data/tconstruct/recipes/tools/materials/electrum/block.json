@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:electrum_blocks"
+        "forge:electrum_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:electrum_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:electrum_ingots"
   },
   "material": "tconstruct:electrum",

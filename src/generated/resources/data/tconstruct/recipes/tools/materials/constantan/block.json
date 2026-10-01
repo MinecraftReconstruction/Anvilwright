@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:constantan_blocks"
+        "forge:constantan_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:constantan_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:constantan_ingots"
   },
   "material": "tconstruct:constantan",

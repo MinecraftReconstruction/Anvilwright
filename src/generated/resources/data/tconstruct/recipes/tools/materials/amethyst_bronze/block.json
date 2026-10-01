@@ -4,6 +4,7 @@
     "tag": "c:amethyst_bronze_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:amethyst_bronze_ingots"
   },
   "material": "tconstruct:amethyst_bronze",

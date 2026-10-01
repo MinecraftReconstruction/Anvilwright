@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:bronze_blocks"
+        "forge:bronze_blocks"
       ]
     }
   ],
@@ -12,6 +12,7 @@
     "tag": "c:bronze_blocks"
   },
   "leftover": {
+    "count": 1,
     "tag": "c:bronze_ingots"
   },
   "material": "tconstruct:bronze",

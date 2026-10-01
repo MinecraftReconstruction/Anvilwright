@@ -1,17 +1,19 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/fiery"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:fiery_blocks"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/fiery"
+    "tag": "c:fiery_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/fiery"
+    "tag": "c:fiery_ingots"
   },
   "material": "tconstruct:fiery",
   "needed": 1,

@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:constantan_ingots"
+        "forge:constantan_ingots"
       ]
     }
   ],

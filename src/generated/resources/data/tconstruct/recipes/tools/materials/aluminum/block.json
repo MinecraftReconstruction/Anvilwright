@@ -1,17 +1,19 @@
 {
-  "type": "tconstruct:material",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/aluminum"
+      "condition": "fabric:tags_populated",
+      "values": [
+        "forge:aluminum_blocks"
+      ]
     }
   ],
+  "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/aluminum"
+    "tag": "c:aluminum_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/aluminum"
+    "tag": "c:aluminum_ingots"
   },
   "material": "tconstruct:aluminum",
   "needed": 1,

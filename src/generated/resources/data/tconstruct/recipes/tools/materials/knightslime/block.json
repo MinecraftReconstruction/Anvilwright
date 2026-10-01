@@ -1,11 +1,11 @@
 {
   "type": "tconstruct:material",
   "ingredient": {
-    "tag": "forge:storage_blocks/knightslime"
+    "tag": "c:knightslime_blocks"
   },
   "leftover": {
     "count": 1,
-    "tag": "forge:ingots/knightslime"
+    "tag": "c:knightslime_ingots"
   },
   "material": "tconstruct:knightslime",
   "needed": 1,

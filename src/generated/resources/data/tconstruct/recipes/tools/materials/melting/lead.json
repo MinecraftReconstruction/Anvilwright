@@ -3,7 +3,7 @@
     {
       "condition": "fabric:tags_populated",
       "values": [
-        "c:lead_ingots"
+        "forge:lead_ingots"
       ]
     }
   ],
