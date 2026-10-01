@@ -97,6 +97,10 @@ loom {
     accessWidenerPath = file("src/main/resources/tinkers.accesswidener")
 
     runs {
+        // smoke test helper: jump straight into an existing world so the game can be verified without clicking
+        client {
+            programArgs "--quickPlaySingleplayer", "New World"
+        }
         datagen {
             client()
 

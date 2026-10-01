@@ -5,6 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -123,9 +124,12 @@ public class TinkerTabs {
     output.accept(TinkerMaterials.nahuatl.getStairs());
     output.accept(TinkerMaterials.nahuatl.getFence());
 
-    ((RetexturedBlockItem)TinkerTables.craftingStation.asItem()).fillItemCategory(output);
-    ((RetexturedBlockItem)TinkerTables.tinkerStation.asItem()).fillItemCategory(output);
-    ((RetexturedBlockItem)TinkerTables.partBuilder.asItem()).fillItemCategory(output);
+    // NOTE(porting): upstream casts these to RetexturedBlockItem, but this port registers the tables with the plain
+    // block item factory (TinkerModule.BLOCK_ITEM), so the cast threw a ClassCastException while the creative tab
+    // was being built. Accept the item directly instead - the tab entry then simply has no stored texture.
+    addTable(output, TinkerTables.craftingStation.asItem());
+    addTable(output, TinkerTables.tinkerStation.asItem());
+    addTable(output, TinkerTables.partBuilder.asItem());
 
     output.accept(TinkerTables.tinkersChest);
     output.accept(TinkerTables.partChest);
@@ -508,4 +512,14 @@ public class TinkerTabs {
     Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_TOOLS, SupplierCreativeTab.create(TConstruct.MOD_ID, "tools", () -> TinkerTools.pickaxe.get().getRenderTool()).build());
     Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_SMELTERY, SupplierCreativeTab.create(TConstruct.MOD_ID, "smeltery", () -> new ItemStack(TinkerSmeltery.smelteryController)).displayItems(TinkerTabs::buildSmelteryTab).build());
   }
+
+  /** Adds a table item to the tab, using the retextured variant when the item supports it */
+  private static void addTable(CreativeModeTab.Output output, Item item) {
+    if (item instanceof RetexturedBlockItem retextured) {
+      retextured.fillItemCategory(output);
+    } else {
+      output.accept(item);
+    }
+  }
+
 }
