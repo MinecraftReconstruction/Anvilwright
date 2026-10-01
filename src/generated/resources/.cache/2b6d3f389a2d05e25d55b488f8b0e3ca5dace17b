@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T19:24:22.511162	Hephaestus/Tinkers Construct Item Tags
+// 1.20.1	2026-10-01T19:35:46.4404	Hephaestus/Tinkers Construct Item Tags
 1fa2d942cf49135cd816b3c25add23572651ae72 data/forge/tags/items/bones/wither.json
 94a4098e93878b689773dc853dbf0f310d824a77 data/forge/tags/items/raw_nuggets/steel.json
 d5d9f34c259dd56d3734d952aa9e36d686042799 data/forge/tags/items/glass/cyan.json
@@ -176,8 +176,8 @@ c66fab146178127a1526e7d827e0c1c320e4824f data/tconstruct/tags/items/modifiable/a
 4f1006c81c55082386db54c952ac2e654210095c data/tconstruct/tags/items/modifiable/armor.json
 1d709c37589f277f1cc0f7ca7bd73186568103e0 data/forge/tags/items/ingots/knightslime.json
 4e33a1fe53d55f413c65c2dbe82f335eed765bba data/tconstruct/tags/items/modifiable/melee/primary.json
-6e9c18314bc53aa1ad78551cdfd9b7f8d1572d50 data/tconstruct/tags/items/casts/red_sand.json
 a2fa68eebf89ab41fd6dd732fb77e2bcb5c6d489 data/forge/tags/items/ingots/soulsteel.json
+6e9c18314bc53aa1ad78551cdfd9b7f8d1572d50 data/tconstruct/tags/items/casts/red_sand.json
 dc821139c0f19260ba32a08ecf7fc2a06ff1d8ff data/tconstruct/tags/items/modifiable/ranged/launcher.json
 4c9b62b5f89377dd70e105b79ac5784c4d8e3d65 data/tconstruct/tags/items/enderbark_logs.json
 75af80c975a9529debe06c4cc4a2c7da2d68ca3b data/tconstruct/tags/items/wood_variants/logs.json

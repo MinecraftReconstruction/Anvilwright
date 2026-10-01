@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T19:24:22.568711	Hephaestus/Material Part Generator - Tinkers' Construct Parts - Tinkers' Construct Materials
+// 1.20.1	2026-10-01T19:35:46.489	Hephaestus/Material Part Generator - Tinkers' Construct Parts - Tinkers' Construct Materials
 3412532877fb7f71d41fb3c59f7659fb17c3a1af assets/tconstruct/textures/item/tool/armor/travelers/shield/wood_tconstruct_treated_wood.png
 8c3667c7a8d029b6ba05c26252b9a4ac33301e65 assets/tconstruct/textures/item/tool/longbow/limb_bottom_3_tconstruct_silver.png
 32489d503ad26c4b8be3d81d244cfb9a139c6d85 assets/tconstruct/textures/item/tool/parts/small_blade_tconstruct_plated_slimewood.png
@@ -2148,8 +2148,8 @@ d147cff2ae6b5c7727baeb12deb5fe83980498ed assets/tconstruct/textures/item/tool/ex
 507da0041c1cf9377bb79f07b4cca8961e921d84 assets/tconstruct/textures/item/tool/pickaxe/handle_tconstruct_slimewood_bloodshroom.png
 c0ed531dff6d7d46cfecc1aebb8387d32d7a5640 assets/tconstruct/textures/item/tool/battlesign/head_tconstruct_necrotic_bone.png
 94198238a64bd6b617dbe2cf623f107ffb1618cd assets/tconstruct/textures/item/tool/armor/plate/shield/plating_large_tconstruct_rose_gold.png
-812a45be48e712b23a483fd6d32e1ea48cbb09b6 assets/tconstruct/textures/item/tool/swasher/barrel_tconstruct_blazing_bone.png
 70489327029d7f1c6ed325d113134a6bcc3cf097 assets/tconstruct/textures/item/tool/swasher/blade_broken_tconstruct_blazing_bone.png
+812a45be48e712b23a483fd6d32e1ea48cbb09b6 assets/tconstruct/textures/item/tool/swasher/barrel_tconstruct_blazing_bone.png
 d5b7e613e99dee8a292b63a3ee4fe4eb24ae89f1 assets/tconstruct/textures/item/tool/broad_axe/large/blade_broken_tconstruct_ancient.png
 f15b2081e30571d899615c084744cb1fc3be05da assets/tconstruct/textures/tinker_armor/plate/maille_wings_tconstruct_silver.png
 413b94ee8cd54f4ec937cfb51b5b5be45f77bf69 assets/tconstruct/textures/item/tool/minotaur_axe/front_tconstruct_scorched_stone.png

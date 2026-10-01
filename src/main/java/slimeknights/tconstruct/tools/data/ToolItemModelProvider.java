@@ -58,7 +58,7 @@ public class ToolItemModelProvider extends AbstractToolItemModelProvider {
     //  so the chestplate slot of the slimesuit enum is the wings item whose model has no ribcage texture. Generate
     //  the chestplate model from the slimy_chestplate model file instead, which keeps the output identical to
     //  upstream (that item model already exists in the resources, it is just no longer reachable through an item).
-    armor("slime", new ResourceLocation(TConstruct.MOD_ID, "slimy_chestplate"), "slime", "ribcage");
+    armor("slime/chestplate", new ResourceLocation(TConstruct.MOD_ID, "slimy_chestplate"), "slime", "ribcage");
     armor("slime", TinkerTools.slimesuit, ArmorSlotType.LEGGINGS,   "slime", "shell");
     armor("slime", TinkerTools.slimesuit, ArmorSlotType.BOOTS,      "slime");
     armor("slime/wings", TinkerTools.slimeWings, "slime");

@@ -2,6 +2,7 @@ package slimeknights.tconstruct.shared;
 
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleType;
@@ -226,8 +227,15 @@ public final class TinkerCommons extends TinkerModule {
     // of these, it only uses them from JSON. Anything TConstruct specific goes in its own module.
   }
 
-  public static void gatherData(final FabricDataGenerator.Pack pack) {
+  public static void gatherData(final FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
     pack.addProvider(CommonRecipeProvider::new);
     pack.addProvider(TinkerDamageSourceProvider::new);
+    // NOTE(porting): the merge dropped every client provider of this module, which left the 290 item models it owns
+    //  (casts, tool parts, wood and slime blocks, armor stands, ...) without any model at all
+    pack.addProvider((output, registriesFuture) -> new ModelSpriteProvider(output, existingFileHelper));
+    pack.addProvider((output, registriesFuture) -> new TinkerItemModelProvider(output, existingFileHelper));
+    pack.addProvider((output, registriesFuture) -> new TinkerBlockStateProvider(output, existingFileHelper));
+    pack.addProvider((FabricDataGenerator.Pack.Factory<RenderFluidProvider>) RenderFluidProvider::new);
+    pack.addProvider((FabricDataGenerator.Pack.Factory<RenderItemProvider>) RenderItemProvider::new);
   }
 }

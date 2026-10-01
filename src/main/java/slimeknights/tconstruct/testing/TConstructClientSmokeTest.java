@@ -8,7 +8,9 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.CreativeModeTab;
@@ -111,8 +113,33 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
     for (String failure : failures) {
       TConstruct.LOG.error("{}{} FAIL  {}", TAG, "creative/", failure);
     }
+    auditItemModels(minecraft);
     auditAtlas(minecraft);
     TConstruct.LOG.info("{}summary: {} passed, {} failed", TAG, passed, failed);
+  }
+
+  /**
+   * Counts Tinkers items that resolve to the vanilla missing model, which is what draws as the magenta and black cube
+   * players describe as a broken item - i.e. the items that still have no model of their own.
+   */
+  private static void auditItemModels(Minecraft minecraft) {
+    BakedModel missingModel = minecraft.getModelManager().getMissingModel();
+    int total = 0;
+    List<String> missing = new ArrayList<>();
+    for (Item item : BuiltInRegistries.ITEM) {
+      ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+      if (!id.getNamespace().equals(TConstruct.MOD_ID)) {
+        continue;
+      }
+      total++;
+      if (minecraft.getItemRenderer().getModel(new ItemStack(item), minecraft.level, minecraft.player, 0) == missingModel) {
+        missing.add(id.getPath());
+      }
+    }
+    TConstruct.LOG.info("{}models/ {}/{} tconstruct items use the missing model", TAG, missing.size(), total);
+    for (int i = 0; i < missing.size() && i < MAX_DETAILED_FAILURES; i++) {
+      TConstruct.LOG.info("{}models/   {}", TAG, missing.get(i));
+    }
   }
 
   /**

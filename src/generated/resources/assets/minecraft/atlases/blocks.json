@@ -900,6 +900,22 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shuriken"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/crystal"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/laces"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/pattern"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/gem"
     },
     {
@@ -1129,22 +1145,6 @@
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/broad_axe_head"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/shuriken"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/crystal"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/laces"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/pattern"
     }
   ]
 }
