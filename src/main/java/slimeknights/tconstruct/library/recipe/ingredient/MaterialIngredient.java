@@ -191,7 +191,10 @@ public class MaterialIngredient extends NestedIngredient {
     JsonObject object = parent.getAsJsonObject();
     object.addProperty("fabric:type", Serializer.ID.toString());
     if (material != MaterialPredicate.ANY) {
-      object.addProperty("material", material.toString());
+      // NOTE(porting): this used to write the predicate's toString, which the loader then tried to read back as a
+      // material variant id, so every recipe using a material predicate (the travelers armour, the fake ingot recipes)
+      // failed to load. Serialize through the field, which knows both the compact variant form and the JSON form.
+      Serializer.MATERIAL_FIELD.serialize(this, object);
     }
     return object;
   }

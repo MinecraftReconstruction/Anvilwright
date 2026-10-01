@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
@@ -23,6 +25,8 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.fluids.TinkerFluids;
+import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.ArrayList;
 import java.io.IOException;
@@ -120,6 +124,7 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
     }
     auditItemModels(minecraft);
     auditItemSprites(minecraft);
+    auditItemRenderLayers(minecraft);
     auditTranslations(minecraft);
     auditAtlas(minecraft);
     TConstruct.LOG.info("{}summary: {} passed, {} failed", TAG, passed, failed);
@@ -203,6 +208,26 @@ public class TConstructClientSmokeTest implements ClientModInitializer {
 
   private static boolean isMissing(TextureAtlas atlas, @Nullable TextureAtlasSprite sprite) {
     return sprite == null || MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name());
+  }
+
+  /**
+   * Reports the render layer of the items that embed a fluid, which is what Forge used to express with a per-layer
+   * render type on the model ({@code RenderTypeGroup}). Fabric renders every non-block item in the translucent layer
+   * and takes block items from their block, so this is the evidence for whether those layers survived the port.
+   */
+  private static void auditItemRenderLayers(Minecraft minecraft) {
+    ItemStack[] interesting = {
+      new ItemStack(TinkerSmeltery.copperCan),
+      TinkerFluids.moltenIron.getBucket() == null ? ItemStack.EMPTY : new ItemStack(TinkerFluids.moltenIron.getBucket()),
+      new ItemStack(TinkerSmeltery.copperGauge),
+    };
+    for (ItemStack stack : interesting) {
+      if (stack.isEmpty()) {
+        continue;
+      }
+      RenderType type = ItemBlockRenderTypes.getRenderType(stack, false);
+      TConstruct.LOG.info("{}layers/ {} -> {}", TAG, BuiltInRegistries.ITEM.getKey(stack.getItem()), type);
+    }
   }
 
   /**

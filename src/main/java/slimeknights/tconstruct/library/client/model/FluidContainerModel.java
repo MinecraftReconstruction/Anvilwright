@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -55,6 +56,7 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.model.util.ColoredBlockModel;
+import slimeknights.mantle.client.model.util.ModelLayers;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.fluid.texture.ClientFluidTextureRegistry;
 import slimeknights.mantle.util.JsonHelper;
@@ -62,6 +64,7 @@ import slimeknights.tconstruct.TConstruct;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -169,13 +172,19 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
 
     // start building the mode
     CompositeModel.Baked.Builder modelBuilder = CompositeModel.Baked.builder(context.hasAmbientOcclusion(), false, false, particleSprite, overrides, context.getTransforms());
+    // Forge gave this model a RenderTypeGroup (cutout for the container, translucent for the fluid). Fabric picks one
+    // render type per item, so the layers are recorded for the callers that can use them (book preview) and the items
+    // are registered as translucent in FluidClientEvents. See docs/BEHAVIOUR-DIFFERENCES.md.
+    List<ModelLayers.Layer> layers = new ArrayList<>(2);
 
     // add in the base
     if (baseSprite != null) {
-      modelBuilder.addQuads(UnbakedGeometryHelper.bakeElements(
+      List<BakedQuad> baseQuads = UnbakedGeometryHelper.bakeElements(
         UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents()),
         $ -> baseSprite, modelState, modelLocation
-      ));
+      );
+      modelBuilder.addQuads(baseQuads);
+      layers.add(new ModelLayers.Layer(RenderType.cutout(), baseQuads));
     }
 
     // add in fluid
@@ -198,8 +207,11 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
         ModelHelper.applyColor(quads, color);
       }
       modelBuilder.addQuads(quads);
+      layers.add(new ModelLayers.Layer(RenderType.translucent(), quads));
     }
-    return modelBuilder.build();
+    BakedModel baked = modelBuilder.build();
+    ModelLayers.put(baked, layers);
+    return baked;
   }
 
   @Override

@@ -9,6 +9,8 @@ import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.ConfigVa
 import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.DoubleValue;
 import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.EnumValue;
 import io.github.fabricators_of_create.porting_lib.config.ModConfigSpec.IntValue;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.apache.commons.lang3.tuple.Pair;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.melting.IMeltingContainer.IOreRate;
@@ -97,8 +99,14 @@ public class Config {
 //        DamageSource.FALLING_STALACTITE.setProjectile();
 //      }));
 //      actions.add(new ConfigurableAction(builder, "lightning", true, "Makes lightning count as fire damage", ((DamageSourceAccessor)DamageSource.LIGHTNING_BOLT)::port_lib$setFireDamage));
-      // upstream 3.12.1 fills this list with the fire/blast protection slot extensions; both need Forge's
-      // writable Enchantment.slots (private and final in vanilla), see docs/BEHAVIOUR-DIFFERENCES.md #29
+      // NOTE(porting): upstream relies on Forge's access transformer making Enchantment.slots writable; the port does
+      // the same through a transitive-mutable entry in tinkers.accesswidener
+      actions.add(new ConfigurableAction(builder, "extendFireProtectionSlots", true,
+        "If true, extends the applicable slots for the fire protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, fire protection on a shield will not reduce fire tick time.",
+        () -> Enchantments.FIRE_PROTECTION.slots = EquipmentSlot.values()));
+      actions.add(new ConfigurableAction(builder, "extendBlastProtectionSlots", true,
+        "If true, extends the applicable slots for the blast protection enchantment to work better with shields. Will not impact gameplay with the vanilla enchantment.\nIf false, blast protection on a shield will not reduce explosion knockback.",
+        () -> Enchantments.BLAST_PROTECTION.slots = EquipmentSlot.values()));
       toolTweaks = actions.build();
 
       this.repairKitAmount = builder

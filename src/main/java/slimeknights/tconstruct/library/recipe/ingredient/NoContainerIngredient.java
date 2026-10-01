@@ -45,7 +45,10 @@ public class NoContainerIngredient extends NestedIngredient {
       return nestedObject;
     }
     // if we have an array or a type, then serialize nested
-    JsonObject json = JsonUtils.withType(ID);
+    // NOTE(porting): Fabric reads custom ingredients from the "fabric:type" key, not Forge's "type", so this form has
+    // to write that key or the recipe loader treats the object as a vanilla ingredient and fails on it
+    JsonObject json = new JsonObject();
+    json.addProperty("fabric:type", ID.toString());
     json.add("match", nestedElement);
     return json;
   }

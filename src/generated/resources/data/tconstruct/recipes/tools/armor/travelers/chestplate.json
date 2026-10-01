@@ -28,7 +28,10 @@
         {
           "fabric:type": "tconstruct:material",
           "item": "tconstruct:fake_ingot",
-          "material": "MaterialStatTypePredicate[statType=tconstruct:plating_chestplate]"
+          "material": {
+            "type": "tconstruct:stat_type",
+            "stat_type": "tconstruct:plating_chestplate"
+          }
         }
       ]
     },

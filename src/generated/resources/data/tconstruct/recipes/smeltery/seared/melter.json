@@ -6,7 +6,7 @@
       "item": "tconstruct:seared_brick"
     },
     "G": {
-      "type": "tconstruct:no_container",
+      "fabric:type": "tconstruct:no_container",
       "match": [
         {
           "item": "tconstruct:seared_fuel_gauge"

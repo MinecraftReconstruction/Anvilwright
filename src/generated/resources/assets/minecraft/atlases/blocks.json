@@ -900,6 +900,18 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/shield_plus"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/repair_kit"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/slimeball"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/shield"
     },
     {
@@ -1133,18 +1145,6 @@
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/plate_armor"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/shield_plus"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/repair_kit"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/slimeball"
     }
   ]
 }

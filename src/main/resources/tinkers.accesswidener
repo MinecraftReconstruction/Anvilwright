@@ -215,6 +215,7 @@ transitive-accessible method net/minecraft/client/renderer/entity/ItemRenderer r
 
 # Enchantment slots + item eating particles (upstream: accesstransformer.cfg)
 transitive-accessible field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;
+transitive-mutable field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;
 transitive-accessible method net/minecraft/world/entity/LivingEntity spawnItemParticles (Lnet/minecraft/world/item/ItemStack;I)V
 
 # Custom explosions copy vanilla's block damage pass (upstream: accesstransformer.cfg exposes x/y/z)
