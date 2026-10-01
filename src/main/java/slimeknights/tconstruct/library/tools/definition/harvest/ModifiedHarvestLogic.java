@@ -15,8 +15,6 @@ import slimeknights.mantle.data.GenericLoaderRegistry.IGenericLoader;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.mantle.data.predicate.IJsonPredicate;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
-import slimeknights.tconstruct.library.json.predicate.block.SetBlockPredicate;
-import slimeknights.tconstruct.library.json.predicate.block.TagBlockPredicate;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
 import java.util.ArrayList;
@@ -68,22 +66,22 @@ public class ModifiedHarvestLogic extends TagHarvestLogic {
 
     /** Adds a modifier when the block matches a tag */
     public Builder tagModifier(TagKey<Block> tag, float modifier) {
-      return addModifier(modifier, new TagBlockPredicate(tag));
+      return addModifier(modifier, BlockPredicate.LOADER.tag(tag));
     }
 
     /** Adds a modifier when the block does not match a tag */
     public Builder notTagModifier(TagKey<Block> tag, float modifier) {
-      return addModifier(modifier, new TagBlockPredicate(tag).inverted());
+      return addModifier(modifier, BlockPredicate.LOADER.tag(tag).inverted());
     }
 
     /** Adds a modifier when the block matches a tag */
     public Builder blockModifier(float modifier, Block... blocks) {
-      return addModifier(modifier, new SetBlockPredicate(ImmutableSet.copyOf(blocks)));
+      return addModifier(modifier, BlockPredicate.LOADER.setOf(ImmutableSet.copyOf(blocks)));
     }
 
     /** Adds a modifier when the block matches a tag */
     public Builder notBlockModifier(float modifier, Block... blocks) {
-      return addModifier(modifier, new SetBlockPredicate(ImmutableSet.copyOf(blocks)).inverted());
+      return addModifier(modifier, BlockPredicate.LOADER.setOf(ImmutableSet.copyOf(blocks)).inverted());
     }
 
     /** Builds the modifier */

@@ -494,3 +494,44 @@ $JDK17/bin/javac -encoding UTF-8 -proc:full -processorpath "$AP" -cp "src/main/j
 
 **仍然没解开的**：`PartRecipe` 看不到 Lombok 生成物（见上一节），`getVariant()`/`getId()`/`getCraftingResult()`
 这一批共 ~28 条错误都属于它，**先别单独去修**。
+
+### 2026-09-29 · 补回"藏在 Forge 事件处理器里的运行时注册" —— 548 → 534
+
+清 `@SubscribeEvent` 残余时发现三处**在 Fabric 上从来没执行过**的注册（属于功能缺失，不只是编译问题）：
+
+| 位置 | 问题 | 处理 |
+|---|---|---|
+| `TinkerModifiers.registerSerializers(RegisterEvent)` | **整个** loader 注册表（modifier modules、fluid effects、level displays、tank helpers…，约 300 行）被包在 `if (registry == RECIPE_SERIALIZER)` 里，靠 Forge 的 `RegisterEvent` 触发。Fabric 没有这个事件 ⇒ **运行时这些注册表是空的** | 抽成 `public static void registerLoaders()`，由 `TinkerModifiers` 析构函数调用 |
+| `TinkerModifiers.commonSetup(FMLCommonSetupEvent)` | 是 `PersistentDataCapability.register()` 的**唯一调用点**，而它要注册 4 个 Fabric 玩家事件（copy/respawn/换维度/join）| 抽成 `registerCapabilities()`，同样由构造函数调用 |
+| `TinkerModifiers/TinkerTables.gatherData(GatherDataEvent)` | Forge 版 datagen，`TConstructData` 调的其实是不存在的方法（javac 没报错，见上面"假错误"一节） | 补上 `FabricDataGenerator.Pack` 版本 |
+| `TinkerTables.commonSetup` | 唯一在注册"必需的工作台布局" | 抽成 `TinkerTables.init()`，由 `FabricEvents` 调用 |
+| `WorldEvents.wanderingTrades` / `ModifierClientEvents.playerLoggedOut` | Forge 的 `WandererTradesEvent` / `ClientPlayerNetworkEvent.LoggingOut` | 换成 Fabric 的 `TradeOfferHelper`（rare pool = 2）/ `ClientPlayConnectionEvents.DISCONNECT` |
+
+**教训**：`@SubscribeEvent` 残留不能一律当"死代码"删。这里有一半是**真正没跑起来的业务逻辑**，
+删之前一定先搜这个 handler 里调用的方法还有没有别的调用点（`rg <method>` 全树查一遍）。
+
+### 2026-09-29 · 批量机械化清理的极限 —— 534 → 462
+
+这一轮全部用"能批量就批量"的手段，几步都做了测量：
+
+| 手法 | 效果 |
+|---|---|
+| 网络包：删掉 Forge 的 `NetworkEvent(Context)` import（TCon 的包都是 `IThreadsafePacket`，`Context` 直接继承自 `ISimplePacket`，不需要 import） | 514 → 503 |
+| **把每个失效的 `net.minecraftforge.*` import 拿去 jar 类索引里找同名替代**：TierSortingRegistry / CraftingHelper / SoundActions / NonNullConsumer / FluidType / BlockSnapshot / LootModifierManager / ConditionalRecipe / TrueCondition / QuadTransformers / SimpleModelState / UnbakedGeometryHelper / ForgeI18n / MobEffectEvent / TablePrinter / SpriteSourceProvider | 534 → 489 |
+| 删**未被引用**且**上游已删**的遗骸：`TagBlockPredicate`/`SetBlockPredicate`/`TagEntityPredicate`（改用 Mantle 的 `BlockPredicate.LOADER.tag/setOf`）+ CraftTweaker 插件（CraftTweaker 没有 1.20.1 Fabric 版，依赖本来也没接进 build.gradle） | 489 → 476 |
+| **给 accesswidener 加一行**：`IntrinsicTagAppender` 是 protected 嵌套类，`CostTagAppender` 要直接用 | 476 → 470 |
+| 删"指向不存在类的未使用 import"（自动判断文件正文有没有用到那个简单名） | 470 → 462 |
+
+**这轮之后，纯机械手段基本用尽**：再跑自动补 import / 删死 import 都已经 0 提案。
+剩下的 462 条需要**逐文件改 API**，按家族分：
+
+| 家族 | 约多少条 | 说明 |
+|---|---|---|
+| Forge capability（`ForgeCapabilities`/`Capability`/`ICapabilityProvider`/`IItemHandler`） | ~42（22 个文件） | Fabric 侧要改成 `FluidStorage.SIDED` / `ItemStorage.SIDED`；Porting Lib 2.3.15 **没有** capabilities 模块（缓存里 27 个模块都列过了） |
+| Forge 流体（`IFluidHandler`/`FluidTank`/`IFluidHandlerItem`/`EmptyFluidHandler`） | ~35 | Porting Lib 的 `transfer.fluid.FluidTank` 只有 `insert/extract(TransactionContext)`，没有 `fill/drain(FluidAction)`，调用点要按 Transaction 语义重写（**行为差异 #4 点名要实测的正是这里**） |
+| Mantle 模型数据（`client.model.data` / `IModelData`） | ~17 | 目标 API 已经明确：`ModelData getModelData()` + `ModelProperties`（`CastingTankBlockEntity`/`TinkerStationBlockEntity` 已经是这个写法，照抄即可） |
+| Mantle loadable（`IGenericLoader` / `TagPredicateLoader` / `StatPredicate`） | ~20 | 1.9 的 `IGenericLoader` → 1.11 的 `Loadable`/`RecordLoadable` |
+| JEI 插件（`mezz.jei.api.forge.ForgeTypes`） | ~10 | JEI Fabric 版是 `mezz.jei.api.fabric.constants.FabricTypes.FLUID_STACK`，但成分类型从 `FluidStack` 变成 `IJeiFluidIngredient`，**不是纯改名** |
+| **Lombok 假错误**（`getVariant`/`getId`/`getCraftingResult`） | ~28 | 见上面的调查，**别单独修** |
+| 其余零散 | ~310 | 每个文件 1–3 条 |
+

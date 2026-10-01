@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.tables;
 
-import net.minecraft.data.DataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -164,20 +164,22 @@ public final class TinkerTables extends TinkerModule {
   public static final RegistryObject<SimpleRecipeSerializer<TinkerStationRepairRecipe>> tinkerStationRepairSerializer = RECIPE_SERIALIZERS.register("tinker_station_repair", () -> new SimpleRecipeSerializer<>(TinkerStationRepairRecipe::new));
   public static final RegistryObject<SimpleRecipeSerializer<CraftingTableRepairKitRecipe>> craftingTableRepairSerializer = RECIPE_SERIALIZERS.register("crafting_table_repair", () -> new SimpleRecipeSerializer<>(CraftingTableRepairKitRecipe::new));
 
-  @SubscribeEvent
-  void commonSetup(final FMLCommonSetupEvent event) {
-    event.enqueueWork(() -> {
-      StationSlotLayoutLoader loader = StationSlotLayoutLoader.getInstance();
-      loader.registerRequiredLayout(tinkerStation.getId());
-      loader.registerRequiredLayout(tinkersAnvil.getId());
-      loader.registerRequiredLayout(scorchedAnvil.getId());
-    });
+  /**
+   * Registers the station layouts that must exist for the table screens to work.
+   * <p>
+   * <b>Porting note:</b> upstream does this from a Forge {@code FMLCommonSetupEvent} handler; Fabric has no
+   * equivalent event, so {@link slimeknights.tconstruct.FabricEvents} calls this during mod init.
+   */
+  public static void init() {
+    StationSlotLayoutLoader loader = StationSlotLayoutLoader.getInstance();
+    loader.registerRequiredLayout(tinkerStation.getId());
+    loader.registerRequiredLayout(tinkersAnvil.getId());
+    loader.registerRequiredLayout(scorchedAnvil.getId());
   }
 
-  @SubscribeEvent
-  void gatherData(final GatherDataEvent event) {
-    DataGenerator generator = event.getGenerator();
-    generator.addProvider(event.includeServer(), new TableRecipeProvider(generator.getPackOutput()));
+  /** Registers the datagen providers, called from {@link slimeknights.tconstruct.TConstructData}. */
+  public static void gatherData(final FabricDataGenerator.Pack pack) {
+    pack.addProvider(TableRecipeProvider::new);
   }
 
   /** Adds all relevant items to the creative tab, called in the general tab */

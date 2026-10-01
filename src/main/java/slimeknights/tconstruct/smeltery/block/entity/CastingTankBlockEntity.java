@@ -24,7 +24,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;

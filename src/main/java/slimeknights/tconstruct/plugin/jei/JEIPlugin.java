@@ -56,7 +56,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import slimeknights.mantle.item.RetexturedBlockItem;
 import slimeknights.mantle.recipe.helper.RecipeHelper;
 import slimeknights.mantle.registration.object.FluidObject;
 import slimeknights.mantle.util.RetexturedHelper;

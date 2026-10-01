@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.common.registration;
 
-import net.minecraftforge.fluids.FluidType;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidType;
 import slimeknights.mantle.registration.deferred.FluidDeferredRegister;
 import slimeknights.tconstruct.fluids.fluids.SlimeFluidType;
 

@@ -344,6 +344,7 @@ import slimeknights.tconstruct.tools.recipe.severing.SnowGolemBeheadingRecipe;
 import slimeknights.tconstruct.tools.stats.ToolType;
 
 import static slimeknights.tconstruct.TConstruct.getResource;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 
 /**
  * Contains modifiers and the items or blocks used to craft modifiers
@@ -358,6 +359,8 @@ public final class TinkerModifiers extends TinkerModule {
     FluidEffectManager.INSTANCE.init();
     MODIFIERS.register();
     TinkerDataKeys.init();
+    registerLoaders();
+    registerCapabilities();
   }
 
   /*
@@ -786,336 +789,341 @@ public final class TinkerModifiers extends TinkerModule {
    * Events
    */
 
-  @SubscribeEvent
-  void registerSerializers(RegisterEvent event) {
-    if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      // combinations
-      FluidEffect.BLOCK_EFFECTS.register(getResource("conditional"), ConditionalFluidEffect.Block.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("conditional"), ConditionalFluidEffect.Entity.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("scaling"), ScalingFluidEffect.BLOCK_LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("scaling"), ScalingFluidEffect.ENTITY_LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("alternatives"), AlternativesFluidEffect.BLOCK_LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("alternatives"), AlternativesFluidEffect.ENTITY_LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("sequence"), SequenceFluidEffect.BLOCK_LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("sequence"), SequenceFluidEffect.ENTITY_LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("offset"), OffsetBlockFluidEffect.LOADER);
-      // simple
-      FluidEffect.ENTITY_EFFECTS.register(getResource("calcified"), StrongBonesModifier.FLUID_EFFECT.getLoader());
-      FluidEffect.ENTITY_EFFECTS.register(getResource("extinguish"), FluidEffect.EXTINGUISH_FIRE.getLoader());
-      FluidEffect.ENTITY_EFFECTS.register(getResource("teleport"), RandomTeleportFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("weather"), FluidEffect.WEATHER.getLoader());
-      // potions
-      FluidEffect.ENTITY_EFFECTS.register(getResource("cure_effects"), CureEffectsFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("remove_effect"), RemoveEffectFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("mob_effect"), MobEffectFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("potion"), PotionFluidEffect.LOADER);
-      // misc
-      FluidEffect.ENTITY_EFFECTS.register(getResource("damage"), DamageFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("restore_hunger"), RestoreHungerFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("fire"), FireFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("freeze"), FreezeFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("award_stat"), AwardStatFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("add_breath"), AddBreathFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("push_entity"), PushEntityFluidEffect.LOADER);
-      FluidEffect.ENTITY_EFFECTS.register(getResource("interact"), EntityInteractFluidEffect.INSTANCE.getLoader());
-      // block
-      FluidEffect.BLOCK_EFFECTS.register(getResource("place_block"), PlaceBlockFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("break_block"), BreakBlockFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("remove_block"), FluidEffect.REMOVE_BLOCK.getLoader());
-      FluidEffect.BLOCK_EFFECTS.register(getResource("mob_effect_cloud"), MobEffectCloudFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("potion_cloud"), PotionCloudFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("move_block"), MoveBlocksFluidEffect.LOADER);
-      FluidEffect.BLOCK_EFFECTS.register(getResource("interact"), BlockInteractFluidEffect.INSTANCE.getLoader());
-      FluidEffect.BLOCK_EFFECTS.register(getResource("melt_block"), MeltBlockFluidEffect.LOADER);
-      // shared
-      FluidEffect.registerGeneral(getResource("drop_item"), DropItemFluidEffect.LOADER);
-      FluidEffect.registerGeneral(getResource("explosion"), ExplosionFluidEffect.LOADER);
-      FluidEffect.registerGeneral(getResource("set_block"), SetBlockFluidEffect.LOADER);
-      FluidEffect.registerGeneral(getResource("area_mob_effect"), AreaMobEffectFluidEffect.LOADER);
+  /**
+   * Registers every loader registry Tinkers ships (modifier modules, fluid effects, level displays, ...).
+   * <p>
+   * <b>Porting note:</b> upstream does this from a Forge {@code RegisterEvent} handler. Fabric has no equivalent event,
+   * so this runs from the constructor, which still happens before any data pack is parsed.
+   */
+  public static void registerLoaders() {
+    // combinations
+    FluidEffect.BLOCK_EFFECTS.register(getResource("conditional"), ConditionalFluidEffect.Block.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("conditional"), ConditionalFluidEffect.Entity.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("scaling"), ScalingFluidEffect.BLOCK_LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("scaling"), ScalingFluidEffect.ENTITY_LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("alternatives"), AlternativesFluidEffect.BLOCK_LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("alternatives"), AlternativesFluidEffect.ENTITY_LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("sequence"), SequenceFluidEffect.BLOCK_LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("sequence"), SequenceFluidEffect.ENTITY_LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("offset"), OffsetBlockFluidEffect.LOADER);
+    // simple
+    FluidEffect.ENTITY_EFFECTS.register(getResource("calcified"), StrongBonesModifier.FLUID_EFFECT.getLoader());
+    FluidEffect.ENTITY_EFFECTS.register(getResource("extinguish"), FluidEffect.EXTINGUISH_FIRE.getLoader());
+    FluidEffect.ENTITY_EFFECTS.register(getResource("teleport"), RandomTeleportFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("weather"), FluidEffect.WEATHER.getLoader());
+    // potions
+    FluidEffect.ENTITY_EFFECTS.register(getResource("cure_effects"), CureEffectsFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("remove_effect"), RemoveEffectFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("mob_effect"), MobEffectFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("potion"), PotionFluidEffect.LOADER);
+    // misc
+    FluidEffect.ENTITY_EFFECTS.register(getResource("damage"), DamageFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("restore_hunger"), RestoreHungerFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("fire"), FireFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("freeze"), FreezeFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("award_stat"), AwardStatFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("add_breath"), AddBreathFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("push_entity"), PushEntityFluidEffect.LOADER);
+    FluidEffect.ENTITY_EFFECTS.register(getResource("interact"), EntityInteractFluidEffect.INSTANCE.getLoader());
+    // block
+    FluidEffect.BLOCK_EFFECTS.register(getResource("place_block"), PlaceBlockFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("break_block"), BreakBlockFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("remove_block"), FluidEffect.REMOVE_BLOCK.getLoader());
+    FluidEffect.BLOCK_EFFECTS.register(getResource("mob_effect_cloud"), MobEffectCloudFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("potion_cloud"), PotionCloudFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("move_block"), MoveBlocksFluidEffect.LOADER);
+    FluidEffect.BLOCK_EFFECTS.register(getResource("interact"), BlockInteractFluidEffect.INSTANCE.getLoader());
+    FluidEffect.BLOCK_EFFECTS.register(getResource("melt_block"), MeltBlockFluidEffect.LOADER);
+    // shared
+    FluidEffect.registerGeneral(getResource("drop_item"), DropItemFluidEffect.LOADER);
+    FluidEffect.registerGeneral(getResource("explosion"), ExplosionFluidEffect.LOADER);
+    FluidEffect.registerGeneral(getResource("set_block"), SetBlockFluidEffect.LOADER);
+    FluidEffect.registerGeneral(getResource("area_mob_effect"), AreaMobEffectFluidEffect.LOADER);
 
 
-      // modifier names, sometimes I wonder if I have too many registries for tiny JSON pieces
-      ModifierLevelDisplay.LOADER.register(getResource("default"), ModifierLevelDisplay.DEFAULT.getLoader());
-      ModifierLevelDisplay.LOADER.register(getResource("single_level"), ModifierLevelDisplay.SINGLE_LEVEL.getLoader());
-      ModifierLevelDisplay.LOADER.register(getResource("no_levels"), ModifierLevelDisplay.NO_LEVELS.getLoader());
-      ModifierLevelDisplay.LOADER.register(getResource("pluses"), ModifierLevelDisplay.PLUSES.getLoader());
-      ModifierLevelDisplay.LOADER.register(getResource("unique"), ModifierLevelDisplay.UniqueForLevels.LOADER);
-      ModifierLevelDisplay.LOADER.register(getResource("cap_level"), ModifierLevelDisplay.LevelCap.LOADER);
-      ModifierLevelDisplay.LOADER.register(getResource("map_level"), ModifierLevelDisplay.MapLevel.LOADER);
+    // modifier names, sometimes I wonder if I have too many registries for tiny JSON pieces
+    ModifierLevelDisplay.LOADER.register(getResource("default"), ModifierLevelDisplay.DEFAULT.getLoader());
+    ModifierLevelDisplay.LOADER.register(getResource("single_level"), ModifierLevelDisplay.SINGLE_LEVEL.getLoader());
+    ModifierLevelDisplay.LOADER.register(getResource("no_levels"), ModifierLevelDisplay.NO_LEVELS.getLoader());
+    ModifierLevelDisplay.LOADER.register(getResource("pluses"), ModifierLevelDisplay.PLUSES.getLoader());
+    ModifierLevelDisplay.LOADER.register(getResource("unique"), ModifierLevelDisplay.UniqueForLevels.LOADER);
+    ModifierLevelDisplay.LOADER.register(getResource("cap_level"), ModifierLevelDisplay.LevelCap.LOADER);
+    ModifierLevelDisplay.LOADER.register(getResource("map_level"), ModifierLevelDisplay.MapLevel.LOADER);
 
-      // modifier modules //
-      ModifierModule.LOADER.register(getResource("empty"), ModifierModule.EMPTY.getLoader());
-      // armor
-      ModifierModule.LOADER.register(getResource("max_armor_attribute"), MaxArmorAttributeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("effect_immunity"), EffectImmunityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("mob_disguise"), MobDisguiseModule.LOADER);
-      ModifierModule.LOADER.register(getResource("block_damage"), BlockDamageSourceModule.LOADER);
-      ModifierModule.LOADER.register(getResource("cover_ground"), CoverGroundWalkerModule.LOADER);
-      ModifierModule.LOADER.register(getResource("protection"), ProtectionModule.LOADER);
-      ModifierModule.LOADER.register(getResource("adjust_damage"), AdjustDamageModule.LOADER);
-      ModifierModule.LOADER.register(getResource("replace_fluid"), ReplaceBlockWalkerModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_action_walk_transform"), ToolActionWalkerTransformModule.LOADER);
-      // behavior
-      ModifierModule.LOADER.register(getResource("attribute"), AttributeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("reduce_tool_damage"), ReduceToolDamageModule.LOADER);
-      // TODO 1.21: rename to repair_factor?
-      ModifierModule.LOADER.register(getResource("repair"), RepairModule.LOADER);
-      ModifierModule.LOADER.register(getResource("material_repair"), MaterialRepairModule.LOADER);
-      ModifierModule.LOADER.register(getResource("show_offhand"), ShowOffhandModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_actions"), ToolActionsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_action_transform"), ToolActionTransformModule.LOADER);
-      // edible
-      ModifierModule.LOADER.register(getResource("edible"), EdibleModule.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_consume_durability"), EdibleConsumeDurabilityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_representative_item"), EdibleRepresentativeItemModule.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_cure_effects"), EdibleCureEffectsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_cure_random_effect"), EdibleCureRandomEffectModule.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_remove_effect"), EdibleRemoveEffectModule.LOADER);
-      // build
-      ModifierModule.LOADER.register(getResource("conditional_stat"), ConditionalStatModule.LOADER);
-      ModifierModule.LOADER.register(getResource("modifier_slot"), ModifierSlotModule.LOADER);
-      ModifierModule.LOADER.register(getResource("rarity"), RarityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("requirements"), ModifierRequirementsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("swappable_slot"), SwappableSlotModule.LOADER);
-      ModifierModule.LOADER.register(getResource("swappable_bonus_slot"), SwappableSlotModule.BonusSlot.LOADER);
-      ModifierModule.LOADER.register(getResource("swappable_tool_traits"), SwappableToolTraitsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("stat_boost"), StatBoostModule.LOADER);
-      ModifierModule.LOADER.register(getResource("stat_copy"), StatCopyModule.LOADER);
-      ModifierModule.LOADER.register(getResource("set_stat"), SetStatModule.LOADER);
-      ModifierModule.LOADER.register(getResource("trait"), ModifierTraitModule.LOADER);
-      ModifierModule.LOADER.register(getResource("volatile_flag"), VolatileFlagModule.LOADER);
-      ModifierModule.LOADER.register(getResource("volatile_int"), VolatileIntModule.LOADER);
-      ModifierModule.LOADER.register(getResource("volatile_float"), VolatileFloatModule.LOADER);
-      // combat
-      ModifierModule.LOADER.register(getResource("conditional_melee_damage"), ConditionalMeleeDamageModule.LOADER);
-      ModifierModule.LOADER.register(getResource("conditional_power"), ConditionalPowerModule.LOADER);
-      ModifierModule.LOADER.register(getResource("knockback"), KnockbackModule.LOADER);
-      ModifierModule.LOADER.register(getResource("melee_attribute"), MeleeAttributeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_explosion"), ProjectileExplosionModule.LOADER);
-      ModifierModule.LOADER.register(getResource("sling_force"), SlingForceModule.LOADER);
-      // mob effect
-      ModifierModule.LOADER.register(getResource("mob_effect"), MobEffectModule.LOADER);
-      ModifierModule.LOADER.register(getResource("weapon_mob_effect"), MobEffectModule.Weapon.LOADER);
-      ModifierModule.LOADER.register(getResource("counter_mob_effect"), MobEffectModule.ArmorCounter.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_usage_mob_effect"), MobEffectModule.ToolUsage.LOADER);
-      ModifierModule.LOADER.register(getResource("armor_attack_mob_effect"), MobEffectModule.ArmorAttack.LOADER);
-      ModifierModule.LOADER.register(getResource("edible_mob_effect"), MobEffectModule.Edible.LOADER);
-      // display
-      ModifierModule.LOADER.register(getResource("durability_color"), DurabilityBarColorModule.LOADER);
-      ModifierModule.LOADER.register(getResource("variant_name"), ModifierVariantNameModule.LOADER);
-      ModifierModule.LOADER.register(getResource("variant_color"), ModifierVariantColorModule.LOADER);
-      ModifierModule.LOADER.register(getResource("material_variant_color"), MaterialVariantColorModule.LOADER);
-      ModifierModule.LOADER.register(getResource("show_interaction_source"), ShowInteractionSourceModule.LOADER);
-      ModifierModule.LOADER.register(getResource("melee_instrument"), MeleeInstrumentModule.LOADER);
-      ModifierModule.LOADER.register(getResource("stat_tooltip"), StatTooltipModule.LOADER);
-      // enchantment
-      ModifierModule.LOADER.register(getResource("constant_enchantment"), EnchantmentModule.Constant.LOADER);
-      ModifierModule.LOADER.register(getResource("main_hand_harvest_enchantment"), EnchantmentModule.MainHandHarvest.LOADER);
-      ModifierModule.LOADER.register(getResource("armor_harvest_enchantment"), EnchantmentModule.ArmorHarvest.LOADER);
-      ModifierModule.LOADER.register(getResource("enchantment_ignoring_protection"), EnchantmentModule.Protection.LOADER);
-      ModifierModule.LOADER.register(getResource("weapon_looting"), LootingModule.Weapon.LOADER);
-      ModifierModule.LOADER.register(getResource("armor_looting"), LootingModule.Armor.LOADER);
-      // mining
-      ModifierModule.LOADER.register(getResource("conditional_mining_speed"), ConditionalMiningSpeedModule.LOADER);
-      // capacity
-      ModifierModule.LOADER.register(getResource("capacity_bar"), CapacityBarModule.LOADER);
-      ModifierModule.LOADER.register(getResource("durability_as_capacity"), DurabilityAsCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("energy_as_capacity"), EnergyAsCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fluid_as_capacity"), FluidAsCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fluid_predicate_as_capacity"), FluidPredicateAsCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("durability_shield"), DurabilityShieldModule.LOADER);
-      ModifierModule.LOADER.register(getResource("loot_to_capacity"), LootToCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("damage_to_capacity"), DamageToCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("time_to_capacity"), TimeToCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("launch_capacity"), LaunchCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("mining_capacity"), MiningCapacityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("melee_capacity"), MeleeCapacityModule.LOADER);
-      // technical
-      ModifierModule.LOADER.register(getResource("armor_level"), ArmorLevelModule.LOADER);
-      ModifierModule.LOADER.register(getResource("max_armor_stat"), MaxArmorStatModule.LOADER);
-      ModifierModule.LOADER.register(getResource("armor_stat"), ArmorStatModule.LOADER);
-      ModifierModule.LOADER.register(getResource("inventory"), InventoryModule.LOADER);
-      ModifierModule.LOADER.register(getResource("inventory_menu"), InventoryMenuModule.LOADER);
-      ModifierModule.LOADER.register(getResource("inventory_slot_menu"), InventorySlotMenuModule.INSTANCE.getLoader());
+    // modifier modules //
+    ModifierModule.LOADER.register(getResource("empty"), ModifierModule.EMPTY.getLoader());
+    // armor
+    ModifierModule.LOADER.register(getResource("max_armor_attribute"), MaxArmorAttributeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("effect_immunity"), EffectImmunityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("mob_disguise"), MobDisguiseModule.LOADER);
+    ModifierModule.LOADER.register(getResource("block_damage"), BlockDamageSourceModule.LOADER);
+    ModifierModule.LOADER.register(getResource("cover_ground"), CoverGroundWalkerModule.LOADER);
+    ModifierModule.LOADER.register(getResource("protection"), ProtectionModule.LOADER);
+    ModifierModule.LOADER.register(getResource("adjust_damage"), AdjustDamageModule.LOADER);
+    ModifierModule.LOADER.register(getResource("replace_fluid"), ReplaceBlockWalkerModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_action_walk_transform"), ToolActionWalkerTransformModule.LOADER);
+    // behavior
+    ModifierModule.LOADER.register(getResource("attribute"), AttributeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("reduce_tool_damage"), ReduceToolDamageModule.LOADER);
+    // TODO 1.21: rename to repair_factor?
+    ModifierModule.LOADER.register(getResource("repair"), RepairModule.LOADER);
+    ModifierModule.LOADER.register(getResource("material_repair"), MaterialRepairModule.LOADER);
+    ModifierModule.LOADER.register(getResource("show_offhand"), ShowOffhandModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_actions"), ToolActionsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_action_transform"), ToolActionTransformModule.LOADER);
+    // edible
+    ModifierModule.LOADER.register(getResource("edible"), EdibleModule.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_consume_durability"), EdibleConsumeDurabilityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_representative_item"), EdibleRepresentativeItemModule.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_cure_effects"), EdibleCureEffectsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_cure_random_effect"), EdibleCureRandomEffectModule.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_remove_effect"), EdibleRemoveEffectModule.LOADER);
+    // build
+    ModifierModule.LOADER.register(getResource("conditional_stat"), ConditionalStatModule.LOADER);
+    ModifierModule.LOADER.register(getResource("modifier_slot"), ModifierSlotModule.LOADER);
+    ModifierModule.LOADER.register(getResource("rarity"), RarityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("requirements"), ModifierRequirementsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("swappable_slot"), SwappableSlotModule.LOADER);
+    ModifierModule.LOADER.register(getResource("swappable_bonus_slot"), SwappableSlotModule.BonusSlot.LOADER);
+    ModifierModule.LOADER.register(getResource("swappable_tool_traits"), SwappableToolTraitsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("stat_boost"), StatBoostModule.LOADER);
+    ModifierModule.LOADER.register(getResource("stat_copy"), StatCopyModule.LOADER);
+    ModifierModule.LOADER.register(getResource("set_stat"), SetStatModule.LOADER);
+    ModifierModule.LOADER.register(getResource("trait"), ModifierTraitModule.LOADER);
+    ModifierModule.LOADER.register(getResource("volatile_flag"), VolatileFlagModule.LOADER);
+    ModifierModule.LOADER.register(getResource("volatile_int"), VolatileIntModule.LOADER);
+    ModifierModule.LOADER.register(getResource("volatile_float"), VolatileFloatModule.LOADER);
+    // combat
+    ModifierModule.LOADER.register(getResource("conditional_melee_damage"), ConditionalMeleeDamageModule.LOADER);
+    ModifierModule.LOADER.register(getResource("conditional_power"), ConditionalPowerModule.LOADER);
+    ModifierModule.LOADER.register(getResource("knockback"), KnockbackModule.LOADER);
+    ModifierModule.LOADER.register(getResource("melee_attribute"), MeleeAttributeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_explosion"), ProjectileExplosionModule.LOADER);
+    ModifierModule.LOADER.register(getResource("sling_force"), SlingForceModule.LOADER);
+    // mob effect
+    ModifierModule.LOADER.register(getResource("mob_effect"), MobEffectModule.LOADER);
+    ModifierModule.LOADER.register(getResource("weapon_mob_effect"), MobEffectModule.Weapon.LOADER);
+    ModifierModule.LOADER.register(getResource("counter_mob_effect"), MobEffectModule.ArmorCounter.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_usage_mob_effect"), MobEffectModule.ToolUsage.LOADER);
+    ModifierModule.LOADER.register(getResource("armor_attack_mob_effect"), MobEffectModule.ArmorAttack.LOADER);
+    ModifierModule.LOADER.register(getResource("edible_mob_effect"), MobEffectModule.Edible.LOADER);
+    // display
+    ModifierModule.LOADER.register(getResource("durability_color"), DurabilityBarColorModule.LOADER);
+    ModifierModule.LOADER.register(getResource("variant_name"), ModifierVariantNameModule.LOADER);
+    ModifierModule.LOADER.register(getResource("variant_color"), ModifierVariantColorModule.LOADER);
+    ModifierModule.LOADER.register(getResource("material_variant_color"), MaterialVariantColorModule.LOADER);
+    ModifierModule.LOADER.register(getResource("show_interaction_source"), ShowInteractionSourceModule.LOADER);
+    ModifierModule.LOADER.register(getResource("melee_instrument"), MeleeInstrumentModule.LOADER);
+    ModifierModule.LOADER.register(getResource("stat_tooltip"), StatTooltipModule.LOADER);
+    // enchantment
+    ModifierModule.LOADER.register(getResource("constant_enchantment"), EnchantmentModule.Constant.LOADER);
+    ModifierModule.LOADER.register(getResource("main_hand_harvest_enchantment"), EnchantmentModule.MainHandHarvest.LOADER);
+    ModifierModule.LOADER.register(getResource("armor_harvest_enchantment"), EnchantmentModule.ArmorHarvest.LOADER);
+    ModifierModule.LOADER.register(getResource("enchantment_ignoring_protection"), EnchantmentModule.Protection.LOADER);
+    ModifierModule.LOADER.register(getResource("weapon_looting"), LootingModule.Weapon.LOADER);
+    ModifierModule.LOADER.register(getResource("armor_looting"), LootingModule.Armor.LOADER);
+    // mining
+    ModifierModule.LOADER.register(getResource("conditional_mining_speed"), ConditionalMiningSpeedModule.LOADER);
+    // capacity
+    ModifierModule.LOADER.register(getResource("capacity_bar"), CapacityBarModule.LOADER);
+    ModifierModule.LOADER.register(getResource("durability_as_capacity"), DurabilityAsCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("energy_as_capacity"), EnergyAsCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fluid_as_capacity"), FluidAsCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fluid_predicate_as_capacity"), FluidPredicateAsCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("durability_shield"), DurabilityShieldModule.LOADER);
+    ModifierModule.LOADER.register(getResource("loot_to_capacity"), LootToCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("damage_to_capacity"), DamageToCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("time_to_capacity"), TimeToCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("launch_capacity"), LaunchCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("mining_capacity"), MiningCapacityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("melee_capacity"), MeleeCapacityModule.LOADER);
+    // technical
+    ModifierModule.LOADER.register(getResource("armor_level"), ArmorLevelModule.LOADER);
+    ModifierModule.LOADER.register(getResource("max_armor_stat"), MaxArmorStatModule.LOADER);
+    ModifierModule.LOADER.register(getResource("armor_stat"), ArmorStatModule.LOADER);
+    ModifierModule.LOADER.register(getResource("inventory"), InventoryModule.LOADER);
+    ModifierModule.LOADER.register(getResource("inventory_menu"), InventoryMenuModule.LOADER);
+    ModifierModule.LOADER.register(getResource("inventory_slot_menu"), InventorySlotMenuModule.INSTANCE.getLoader());
 
-      // special
-      ModifierModule.LOADER.register(getResource("smelting"), SmeltingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("autosmelt"), AutosmeltModule.LOADER);
-      ModifierModule.LOADER.register(getResource("melting"), MeltingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("glow_walker"), GlowWalkerModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fire_walker"), FireWalkerModule.LOADER);
-      ModifierModule.LOADER.register(getResource("lightspeed_attribute"), LightspeedAttributeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("zoom"), ZoomModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fov"), FovModule.LOADER);
-      ModifierModule.LOADER.register(getResource("damage_on_unequip"), DamageOnUnequipModule.LOADER);
-      ModifierModule.LOADER.register(getResource("damage_on_shoot"), DamageOnShootModule.LOADER);
-      ModifierModule.LOADER.register(getResource("reduce_effect_on_unequip"), ReduceEffectOnUnequipModule.LOADER);
-      ModifierModule.LOADER.register(getResource("clear_effect_on_unequip"), ClearEffectOnUnequipModule.LOADER);
-      ModifierModule.LOADER.register(getResource("share_durability"), ShareDurabilityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("craft_count"), CraftCountModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tipped"), TippedModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_bounce"), ProjectileBounceModule.LOADER);
-      ModifierModule.LOADER.register(getResource("block_item_provider"), BlockItemProviderModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_damage_range"), ToolDamageRangeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("golden_attribute"), GoldenAttributeModule.LOADER);
-      // interaction
-      ModifierModule.LOADER.register(getResource("brush"), BrushModule.LOADER);
-      ModifierModule.LOADER.register(getResource("campfire_extinguish"), ExtinguishCampfireModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fishing"), FishingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("harvest"), HarvestModule.LOADER);
-      ModifierModule.LOADER.register(getResource("place_glow"), PlaceGlowModule.LOADER);
-      ModifierModule.LOADER.register(getResource("place_fire"), PlaceFireModule.LOADER);
-      ModifierModule.LOADER.register(getResource("bucket"), BucketModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tank_interaction"), TankInteractionModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_place_glow"), ProjectilePlaceGlowModule.LOADER);
-      ModifierModule.LOADER.register(getResource("shears"), ShearsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("throwing"), ThrowingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("spitting"), SpittingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("splashing"), SplashingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("slurping"), SlurpingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fireball"), FireballModule.LOADER);
-      // sling
-      ModifierModule.LOADER.register(getResource("sling_leap"), SlingLeapModule.LOADER);
-      ModifierModule.LOADER.register(getResource("sling_knockback"), SlingKnockbackModule.LOADER);
-      ModifierModule.LOADER.register(getResource("sling_teleport"), SlingTeleportModule.LOADER);
-      // overslime
-      ModifierModule.LOADER.register(getResource("overgrowth"), OvergrowthModule.LOADER);
-      ModifierModule.LOADER.register(getResource("overburn"), OverburnModule.INSTANCE.getLoader());
-      ModifierModule.LOADER.register(getResource("overshield"), OvershieldModule.LOADER);
-      // combat
-      ModifierModule.LOADER.register(getResource("fiery_attack"), FieryAttackModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fiery_armor_attack"), FieryArmorAttackModule.LOADER);
-      ModifierModule.LOADER.register(getResource("freezing_attack"), FreezingAttackModule.LOADER);
-      ModifierModule.LOADER.register(getResource("spilling"), SpillingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("channeling"), ChannelingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("smashing"), SmashingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("sweeping_edge"), SweepingEdgeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("severing"), SeveringModule.LOADER);
-      ModifierModule.LOADER.register(getResource("blocking"), BlockingModule.LOADER);
-      ModifierModule.LOADER.register(getResource("lifesteal"), LifestealModule.LOADER);
-      // armor
-      ModifierModule.LOADER.register(getResource("enderclearance"), EnderclearanceModule.LOADER);
-      ModifierModule.LOADER.register(getResource("depth_protection"), DepthProtectionModule.LOADER);
-      ModifierModule.LOADER.register(getResource("flame_barrier"), FlameBarrierModule.LOADER);
-      ModifierModule.LOADER.register(getResource("kinetic"), KineticModule.LOADER);
-      ModifierModule.LOADER.register(getResource("recurrent_protection"), RecurrentProtectionModule.LOADER);
-      ModifierModule.LOADER.register(getResource("shield_strap"), ShieldStrapModule.LOADER);
-      ModifierModule.LOADER.register(getResource("tool_belt"), ToolBeltModule.LOADER);
-      ModifierModule.LOADER.register(getResource("minimap"), MinimapModule.LOADER);
-      ModifierModule.LOADER.register(getResource("sleeves"), SleevesModule.LOADER);
-      ModifierModule.LOADER.register(getResource("soulspeed"), SoulSpeedModule.LOADER);
-      ModifierModule.LOADER.register(getResource("restore_lost_health"), RestoreLostHealthModule.LOADER);
-      ModifierModule.LOADER.register(getResource("update_health"), UpdateHealthModule.LOADER);
-      ModifierModule.LOADER.register(getResource("teleport_dodge"), TeleportDodgeModule.LOADER);
-      // counterattack
-      ModifierModule.LOADER.register(getResource("thorns"), ThornsModule.LOADER);
-      ModifierModule.LOADER.register(getResource("fiery_counter"), FieryCounterModule.LOADER);
-      ModifierModule.LOADER.register(getResource("freezing_counter"), FreezingCounterModule.LOADER);
-      ModifierModule.LOADER.register(getResource("knockback_counter"), KnockbackCounterModule.LOADER);
-      // ranged
-      ModifierModule.LOADER.register(getResource("restrict_projectile_angle"), RestrictAngleModule.LOADER);
-      ModifierModule.LOADER.register(getResource("bulk_quiver"), BulkQuiverModule.LOADER);
-      ModifierModule.LOADER.register(getResource("trick_quiver"), TrickQuiverModule.LOADER);
-      ModifierModule.LOADER.register(getResource("quiver_inventory"), QuiverInventoryModule.LOADER);
-      ModifierModule.LOADER.register(getResource("infinity"), InfinityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("punch"), PunchModule.LOADER);
-      ModifierModule.LOADER.register(getResource("reverse_punch"), ReversePunchModule.LOADER);
-      ModifierModule.LOADER.register(getResource("arrow_pierce"), ArrowPierceModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_gravity"), ProjectileGravityModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_fuse"), ProjectileFuseModule.LOADER);
-      ModifierModule.LOADER.register(getResource("projectile_attract_mobs"), ProjectileAttractMobsModule.LOADER);
-      // cosmetic
-      ModifierModule.LOADER.register(getResource("dye"), DyeModule.LOADER);
-      ModifierModule.LOADER.register(getResource("embellishment"), EmbellishmentModule.LOADER);
-      ModifierModule.LOADER.register(getResource("trim"), TrimModule.LOADER);
-      ModifierModule.LOADER.register(getResource("banner"), BannerModule.LOADER);
-      // compat
-      ModifierModule.LOADER.register(getResource("the_one_probe"), TheOneProbeModule.INSTANCE.getLoader());
-      ModifierModule.LOADER.register(getResource("headlight"), HeadlightModule.LOADER);
+    // special
+    ModifierModule.LOADER.register(getResource("smelting"), SmeltingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("autosmelt"), AutosmeltModule.LOADER);
+    ModifierModule.LOADER.register(getResource("melting"), MeltingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("glow_walker"), GlowWalkerModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fire_walker"), FireWalkerModule.LOADER);
+    ModifierModule.LOADER.register(getResource("lightspeed_attribute"), LightspeedAttributeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("zoom"), ZoomModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fov"), FovModule.LOADER);
+    ModifierModule.LOADER.register(getResource("damage_on_unequip"), DamageOnUnequipModule.LOADER);
+    ModifierModule.LOADER.register(getResource("damage_on_shoot"), DamageOnShootModule.LOADER);
+    ModifierModule.LOADER.register(getResource("reduce_effect_on_unequip"), ReduceEffectOnUnequipModule.LOADER);
+    ModifierModule.LOADER.register(getResource("clear_effect_on_unequip"), ClearEffectOnUnequipModule.LOADER);
+    ModifierModule.LOADER.register(getResource("share_durability"), ShareDurabilityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("craft_count"), CraftCountModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tipped"), TippedModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_bounce"), ProjectileBounceModule.LOADER);
+    ModifierModule.LOADER.register(getResource("block_item_provider"), BlockItemProviderModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_damage_range"), ToolDamageRangeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("golden_attribute"), GoldenAttributeModule.LOADER);
+    // interaction
+    ModifierModule.LOADER.register(getResource("brush"), BrushModule.LOADER);
+    ModifierModule.LOADER.register(getResource("campfire_extinguish"), ExtinguishCampfireModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fishing"), FishingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("harvest"), HarvestModule.LOADER);
+    ModifierModule.LOADER.register(getResource("place_glow"), PlaceGlowModule.LOADER);
+    ModifierModule.LOADER.register(getResource("place_fire"), PlaceFireModule.LOADER);
+    ModifierModule.LOADER.register(getResource("bucket"), BucketModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tank_interaction"), TankInteractionModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_place_glow"), ProjectilePlaceGlowModule.LOADER);
+    ModifierModule.LOADER.register(getResource("shears"), ShearsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("throwing"), ThrowingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("spitting"), SpittingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("splashing"), SplashingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("slurping"), SlurpingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fireball"), FireballModule.LOADER);
+    // sling
+    ModifierModule.LOADER.register(getResource("sling_leap"), SlingLeapModule.LOADER);
+    ModifierModule.LOADER.register(getResource("sling_knockback"), SlingKnockbackModule.LOADER);
+    ModifierModule.LOADER.register(getResource("sling_teleport"), SlingTeleportModule.LOADER);
+    // overslime
+    ModifierModule.LOADER.register(getResource("overgrowth"), OvergrowthModule.LOADER);
+    ModifierModule.LOADER.register(getResource("overburn"), OverburnModule.INSTANCE.getLoader());
+    ModifierModule.LOADER.register(getResource("overshield"), OvershieldModule.LOADER);
+    // combat
+    ModifierModule.LOADER.register(getResource("fiery_attack"), FieryAttackModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fiery_armor_attack"), FieryArmorAttackModule.LOADER);
+    ModifierModule.LOADER.register(getResource("freezing_attack"), FreezingAttackModule.LOADER);
+    ModifierModule.LOADER.register(getResource("spilling"), SpillingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("channeling"), ChannelingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("smashing"), SmashingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("sweeping_edge"), SweepingEdgeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("severing"), SeveringModule.LOADER);
+    ModifierModule.LOADER.register(getResource("blocking"), BlockingModule.LOADER);
+    ModifierModule.LOADER.register(getResource("lifesteal"), LifestealModule.LOADER);
+    // armor
+    ModifierModule.LOADER.register(getResource("enderclearance"), EnderclearanceModule.LOADER);
+    ModifierModule.LOADER.register(getResource("depth_protection"), DepthProtectionModule.LOADER);
+    ModifierModule.LOADER.register(getResource("flame_barrier"), FlameBarrierModule.LOADER);
+    ModifierModule.LOADER.register(getResource("kinetic"), KineticModule.LOADER);
+    ModifierModule.LOADER.register(getResource("recurrent_protection"), RecurrentProtectionModule.LOADER);
+    ModifierModule.LOADER.register(getResource("shield_strap"), ShieldStrapModule.LOADER);
+    ModifierModule.LOADER.register(getResource("tool_belt"), ToolBeltModule.LOADER);
+    ModifierModule.LOADER.register(getResource("minimap"), MinimapModule.LOADER);
+    ModifierModule.LOADER.register(getResource("sleeves"), SleevesModule.LOADER);
+    ModifierModule.LOADER.register(getResource("soulspeed"), SoulSpeedModule.LOADER);
+    ModifierModule.LOADER.register(getResource("restore_lost_health"), RestoreLostHealthModule.LOADER);
+    ModifierModule.LOADER.register(getResource("update_health"), UpdateHealthModule.LOADER);
+    ModifierModule.LOADER.register(getResource("teleport_dodge"), TeleportDodgeModule.LOADER);
+    // counterattack
+    ModifierModule.LOADER.register(getResource("thorns"), ThornsModule.LOADER);
+    ModifierModule.LOADER.register(getResource("fiery_counter"), FieryCounterModule.LOADER);
+    ModifierModule.LOADER.register(getResource("freezing_counter"), FreezingCounterModule.LOADER);
+    ModifierModule.LOADER.register(getResource("knockback_counter"), KnockbackCounterModule.LOADER);
+    // ranged
+    ModifierModule.LOADER.register(getResource("restrict_projectile_angle"), RestrictAngleModule.LOADER);
+    ModifierModule.LOADER.register(getResource("bulk_quiver"), BulkQuiverModule.LOADER);
+    ModifierModule.LOADER.register(getResource("trick_quiver"), TrickQuiverModule.LOADER);
+    ModifierModule.LOADER.register(getResource("quiver_inventory"), QuiverInventoryModule.LOADER);
+    ModifierModule.LOADER.register(getResource("infinity"), InfinityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("punch"), PunchModule.LOADER);
+    ModifierModule.LOADER.register(getResource("reverse_punch"), ReversePunchModule.LOADER);
+    ModifierModule.LOADER.register(getResource("arrow_pierce"), ArrowPierceModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_gravity"), ProjectileGravityModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_fuse"), ProjectileFuseModule.LOADER);
+    ModifierModule.LOADER.register(getResource("projectile_attract_mobs"), ProjectileAttractMobsModule.LOADER);
+    // cosmetic
+    ModifierModule.LOADER.register(getResource("dye"), DyeModule.LOADER);
+    ModifierModule.LOADER.register(getResource("embellishment"), EmbellishmentModule.LOADER);
+    ModifierModule.LOADER.register(getResource("trim"), TrimModule.LOADER);
+    ModifierModule.LOADER.register(getResource("banner"), BannerModule.LOADER);
+    // compat
+    ModifierModule.LOADER.register(getResource("the_one_probe"), TheOneProbeModule.INSTANCE.getLoader());
+    ModifierModule.LOADER.register(getResource("headlight"), HeadlightModule.LOADER);
 
-      // modifier predicates
-      ModifierPredicate.LOADER.register(getResource("single"), SingleModifierPredicate.LOADER);
-      ModifierPredicate.LOADER.register(getResource("tag"), TagModifierPredicate.LOADER);
-      ModifierPredicate.LOADER.register(getResource("slot_type"), SlotTypeModifierPredicate.LOADER);
+    // modifier predicates
+    ModifierPredicate.LOADER.register(getResource("single"), SingleModifierPredicate.LOADER);
+    ModifierPredicate.LOADER.register(getResource("tag"), TagModifierPredicate.LOADER);
+    ModifierPredicate.LOADER.register(getResource("slot_type"), SlotTypeModifierPredicate.LOADER);
 
 
-      // variables
-      // block
-      BlockVariable.LOADER.register(getResource("constant"), BlockVariable.Constant.LOADER);
-      BlockVariable.LOADER.register(getResource("conditional"), ConditionalBlockVariable.LOADER);
-      BlockVariable.LOADER.register(getResource("blast_resistance"), BlockVariable.BLAST_RESISTANCE.getLoader());
-      BlockVariable.LOADER.register(getResource("hardness"), BlockVariable.HARDNESS.getLoader());
-      BlockVariable.LOADER.register(getResource("state_property"), StatePropertyVariable.LOADER);
-      // entity
-      EntityVariable.LOADER.register(getResource("constant"), EntityVariable.Constant.LOADER);
-      EntityVariable.LOADER.register(getResource("conditional"), ConditionalEntityVariable.LOADER);
-      EntityVariable.LOADER.register(getResource("health"), EntityVariable.HEALTH.getLoader());
-      EntityVariable.LOADER.register(getResource("height"), EntityVariable.HEIGHT.getLoader());
-      EntityVariable.LOADER.register(getResource("attribute"), AttributeEntityVariable.LOADER);
-      EntityVariable.LOADER.register(getResource("effect_level"), EntityEffectLevelVariable.LOADER);
-      EntityVariable.LOADER.register(getResource("light"), EntityLightVariable.LOADER);
-      EntityVariable.LOADER.register(getResource("equipment_count"), EquipmentCountEntityVariable.LOADER);
-      EntityVariable.LOADER.register(getResource("biome_temperature"), EntityVariable.BIOME_TEMPERATURE.getLoader());
-      EntityVariable.LOADER.register(getResource("water"), EntityVariable.WATER.getLoader());
-      EntityVariable.LOADER.register(getResource("armor_coverage"), EntityVariable.ARMOR_COVERAGE.getLoader());
-      EntityVariable.LOADER.register(getResource("player_stat"), PlayerStatVariable.LOADER);
-      // tool
-      ToolVariable.LOADER.register(getResource("constant"), ToolVariable.Constant.LOADER);
-      ToolVariable.register(getResource("tool_conditional"), ConditionalToolVariable.LOADER);
-      ToolVariable.register(getResource("tool_durability"), ToolVariable.CURRENT_DURABILITY.getLoader());
-      ToolVariable.register(getResource("tool_lost_durability"), ToolVariable.CURRENT_DAMAGE.getLoader());
-      ToolVariable.register(getResource("tool_stat"), ToolStatVariable.LOADER);
-      ToolVariable.register(getResource("stat_multiplier"), StatMultiplierVariable.LOADER);
-      ToolVariable.register(getResource("mod_data"), ModDataVariable.LOADER);
-      ToolVariable.register(getResource("modifier_level"), ModifierLevelVariable.LOADER);
-      ToolVariable.register(getResource("fluid_amount"), FluidAmountVariable.LOADER);
-      ToolVariable.register(getResource("tank_capacity"), TankCapacityVariable.LOADER);
-      // stat
-      ConditionalStatVariable.LOADER.register(getResource("constant"), ConditionalStatVariable.Constant.LOADER);
-      ConditionalStatVariable.register(getResource("entity"), EntityConditionalStatVariable.LOADER);
-      // melee
-      MeleeVariable.LOADER.register(getResource("constant"), MeleeVariable.Constant.LOADER);
-      MeleeVariable.LOADER.register(getResource("entity"), EntityMeleeVariable.LOADER);
-      // power
-      PowerVariable.LOADER.register(getResource("constant"), PowerVariable.Constant.LOADER);
-      PowerVariable.LOADER.register(getResource("entity"), EntityPowerVariable.LOADER);
-      PowerVariable.LOADER.register(getResource("persistent_data"), PersistentDataPowerVariable.LOADER);
-      // mining speed
-      MiningSpeedVariable.LOADER.register(getResource("constant"), MiningSpeedVariable.Constant.LOADER);
-      MiningSpeedVariable.LOADER.register(getResource("block"), BlockMiningSpeedVariable.LOADER);
-      MiningSpeedVariable.LOADER.register(getResource("block_light"), BlockLightVariable.LOADER);
-      MiningSpeedVariable.LOADER.register(getResource("biome_temperature"), BlockTemperatureVariable.LOADER);
-      MiningSpeedVariable.LOADER.register(getResource("effective"), EffectiveMiningSpeedVariable.LOADER);
-      // protection
-      ProtectionVariable.LOADER.register(getResource("constant"), ProtectionVariable.Constant.LOADER);
-      ProtectionVariable.LOADER.register(getResource("entity"), EntityProtectionVariable.LOADER);
+    // variables
+    // block
+    BlockVariable.LOADER.register(getResource("constant"), BlockVariable.Constant.LOADER);
+    BlockVariable.LOADER.register(getResource("conditional"), ConditionalBlockVariable.LOADER);
+    BlockVariable.LOADER.register(getResource("blast_resistance"), BlockVariable.BLAST_RESISTANCE.getLoader());
+    BlockVariable.LOADER.register(getResource("hardness"), BlockVariable.HARDNESS.getLoader());
+    BlockVariable.LOADER.register(getResource("state_property"), StatePropertyVariable.LOADER);
+    // entity
+    EntityVariable.LOADER.register(getResource("constant"), EntityVariable.Constant.LOADER);
+    EntityVariable.LOADER.register(getResource("conditional"), ConditionalEntityVariable.LOADER);
+    EntityVariable.LOADER.register(getResource("health"), EntityVariable.HEALTH.getLoader());
+    EntityVariable.LOADER.register(getResource("height"), EntityVariable.HEIGHT.getLoader());
+    EntityVariable.LOADER.register(getResource("attribute"), AttributeEntityVariable.LOADER);
+    EntityVariable.LOADER.register(getResource("effect_level"), EntityEffectLevelVariable.LOADER);
+    EntityVariable.LOADER.register(getResource("light"), EntityLightVariable.LOADER);
+    EntityVariable.LOADER.register(getResource("equipment_count"), EquipmentCountEntityVariable.LOADER);
+    EntityVariable.LOADER.register(getResource("biome_temperature"), EntityVariable.BIOME_TEMPERATURE.getLoader());
+    EntityVariable.LOADER.register(getResource("water"), EntityVariable.WATER.getLoader());
+    EntityVariable.LOADER.register(getResource("armor_coverage"), EntityVariable.ARMOR_COVERAGE.getLoader());
+    EntityVariable.LOADER.register(getResource("player_stat"), PlayerStatVariable.LOADER);
+    // tool
+    ToolVariable.LOADER.register(getResource("constant"), ToolVariable.Constant.LOADER);
+    ToolVariable.register(getResource("tool_conditional"), ConditionalToolVariable.LOADER);
+    ToolVariable.register(getResource("tool_durability"), ToolVariable.CURRENT_DURABILITY.getLoader());
+    ToolVariable.register(getResource("tool_lost_durability"), ToolVariable.CURRENT_DAMAGE.getLoader());
+    ToolVariable.register(getResource("tool_stat"), ToolStatVariable.LOADER);
+    ToolVariable.register(getResource("stat_multiplier"), StatMultiplierVariable.LOADER);
+    ToolVariable.register(getResource("mod_data"), ModDataVariable.LOADER);
+    ToolVariable.register(getResource("modifier_level"), ModifierLevelVariable.LOADER);
+    ToolVariable.register(getResource("fluid_amount"), FluidAmountVariable.LOADER);
+    ToolVariable.register(getResource("tank_capacity"), TankCapacityVariable.LOADER);
+    // stat
+    ConditionalStatVariable.LOADER.register(getResource("constant"), ConditionalStatVariable.Constant.LOADER);
+    ConditionalStatVariable.register(getResource("entity"), EntityConditionalStatVariable.LOADER);
+    // melee
+    MeleeVariable.LOADER.register(getResource("constant"), MeleeVariable.Constant.LOADER);
+    MeleeVariable.LOADER.register(getResource("entity"), EntityMeleeVariable.LOADER);
+    // power
+    PowerVariable.LOADER.register(getResource("constant"), PowerVariable.Constant.LOADER);
+    PowerVariable.LOADER.register(getResource("entity"), EntityPowerVariable.LOADER);
+    PowerVariable.LOADER.register(getResource("persistent_data"), PersistentDataPowerVariable.LOADER);
+    // mining speed
+    MiningSpeedVariable.LOADER.register(getResource("constant"), MiningSpeedVariable.Constant.LOADER);
+    MiningSpeedVariable.LOADER.register(getResource("block"), BlockMiningSpeedVariable.LOADER);
+    MiningSpeedVariable.LOADER.register(getResource("block_light"), BlockLightVariable.LOADER);
+    MiningSpeedVariable.LOADER.register(getResource("biome_temperature"), BlockTemperatureVariable.LOADER);
+    MiningSpeedVariable.LOADER.register(getResource("effective"), EffectiveMiningSpeedVariable.LOADER);
+    // protection
+    ProtectionVariable.LOADER.register(getResource("constant"), ProtectionVariable.Constant.LOADER);
+    ProtectionVariable.LOADER.register(getResource("entity"), EntityProtectionVariable.LOADER);
 
-      // tank helper
-      ToolTankHelper.LOADABLE.register(getResource("tank"), ToolTankHelper.TANK_HELPER);
-      ToolTankHelper.LOADABLE.register(getResource("smashing"), SmashingModule.TANK_HELPER);
-    }
+    // tank helper
+    ToolTankHelper.LOADABLE.register(getResource("tank"), ToolTankHelper.TANK_HELPER);
+    ToolTankHelper.LOADABLE.register(getResource("smashing"), SmashingModule.TANK_HELPER);
   }
 
-  @SubscribeEvent
-  void commonSetup(final FMLCommonSetupEvent event) {
+  /**
+   * Registers the capability hooks and the entity predicates that Tinkers needs at runtime.
+   * <p>
+   * <b>Porting note:</b> upstream does this from a Forge {@code FMLCommonSetupEvent} handler. Most of the Forge
+   * capability registration in that handler is empty on Fabric (the data lives in Cardinal Components now), but
+   * {@link PersistentDataCapability#register()} wires up the Fabric player events and must still run.
+   */
+  public static void registerCapabilities() {
     TinkerDataCapability.register();
     PersistentDataCapability.register();
     EntityModifierCapability.register();
-    BlockItemProviderCapability.register();
     // by default, we support modifying projectiles (arrows or fireworks mainly, but maybe other stuff). other entities may come in the future
     EntityModifierCapability.registerEntityPredicate(entity -> entity instanceof Projectile);
   }
 
-  @SubscribeEvent
-  void gatherData(final GatherDataEvent event) {
-    DataGenerator generator = event.getGenerator();
-    PackOutput packOutput = generator.getPackOutput();
-    boolean server = event.includeServer();
-    generator.addProvider(server, new ModifierProvider(packOutput));
-    generator.addProvider(server, new ModifierRecipeProvider(packOutput));
-    generator.addProvider(server, new FluidEffectProvider(packOutput));
-    generator.addProvider(server, new ModifierTagProvider(packOutput, event.getExistingFileHelper()));
-    generator.addProvider(server, new EnchantmentToModifierProvider(packOutput));
+  /** Registers the datagen providers, called from {@link slimeknights.tconstruct.TConstructData}. */
+  public static void gatherData(FabricDataGenerator.Pack pack, ExistingFileHelper existingFileHelper) {
+    pack.addProvider(ModifierProvider::new);
+    pack.addProvider(ModifierRecipeProvider::new);
+    pack.addProvider(FluidEffectProvider::new);
+    pack.addProvider((output, registriesFuture) -> new ModifierTagProvider(output, existingFileHelper));
+    pack.addProvider(EnchantmentToModifierProvider::new);
   }
 
   /** Adds all relevant items to the creative tab, called by general */
