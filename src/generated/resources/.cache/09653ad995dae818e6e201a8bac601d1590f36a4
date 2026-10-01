@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:46:16.302419	Hephaestus/Tinkers' Construct World Recipes
+// 1.20.1	2026-10-01T17:16:36.375424	Hephaestus/Tinkers' Construct World Recipes
 f12dd1b84fc79cbc6c19c62da8df3178a51796c3 data/tconstruct/recipes/common/slime/ichor/slimeball_from_congealed.json
 17ecc77f82107f6361db370a19ef7ad7f386efc4 data/tconstruct/recipes/world/wood/greenheart/door.json
 172e99b67b919f808b70512c7df66fd93305c822 data/tconstruct/recipes/world/wood/bloodshroom/fence.json
@@ -30,8 +30,8 @@ c717ee6f531a84e6142f3cb5f681472809198e7f data/tconstruct/advancements/recipes/re
 54f9c4762d35a58665b3e3e762557ff36880e6e9 data/tconstruct/recipes/world/wood/bloodshroom/stripped_log_to_wood.json
 2464cef9c27c7e70ab7411e2e4e1c9e9370f47df data/tconstruct/advancements/recipes/misc/common/slime/ender/crystal_smelting.json
 68b4fde463f0ccd06e20099e480ed1f84f4d8576 data/tconstruct/advancements/recipes/building_blocks/world/wood/greenheart/log_to_wood.json
-0d7d522263247471d2f948441032c3f4c667de85 data/tconstruct/advancements/recipes/building_blocks/world/wood/enderbark/stairs.json
 48952a2153fb574dc19332ffa668c42bd3021522 data/tconstruct/recipes/world/wood/enderbark/stairs.json
+0d7d522263247471d2f948441032c3f4c667de85 data/tconstruct/advancements/recipes/building_blocks/world/wood/enderbark/stairs.json
 bbe3178db9a01c15233678fcb3f9db3c676f22a7 data/tconstruct/advancements/recipes/misc/common/slime/ichor/slimeblock.json
 75eb0f3ef3e05fc20393bab0fb30393aa4d8202e data/tconstruct/recipes/world/wood/skyroot/slab.json
 c77e27c181fd3b834e6cb316adca2560801b3987 data/tconstruct/advancements/recipes/building_blocks/world/wood/enderbark/log_to_wood.json

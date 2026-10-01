@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:46:16.233308	Hephaestus/Global Loot Modifiers : tconstruct
+// 1.20.1	2026-10-01T17:16:36.3066	Hephaestus/Global Loot Modifiers : tconstruct
 9dbe294390ce795f2b1b7bad63c4ba0cf0eebcd2 data/tconstruct/loot_modifiers/lustrous/tungsten.json
 0eb49dfdfb29c59c583a0858ed81a89926bfd04e data/tconstruct/loot_modifiers/lustrous/nickel.json
 440aeeefebb310bb3d627212cdd6d4cf17cf7c8a data/tconstruct/loot_modifiers/lustrous/aluminum.json
@@ -9,10 +9,10 @@ b2f100841f847bfb00c78dcf710a033830bc2c5f data/tconstruct/loot_modifiers/lustrous
 1392a96177657150c0d3ca1ed50afca39a01d8a2 data/tconstruct/loot_modifiers/lustrous/chromium.json
 12fd1ee378f44c853af9c02436181cbc1536b68d data/tconstruct/loot_modifiers/tasty_bacon.json
 158fcbb15af61128fbea79a71579d9c000362d2f data/tconstruct/loot_modifiers/lustrous/osmium.json
-8f8d5b2004f76886cc964f7a0ecdc33cc976cbe5 data/tconstruct/loot_modifiers/lustrous/copper.json
 b668924904c28b883c3409918321a63d0ea00a48 data/tconstruct/loot_modifiers/lustrous/cobalt.json
-7080ed372094846a31bceff8316f71898d72f3a1 data/tconstruct/loot_modifiers/lustrous/iron.json
+8f8d5b2004f76886cc964f7a0ecdc33cc976cbe5 data/tconstruct/loot_modifiers/lustrous/copper.json
 db7412f594e7805bb6b5648a2e325a5218bb6917 data/tconstruct/loot_modifiers/lustrous/netherite_scrap.json
+7080ed372094846a31bceff8316f71898d72f3a1 data/tconstruct/loot_modifiers/lustrous/iron.json
 cd464159b547c5edbecf7593103090be124bfb91 data/tconstruct/loot_modifiers/lustrous/uranium.json
 f8d6cf1db9767d47125b4f751048d684982efa28 data/forge/loot_modifiers/global_loot_modifiers.json
 1fa4720df198ea1d66530cd5aec444ee95213928 data/tconstruct/loot_modifiers/modifier_hook.json

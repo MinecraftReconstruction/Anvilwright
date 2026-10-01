@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:46:16.259385	Hephaestus/Material Part Generator - Tinkers' Construct Parts - Tinkers' Construct Materials
+// 1.20.1	2026-10-01T17:16:36.3355	Hephaestus/Material Part Generator - Tinkers' Construct Parts - Tinkers' Construct Materials
 3412532877fb7f71d41fb3c59f7659fb17c3a1af assets/tconstruct/textures/item/tool/armor/travelers/shield/wood_tconstruct_treated_wood.png
 8c3667c7a8d029b6ba05c26252b9a4ac33301e65 assets/tconstruct/textures/item/tool/longbow/limb_bottom_3_tconstruct_silver.png
 32489d503ad26c4b8be3d81d244cfb9a139c6d85 assets/tconstruct/textures/item/tool/parts/small_blade_tconstruct_plated_slimewood.png
@@ -44,8 +44,8 @@ ced36fdc762ce929ec29045fd2336f0f84310867 assets/tconstruct/textures/item/tool/wa
 f8fca97a101980a0d8423fefe7c33daaf168421a assets/tconstruct/textures/item/tool/parts/maille_tconstruct_electrum.png
 f14e3ac55817df4fee701fb82e64cfb7b5f94c1f assets/tconstruct/textures/item/tool/javelin/handle_tconstruct_seared_stone.png
 2f432eaca2557a80e0b5fbc834ff2f5b7d5f6c2e assets/tconstruct/textures/item/tool/javelin/large/head_broken_tconstruct_cinderslime.png
-9284f09d2621273d56a03bdd2fcdf42a61efc843 assets/tconstruct/textures/item/tool/javelin/large/grip_tconstruct_chorus.png
 cecdf980b252c421b221f9a08ccb08b258c3de9b assets/tconstruct/textures/item/tool/armor/slime/chestplate/ribcage_broken_tconstruct_necronium.png
+9284f09d2621273d56a03bdd2fcdf42a61efc843 assets/tconstruct/textures/item/tool/javelin/large/grip_tconstruct_chorus.png
 070c70cf166ec0cf911f165fcc97c87666838f8c assets/tconstruct/textures/item/tool/mattock/pick_broken_tconstruct_iron_oxidized.png
 a0abb3b3decc4f0d86f77980efab6875e6cbfa29 assets/tconstruct/textures/item/tool/sword/blade_tconstruct_treated_wood.png
 6771901a523311dfca8a3a5033115e925904e4c2 assets/tconstruct/textures/item/tool/longbow/limb_bottom_tconstruct_blazing_bone.png
