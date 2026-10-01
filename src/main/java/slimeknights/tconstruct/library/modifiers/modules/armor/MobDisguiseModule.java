@@ -2,7 +2,6 @@ package slimeknights.tconstruct.library.modifiers.modules.armor;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;

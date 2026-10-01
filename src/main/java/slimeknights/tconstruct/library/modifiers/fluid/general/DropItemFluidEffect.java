@@ -4,7 +4,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.ItemLike;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import slimeknights.tconstruct.library.fluid.FluidAction;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.ItemOutput;

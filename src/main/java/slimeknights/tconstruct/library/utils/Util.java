@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 
 public class Util {
   public static final Marker TCONSTRUCT = MarkerManager.getMarker("TCONSTRUCT");
@@ -236,8 +237,8 @@ public class Util {
   }
 
   /** Tests the given list of conditions using {@link DataLoadedConditionContext#INSTANCE} to see if all pass. */
-  public static boolean testConditions(ICondition[] conditions) {
-    for (ICondition condition : conditions) {
+  public static boolean testConditions(ConditionJsonProvider[] conditions) {
+    for (ConditionJsonProvider condition : conditions) {
       if (!condition.test(DataLoadedConditionContext.INSTANCE)) {
         return false;
       }

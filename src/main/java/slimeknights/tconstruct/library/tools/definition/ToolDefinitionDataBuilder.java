@@ -1,18 +1,12 @@
 package slimeknights.tconstruct.library.tools.definition;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
+import com.google.common.collect.ImmutableMap;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
-import slimeknights.tconstruct.library.materials.stats.MaterialStatsId;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.ModifierHook;
-import slimeknights.tconstruct.library.modifiers.ModifierId;
-import slimeknights.tconstruct.library.modifiers.util.LazyModifier;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
+import slimeknights.mantle.data.loadable.ErrorFactory;
+import slimeknights.tconstruct.library.module.ModuleHook;
+import slimeknights.tconstruct.library.module.WithHooks;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
 import slimeknights.tconstruct.library.tools.definition.module.build.ToolSlotsModule;
@@ -20,8 +14,6 @@ import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
 import slimeknights.tconstruct.library.tools.stat.IToolStat;
 
 import java.util.List;
-import slimeknights.tconstruct.library.module.ModuleHook;
-import slimeknights.tconstruct.library.module.WithHooks;
 
 /**
  * Builder for a tool definition data

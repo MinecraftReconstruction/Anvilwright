@@ -1,36 +1,14 @@
 package slimeknights.tconstruct.library.tools.definition;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import net.minecraft.network.FriendlyByteBuf;
-import slimeknights.tconstruct.library.modifiers.ModifierEntry;
-import slimeknights.tconstruct.library.modifiers.ModifierHook;
-import slimeknights.tconstruct.library.modifiers.util.ModifierHookMap;
-import slimeknights.tconstruct.library.tools.SlotType;
-import slimeknights.tconstruct.library.tools.definition.aoe.IAreaOfEffectIterator;
-import slimeknights.tconstruct.library.tools.definition.harvest.IHarvestLogic;
-import slimeknights.tconstruct.library.tools.definition.module.IToolModule;
-import slimeknights.tconstruct.library.tools.definition.weapon.IWeaponAttack;
-import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
-import slimeknights.tconstruct.library.tools.nbt.MultiplierNBT;
-import slimeknights.tconstruct.library.tools.nbt.StatsNBT;
-import slimeknights.tconstruct.library.tools.stat.INumericToolStat;
-import slimeknights.tconstruct.library.tools.stat.IToolStat;
-import slimeknights.tconstruct.library.tools.stat.ModifierStatsBuilder;
-
-import java.util.List;
+import lombok.Getter;
 import slimeknights.mantle.data.loadable.ErrorFactory;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.module.ModuleHookMap;
 import slimeknights.tconstruct.library.module.WithHooks;
 import slimeknights.tconstruct.library.tools.definition.module.ToolModule;
+
+import java.util.List;
 
 /**
  * This class contains all data pack configurable data for a tool, before materials are factored in.

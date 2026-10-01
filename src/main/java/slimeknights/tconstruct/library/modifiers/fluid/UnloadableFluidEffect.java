@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.modifiers.fluid;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import slimeknights.tconstruct.library.fluid.FluidAction;
 
 /** Base class for {@link FluidEffect} to simplify creating effects */
 public interface UnloadableFluidEffect<C extends FluidEffectContext> {

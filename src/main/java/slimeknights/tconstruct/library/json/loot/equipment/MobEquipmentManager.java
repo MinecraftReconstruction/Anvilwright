@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
+import slimeknights.mantle.util.DataLoadedConditionContext;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent.FinalizeSpawn;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 
 /** Loads the list of mob equipment replacements from JSON */
 public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
@@ -45,7 +46,7 @@ public class MobEquipmentManager extends SimpleJsonResourceReloadListener {
 
   /** Map of active replacements */
   private Map<EntityType<?>,List<MobEquipment>> replacements = Map.of();
-  private IContext context = IContext.EMPTY;
+  private DataLoadedConditionContext context = DataLoadedConditionContext.INSTANCE;
 
   private MobEquipmentManager() {
     super(JsonHelper.DEFAULT_GSON, FOLDER);

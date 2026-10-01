@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.tools.modifiers.traits.skull;
 
-import io.github.fabricators_of_create.porting_lib.util.PotionHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -45,7 +44,7 @@ public class RevengeModifier extends NoLevelsModifier implements EquipmentChange
       IToolStackView replacement = context.getReplacementTool();
       if (replacement == null || replacement.getModifierLevel(this) == 0) {
         // cure effects using the helmet
-        PotionHelper.curePotionEffects(context.getEntity(), new ItemStack(tool.getItem()));
+        context.getEntity().curePotionEffects(new ItemStack(tool.getItem()));
       }
     }
   }

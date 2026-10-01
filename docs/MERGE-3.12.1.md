@@ -160,8 +160,51 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 | 按移植历史推断并套用 Forge→Porting Lib import 映射（182 文件）+ 补 errorprone 注解依赖 | **2223** | `FluidStack`→`porting_lib.fluids.FluidStack` 等 10 组 |
 | 自动补齐合并丢掉的 import（135 处 / 76 文件） | **2037** | `RecordLoadable`、`LoadableField`、`ModelData`、`TooltipKey`、`IJsonPredicate`… |
 | 符号改名：`TooltipKey` 路径搬迁、`SimpleFlowableFluid`→`SimpleFlowingFluid`、`ICondition` 用法改名 | **1920**（当前） | 见提交历史 |
+| 用 Porting Lib 垫片顶掉 `FluidAction`（46 文件） | **1639** | 见提交历史 |
+| 删除只有 Forge 版的可选集成（jsonthings 21 文件 + diet + IE） | **1594** | 见提交历史 |
+| **合并上游 Mantle 1.20**（Mantle 侧，见下） | **1539** | `mantle_version` 切到 `1.11.DEV.ad2e7db0` |
+| hook/module 体系第一波：257 个「上游版本不含 Forge API」的文件直接取上游 | **1494**（当前） | 358 个相关文件里的 257 个 |
+
+## hook 体系迁移的分批实测（358 个文件）
+
+358 个文件引用被上游替换掉的 hook API。按「上游版本是否依赖 Forge API」分成三组，
+并对前两组做了对照测量：
+
+| 组 | 文件数 | 处理 | 实测结果 |
+|---|---|---|---|
+| 上游版本**不含** Forge API | 257 | **取上游版本**（其中只有 10 个我们这边有 Fabric 专有代码，逐个补回） | 1539 → **1494**（-45）✅ 采纳 |
+| 上游版本**含** Forge API | 79 | 试过整体取上游 | 1494 → **1617**（**+123**）❌ 已回滚；这 79 个必须逐文件把 Forge 用法（事件、capability、`IClientItemExtensions`）换成移植侧写法 |
+| 移植独有、上游没有 | 22 | 尚未处理 | — |
+
+**结论**：hook 体系可以按「上游是否 Forge-clean」这个判据分批推进 —— 干净的整批取，含 Forge 的
+必须逐个移植。这也解释了为什么之前"整体翻转 299 个文件"的对照实验会失败（把大量含 Forge 的文件一起翻了）。
+
+顺带记录一个容易踩的坑：`ModifierCrystalItem` 属于第一组，但我们的**调用方**（尚未迁移的
+`EnchantmentConvertingRecipe` / `ExtractModifierRecipe` / `ModifierIngredientHelper`）依赖它的
+`withModifier`，而我们的版本还带着 Fabric 的创造标签页注册（`ItemGroupEvents`）。最终解法是
+**取上游实现 + 把标签页注册按 Fabric 方式接回去**（用上游自己的 `addVariants()` 喂
+`FabricItemGroupEntries`），而不是保留旧类。
 
 ## 下一步：hook 系统的迁移（最大的一块人工工作）
+
+## ✅ Mantle 侧的上游合并已完成（2026-09-29）
+
+这一项原本列在"下一步"里：TCon 3.12.1 用了一些**我们 Mantle 1.11 里根本没有**的类
+（最典型的是 `slimeknights.mantle.util.html`）。已经解决 ——
+`Mantle-Fabric` 的 `mcr/mantle-1.11` 合并了上游 `SlimeKnights/Mantle` 的 **`1.20` 分支**
+（commit `ad2e7db0`，78 个上游提交，22 个冲突，全部解决；`./gradlew build` 通过、
+`runServer` 0 ERROR/FATAL、开发自检仍然 9 passed / 0 failed）。
+
+这次合并给 TCon 端**直接补上了缺的东西**：
+
+| TCon 报错的符号 | 现在来自 |
+|---|---|
+| `slimeknights.mantle.util.html.*`（22 处报错） | 上游新增的 `util/html/{HtmlElement,HtmlGroup,HtmlString,RawHtml,HtmlSerializable}` |
+| `slimeknights.mantle.data.predicate.fluid.FluidPredicate` | 上游新增的流体 predicate（已按 Porting Lib 的 `FluidType` 移植） |
+| `slimeknights.mantle.network.packet.BlockEntityPacket` | 上游新增，已移植到 Mantle 自己的 `ISimplePacket.Context` |
+| 顺手还拿到 | `client/book/{IHTML,HTMLUtils}`、`command/HungerCommand`、`MantleEvents`（灵魂绑定）、`BaseRegistryLoadable`/`LazyRegistryLoadable`、`HasLootContextSetCondition` |
+
+**TCon 侧错误：1594 → 1539**（`mantle_version` 已切到 `1.11.DEV.ad2e7db0`）。
 
 上游 3.12 把 modifier hook 体系重构了，这是当前错误里最集中的结构性变化：
 
@@ -185,3 +228,26 @@ FabricLoader | FluidVariant | ItemVariant | TriState | TransferVariant | RenderC
 2. **Forge 事件**：`SubscribeEvent`(28)、`BreakSpeed`(15) —— 需要换成 Fabric 的事件注册
 3. **可选兼容**：JEI 的 `api.forge`、jsonthings、diet、Immersive Engineering 在 Fabric 上没有对等物，
    建议直接把这几处集成**移除**并在 CHANGELOG 里写明（而不是硬凑）
+
+## 剩余工作的分类清单（自动生成）
+
+[merge-3.12.1-workqueue.txt](merge-3.12.1-workqueue.txt) 是按当前编译日志自动分类的待办清单，
+每一条都带文件与错误数，可以直接照着清。1736 个错误的分布：
+
+| 类别 | 错误 | 说明 |
+|---|---|---|
+| **B. Forge 通用/事件/datagen API** | 377 | `SubscribeEvent`、`BreakSpeed`、`IGeometryBakingContext`、`ExistingFileHelper`、`ItemModelBuilder`… |
+| **A. Forge 流体 API** | 168 | `FluidAction`、`IFluidHandler`、`FluidAttributes`（77 个文件） |
+| **D. hook/module 体系** | 76 | `TinkerHooks`、`ModifierHook`、`IncrementalModifier` |
+| **C. Mantle 1.9 → 1.11 API** | 51 | `IGenericLoader` 为主 |
+| **E. 可选兼容 / 依赖** | 42 | JEI `api.forge`、jsonthings、diet、IE、CCA |
+| F. 其它 / 级联 | 1022 | **多数是上面几类的级联**：某个类型解析失败后，同文件后续错误都会被归到这里 |
+
+### 两个需要人来定的决策
+
+1. **`FluidAction`（61 处，46 个文件）**：Fabric 的 Transfer API 用 `Transaction` 表达
+   simulate/execute，Porting Lib 也没有 `FluidAction`。两条路：
+   (a) 在 TCon 里保留一个自己的 `FluidAction` 垫片枚举，把语义翻译成 `Transaction`；
+   (b) 逐处重写成 `StorageUtil.simulateInsert` / 真实调用。前者改动小但多一层抽象，后者更"正统"但工作量大。
+2. **只有 Forge 版的可选兼容**（JEI `api.forge` 等）：建议移除对应集成，而不是硬凑。
+   这会让 `plugin/` 目录缩小一部分，需要写进 CHANGELOG。

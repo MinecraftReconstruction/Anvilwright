@@ -12,7 +12,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
+import slimeknights.mantle.util.DataLoadedConditionContext;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 
 /** Manager for spilling fluids for spilling, slurping, and wetting */
 public class FluidEffectManager extends SimpleJsonResourceReloadListener {
@@ -49,7 +50,7 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
   private static final FluidEffects EMPTY = new FluidEffects(FluidIngredient.EMPTY, List.of(), List.of(), true);
 
   /** Condition context for recipe loading */
-  private IContext conditionContext = IContext.EMPTY;
+  private DataLoadedConditionContext conditionContext = DataLoadedConditionContext.INSTANCE;
 
   private FluidEffectManager() {
     super(JsonHelper.DEFAULT_GSON, FOLDER);

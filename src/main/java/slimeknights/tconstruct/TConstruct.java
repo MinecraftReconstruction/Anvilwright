@@ -125,13 +125,9 @@ public class TConstruct implements ModInitializer {
 //    }
 
     // compat
-//    ModList modList = ModList.get();
-//    if (modList.isLoaded("immersiveengineering")) {
-//      bus.register(new ImmersiveEngineeringPlugin());
-//    }
-//    if (modList.isLoaded("jsonthings")) {
-//      JsonThingsPlugin.onConstruct();
-//    }
+    // Upstream's Immersive Engineering, jsonthings and Diet integrations were removed for this Fabric port:
+    // all three mods are Forge-only and have no Fabric equivalent, so the plugin classes could never run here.
+    // See docs/MERGE-3.12.1.md.
 
     commonSetup();
     FabricEvents.init();
