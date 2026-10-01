@@ -136,7 +136,8 @@ public abstract class ModifierMatch implements Predicate<List<ModifierEntry>> {
       return new TagMatch(tag, level, required);
     }
 
-    ModifierEntry entry = ModifierEntry.fromJson(json);
+    // ModifierEntry no longer has JSON helpers; read the same "name"/"level" pair it always serialized
+    ModifierEntry entry = new ModifierEntry(ModifierId.PARSER.getIfPresent(json, "name"), GsonHelper.getAsInt(json, "level", 1));
     return new EntryMatch(entry);
   }
 
@@ -149,7 +150,7 @@ public abstract class ModifierMatch implements Predicate<List<ModifierEntry>> {
     int size = buffer.readVarInt();
     if (size == 1) {
       // single entry
-      ModifierEntry entry = ModifierEntry.read(buffer);
+      ModifierEntry entry = new ModifierEntry(new ModifierId(buffer.readResourceLocation()), buffer.readVarInt());
       return new EntryMatch(entry);
     }
     // iterate through the requested size, reading an entry for each element
@@ -218,13 +219,17 @@ public abstract class ModifierMatch implements Predicate<List<ModifierEntry>> {
 
     @Override
     public JsonObject serialize() {
-      return entry.toJson();
+      JsonObject json = new JsonObject();
+      json.addProperty("name", entry.getId().toString());
+      json.addProperty("level", entry.getLevel());
+      return json;
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
       buffer.writeVarInt(1);
-      entry.write(buffer);
+      buffer.writeResourceLocation(entry.getId());
+      buffer.writeVarInt(entry.getLevel());
     }
   }
 

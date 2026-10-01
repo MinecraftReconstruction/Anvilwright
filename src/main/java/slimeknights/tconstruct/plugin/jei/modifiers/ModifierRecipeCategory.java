@@ -19,10 +19,12 @@ import slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierR
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.item.CreativeSlotItem;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /** Category for display recipes for crafting {@link ModifierEntry}. */
 public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDisplayModifierRecipe> {
@@ -96,15 +98,13 @@ public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDispl
     ModifierEntry result = recipe.getDisplayResult();
     Component requirementsError = result.getHook(ModifierHooks.REQUIREMENTS).requirementsError(result);
     if (requirementsError != null) {
-      builder.addDrawableWidget(requirements).setPosition(66, 58).setTooltip(requirementsError);
+      TooltipWidget.add(builder, requirements, 66, 58, List.of(requirementsError));
     }
     if (recipe.isIncremental()) {
-      builder.addDrawableWidget(incremental).setPosition(83, 59).setTooltip(TEXT_INCREMENTAL);
+      TooltipWidget.add(builder, incremental, 83, 59, List.of(TEXT_INCREMENTAL));
     }
     if (recipe.getSlots() == null) {
-      builder.addDrawableWidget(SLOTLESS)
-        .setPosition(102, 58)
-        .setTooltip(SlotIngredientRenderer.TEXT_FREE);
+      TooltipWidget.add(builder, SLOTLESS, 102, 58, SlotIngredientRenderer.TEXT_FREE);
     }
   }
 

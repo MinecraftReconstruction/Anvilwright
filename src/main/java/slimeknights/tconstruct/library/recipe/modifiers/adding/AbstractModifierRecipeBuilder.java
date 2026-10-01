@@ -180,18 +180,8 @@ public abstract class AbstractModifierRecipeBuilder<T extends AbstractModifierRe
     if (maxLevel < minLevel) {
       throw new IllegalStateException("Max level must be greater than min level");
     }
-    // if true, only chestplates
-    if (unarmed) {
-      ingredient = DefaultCustomIngredients.any(ingredient, Ingredient.of(TinkerTags.Items.UNARMED));
-    }
-    json.add("tools", ingredient.toJson());
-    if (maxToolSize != ITinkerStationRecipe.DEFAULT_TOOL_STACK_SIZE) {
-      json.addProperty("max_tool_size", maxToolSize);
-    }
-    if (slotType != null && slots > 0) {
-      JsonObject slotJson = new JsonObject();
-      slotJson.addProperty(slotType.getName(), slots);
-      json.add("slots", slotJson);
+    if (slots == null) {
+      throw new IllegalStateException("Must set modifier slots to apply modifier salvage.");
     }
     ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
     consumer.accept(new LoadableFinishedRecipe<>(makeSalvage(id), ModifierSalvage.LOADER, advancementId));

@@ -30,10 +30,6 @@ public abstract class GenericNBTProvider implements DataProvider {
     this(output.createPathProvider(type, folder), folder);
   }
 
-  public GenericNBTProvider(DataGenerator generator, Target type, String folder) {
-    this(generator.getPackOutput(), type, folder);
-  }
-
   /** Localizes the given resource to the folder */
   public ResourceLocation localize(ResourceLocation name) {
     return JsonHelper.localize(name, folder, ".nbt");

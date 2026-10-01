@@ -36,7 +36,7 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
   private final String modId;
 
   public AbstractToolDefinitionDataProvider(FabricDataOutput output, String modId) {
-    super(output, PackType.SERVER_DATA, ToolDefinitionLoader.FOLDER, ToolDefinitionLoader.GSON);
+    super(output, Target.DATA_PACK, ToolDefinitionLoader.FOLDER);
     this.modId = modId;
   }
 
@@ -79,7 +79,6 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
         throw new IllegalStateException(String.format("Missing tool definition for '%s'", name));
       }
     }
-    List<CompletableFuture<?>> futures = new ArrayList<>();
     // ensure all included ones are required, and the built ones are valid
     List<CompletableFuture<?>> tasks = new ArrayList<>();
     for (Entry<ResourceLocation,ToolDefinitionDataBuilder> entry : allTools.entrySet()) {
@@ -88,11 +87,9 @@ public abstract class AbstractToolDefinitionDataProvider extends GenericDataProv
       if (definition == null) {
         throw new IllegalStateException("Unknown tool definition with ID " + id);
       }
-      ToolDefinitionData data = entry.getValue().build();
-      definition.validate(data);
-      futures.add(saveThing(cache, id, data));
+      tasks.add(saveJson(cache, id, ToolDefinitionData.LOADABLE.serialize(entry.getValue().build())));
     }
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return allOf(tasks);
   }
 
   /** Builder for an armor material to batch certain hooks */

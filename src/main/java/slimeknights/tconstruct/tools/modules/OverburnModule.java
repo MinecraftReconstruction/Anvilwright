@@ -109,7 +109,7 @@ public enum OverburnModule implements ModifierModule, InventoryTickModifierHook,
             MeltingFuel fuel = MeltingFuelLookup.findFuel(fluid.getFluid());
             if (fuel != null) {
               // scale amount consumed by level
-              int amount = fuel.getAmount(fluid.getFluid());
+              long amount = fuel.getAmount(fluid.getFluid());
               // scale up fuel duration so we always get the same amount of overslime per fuel bucket
               // if we didn't do this, lower levels would consume way more than higher ones
               // this works out to equivalent to the alloyer/melter at level 4
@@ -118,7 +118,7 @@ public enum OverburnModule implements ModifierModule, InventoryTickModifierHook,
               // if we don't have a full recipe, use what is left but scale down the duration
               if (amount > fluid.getAmount()) {
                 ToolTankHelper.TANK_HELPER.setFluid(tool, FluidStack.EMPTY);
-                duration = duration * fluid.getAmount() / amount;
+                duration = (int)(duration * fluid.getAmount() / amount);
               } else {
                 // if we have a complete recipe, just decrease fluid in the tank
                 fluid.shrink(amount);

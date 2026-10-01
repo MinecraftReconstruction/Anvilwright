@@ -1,7 +1,5 @@
 package slimeknights.tconstruct.library.data.material;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +36,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialTraitDataProvider(FabricDataOutput output, AbstractMaterialDataProvider materials) {
-    super(output, MaterialTraitsManager.FOLDER, GSON);
+    super(output, Target.DATA_PACK, MaterialTraitsManager.FOLDER, MaterialTraitsManager.GSON);
     this.materials = materials;
   }
 
@@ -59,9 +57,7 @@ public abstract class AbstractMaterialTraitDataProvider extends GenericDataProvi
     }
 
     // generate
-    List<CompletableFuture<?>> futures = new ArrayList<>();
-    allMaterialTraits.forEach((materialId, traits) -> futures.add(saveThing(cache, materialId, traits.serialize())));
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return allOf(allMaterialTraits.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().build())));
   }
 
 

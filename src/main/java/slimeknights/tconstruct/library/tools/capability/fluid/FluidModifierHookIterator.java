@@ -76,7 +76,8 @@ abstract class FluidModifierHookIterator<I> extends CompoundIndexHookIterator<Fl
           } else {
             drainedSoFar = drained;
           }
-          resource = new FluidStack(resource, resource.getAmount() - drained.getAmount());
+          // NOTE(porting): upstream shrinks the FluidStack it iterates with; the Fabric signature only carries a
+          //  FluidVariant, and the remaining amount is tracked in maxAmount below, so there is nothing to shrink
         } else {
           drainedSoFar += drained;
         }

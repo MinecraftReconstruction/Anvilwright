@@ -20,6 +20,7 @@ import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.Collection;
+import java.util.Objects;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoggingRecipeSerializer;
 import java.util.List;
@@ -48,6 +49,12 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
   private final FluidOutput output;
   @Getter
   private final int damage;
+  /** Cache of entity types for display in JEI, set lazily */
+  @Nullable
+  private List<EntityType> entityInputs;
+  /** Cache of item inputs for recipe lookup in JEI, set lazily */
+  @Nullable
+  private List<ItemStack> itemInputs;
 
   /**
    * Checks if the recipe matches the given type
@@ -124,30 +131,4 @@ public class EntityMeltingRecipe implements ICustomOutputRecipe<IEmptyContainer>
     return false;
   }
 
-  /** Serializer for this recipe */
-  public static class Serializer implements LoggingRecipeSerializer<EntityMeltingRecipe> {
-    @Override
-    public EntityMeltingRecipe fromJson(ResourceLocation id, JsonObject json) {
-      EntityIngredient ingredient = EntityIngredient.deserialize(JsonHelper.getElement(json, "entity"));
-      FluidStack output = RecipeHelper.deserializeFluidStack(GsonHelper.getAsJsonObject(json, "result"));
-      int damage = GsonHelper.getAsInt(json, "damage", 2);
-      return new EntityMeltingRecipe(id, ingredient, output, damage);
-    }
-
-    @Nullable
-    @Override
-    public EntityMeltingRecipe fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer) {
-      EntityIngredient ingredient = EntityIngredient.read(buffer);
-      FluidStack output = FluidStack.readFromPacket(buffer);
-      int damage = buffer.readVarInt();
-      return new EntityMeltingRecipe(id, ingredient, output, damage);
-    }
-
-    @Override
-    public void toNetworkSafe(FriendlyByteBuf buffer, EntityMeltingRecipe recipe) {
-      recipe.ingredient.write(buffer);
-      recipe.output.writeToPacket(buffer);
-      buffer.writeVarInt(recipe.damage);
-    }
-  }
 }

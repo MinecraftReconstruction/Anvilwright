@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class EarthSlimeEntity extends ArmoredSlimeEntity {
-  public EarthSlimeEntity(EntityType<? extends Slime> type, Level worldIn) {
+  public EarthSlimeEntity(EntityType<? extends EarthSlimeEntity> type, Level worldIn) {
     super(type, worldIn);
   }
 

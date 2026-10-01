@@ -8,9 +8,11 @@ import net.minecraft.network.chat.Component;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayToolTinkering;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.tables.TinkerTables;
 
 import java.awt.Color;
+import java.util.List;
 
 /** Displays tool modifications that are not adding modifiers, such as part swapping or tool damaging. */
 public class ToolTinkeringCategory extends AbstractTinkerStationCategory<IDisplayToolTinkering> {
@@ -32,7 +34,7 @@ public class ToolTinkeringCategory extends AbstractTinkerStationCategory<IDispla
     // add title and tooltip
     builder.addText(recipe.getTitle(), 124, 10)
       .setShadow(true).setColor(Color.WHITE.getRGB())
-      .setTextAlignment(HorizontalAlignment.CENTER).setPosition(3, 3)
-      .setTooltip(recipe.getTooltip());
+      .setTextAlignment(HorizontalAlignment.CENTER).setPosition(3, 3);
+    TooltipWidget.addArea(builder, 3, 3, 124, 10, List.of(recipe.getTooltip()));
   }
 }

@@ -1,8 +1,10 @@
 package slimeknights.tconstruct.library.data.material;
 
-import lombok.AllArgsConstructor;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.data.PackOutput.Target;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import slimeknights.mantle.data.GenericDataProvider;
@@ -21,11 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonElement;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.PackOutput.Target;
 
 /** Base data generator for use in addons, depends on the regular material provider */
 public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvider {
@@ -35,7 +32,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
   private final AbstractMaterialDataProvider materials;
 
   public AbstractMaterialStatsDataProvider(FabricDataOutput output, AbstractMaterialDataProvider materials) {
-    super(output, MaterialStatsManager.FOLDER);
+    super(output, Target.DATA_PACK, MaterialStatsManager.FOLDER);
     this.materials = materials;
   }
 
@@ -55,9 +52,7 @@ public abstract class AbstractMaterialStatsDataProvider extends GenericDataProvi
     }
     // does not ensure we have materials for all stats, we may be adding stats for another mod
     // generate finally
-    List<CompletableFuture<?>> futures = new ArrayList<>();
-    allMaterialStats.forEach((materialId, materialStats) -> futures.add(saveThing(cache, materialId, convert(materialStats))));
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return allOf(allMaterialStats.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
   }
 
 

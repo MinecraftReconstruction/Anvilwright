@@ -20,6 +20,7 @@ import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableCrossbowItem;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableLauncherItem;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -252,20 +253,20 @@ public abstract class AbstractToolItemModelProvider extends GenericDataProvider 
   }
 
   /** Adds broken and blocking models for the armor item */
-  protected void armor(String name, EnumObject<ArmorItem.Type,? extends Item> armor, ArmorItem.Type slot, String... textures) throws IOException {
-    armor(name + '/' + slot.getName(), Loadables.ITEM.getKey(armor.get(slot)), textures);
+  protected void armor(String name, EnumObject<ArmorSlotType,? extends Item> armor, ArmorSlotType slot, String... textures) throws IOException {
+    armor(name + '/' + slot.getSerializedName(), Loadables.ITEM.getKey(armor.get(slot)), textures);
   }
 
   /** Adds broken and blocking models for the armor set */
-  protected void armor(String name, EnumObject<ArmorItem.Type,? extends Item> armor, ArmorItem.Type[] types, String... textures) throws IOException {
-    for (ArmorItem.Type slot : types) {
+  protected void armor(String name, EnumObject<ArmorSlotType,? extends Item> armor, ArmorSlotType[] types, String... textures) throws IOException {
+    for (ArmorSlotType slot : types) {
       armor(name, armor, slot, textures);
     }
   }
 
   /** Adds broken and blocking models for the armor set */
-  protected void armor(String name, EnumObject<ArmorItem.Type,? extends Item> armor, String... textures) throws IOException {
-    armor(name, armor, ArmorItem.Type.values(), textures);
+  protected void armor(String name, EnumObject<ArmorSlotType,? extends Item> armor, String... textures) throws IOException {
+    armor(name, armor, ArmorSlotType.values(), textures);
   }
 
   /** Creates models for fishing rods cast and broken */

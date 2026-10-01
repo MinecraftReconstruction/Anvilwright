@@ -15,6 +15,7 @@ import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.util.ItemLayerPixels;
 import slimeknights.tconstruct.library.client.modifiers.model.SimpleModifierModel;
+import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 
@@ -57,8 +58,16 @@ public class NormalModifierModel implements SimpleModifierModel {
 
   @Override
   public Mesh getQuads(IToolStackView tool, ModifierEntry entry, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
-    int index = isLarge ? 1 : 0;
-    return MantleItemLayerModel.getQuadsForSprite(color, -1, spriteGetter.apply(textures[index]), transforms, luminosity, pixels);
+    Material spriteName = isLarge ? large : small;
+    if (spriteName != null) {
+      return ToolModel.ofQuads(MantleItemLayerModel.getQuadsForSprite(color, -1, spriteGetter.apply(spriteName), transforms, luminosity, pixels));
+    }
+    return EMPTY_MESH;
+  }
+
+  @Override
+  public RecordLoadable<? extends NormalModifierModel> getLoader() {
+    return LOADER;
   }
 
   @Override
@@ -68,14 +77,6 @@ public class NormalModifierModel implements SimpleModifierModel {
     }
     if (large != null) {
       spriteGetter.apply(large);
-    }
-  }
-
-  @Override
-  public void addQuads(IToolStackView tool, ModifierEntry entry, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, Consumer<Collection<BakedQuad>> quadConsumer, @Nullable ItemLayerPixels pixels) {
-    Material spriteName = isLarge ? large : small;
-    if (spriteName != null) {
-      quadConsumer.accept(MantleItemLayerModel.getQuadsForSprite(color, -1, spriteGetter.apply(spriteName), transforms, luminosity, pixels));
     }
   }
 

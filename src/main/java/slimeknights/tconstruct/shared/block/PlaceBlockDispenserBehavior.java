@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.SoundType;
+import slimeknights.tconstruct.library.utils.SoundTypeHelper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
@@ -36,8 +37,8 @@ public class PlaceBlockDispenserBehavior extends OptionalDispenseItemBehavior {
           block.setPlacedBy(level, target, state, null, stack);
         }
         level.gameEvent(null, GameEvent.BLOCK_PLACE, target);
-        SoundType sound = state.getSoundType(level, target, null);
-        level.playSound(null, target, state.getSoundType(level, target, null).getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
+        SoundType sound = SoundTypeHelper.getSoundType(state, level, target, null);
+        level.playSound(null, target, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
       }
       stack.shrink(1);
       this.setSuccess(true);

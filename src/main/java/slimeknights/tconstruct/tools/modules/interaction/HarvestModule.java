@@ -11,6 +11,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -25,6 +26,7 @@ import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.AreaOfEffectHighlightModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.BlockInteractionModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.interaction.InteractionSource;
+import slimeknights.tconstruct.library.utils.SoundTypeHelper;
 import slimeknights.tconstruct.library.modifiers.modules.ModifierModule;
 import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
@@ -155,7 +157,10 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
       world.setBlockAndUpdate(pos, replant);
       state.spawnAfterBreak(world, pos, stack, true);
       // set block state will not play sounds, destory block will
-      world.playSound(null, pos, state.getSoundType(world, pos, player).getBreakSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
+      // NOTE(porting): upstream calls Forge's IForgeBlock#getSoundType; Porting Lib exposes the same override hook
+      //  as CustomSoundTypeBlock, and its default is the plain block state sound type
+      SoundType sound = SoundTypeHelper.getSoundType(state, world, pos, player);
+      world.playSound(null, pos, sound.getBreakSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
     } else {
       world.destroyBlock(pos, false);
     }

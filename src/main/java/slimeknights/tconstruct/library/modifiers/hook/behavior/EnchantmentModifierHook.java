@@ -56,7 +56,8 @@ public interface EnchantmentModifierHook {
    * @return  Enchantment level
    */
   static int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
-    int level = EnchantmentHelper.getTagEnchantmentLevel(enchantment, stack);
+    // NOTE(porting): Forge's getTagEnchantmentLevel reads just the NBT, which is what vanilla's item lookup does too
+    int level = EnchantmentHelper.getItemEnchantmentLevel(enchantment, stack);
     IToolStackView tool = ToolStack.from(stack);
     for (ModifierEntry entry : tool.getModifierList()) {
       level = entry.getHook(ModifierHooks.ENCHANTMENTS).updateEnchantmentLevel(tool, entry, enchantment, level);

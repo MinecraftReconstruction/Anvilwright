@@ -98,22 +98,22 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   }
 
   /** Creates a builder for a fluid and amount */
-  protected Builder addFluid(Fluid fluid, int amount) {
+  protected Builder addFluid(Fluid fluid, long amount) {
     return addFluid(BuiltInRegistries.FLUID.getKey(fluid).getPath(), FluidIngredient.of(fluid, amount));
   }
 
   /** Creates a builder for a tag and amount */
-  protected Builder addFluid(String name, TagKey<Fluid> fluid, int amount) {
+  protected Builder addFluid(String name, TagKey<Fluid> fluid, long amount) {
     return addFluid(name, FluidIngredient.of(fluid, amount));
   }
 
   /** Creates a builder for a tag and amount */
-  protected Builder addFluid(TagKey<Fluid> fluid, int amount) {
+  protected Builder addFluid(TagKey<Fluid> fluid, long amount) {
     return addFluid(fluid.location().getPath(), fluid, amount);
   }
 
   /** Creates a builder for a fluid object */
-  protected Builder addFluid(FluidObject<?> fluid, int amount) {
+  protected Builder addFluid(FluidObject<?> fluid, long amount) {
     return addFluid(fluid.getId().getPath(), fluid.ingredient(amount));
   }
 
@@ -131,22 +131,22 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
   }
 
   /** Adds a conditional fluid effect */
-  protected Builder compatFluid(TagKey<Fluid> fluid, int amount) {
+  protected Builder compatFluid(TagKey<Fluid> fluid, long amount) {
     return addFluid(fluid, amount).addCondition(new TagFilledCondition<>(fluid));
   }
 
   /** Adds a conditional fluid effect */
-  protected Builder compatFluid(String name, int amount) {
+  protected Builder compatFluid(String name, long amount) {
     return compatFluid(TagKey.create(Registries.FLUID, commonResource(name)), amount);
   }
 
   /** Adds a conditional fluid effect */
-  protected Builder compatFluid(String modId, TagKey<Fluid> fluid, int amount) {
+  protected Builder compatFluid(String modId, TagKey<Fluid> fluid, long amount) {
     return addFluid(fluid, amount).addCondition(DefaultResourceConditions.allModsLoaded(modId));
   }
 
   /** Adds a conditional fluid effect */
-  protected Builder compatFluid(String modId, String name, int amount) {
+  protected Builder compatFluid(String modId, String name, long amount) {
     return compatFluid(modId, TagKey.create(Registries.FLUID, commonResource(name)), amount);
   }
 
@@ -190,7 +190,7 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
 
   /** Use {@link #addFluid(TagKey, int)} with {@link Builder#fireDamage(float)}, {@link FireFluidEffect} and {@link Builder#placeFire()} */
   @Deprecated(forRemoval = true)
-  protected Builder burningFluid(String name, TagKey<Fluid> tag, int amount, float damage, int time) {
+  protected Builder burningFluid(String name, TagKey<Fluid> tag, long amount, float damage, int time) {
     Builder builder = addFluid(name, tag, amount).fireDamage(damage);
     if (time > 0) {
       builder.addEntityEffect(new FireFluidEffect(TimeAction.SET, time)).placeFire();
@@ -337,7 +337,8 @@ public abstract class AbstractFluidEffectProvider extends GenericDataProvider {
     private JsonObject build(ResourceLocation id) {
       JsonObject json = new JsonObject();
       if (!conditions.isEmpty()) {
-        json.add("conditions", CraftingHelper.serialize(conditions.toArray(new ConditionJsonProvider[0])));
+        // Fabric resource conditions live under "fabric:conditions"; the Forge "conditions" list maps onto that
+        ConditionJsonProvider.write(json, conditions.toArray(new ConditionJsonProvider[0]));
       }
       if (blockEffects.isEmpty() && entityEffects.isEmpty()) {
         throw new IllegalStateException("Must have at least 1 effect");

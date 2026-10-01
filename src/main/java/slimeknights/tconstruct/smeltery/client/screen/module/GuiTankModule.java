@@ -36,9 +36,15 @@ public class GuiTankModule implements IScreenWithFluidTank, ClickableTankModule 
   private final StorageView<FluidVariant> tank;
   @Getter
   private final int x, y, width, height;
+  private final boolean horizontal;
+  private final Rect2i fluidLoc;
   private final BiConsumer<Long,List<Component>> formatter;
 
   public GuiTankModule(AbstractContainerScreen<?> screen, StorageView<FluidVariant> tank, int x, int y, int width, int height, ResourceLocation tooltipId) {
+    this(screen, tank, x, y, width, height, false, tooltipId);
+  }
+
+  public GuiTankModule(AbstractContainerScreen<?> screen, StorageView<FluidVariant> tank, int x, int y, int width, int height, boolean horizontal, @Nullable ResourceLocation tooltipId) {
     this.screen = screen;
     this.tank = tank;
     this.x = x;
@@ -70,6 +76,26 @@ public class GuiTankModule implements IScreenWithFluidTank, ClickableTankModule 
       return height;
     }
     return height * tank.getAmount() / capacity;
+  }
+
+  @Override
+  public boolean isFluidHovered(int check) {
+    if (horizontal) {
+      return check - x <= getFluidWidth();
+    }
+    return check > (y + height) - getFluidHeight();
+  }
+
+  /**
+   * Gets the width of the fluid in pixels, for horizontal tanks
+   * @return  Fluid width
+   */
+  private long getFluidWidth() {
+    long capacity = tank.getCapacity();
+    if (capacity == 0) {
+      return width;
+    }
+    return width * tank.getAmount() / capacity;
   }
 
   /**
@@ -160,6 +186,21 @@ public class GuiTankModule implements IScreenWithFluidTank, ClickableTankModule 
   public FluidStack getIngreientUnderMouse(int checkX, int checkY) {
     if (isHovered(checkX, checkY) && checkY > (y + height) - getFluidHeight()) {
       return new FluidStack(tank);
+    }
+    return null;
+  }
+
+  /**
+   * Gets the fluid under the given position, used by the JEI plugin to show the fluid in the tank
+   * @param checkX  X position to check
+   * @param checkY  Y position to check
+   * @return  Fluid location under the mouse, or null if none
+   */
+  @Nullable
+  @Override
+  public FluidLocation getFluidUnderMouse(int checkX, int checkY) {
+    if (isHovered(checkX, checkY) && isFluidHovered(horizontal ? checkX : checkY)) {
+      return new FluidLocation(new FluidStack(tank), fluidLoc);
     }
     return null;
   }

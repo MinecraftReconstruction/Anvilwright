@@ -14,6 +14,7 @@ import slimeknights.tconstruct.library.recipe.FluidValues;
 import slimeknights.tconstruct.library.recipe.melting.IDisplayableMeltingRecipe;
 import slimeknights.tconstruct.plugin.jei.TConstructJEIConstants;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
+import slimeknights.tconstruct.plugin.jei.util.FluidIngredients;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class FoundryCategory extends AbstractMeltingCategory {
     // output fluid
     List<List<FluidStack>> fluids = recipe.getOutputWithByproducts();
     List<IRecipeSlotBuilder> slots = new ArrayList<>(fluids.size() + 1);
-    CategoryUtil.drawMultipleFluids(builder, i -> RecipeIngredientRole.OUTPUT, 96, 4, 32, 32, recipe.getOutputWithByproducts(), FluidValues.METAL_BLOCK, Function.identity(), list -> MeltingFluidCallback.INSTANCE, slots::add);
+    CategoryUtil.drawMultipleFluidsLegacy(builder, i -> RecipeIngredientRole.OUTPUT, 96, 4, 32, 32, recipe.getOutputWithByproducts(), (int)FluidValues.METAL_BLOCK, Function.identity(), list -> MeltingFluidCallback.INSTANCE, slots::add);
     // first one is the main output, should always be present
     slots.get(0).setSlotName(FLUID_SLOT);
 
@@ -62,8 +63,8 @@ public class FoundryCategory extends AbstractMeltingCategory {
 
     // fuel
     builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 4, 4)
-           .addRichTooltipCallback(FUEL_TOOLTIP)
+           .addTooltipCallback(FUEL_TOOLTIP)
            .setFluidRenderer(1, false, 12, 32)
-           .addIngredients(FabricTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()));
+           .addIngredients(FabricTypes.FLUID_STACK, MeltingFuelHandler.getUsableFuels(recipe.getTemperature()).stream().map(FluidIngredients::of).toList());
   }
 }

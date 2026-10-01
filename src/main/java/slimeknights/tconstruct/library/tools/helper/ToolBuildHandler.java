@@ -110,19 +110,39 @@ public final class ToolBuildHandler {
   /* Item groups */
 
   /**
-   * Adds all sub items to a tool
-   * @param tab    Tab being filled
-   * @param item   item being created
+   * Adds all sub items of a tool to the given item group
+   * @param item            tool item
+   * @param itemList        list to add the items to
+   * @param fixedMaterials  if non-empty, only add the given materials
    */
   public static void addDefaultSubItems(IModifiable item, FabricItemGroupEntries itemList, MaterialVariantId... fixedMaterials) {
+    if (fixedMaterials.length == 0) {
+      addVariants(itemList::accept, item, "");
+    } else {
+      for (MaterialVariantId material : fixedMaterials) {
+        ItemStack tool = createSingleMaterial(item, MaterialVariant.of(material));
+        if (!tool.isEmpty()) {
+          itemList.accept(tool);
+        }
+      }
+    }
+  }
+
+  /**
+   * Adds all variants of the given tool to the given consumer
+   * @param tab               Consumer to add items to
+   * @param item              Tool item
+   * @param showOnlyMaterial  If non-empty, only show the given material
+   */
+  public static void addVariants(Consumer<ItemStack> tab, IModifiable item, String showOnlyMaterial) {
     ToolDefinition definition = item.getToolDefinition();
     boolean hasMaterials = definition.hasMaterials();
     if (!definition.isDataLoaded() || (hasMaterials && !MaterialRegistry.isFullyLoaded())) {
       // not loaded? cannot properly build it
-      itemList.accept(new ItemStack(item));
-    } else if (!isMultipart) {
+      tab.accept(new ItemStack(item));
+    } else if (!hasMaterials) {
       // no parts? just add this item
-      itemList.accept(buildItemFromMaterials(item, MaterialNBT.EMPTY));
+      tab.accept(buildItemFromMaterials(item, MaterialNBT.EMPTY));
     } else {
       // if a specific material is set, show just that in search
       boolean added = false;
@@ -156,9 +176,14 @@ public final class ToolBuildHandler {
     }
   }
 
-  /** Makes a single sub item for the given materials */
-  private static boolean addSubItem(IModifiable item, FabricItemGroupEntries items, IMaterial material, MaterialVariantId[] fixedMaterials) {
-    List<PartRequirement> required = item.getToolDefinition().getData().getParts();
+  /**
+   * Makes a tool with a single material.
+   * @param item      Tool to create
+   * @param material  Material to be used for applicable parts. Any parts that disallow the material will be set to first of their type
+   * @return Built tool stack, or empty if no part allowed this material
+   */
+  public static ItemStack createSingleMaterial(IModifiable item, MaterialVariant material) {
+    List<MaterialStatsId> required = ToolMaterialHook.stats(item.getToolDefinition());
     MaterialNBT.Builder materials = MaterialNBT.builder();
     boolean useMaterial = false;
     for (MaterialStatsId requirement : required) {
@@ -173,8 +198,7 @@ public final class ToolBuildHandler {
     }
     // only report success if we actually used the material somewhere
     if (useMaterial) {
-      items.accept(buildItemFromMaterials(item, materials.build()));
-      return true;
+      return buildItemFromMaterials(item, materials.build());
     }
     return ItemStack.EMPTY;
   }

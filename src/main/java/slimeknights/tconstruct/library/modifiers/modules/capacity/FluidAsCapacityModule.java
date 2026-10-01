@@ -44,7 +44,7 @@ public record FluidAsCapacityModule(ToolTankHelper helper, Fluid fluid) implemen
   @Override
   public int getAmount(IToolStackView tool) {
     FluidStack fluid = helper.getFluid(tool);
-    return !fluid.isEmpty() && fluid.getFluid() == this.fluid ? fluid.getAmount() : 0;
+    return !fluid.isEmpty() && fluid.getFluid() == this.fluid ? (int)fluid.getAmount() : 0;
   }
 
   @Override
@@ -79,7 +79,7 @@ public record FluidAsCapacityModule(ToolTankHelper helper, Fluid fluid) implemen
     // don't allow setting amount if another fluid is present
     FluidStack fluid = helper.getFluid(tool);
     if (fluid.isEmpty() || fluid.getFluid() == this.fluid) {
-      int newAmount = fluid.getAmount() - amount;
+      int newAmount = (int)fluid.getAmount() - amount;
       helper.setFluid(tool, newAmount == 0 ? FluidStack.EMPTY : new FluidStack(this.fluid, newAmount));
     }
   }

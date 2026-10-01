@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.world.data;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,7 +19,7 @@ import java.util.List;
 
 /** Provider for custom mob equipment */
 public class MobEquipmentProvider extends AbstractMobEquipmentProvider {
-  public MobEquipmentProvider(PackOutput output) {
+  public MobEquipmentProvider(FabricDataOutput output) {
     super(output, TConstruct.MOD_ID);
   }
 

@@ -67,11 +67,34 @@ public record RecipeSlotWrapper<T>(IRecipeSlotDrawable slot, IIngredientType<T> 
 
   /** Makes a wrapper for a fluid slot. */
   public static RecipeSlot<FluidStack> createFluid(List<IRecipeSlotDrawable> slots, String name) {
-    return create(slots, name, FabricTypes.FLUID_STACK, RecipeSlot.EMPTY_FLUID);
+    // JEI for Fabric uses its own fluid ingredient type; wrap it so the rest of the mod keeps using fluid stacks
+    IRecipeSlotDrawable slot = CategoryUtil.findSlot(slots, name);
+    if (slot != null) {
+      return new FluidRecipeSlot(slot);
+    }
+    return RecipeSlot.EMPTY_FLUID;
   }
 
   /** Makes a wrapper for an item slot. */
   public static RecipeSlot<ItemStack> createItem(IRecipeSlotDrawable slot) {
     return new RecipeSlotWrapper<>(slot, VanillaTypes.ITEM_STACK, ItemStack.EMPTY);
+  }
+
+  /** Slot wrapper for fluid stacks, translating to and from JEI's fluid ingredient type */
+  private record FluidRecipeSlot(IRecipeSlotDrawable slot) implements RecipeSlot<FluidStack> {
+    @Override
+    public FluidStack get() {
+      return slot.getDisplayedIngredient(FabricTypes.FLUID_STACK).map(FluidIngredients::toStack).orElse(FluidStack.EMPTY);
+    }
+
+    @Override
+    public void set(FluidStack ingredient) {
+      slot.createDisplayOverrides().addIngredient(FabricTypes.FLUID_STACK, FluidIngredients.of(ingredient));
+    }
+
+    @Override
+    public void set(List<FluidStack> ingredients) {
+      slot.createDisplayOverrides().addIngredients(FabricTypes.FLUID_STACK, ingredients.stream().map(FluidIngredients::of).toList());
+    }
   }
 }

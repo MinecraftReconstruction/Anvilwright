@@ -62,6 +62,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   private final SlottedStackStorage itemHandler;
   /** Fluid handler for the tool */
   private final ToolFluidHandler tank;
+  @Getter
   private final Player player;
   @Getter
   private final int slotIndex;

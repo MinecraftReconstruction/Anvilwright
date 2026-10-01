@@ -476,7 +476,12 @@ public class ModifierManager extends SimpleJsonResourceReloadListener implements
    * @return  Contained values
    */
   public static List<Modifier> getTagValues(TagKey<Modifier> tag) {
-    return INSTANCE.tags.getOrDefault(tag.location(), Collections.emptyList()).stream().toList();
+    return INSTANCE.tags.getOrDefault(tag, List.of());
+  }
+
+  /** Gets a stream of all tag ID to tag value mappings */
+  public static Stream<Entry<TagKey<Modifier>,List<Modifier>>> getAllTags() {
+    return INSTANCE.tags.entrySet().stream();
   }
 
 

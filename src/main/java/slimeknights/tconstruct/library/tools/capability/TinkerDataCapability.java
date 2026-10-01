@@ -89,9 +89,14 @@ public class TinkerDataCapability implements EntityComponentInitializer {
   /** Class for generic keys */
   @SuppressWarnings("unused")
   @RequiredArgsConstructor(staticName = "of")
-  public static class TinkerDataKey<T> {
+  public static class TinkerDataKey<T> implements IdAwareObject {
     /** Name for debug */
     private final ResourceLocation name;
+
+    /** Gets the name of this data key */
+    public ResourceLocation getId() {
+      return name;
+    }
 
     @Override
     public String toString() {

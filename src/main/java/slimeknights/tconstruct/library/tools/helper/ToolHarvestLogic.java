@@ -40,6 +40,9 @@ import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
 import slimeknights.tconstruct.library.tools.definition.module.mining.IsEffectiveToolHook;
 import slimeknights.tconstruct.library.utils.Util;
 import javax.annotation.Nullable;
+import slimeknights.tconstruct.library.tools.definition.module.mining.MiningSpeedToolHook;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * External logic for the ToolCore that handles mining calculations and breaking blocks.
@@ -71,7 +74,7 @@ public class ToolHarvestLogic {
    */
   public static boolean isEffective(IToolStackView tool, BlockState state) {
     // must not be broken, and the tool definition must be effective
-    return !tool.isBroken() && tool.getDefinition().getData().getHarvestLogic().isEffective(tool, state);
+    return !tool.isBroken() && IsEffectiveToolHook.isEffective(tool, state);
   }
 
   /**
@@ -89,7 +92,8 @@ public class ToolHarvestLogic {
     if (tool.isBroken()) {
       return 0.3f;
     }
-    return tool.getDefinition().getData().getHarvestLogic().getDestroySpeed(tool, state);
+    // the destroy speed hook moved onto the tool definition's mining module
+    return MiningSpeedToolHook.getDestroySpeed(tool, state);
   }
 
   /**
@@ -257,9 +261,10 @@ public class ToolHarvestLogic {
                                                           isEffective(tool, state));
 
       // add enchants
-      ListTag originalEnchants = ModifierUtil.applyHarvestEnchantments(tool, stack, context);
+      ListTag originalEnchants = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(tool, stack, context);
       // need to calculate the iterator before we break the block, as we need the reference hardness from the center
-      Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getDefinition().getData().getAOE().getBlocks(tool, stack, player, state, world, pos, sideHit, AOEMatchType.BREAKING) : Collections.emptyList();
+      UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), sideHit, pos, false));
+      Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();
 
       // actually break the block, run AOE if successful
       int harvested = 0;
@@ -282,7 +287,7 @@ public class ToolHarvestLogic {
 
       // blocks done being broken, clear extra enchants added
       if (originalEnchants != null) {
-        ModifierUtil.restoreEnchantments(stack, originalEnchants);
+        HarvestEnchantmentsModifierHook.restoreEnchantments(stack, originalEnchants);
       }
     }
 
@@ -302,9 +307,10 @@ public class ToolHarvestLogic {
                                                         isEffective(tool, state));
 
     // add enchants
-    ListTag originalEnchants = ModifierUtil.applyHarvestEnchantments(toolStack, stack, context);
+    ListTag originalEnchants = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(toolStack, stack, context);
     // need to calculate the iterator before we break the block, as we need the reference hardness from the center
-    Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getDefinition().getData().getAOE().getBlocks(tool, stack, player, state, world, pos, sideHit, AOEMatchType.BREAKING) : Collections.emptyList();
+    UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), sideHit, pos, false));
+    Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();
 
     // actually break the block, run AOE if successful
     int harvested = 0;
@@ -325,7 +331,7 @@ public class ToolHarvestLogic {
 
     // blocks done being broken, clear extra enchants added
     if (originalEnchants != null) {
-      ModifierUtil.restoreEnchantments(stack, originalEnchants);
+      HarvestEnchantmentsModifierHook.restoreEnchantments(stack, originalEnchants);
     }
     return harvested;
   }

@@ -8,6 +8,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -70,22 +71,22 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
   /** If true, adds the item data to the drawback model. Its a bit less efficient but produces better models. False will just set a boolean. */
   private final boolean storeDrawingItem;
 
-  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, Predicate<ItemStack> supportedHeldProjectiles, boolean storeDrawingItem) {
-    super(properties, toolDefinition);
+  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> supportedHeldProjectiles, boolean storeDrawingItem) {
+    super(properties, toolDefinition, tab);
     this.supportedHeldProjectiles = supportedHeldProjectiles;
     this.storeDrawingItem = storeDrawingItem;
   }
 
-  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, Predicate<ItemStack> supportedHeldProjectiles) {
-    this(properties, toolDefinition, supportedHeldProjectiles, false);
+  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab, Predicate<ItemStack> supportedHeldProjectiles) {
+    this(properties, toolDefinition, tab, supportedHeldProjectiles, false);
   }
 
-  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, boolean storeDrawingItem) {
-    this(properties, toolDefinition, ARROW_OR_FIREWORK, storeDrawingItem);
+  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab, boolean storeDrawingItem) {
+    this(properties, toolDefinition, tab, ARROW_OR_FIREWORK, storeDrawingItem);
   }
 
-  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition) {
-    this(properties, toolDefinition, ARROW_OR_FIREWORK);
+  public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition, ResourceKey<CreativeModeTab> tab) {
+    this(properties, toolDefinition, tab, ARROW_OR_FIREWORK);
   }
 
   /* Properties */

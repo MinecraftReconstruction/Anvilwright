@@ -45,7 +45,7 @@ public record FluidPredicateAsCapacityModule(ToolTankHelper helper, IJsonPredica
   @Override
   public int getAmount(IToolStackView tool) {
     FluidStack fluid = helper.getFluid(tool);
-    return !fluid.isEmpty() && this.fluid.matches(fluid.getFluid()) ? fluid.getAmount() : 0;
+    return !fluid.isEmpty() && this.fluid.matches(fluid.getFluid()) ? (int)fluid.getAmount() : 0;
   }
 
   @Override

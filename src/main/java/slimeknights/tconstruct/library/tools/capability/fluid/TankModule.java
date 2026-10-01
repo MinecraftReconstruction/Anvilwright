@@ -1,6 +1,11 @@
 package slimeknights.tconstruct.library.tools.capability.fluid;
 
 import lombok.RequiredArgsConstructor;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.SlotAccess;
@@ -27,9 +32,12 @@ import slimeknights.tconstruct.library.tools.capability.fluid.ToolFluidCapabilit
 import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolNbtSnapshots;
 import slimeknights.tconstruct.smeltery.item.TankItem;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -75,13 +83,18 @@ public class TankModule implements HookProvider, FluidModifierHook, VolatileData
   }
 
   @Override
-  public int getTankCapacity(IToolStackView tool, ModifierEntry modifier, int tank) {
+  public long getTankCapacity(IToolStackView tool, ModifierEntry modifier, int tank) {
     return helper.getCapacity(tool);
   }
 
   @Override
   public FluidStack getFluidInTank(IToolStackView tool, ModifierEntry modifier, int tank) {
     return helper.getFluid(tool);
+  }
+
+  @Override
+  public SingleSlotStorage<FluidVariant> getSlot(IToolStackView tool, ModifierEntry modifier, int tank) {
+    return new TankSlot(tool, modifier);
   }
 
 
@@ -110,77 +123,100 @@ public class TankModule implements HookProvider, FluidModifierHook, VolatileData
   /* Filling and draining */
 
   @Override
-  public int fill(IToolStackView tool, ModifierEntry modifier, FluidStack resource, FluidAction action) {
+  public long fill(ContainerItemContext context, IToolStackView tool, ModifierEntry modifier, FluidVariant resource, long maxAmount, TransactionContext tx) {
     // make sure this modifier is in charge of the tank, that is first come first serve
-    if (!resource.isEmpty()) {
-      // if empty, just directly fill, setFluid will check capacity
-      FluidStack current = helper.getFluid(tool);
-      int capacity = helper.getCapacity(tool);
-      if (current.isEmpty()) {
-        if (action.execute()) {
-          helper.setFluid(tool, resource);
-        }
-        return Math.min(resource.getAmount(), capacity);
+    if (resource.isBlank() || maxAmount <= 0) {
+      return 0;
+    }
+    // if empty, just directly fill, setFluid will check capacity
+    FluidStack current = helper.getFluid(tool);
+    long capacity = helper.getCapacity(tool);
+    if (current.isEmpty()) {
+      long filled = Math.min(maxAmount, capacity);
+      if (filled > 0) {
+        ToolNbtSnapshots.updateSnapshots(tool, tx);
+        helper.setFluid(tool, new FluidStack(resource, filled));
       }
-      // if the fluid matches and we have space, update
-      if (current.getAmount() < capacity && current.isFluidEqual(resource)) {
-        int filled = Math.min(resource.getAmount(), capacity - current.getAmount());
-        if (filled > 0 && action.execute()) {
-          current.grow(filled);
-          helper.setFluid(tool, current);
-        }
-        return filled;
+      return filled;
+    }
+    // if the fluid matches and we have space, update
+    if (current.getAmount() < capacity && current.getType().equals(resource)) {
+      long filled = Math.min(maxAmount, capacity - current.getAmount());
+      if (filled > 0) {
+        ToolNbtSnapshots.updateSnapshots(tool, tx);
+        helper.setFluid(tool, new FluidStack(current, current.getAmount() + filled));
       }
+      return filled;
     }
     return 0;
   }
 
   @Override
-  public FluidStack drain(IToolStackView tool, ModifierEntry modifier, FluidStack resource, FluidAction action) {
-    modifier.getId();
-    if (!resource.isEmpty()) {
-      // ensure we have something and it matches the request
-      FluidStack current = helper.getFluid(tool);
-      if (!current.isEmpty() && current.isFluidEqual(resource)) {
-        // create the drained stack
-        FluidStack drained = new FluidStack(current, Math.min(current.getAmount(), resource.getAmount()));
-        // if executing, removing it
-        if (action.execute()) {
-          if (drained.getAmount() == current.getAmount()) {
-            helper.setFluid(tool, FluidStack.EMPTY);
-          } else {
-            current.shrink(drained.getAmount());
-            helper.setFluid(tool, current);
-          }
-        }
-        return drained;
+  public long drain(ContainerItemContext context, IToolStackView tool, ModifierEntry modifier, FluidVariant resource, long maxAmount, TransactionContext tx) {
+    if (maxAmount <= 0) {
+      return 0;
+    }
+    // ensure we have something and it matches the request; a blank resource means drain whatever is in the tank
+    FluidStack current = helper.getFluid(tool);
+    if (current.isEmpty() || (!resource.isBlank() && !current.getType().equals(resource))) {
+      return 0;
+    }
+    long drained = Math.min(current.getAmount(), maxAmount);
+    if (drained > 0) {
+      ToolNbtSnapshots.updateSnapshots(tool, tx);
+      if (drained == current.getAmount()) {
+        helper.setFluid(tool, FluidStack.EMPTY);
+      } else {
+        helper.setFluid(tool, new FluidStack(current, current.getAmount() - drained));
       }
     }
-    return FluidStack.EMPTY;
+    return drained;
   }
 
-  @Override
-  public FluidStack drain(IToolStackView tool, ModifierEntry modifier, int maxDrain, FluidAction action) {
-    modifier.getId();
-    if (maxDrain > 0) {
-      // ensure we have something and it matches the request
-      FluidStack current = helper.getFluid(tool);
-      if (!current.isEmpty()) {
-        // create the drained stack
-        FluidStack drained = new FluidStack(current, Math.min(current.getAmount(), maxDrain));
-        // if executing, removing it
-        if (action.execute()) {
-          if (drained.getAmount() == current.getAmount()) {
-            helper.setFluid(tool, FluidStack.EMPTY);
-          } else {
-            current.shrink(drained.getAmount());
-            helper.setFluid(tool, current);
-          }
-        }
-        return drained;
-      }
+  /** Live view of the module's tank, used when something needs a {@link SingleSlotStorage} instead of the tool */
+  private class TankSlot implements SingleSlotStorage<FluidVariant> {
+    private final IToolStackView tool;
+    private final ModifierEntry modifier;
+
+    private TankSlot(IToolStackView tool, ModifierEntry modifier) {
+      this.tool = tool;
+      this.modifier = modifier;
     }
-    return FluidStack.EMPTY;
+
+    @Override
+    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return fill(null, tool, modifier, resource, maxAmount, transaction);
+    }
+
+    @Override
+    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return drain(null, tool, modifier, resource, maxAmount, transaction);
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+      return helper.getFluid(tool).getType().isBlank();
+    }
+
+    @Override
+    public FluidVariant getResource() {
+      return helper.getFluid(tool).getType();
+    }
+
+    @Override
+    public long getAmount() {
+      return helper.getFluid(tool).getAmount();
+    }
+
+    @Override
+    public long getCapacity() {
+      return helper.getCapacity(tool);
+    }
+
+    @Override
+    public Iterator<StorageView<FluidVariant>> iterator() {
+      return Collections.<StorageView<FluidVariant>>singletonList(this).iterator();
+    }
   }
 
 

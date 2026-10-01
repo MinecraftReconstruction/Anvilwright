@@ -5,17 +5,20 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.common.util.Lazy;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.runtime.IIngredientManager;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
+import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.world.item.crafting.Ingredient;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
@@ -90,10 +93,11 @@ public class MeltingFuelHandler {
     RecipeType<?> fuel = TinkerRecipeTypes.FUEL.get();
     for (ItemStack stack : allStacks) {
       try {
-        int burnTime = ForgeHooks.getBurnTime(stack, fuel);
-        if (burnTime > 0) {
+        // Fabric has no Forge-style getBurnTime(stack, recipeType); use the fuel registry the melter itself reads
+        Integer burnTime = FuelRegistry.INSTANCE.get(stack.getItem());
+        if (burnTime != null && burnTime > 0) {
           fuels.add(stack);
-          newFuels.put(itemHelper.getUid(stack, UidContext.Ingredient), burnTime);
+          newFuels.put(itemHelper.getUniqueId(stack, UidContext.Ingredient), burnTime);
         }
       } catch (RuntimeException | LinkageError e) {
         TConstruct.LOG.error("Failed to check if item is fuel {}.", stack, e);
@@ -114,8 +118,18 @@ public class MeltingFuelHandler {
   /** Gets the duration of the given item stack */
   public static int getFuelDuration(ItemStack stack) {
     if (itemHelper != null) {
-      return fuelDurations.getOrDefault(itemHelper.getUid(stack, UidContext.Ingredient), 0);
+      return fuelDurations.getOrDefault(itemHelper.getUniqueId(stack, UidContext.Ingredient), 0);
     }
     return 0;
+  }
+
+  /**
+   * Gets the temperature of the given fluid, if it is a valid fuel
+   * @param fluid  Fluid to check
+   * @return  Temperature, or empty if the fluid is not a fuel
+   */
+  public static Optional<Integer> getTemperature(Fluid fluid) {
+    MeltingFuel fuel = MeltingFuelLookup.findFuel(fluid);
+    return fuel == null ? Optional.empty() : Optional.of(fuel.getTemperature());
   }
 }

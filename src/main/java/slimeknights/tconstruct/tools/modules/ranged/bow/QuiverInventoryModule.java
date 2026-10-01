@@ -2,6 +2,7 @@ package slimeknights.tconstruct.tools.modules.ranged.bow;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,11 +37,11 @@ public class QuiverInventoryModule extends InventoryModule {
   }
 
   @Override
-  public boolean isItemValid(IToolStackView tool, ModifierEntry modifier, int slot, ItemStack stack) {
+  public boolean isItemValid(IToolStackView tool, ModifierEntry modifier, int slot, ItemVariant stack) {
     if (condition().matches(tool, modifier)) {
-      return stack.is(ItemTags.ARROWS)
-        || tool.hasTag(TinkerTags.Items.CROSSBOWS) && stack.is(Items.FIREWORK_ROCKET)
-        || stack.is(TinkerTags.Items.BALLISTA_AMMO) && ModifiableBowItem.isBallista(tool);
+      return stack.getItem().builtInRegistryHolder().is(ItemTags.ARROWS)
+        || tool.hasTag(TinkerTags.Items.CROSSBOWS) && stack.getItem() == Items.FIREWORK_ROCKET
+        || stack.getItem().builtInRegistryHolder().is(TinkerTags.Items.BALLISTA_AMMO) && ModifiableBowItem.isBallista(tool);
     }
     return false;
   }

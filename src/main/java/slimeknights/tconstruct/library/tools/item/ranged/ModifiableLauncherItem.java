@@ -115,11 +115,11 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   /* Basic properties */
 
   @Override
-  public int getMaxStackSize(ItemStack stack) {
+  public int getItemStackLimit(ItemStack stack) {
     return 1;
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public boolean isNotReplaceableByPickAction(ItemStack stack, Player player, int inventorySlot) {
     return true;
   }
@@ -147,12 +147,12 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     return 0;
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
     return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public Map<Enchantment,Integer> getAllEnchantments(ItemStack stack) {
     return EnchantmentModifierHook.getAllEnchantments(stack);
   }
@@ -339,7 +339,7 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     return stack;
   }
 
-  @Override
+  /** Forge hook that has no Porting Lib counterpart in 2.3.15 */
   public void onStopUsing(ItemStack stack, LivingEntity entity, int timeLeft) {
     onStopUsing(ToolStack.from(stack), entity, timeLeft);
   }

@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
 import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import slimeknights.tconstruct.common.json.ConfigEnabledCondition;
 import slimeknights.tconstruct.library.json.JsonRedirect;
+import slimeknights.tconstruct.library.json.JsonCondition;
 import slimeknights.tconstruct.library.materials.definition.IMaterial;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialManager;
@@ -117,6 +118,11 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   /** Conditions on a tag existing; Mantle's TagFilledCondition is a loot condition under Fabric, so use the resource condition instead */
   protected static ConditionJsonProvider tagExistsCondition(String name) {
     return DefaultResourceConditions.itemTagsPopulated(TagKey.create(Registries.ITEM, Mantle.commonResource(name)));
+  }
+
+  /** Conditions on a fluid tag existing; Mantle's TagFilledCondition is a loot condition under Fabric, so use the resource condition instead */
+  protected static ConditionJsonProvider fluidTagExistsCondition(String name) {
+    return DefaultResourceConditions.fluidTagsPopulated(TagKey.create(Registries.FLUID, Mantle.commonResource(name)));
   }
 
 
@@ -227,7 +233,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
   /** @deprecated use {@link MaterialBuilder#redirect(ResourceLocation, ConditionJsonProvider...)} */
   @Deprecated
   protected JsonRedirect conditionalRedirect(MaterialId id, @Nullable ConditionJsonProvider condition) {
-    return new JsonRedirect(id, condition);
+    return new JsonRedirect(id, condition, null);
   }
 
   /** @deprecated use {@link MaterialBuilder#redirect(ResourceLocation, ConditionJsonProvider...)} */
@@ -350,7 +356,7 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
       } else if (conditions.length > 1) {
         combined = DefaultResourceConditions.and(conditions);
       }
-      return redirect(new JsonRedirect(id, combined));
+      return redirect(new JsonRedirect(id, combined, null));
     }
 
 
@@ -371,9 +377,9 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
       }
       // if the array ends in a null condition, skip serializing all material data
       if (isPureRedirect()) {
-        return new MaterialJson(condition, null, null, null, null, null, redirects);
+        return new MaterialJson(condition == null ? null : new JsonCondition(condition), null, null, null, null, null, redirects);
       }
-      return new MaterialJson(condition, craftable, tier, sort, rarity, hidden, redirects);
+      return new MaterialJson(condition == null ? null : new JsonCondition(condition), craftable, tier, sort, rarity, hidden, redirects);
     }
   }
 }

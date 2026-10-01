@@ -1,8 +1,5 @@
 package slimeknights.tconstruct.library.tools.helper;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import io.github.fabricators_of_create.porting_lib.entity.PartEntity;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -27,6 +24,10 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
+import io.github.fabricators_of_create.porting_lib.entity.PartEntity;
+import io.github.fabricators_of_create.porting_lib.entity.events.CriticalHitEvent;
+import slimeknights.mantle.util.CombatHelper;
 import slimeknights.mantle.util.OffhandCooldownTracker;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -46,9 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleSupplier;
-import net.minecraft.world.level.Level;
-import slimeknights.mantle.util.CombatHelper;
-import io.github.fabricators_of_create.porting_lib.entity.events.CriticalHitEvent;
 
 public class ToolAttackUtil {
   private static final float DEGREE_TO_RADIANS = (float)Math.PI / 180F;
@@ -56,6 +54,69 @@ public class ToolAttackUtil {
   /** @deprecated new default for {@link ToolAttackContext.Builder} */
   @Deprecated(forRemoval = true)
   public static final DoubleSupplier NO_COOLDOWN = () -> 1.0;
+
+  /**
+   * Gets the attack damage for the given tool, acting as though it was used in the main hand. Used for offhand attack and chestplate attack notably.
+   * <p>
+   * If your goal is damage for display, you are better off checking the tool attack damage stat directly, then displaying relevant attribute modifiers in the tooltip.
+   * Inefficient to call when the tool is in the mainhand.
+   * @param tool     Held tool
+   * @param holder   Entity holding the tool
+   * @param attribute  Attribute to fetch
+   * @return  Base value of the attribute
+   */
+  public static float getToolAttribute(IToolStackView tool, LivingEntity holder, Attribute attribute, float toolValue) {
+    // fetch attribute instance
+    AttributeInstance instance = holder.getAttribute(attribute);
+    if (instance == null) {
+      return (float) holder.getAttributeBaseValue(attribute);
+    }
+
+    // Mantle optimizes this method by skipping if the mainhand and offhand have no attributes
+    // for our case though, we wish to merge in the tool value so always have something
+    // plus, its more efficient in the attribute builder if we can directly modify the final map
+
+    // start building our attributes list
+    Map<Operation, Set<AttributeModifier>> modifiers = CombatHelper.copyModifiers(instance);
+
+    // remove mainhand attributes
+    ItemStack mainStack = CombatHelper.getMainhandAttributeStack(holder);
+    if (!mainStack.isEmpty()) {
+      for (AttributeModifier modifier : mainStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attribute)) {
+        modifiers.get(modifier.getOperation()).remove(modifier);
+      }
+    }
+
+    // start adding in "mainhand" attributes for the given slot and attribute
+    BiConsumer<Attribute, AttributeModifier> attributeConsumer = (check, modifier) -> {
+      if (check == attribute) {
+        // this will remove duplicates due to AttributeModifier equals only checking UUID
+        modifiers.get(modifier.getOperation()).add(modifier);
+      }
+    };
+    for (ModifierEntry entry : tool.getModifierList()) {
+      entry.getHook(ModifierHooks.ATTRIBUTES).addAttributes(tool, entry, EquipmentSlot.MAINHAND, attributeConsumer);
+    }
+
+    // add in the tool value and build the stat
+    return (float) CombatHelper.computeAttribute(attribute, instance.getBaseValue() + toolValue, modifiers);
+  }
+
+  /** Gets the critical modifier to apply, returning 1.0 if not critical. */
+  public static float getCriticalModifier(LivingEntity attacker, @Nullable Player attackerPlayer, Entity target, @Nullable LivingEntity livingTarget, boolean fullyCharged) {
+    boolean isCritical = fullyCharged && attacker.fallDistance > 0.0F && !attacker.onGround() && !attacker.onClimbable()
+      && !attacker.isInWater() && !attacker.hasEffect(MobEffects.BLINDNESS)
+      && !attacker.isPassenger() && livingTarget != null && !attacker.isSprinting();
+
+    float criticalModifier = isCritical ? 1.5f : 1.0f;
+    if (attackerPlayer != null) {
+      // Porting Lib exposes the Forge critical hit hook as a Fabric event; there is no "cancelled" result
+      CriticalHitEvent hitResult = new CriticalHitEvent(attackerPlayer, target, criticalModifier, isCritical);
+      hitResult.sendEvent();
+      criticalModifier = hitResult.getDamageModifier();
+    }
+    return criticalModifier;
+  }
 
   /**
    * Gets a living entity from the given entity, getting the parent if needed
@@ -80,10 +141,8 @@ public class ToolAttackUtil {
     if (!canPerformAttack(tool)) {
       return false;
     }
-    // nothing to do? cancel
-    // TODO: is it a problem that we return true instead of false when isExtraAttack and the final damage is 0 or we fail to hit? I don't think anywhere clientside uses that
-    if (attackerLiving.level().isClientSide || !targetEntity.isAttackable() || targetEntity.skipAttackInteraction(attackerLiving)) {
-      return true;
+    if (isAttackable(attacker, target)) {
+      performAttack(tool, ToolAttackContext.attacker(attacker).target(target).defaultCooldown().applyAttributes().build());
     }
     return true;
   }
@@ -106,22 +165,9 @@ public class ToolAttackUtil {
     // moved damage calculation, knockback, and cooldown to ToolAttackUtil.Builder
     // missing: enchantment modifiers, we handle modifiers instead
 
-    // determine cooldown
-    float cooldown = (float)cooldownFunction.getAsDouble();
-    boolean fullyCharged = cooldown > 0.9f;
-
-    // calculate if it's a critical hit
-    // that is, in the air, not blind, targeting living, and not sprinting
-    boolean isCritical = !isExtraAttack && fullyCharged && attackerLiving.fallDistance > 0.0F && !attackerLiving.onGround() && !attackerLiving.onClimbable()
-                         && !attackerLiving.isInWater() && !attackerLiving.hasEffect(MobEffects.BLINDNESS)
-                         && !attackerLiving.isPassenger() && targetLiving != null && !attackerLiving.isSprinting();
-
-    // shared context for all modifier hooks
-    ToolAttackContext context = new ToolAttackContext(attackerLiving, attackerPlayer, hand, sourceSlot, targetEntity, targetLiving, isCritical, cooldown, isExtraAttack);
-
-    // calculate actual damage
-    // boost damage from traits
-    float baseDamage = damage;
+    // calculate conditional damage from modifiers
+    float baseDamage = context.getBaseDamage();
+    float damage = baseDamage;
     List<ModifierEntry> modifiers = tool.getModifierList();
     for (ModifierEntry entry : modifiers) {
       damage = entry.getHook(ModifierHooks.MELEE_DAMAGE).getMeleeDamage(tool, entry, context, baseDamage, damage);
@@ -135,12 +181,10 @@ public class ToolAttackUtil {
 
     // knockback moved lower
 
-    // apply critical boost
-    if (!isExtraAttack) {
-      float criticalModifier = isCritical ? 1.5f : 1.0f;
-      if (isCritical) {
-        damage *= criticalModifier;
-      }
+    // apply critical damage boost
+    float criticalModifier = context.getCriticalModifier();
+    if (criticalModifier != 1) {
+      damage += baseDamage * (criticalModifier - 1);
     }
 
     // removed: sword check hook, replaced by weapon callback
@@ -204,7 +248,7 @@ public class ToolAttackUtil {
     Projectile projectile = context.getProjectile();
     if (!didHit || projectile != null && !TinkerEffects.canHitWithProjectile(targetLiving)) {
       if (!isExtraAttack) {
-        attackerLiving.level().playSound(null, attackerLiving.getX(), attackerLiving.getY(), attackerLiving.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, attackerLiving.getSoundSource(), 1.0F, 1.0F);
+        level.playSound(null, attackerLiving.getX(), attackerLiving.getY(), attackerLiving.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, attackerLiving.getSoundSource(), 1.0F, 1.0F);
       }
       // alert modifiers nothing was hit, mainly used for fiery
       for (ModifierEntry entry : modifiers) {
@@ -254,9 +298,9 @@ public class ToolAttackUtil {
         attackerPlayer.magicCrit(targetEntity);
       }
       // sounds
-      attackerLiving.level().playSound(null, attackerLiving.getX(), attackerLiving.getY(), attackerLiving.getZ(), sound, attackerLiving.getSoundSource(), 1.0F, 1.0F);
+      level.playSound(null, attackerLiving.getX(), attackerLiving.getY(), attackerLiving.getZ(), context.getSound(), attackerLiving.getSoundSource(), 1.0F, 1.0F);
     }
-    if (damageDealt > 2.0F && attackerLiving.level() instanceof ServerLevel server) {
+    if (damageDealt > 2.0F && level instanceof ServerLevel server) {
       int particleCount = (int)(damageDealt * 0.5f);
       server.sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY(0.5), targetEntity.getZ(), particleCount, 0.1, 0, 0.1, 0.2);
     }
@@ -283,7 +327,7 @@ public class ToolAttackUtil {
     // final attack hooks
     if (attackerPlayer != null) {
       if (targetLiving != null) {
-        if (!attackerLiving.level().isClientSide && !isExtraAttack) {
+        if (!level.isClientSide && !isExtraAttack) {
           ItemStack held = attackerLiving.getItemBySlot(sourceSlot);
           if (!held.isEmpty()) {
             held.hurtEnemy(targetLiving, attackerPlayer);
@@ -532,60 +576,5 @@ public class ToolAttackUtil {
   @Deprecated(forRemoval = true)
   public static boolean extraEntityAttack(IToolStackView tool, LivingEntity attackerLiving, InteractionHand hand, Entity targetEntity) {
     return attackEntity(tool, attackerLiving, hand, targetEntity, NO_COOLDOWN, true);
-  }
-
-  /**
-   * Gets the value of the given attribute for a tool, merging the tool's own attribute modifiers into
-   * the entity's attribute map. Used by the attack context when the tool is not in the main hand.
-   */
-  public static float getToolAttribute(IToolStackView tool, LivingEntity holder, Attribute attribute, float toolValue) {
-    // fetch attribute instance
-    AttributeInstance instance = holder.getAttribute(attribute);
-    if (instance == null) {
-      return (float) holder.getAttributeBaseValue(attribute);
-    }
-
-    // Mantle optimizes this method by skipping if the mainhand and offhand have no attributes
-    // for our case though, we wish to merge in the tool value so always have something
-    // start building our attributes list
-    Map<Operation, Set<AttributeModifier>> modifiers = CombatHelper.copyModifiers(instance);
-
-    // remove mainhand attributes
-    ItemStack mainStack = CombatHelper.getMainhandAttributeStack(holder);
-    if (!mainStack.isEmpty()) {
-      for (AttributeModifier modifier : mainStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attribute)) {
-        modifiers.get(modifier.getOperation()).remove(modifier);
-      }
-    }
-
-    // start adding in "mainhand" attributes for the given slot and attribute
-    BiConsumer<Attribute, AttributeModifier> attributeConsumer = (check, modifier) -> {
-      if (check == attribute) {
-        // this will remove duplicates due to AttributeModifier equals only checking UUID
-        modifiers.get(modifier.getOperation()).add(modifier);
-      }
-    };
-    for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(ModifierHooks.ATTRIBUTES).addAttributes(tool, entry, EquipmentSlot.MAINHAND, attributeConsumer);
-    }
-
-    // add in the tool value and build the stat
-    return (float) CombatHelper.computeAttribute(attribute, instance.getBaseValue() + toolValue, modifiers);
-  }
-
-  /** Gets the critical modifier to apply, returning 1.0 if not critical. */
-  public static float getCriticalModifier(LivingEntity attacker, @Nullable Player attackerPlayer, Entity target, @Nullable LivingEntity livingTarget, boolean fullyCharged) {
-    boolean isCritical = fullyCharged && attacker.fallDistance > 0.0F && !attacker.onGround() && !attacker.onClimbable()
-      && !attacker.isInWater() && !attacker.hasEffect(MobEffects.BLINDNESS)
-      && !attacker.isPassenger() && livingTarget != null && !attacker.isSprinting();
-
-    float criticalModifier = isCritical ? 1.5f : 1.0f;
-    if (attackerPlayer != null) {
-      // Porting Lib exposes the same hook as a Fabric event, let other mods adjust the modifier
-      CriticalHitEvent hitResult = new CriticalHitEvent(attackerPlayer, target, criticalModifier, isCritical);
-      hitResult.sendEvent();
-      criticalModifier = hitResult.getDamageModifier();
-    }
-    return criticalModifier;
   }
 }

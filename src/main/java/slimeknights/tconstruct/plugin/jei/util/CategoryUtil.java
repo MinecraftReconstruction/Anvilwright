@@ -4,10 +4,12 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
+import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -51,7 +53,7 @@ public final class CategoryUtil {
       for (T ingredient : fluids) {
         for (FluidStack input : mapper.apply(ingredient)) {
           if (input.getAmount() > maxAmount) {
-            maxAmount = input.getAmount();
+            maxAmount = (int)input.getAmount();
           }
         }
       }
@@ -64,7 +66,7 @@ public final class CategoryUtil {
         slotConsumer.accept(builder.addSlot(role.apply(ingredient), fluidX, y)
           .addRichTooltipCallback(tooltip.apply(ingredient))
           .setFluidRenderer(maxAmount, false, width, height)
-          .addIngredients(FabricTypes.FLUID_STACK, mapper.apply(ingredient)));
+          .addIngredients(FabricTypes.FLUID_STACK, toJeiFluids(mapper.apply(ingredient))));
       }
       // for the last, the width is the full remaining width
       int fluidX = x + last * width;
@@ -72,9 +74,25 @@ public final class CategoryUtil {
       slotConsumer.accept(builder.addSlot(role.apply(ingredient), fluidX, y)
         .addRichTooltipCallback(tooltip.apply(ingredient))
         .setFluidRenderer(maxAmount, false, totalWidth - (width * last), height)
-        .addIngredients(FabricTypes.FLUID_STACK, mapper.apply(ingredient)));
+        .addIngredients(FabricTypes.FLUID_STACK, toJeiFluids(mapper.apply(ingredient))));
     }
     return maxAmount;
+  }
+
+  /** Converts Porting Lib fluid stacks into the ingredient type JEI for Fabric expects */
+  private static List<IJeiFluidIngredient> toJeiFluids(List<FluidStack> stacks) {
+    return stacks.stream().map(FluidIngredients::of).toList();
+  }
+
+  /**
+   * Legacy overload taking the old tooltip callback type.
+   * @deprecated use the {@link IRecipeSlotRichTooltipCallback} overload
+   */
+  @Deprecated(forRemoval = true)
+  @SuppressWarnings("removal")
+  public static <T> int drawMultipleFluidsLegacy(IRecipeLayoutBuilder builder, Function<T,RecipeIngredientRole> role, int x, int y, int totalWidth, int height, List<T> fluids, int minAmount, Function<T,List<FluidStack>> mapper, Function<T,IRecipeSlotTooltipCallback> tooltip, Consumer<IRecipeSlotBuilder> slotConsumer) {
+    Function<T,IRecipeSlotRichTooltipCallback> richTooltip = ingredient -> tooltip.apply(ingredient)::onRichTooltip;
+    return drawMultipleFluids(builder, role, x, y, totalWidth, height, fluids, minAmount, mapper, richTooltip, slotConsumer);
   }
 
   /** Finds the slot with the given name, or null if the slot is missing */

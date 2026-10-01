@@ -115,7 +115,7 @@ public final class TinkerGadgets extends TinkerModule {
   /*
    * Entities
    */
-  public static final RegistryObject<EntityType<FancyItemFrameEntity>> itemFrameEntity = ENTITIES.register("fancy_item_frame", () ->
+  public static final RegistryObject<EntityType<FancyItemFrameEntity>> itemFrameEntity = ENTITIES.register("fancy_item_frame",
     FabricEntityTypeBuilder.<FancyItemFrameEntity>create(
         MobCategory.MISC, FancyItemFrameEntity::new)
       .dimensions(EntityDimensions.fixed(0.5F, 0.5F))
@@ -128,7 +128,7 @@ public final class TinkerGadgets extends TinkerModule {
     EntityType.Builder.of(FancyArmorStandEntity::new, MobCategory.MISC).sized(0.5F, 1.975F).clientTrackingRange(10));
 
   @Deprecated
-  public static final RegistryObject<EntityType<GlowballEntity>> glowBallEntity = ENTITIES.register("glow_ball", () ->
+  public static final RegistryObject<EntityType<GlowballEntity>> glowBallEntity = ENTITIES.register("glow_ball",
     FabricEntityTypeBuilder.<GlowballEntity>create(MobCategory.MISC, GlowballEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
       .trackRangeChunks(4)
@@ -136,7 +136,7 @@ public final class TinkerGadgets extends TinkerModule {
       .entityFactory((spawnEntity, world) -> new GlowballEntity(TinkerGadgets.glowBallEntity.get(), world))
       .forceTrackedVelocityUpdates(true)
   );
-  public static final RegistryObject<EntityType<EFLNEntity>> eflnEntity = ENTITIES.register("efln_ball", () ->
+  public static final RegistryObject<EntityType<EFLNEntity>> eflnEntity = ENTITIES.register("efln_ball",
     FabricEntityTypeBuilder.<EFLNEntity>create(MobCategory.MISC, EFLNEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
       .trackRangeChunks(4)
@@ -144,7 +144,7 @@ public final class TinkerGadgets extends TinkerModule {
       .entityFactory((spawnEntity, world) -> new EFLNEntity(TinkerGadgets.eflnEntity.get(), world))
       .forceTrackedVelocityUpdates(true)
   );
-  public static final RegistryObject<EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.register("quartz_shuriken", () ->
+  public static final RegistryObject<EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.register("quartz_shuriken",
     FabricEntityTypeBuilder.<QuartzShurikenEntity>create(MobCategory.MISC, QuartzShurikenEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
       .trackRangeChunks(4)
@@ -153,7 +153,7 @@ public final class TinkerGadgets extends TinkerModule {
       .forceTrackedVelocityUpdates(true)
   );
   @Deprecated
-  public static final RegistryObject<EntityType<FlintShurikenEntity>> flintShurikenEntity = ENTITIES.register("flint_shuriken", () ->
+  public static final RegistryObject<EntityType<FlintShurikenEntity>> flintShurikenEntity = ENTITIES.register("flint_shuriken",
     FabricEntityTypeBuilder.<FlintShurikenEntity>create(MobCategory.MISC, FlintShurikenEntity::new)
       .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
       .trackRangeChunks(4)

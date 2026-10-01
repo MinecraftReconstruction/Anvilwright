@@ -148,3 +148,235 @@ Mantle 侧记在行为差异 #24，TCon 侧记在 #19。
    `DirtType → SlimeType` 19 条、反向 12 条，都是这一件事。
 2. **JEI 版本**：把 `jei_version` 提到上游的 `15.59.0.210`（Fabric 侧是否有对应版本需要联网确认），
    可以一次性消掉 ~16 条；不升级就要改写那 16 处调用。
+
+---
+
+## 2026-09-30 中午：`--gen` 口径从 1 → 0 的路上（本轮交接）
+
+**口径提醒（本轮实测到的第二个坑）**：整树 `--gen` 会**少报**。例：`TinkerGadgets` 有 5 条实体注册错误，
+在只改过 `ToolContainerMenu` 那一版的整树日志里**一条都没出现**，单独编译该文件才报出来。所以
+"total: N" 只能当"至少 N 条"，每轮都要用"单文件编译"复核刚碰过的文件。
+
+| 步骤 | `--gen` 整树 | 说明 |
+|---|---|---|
+| 会话开始（HEAD `9a1a4ffc`） | **1** | 真错是 `ToolContainerMenu:257`：`ToolFluidHandler` 不是 `Storage<FluidVariant>`（不是 Handoff 里写的 Mantle 缺方法——那两个方法在 `0f373c6d` 里已经有了） |
+| `SimpleFluidTank extends Storage<FluidVariant>` | **11** | 修掉那 1 条后立刻暴露 10 条（`TinkerTools` 的实体注册 + 弩/弓构造器） |
+| 实体注册改用 Mantle 新增的 Fabric builder 重载 + 弩/弓 tab 参数 | 1→0 | 之后进入"一轮只留 1 条"的连锁 |
+| 连续 12 轮单点修复（见下） | 1 | 领域从 tools/item 走到 fluid hook、再到 datagen |
+| 本轮结束 | **6** | 全部集中在铸造配方的 long 化（`AbstractMaterialCastingRecipe` / `PartSwapCastingRecipe`） |
+
+### 本轮修掉的东西（按领域）
+
+- **流体链**：`SimpleFluidTank` 现在是 `Storage<FluidVariant>`（Fabric 的 `IFluidHandler` 对应物），带事务化
+  默认实现；`TankModule` / `SmashingModule` 改成 Fabric 版 hook 签名（`FluidVariant` + `long` + `TransactionContext`）；
+  `ToolFluidCapability` 的匿名默认 hook 与接口签名对齐；`FluidModifierHookIterator.drain` 删掉残留的 FluidStack 收缩代码。
+- **新增工具类**：`library/tools/nbt/ToolNbtSnapshots`（事务中止时回滚工具持久 NBT；库存 / 罐 / smashing 三处共用）、
+  `library/utils/SoundTypeHelper`（Forge `IForgeBlock#getSoundType` → Porting Lib `CustomSoundTypeBlock` + 原版回退）。
+- **物品/实体**：`ModifiableLauncherItem` 用 `getItemStackLimit`（Porting Lib 名字）、去掉四个 Forge-only hook 的 `@Override`；
+  `ModifiableArrowItem implements InfiniteArrowItem`；`ModifiableBowItem`/`ModifiableCrossbowItem` 补 `ResourceKey<CreativeModeTab>`；
+  `IndestructibleItemEntity` 改成 `age = Integer.MIN_VALUE`（既不会消失、又保留客户端旋转）；`war_pick` 加入工具创造栏。
+- **Forge 钩子替换**：`getSoundType`（5 处）、`EnchantmentHelper.getTagEnchantmentLevel`、`BucketItem.getFluid`、
+  `collisionExtendsVertically`、`TntBlock#onCaughtFire`、`ForgeHooks.getProjectile`、`LogicHelper.orElseNull(LazyOptional)`。
+- **datagen**：`AbstractStationSlotLayoutProvider` 的 `PackType.SERVER_DATA` → `Target.DATA_PACK`、`saveThing` → `saveJson`、
+  补回上游的 `definePattern(Pattern)`。
+- **accesswidener 新增**：`ItemEntity.age`（+mutable）、`ItemEntity.pickupDelay`、`IntegerProperty.min/max`
+  （对应上游 `accesstransformer.cfg`；改完**必须**重跑 `printCompileCp`）。
+
+### Mantle 侧（都已 push）
+
+| 版本 | 内容 |
+|---|---|
+| `1.11.DEV.78ffdf1a` | `EntityTypeDeferredRegister` 新增收 `FabricEntityTypeBuilder` 实例的重载（原版 builder 表达不了 `forceTrackedVelocityUpdates`，行为差异 #26） |
+| `1.11.DEV.292ad3e8` | `LogicHelper.orElseNull` 增加 `LazyOptional` 重载（上游 Forge Mantle 本来就只有这一版；1.11 移植只留了 `Optional`，下游上游形状的调用点编不过） |
+
+TCon 的 `mantle_version` 已跟到 `1.11.DEV.292ad3e8`，classpath 也重新生成过。
+
+### 2026-09-30 下午续：long 化收尾 + 一次 `upstreamtake`
+
+| 步骤 | `--gen` 整树 | 说明 |
+|---|---|---|
+| 本轮开工 | 6 | 6 条全在铸造配方：`AbstractMaterialCastingRecipe` 的 `getFluidAmount` 还是 `int`（接口早已是 `long`），`PartSwapCastingRecipe` 用 `mapToInt` 取流体量 |
+| 修完这两处 | **55** | 暴露的是 datagen `ToolsRecipeProvider`（合并时"上游主体进来了、fork 的辅助声明没了"） |
+| 对 `ToolsRecipeProvider` 跑 `scripts/port/upstreamtake.py --apply` | **44** | 该文件自身 55 → 4；脚本判定 KEPT（整树也从 55 → 44） |
+| 剩余 | 44 | **全部**集中在 `ToolsRecipeProvider`（外加 `TinkerTools:396` 的 `addProvider` 歧义） |
+
+`ToolsRecipeProvider` 现在剩下的 6 类问题（都是"上游文件 + Fabric 管线"要补的活）：
+
+1. `import net.minecraftforge.common.Tags` → Porting Lib `io.github.fabricators_of_create.porting_lib.tags.Tags`（11 条）
+2. `ArmorItem.Type` → 本移植的 `ArmorSlotType`（21 条）
+3. `CompoundIngredient` / `DifferenceIngredient` / `ModLoadedCondition` → Fabric 的
+   `DefaultCustomIngredients.all/any/difference` 与 `DefaultResourceConditions`（需改调用写法）
+4. `ToolsRecipeProvider(PackOutput)` → `(FabricDataOutput)`（基类要的是 Fabric 的）
+5. `buildRecipes(Consumer<FinishedRecipe>)` 的覆写签名与基类 `BaseRecipeProvider` 不一致
+6. `toolBuilding(consumer, item, folder, Pattern)` 多了一个 `Pattern` 参数；`TinkerTools:396` 的
+   `pack.addProvider(ToolsRecipeProvider::new)` 在 Fabric 下 `addProvider` 有歧义（要显式指定
+   `FabricDataGenerator.Pack.Factory`）
+
+### 2026-09-30 傍晚续：datagen 集群修完，翻到"伤害类型常量"
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 44（全在 `ToolsRecipeProvider` + `TinkerTools` 1 条） |
+| 修完 `ToolsRecipeProvider` 的 6 类管线问题 | 8 |
+| 修 `IToolRecipeHelper` / `IMaterialRecipeHelper` 的残留（`modResource`→`location`、Forge `CompoundIngredient`→`DefaultCustomIngredients`、`MaterialIngredient.fromItem`→`of(part, ANY)`、补 `Objects` 导入、新增 4 参 `toolBuilding` 重载） | **8**（全在 `DamageSpillingEffect`） |
+
+`DamageSpillingEffect`（**fork 独有文件，上游 3.12.1 没有**）用了 8 个伤害类型常量，本树里没有：
+`PLAYER/MOB_ATTACK_{FIRE,MAGIC,EXPLOSION,BYPASS_ARMOR}`。它们在 fork 的
+`slimeknights/tconstruct/shared/TinkerDamageTypes.java`（第 20–27 行定义、第 34 行起 `context.register(...)`）里，
+本树现在只有 `slimeknights/tconstruct/common/TinkerDamageTypes.java`（`SMELTERY_HEAT` 等，没有这 8 个）。
+
+补法（下一位接力）：把这 8 个 `ResourceKey.create(Registries.DAMAGE_TYPE, TConstruct.getResource(...))` 常量、
+它们的 `DamageType` 注册，以及 `src/generated/resources/data/tconstruct/damage_type/{player,mob}_attack_*.json`
+一并从 fork 取回来（fork 里都有），然后重跑 `--gen`；这一步之后应该就摸到 0 了。
+
+### 2026-09-30 夜：伤害类型补齐，翻到 `ModifierRecipeProvider`
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 8（全在 `DamageSpillingEffect`） |
+| 补回 8 个 `PLAYER/MOB_ATTACK_*` 伤害类型常量 + 8 个 `damage_type/*.json` | 5 |
+| 删掉 fork 遗留的 `SpillingFluidProvider` / `AbstractSpillingFluidProvider`（无任何引用；本树已用 3.12 的 `FluidEffectProvider` 生成 `tinkering/fluid_effects/*.json`，上游也没有这两个文件） | **81** |
+
+新集群（`tools/data/ModifierRecipeProvider.java`）：`TinkerModifiers.bronzeReinforcement` 之类的常量没了、
+`modResource(...)` 之类的 fork helper 仍在用。**这正是上一轮 `ToolsRecipeProvider` 的翻版**——建议直接上
+`python3 scripts/port/upstreamtake.py --apply src/main/java/slimeknights/tconstruct/tools/data/ModifierRecipeProvider.java`
+（该脚本会自己比较该文件的错误数并回滚）。之后大概率还有 `MaterialRecipeProvider` / `TableRecipeProvider` /
+`SmeltryRecipeProvider` 等几个同源 datagen 文件排队。
+
+### 2026-09-30 深夜：datagen 家族继续消队（81 → 36）
+
+技巧确认：**凡是"整树只报几条、且与上游 3.12.1 只差几十行"的文件，一律 `git checkout v3.12.1.231 -- <file>`
+再补 Forge→Fabric 管线**，比逐个改 fork 版快一个数量级（fork 版是 1.18 时代的旧 TConstruct 代码，
+用的是 `bronzeReinforcement`、`MaterialIds.bloodbone`、`ArmorItem.Type` 这些已经不存在的东西）。
+
+| 步骤 | `--gen` 整树 |
+|---|---|
+| 上一轮结束 | 81（全在 `tools/data/ModifierRecipeProvider`） |
+| 取上游 `ModifierRecipeProvider` + 管线（2 处 `CompoundIngredient`、6 处 `DifferenceIngredient`、15 处 `IntersectionIngredient`、2 处 `modLoaded`、`Fluids.MILK`+`FluidType.BUCKET_VOLUME`→`Milk.STILL_MILK`+`FluidConstants.BUCKET`） | 3 |
+| 3 处 `FluidContainerIngredient` 需要 `.toVanilla()`（Fabric 下它是 `CustomIngredient`，不是 `Ingredient`） | 3（转到 `AbstractEnchantmentToModifierProvider`） |
+| 取上游 `AbstractEnchantmentToModifierProvider`（`Target.DATA_PACK` + `saveJson`） | 2（转到 `ArmorModelProvider`） |
+| `ArmorModelProvider`：`FabricDataOutput` + `SlimeskullItem.MODEL_LOCATION`→`TConstruct.getResource("slimeskull")`（本树的 `SlimeskullItem` 是 fork 的 Porting Lib 渲染实现，没有该常量） | 1（转到 `TrimMaterialPaletteGenerator`） |
+| `TrimMaterialPaletteGenerator` / `TinkerTrimMaterialPaletteGenerator` 改成 `FabricDataOutput` | 8（转到 `ToolItemModelProvider`） |
+| `ToolItemModelProvider` + `AbstractToolItemModelProvider.armor(...)`：`ArmorItem.Type` → 本移植的 `ArmorSlotType` | 1（转到 `ModifierModelMapProvider`） |
+| `ModifierModelMapProvider` 改成 `FabricDataOutput` | 16（转到 `ModifierModel` / `AbstractMaterialDataProvider` / `MaterialDataProvider`） |
+| `ModifierModel.EMPTY`：接口是 fork 的 `Mesh getQuads(...)`，上游文件还在覆写 `addQuads` → 改回 `getQuads` 返回 `EMPTY_MESH` | 16 |
+| `AbstractMaterialDataProvider`：`JsonRedirect` 第三个参数（`Predicate<JsonObject>`）、`MaterialJson` 需要 `JsonCondition` 包装、新增 `fluidTagExistsCondition`（`FluidTags.create` 是 Forge 对 `FluidTags` 的补丁 API） | 10（转到 `MaterialDataProvider`）+ 2 |
+| 取上游 `MaterialDataProvider`（`material(...)` builder API） | 2（转到 `AbstractMaterialStatsDataProvider`） |
+| `AbstractMaterialStatsDataProvider`：`super(output, Target.DATA_PACK, ...)` + `saveJson(...serialize())`（fork 版的 `saveThing`/`convert` 都不存在） | **36**（全在 `MaterialRecipeProvider`） |
+
+**顺手修掉一个真 bug**：上一轮把 Forge `CompoundIngredient.of` 映射成了 `DefaultCustomIngredients.all`
+（= AND／交集），但 Forge 的 `CompoundIngredient` 是 **OR**（任一子项匹配即可），语义对应 `DefaultCustomIngredients.any`。
+证据：上游 `ModifierRecipeProvider` 用 `ingredientFromTags(TinkerTags.Items.MELEE, ...HARVEST, ...LAUNCHERS, ...LEGGINGS)`
+表示"任一工具类都行"；AND 的话这个 ingredient 永远为空。`ToolsRecipeProvider` 的过路人材质（`fakeIngot`）和
+箭矢图案（图案 **或** 铸模）同理。已在 `ToolsRecipeProvider` 两处改成 `.any(...)`。
+映射表：`CompoundIngredient`→`any`、`IntersectionIngredient`→`all`、`DifferenceIngredient`→`difference`。
+
+### 2026-09-30 深夜（二）：整树口径收敛到个位数，但**分块口径暴露大批隐藏错误**
+
+第二轮继续按"取上游 + 补管线"推进，整树 `--gen` 一度掉到 **1 条**（`ToolContainerScreen`），
+但**整树口径会漏报**（javac 报错后停止归因，整个文件可以完全不出现）。于是跑了唯一可靠的口径：
+
+```
+scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式编译，约 20 分钟
+```
+
+进度到一半时：**49 个包有错、合计 417 条**。也就是说：
+
+- **整树口径**：81 → 1（看着快完了）
+- **分块口径**：还有数百条（真实的"还剩多少活"）
+
+两类数字的差就是那批**从未被归因过的文件**（`GuiTankModule` 里 `this.horizontal` 这种字段都没声明、
+`NormalModifierModel` 里 `textures[index]` 这种早就删掉的变量……都是这么被翻出来的）。
+
+本轮新修（都在 `--gen`/分块下逐个验证过）：
+
+| 文件/位置 | 问题 | 修法 |
+|---|---|---|
+| `MaterialRecipeProvider` + `IMaterialRecipeHelper` | fork 版还在用 `MaterialIds.bloodbone` 这类旧 id；helper 只有带 `forgeTag` 的签名 | 取上游文件；helper 补无 boolean 重载（用 `fluid.getForgeTag() != null` 复刻上游 `FluidObject#ingredient` 的语义）、`materialMelting(FluidObject)`、`compatMeltingCasting(..., altTag, folder)` |
+| `MaterialMeltingRecipeBuilder` | `FluidValues` 是 long，builder 只收 int | 加 long 重载 |
+| `MaterialManager` | 物料 tag 表还是 `Map<ResourceLocation,…>`（fork 版），packet/`GenericTagUtil` 是 `Map<TagKey,…>` | 字段与 `updateMaterialsFromServer` 统一成 `Map<TagKey<IMaterial>,List<IMaterial>>`；`getValues` 同步 |
+| `MaterialManager`(GSON) | 引用了 Mantle 的 `JsonCondition`/`ConditionDeserializer` | 改回 TCon 自己的 `library.json.JsonCondition` + `ConditionSerializer` |
+| `MaterialStatsManager` | 残留的 `deserializeMaterialStat`（用已删除的 `materialStatTypes`/`GSON`/`getStatsClass`） | 删除死代码（新实现已内联在 `deserializeMaterialStatsFromContent`） |
+| `AbstractMaterialTraitDataProvider` | `saveThing`/`convert` 都不存在 | `super(output, Target.DATA_PACK, folder, MaterialTraitsManager.GSON)` + `saveJson(...build())` |
+| `AbstractToolDefinitionDataProvider` | `PackType.SERVER_DATA`/`ToolDefinitionLoader.GSON`/`saveThing`/`definition.validate` | 上游写法：`Target.DATA_PACK` + `saveJson(id, ToolDefinitionData.LOADABLE.serialize(data))` |
+| `AbstractModifierProvider` | fork 版的 `allModifiers`/`addModifier` 与上游新结构混在一起 | 取上游；条件用 `ConditionJsonProvider.write` 包成 `"condition": {"fabric:conditions":[…]}`（与 `ConditionSerializer` 读法一致） |
+| `AbstractFluidEffectProvider` / `FluidEffectProvider` | `addFluid(...)` 只收 int（`FluidValues` 是 long）；`CraftingHelper.serialize` | 全改 long；条件写成 Fabric 的 `fabric:conditions` |
+| `AbstractMaterialRenderInfoProvider` | `PackType.CLIENT_RESOURCES`、缺 `existingFileHelper`、`saveThing` | `Target.RESOURCE_PACK` + 3 参构造 + `saveJson` + `MaterialPartTextureGenerator.runCallbacks` |
+| `MaterialModel` / `MaterialModifierModel` / `NormalModifierModel` / `OverslimeModifierModel` / `ModifierModel.EMPTY` | Fabric 渲染接口是 `Mesh getQuads(...)`，上游文件还在写 `addQuads`；`MantleItemLayerModel.getQuadsForSprite` 返回 `List<BakedQuad>` | 统一走 `ToolModel.ofQuads(...)`（把 vanilla quads 包成 Mesh，`ToolModel` 里已有该 helper，改为 public）；补 `getLoader()`；`MaterialModel.getMaterialSprite` 按上游补回 |
+| `Config.CLIENT` | `renderSleevesItem` 只赋值没声明 | 补声明（builder 里的 `.define("renderSleevesItem", true)` 本来就在） |
+| `ModifierClientEvents` | `offhand`/`mainhand` 是旧 fork 的变量名 | 改成 `held`/`player.getMainHandItem()`，并保留"只处理副手"的 else 分支 |
+| `ToolRenderEvents` | 局部变量 `context`（`UseOnContext`）把 `WorldRenderContext` 参数遮蔽了；`ToolHarvestLogic` 已不存在；`matchType` 丢失 | 局部改名 `useContext`；恢复上游的 `IsEffectiveToolHook.isEffective` + `AOEMatchType` 计算；回调返回 `false`（交给 vanilla 画主方块轮廓） |
+| `PlateArmorModel` | `ISafeManagerReloadListener.create(...)` 不存在（Fabric 侧要固定 ID） | 改用 `IdentifiableISafeManagerReloadListener` |
+| `GuiTankModule` | `horizontal`/`fluidLoc` 字段没声明、缺 `isFluidHovered`/`getFluidUnderMouse` | 补字段 + 8 参构造（保留 7 参重载）、补两个方法 |
+| `ToolContainerScreen` / `ToolContainerMenu` | `getSlots()`（Forge）→ `getSlotCount()`（Porting Lib）；`menu.getPlayer()` 缺 `@Getter`；tank 是 `Storage` 不是 `StorageView` | 逐个对症修（tank 传 `tank.iterator().next()`） |
+| `ShieldBannerModifierSpriteSource` | `SpriteSources.register` 在 vanilla 是 private、`SpriteContents` 的 5 参构造是 Forge 的 | 加两条 accesswidener（`stringVertex`、`SpriteSources.register`，对应上游 AT）；`SpriteContents` 用 4 参 |
+
+⚠️ **Mantle 侧**：本轮还修了一个真 bug —— `Mantle#register()` 把 `mantle:tag_filled` 注册成了
+`TagEmptyCondition.SERIALIZER::test`（语义反了）。TCon 生成的数据里有 **342 个** JSON 用这个条件，
+兼容材料会在标签**不存在**时反而加载。已修、已 push、已 `publishToMavenLocal` 为
+`1.11.DEV.1e53afad`，TCon 的 `mantle_version` 已同步（classpath 也已重新生成）。
+
+### 2026-10-01 凌晨：JEI 15.20 与 world 模块清完，隐藏队列仍在（本轮交接）
+
+本轮的 checkpoint（每个都 push + `git ls-remote` 复核过）：
+
+| commit | 内容 |
+|---|---|
+| `32f391871f` | datagen 家族 8 个文件取上游 + 补管线（81 → 36） |
+| `ca2544e034` | MaterialRecipeProvider / client model Mesh / AW 两条 |
+| `05a08b41f1` | 停用 REI（移到 `src/rei-unsupported`）、JEI 15.20 适配开始 |
+| `8044d90de8` | JEI 流体类型、TankBlockEntity/SearedTankBlock、ModifierManager tags |
+| `7207abf7c7` | JEI 15.20 收尾 + world 模块（Config 选项、worldgen bootstrap） |
+
+**口径提醒（最重要的一条）**：整树 `--gen` 现在在 **1～20 之间来回跳**，但那是假象 ——
+每修好一个文件，javac 就"多归因一个文件"，于是又冒出新错误。真实剩余量看分块口径
+（`scripts/port/truecount.sh`），本轮中途的完整快照是 **170 个包 / 1620 条**（约 3 小时前的数据，
+之后又修了 ~60 处）。**不要用整树数字判断进度。**
+
+本阶段验证过的"等价替换"清单（可直接脚本化，附错误签名）：
+
+| 错误签名 | 替换 |
+|---|---|
+| `ForgeMod.BLOCK_REACH.get()` 之类 | `PortingLibAttributes.BLOCK_REACH`（字段，无 `.get()`） |
+| `FluidType.BUCKET_VOLUME` | `FluidConstants.BUCKET` |
+| `IIngredientHelper#getUid(...)` | `getUniqueId(...)` |
+| `ITypedIngredient#cast(TYPE)` | `getIngredient(TYPE)`（返回 `Optional`） |
+| `addRecipeArrowWidget().setPosition(x,y)` | `addRecipeArrow().setPosition(x,y)` |
+| `addDrawableWidget(D).setPosition(x,y)[.setTooltip(t)]` | `builder.addDrawable(D,x,y)`（tooltip 用 `plugin/jei/util/TooltipWidget`） |
+| `addIngredients(FabricTypes.FLUID_STACK, List<FluidStack>)` | 先 `stream().map(FluidIngredients::of).toList()` |
+| `PackOutput`（datagen provider ctor） | `FabricDataOutput` |
+| `BlockBehaviour.BlockStateBase.OffsetType` | `BlockBehaviour.OffsetType` |
+| `Holder::get` | `Holder::value` |
+| `getData().getTraits()` | `ToolTraitHook.getTraits(definition, MaterialNBT.EMPTY)` |
+| 旧 fork 的枚举 key（`slimeLeaves.get(SlimeType.X)`） | 新 key（`FoliageType.X`，必要时 `.asSlime()` / `.asDirt()`） |
+
+**下一步（按顺序）**：
+1. 重跑 `scripts/port/truecount.sh` 拿最新完整清单（约 20 分钟），按包推平；
+2. 还剩的已知簇：`BlockModelSkullRenderer.renderModelLists`（AW 可解）、`BuddingCrystalBlock`、
+   `FluidEffectManager`（`CraftingHelper.processConditions` → Fabric 条件判断）、`GenericNBTProvider` 的
+   `DataGenerator#getPackOutput`（已把该 ctor 删掉，需确认调用点）；
+3. 全树 0 之后：`./gradlew build --offline` → `runData` → **把 `src/generated` 与上游 3.12.1 逐文件 diff**
+   （这是最能抓语义错误的闸门）→ `runServer` → `runClient`。
+
+### 2026-10-01 凌晨（二）：第二次分块口径 + "级联" 的发现
+
+第二次 `truecount`（`.port/true_now2.txt`，22:09 启动）跑到 100/299 包时的快照：**793 条**，
+最重的包：
+
+| 包 | 条数 |
+|---|---|
+| `common/data/tags` | 81 |
+| `library/recipe/casting/material` | 52 |
+| `shared` | 50 |
+| `library/client/model/block` | 36 |
+| `library/recipe/ingredient` | 35 |
+| `library/recipe/casting` | 29 |
+| `library/data/recipe` | 24 |
+| `library/utils` | 21 |
+
+⚠️ **注意这些数字里有相当一部分是"级联"**：例如 `common/data/tags` 这个 chunk 单独编译时，
+`ToolStack` 会因为 `IToolContext#getDefinition` 未实现而报 10 条、`ModifierNBT`/`ModDataNBT` 各报十几条 ——
+这些**不是各自独立的问题**，而是"根因文件坏了，javac 找不到成员"的连带噪声。
+**判据：修完根因后要重跑同一个 chunk，看这些连带的数字是否一起消失。**
+
+本阶段（22:00–23:00）修完并已 push 的内容见 `HANDOFF.md` 第 21 节。

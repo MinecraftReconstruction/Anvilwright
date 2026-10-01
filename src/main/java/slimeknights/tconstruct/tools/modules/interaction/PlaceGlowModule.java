@@ -22,6 +22,7 @@ import slimeknights.tconstruct.library.tools.context.ToolHarvestContext;
 import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
 import slimeknights.tconstruct.library.tools.helper.ToolDamageUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
+import slimeknights.tconstruct.library.utils.SoundTypeHelper;
 import slimeknights.tconstruct.shared.TinkerCommons;
 
 import javax.annotation.Nullable;
@@ -57,7 +58,7 @@ public record PlaceGlowModule(int damage) implements ModifierModule, BlockIntera
           if (damage > 0 && ToolDamageUtil.damage(tool, damage, player, context.getItemInHand(), modifier.getId()) && player != null) {
             player.broadcastBreakEvent(source.getSlot(context.getHand()));
           }
-          world.playSound(null, pos, world.getBlockState(pos).getSoundType(world, pos, player).getPlaceSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
+          world.playSound(null, pos, SoundTypeHelper.getSoundType(world.getBlockState(pos), world, pos, player).getPlaceSound(), SoundSource.BLOCKS, 1.0f, 1.0f);
         }
       }
       return InteractionResult.sidedSuccess(context.getLevel().isClientSide);

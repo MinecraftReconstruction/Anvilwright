@@ -149,7 +149,7 @@ public record ArmorStatModule(TinkerDataKey<Float> key, LevelingValue amount, bo
    * @return  Level from the key
    */
   public static float getStat(Entity living, TinkerDataKey<Float> key) {
-    return living.getCapability(TinkerDataCapability.CAPABILITY).resolve().map(data -> data.get(key)).orElse(0f);
+    return TinkerDataCapability.CAPABILITY.maybeGet(living).map(data -> data.get(key)).orElse(0f);
   }
 
 

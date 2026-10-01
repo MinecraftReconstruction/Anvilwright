@@ -12,6 +12,7 @@ import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import net.minecraft.world.phys.Vec3;
 
 /** Effect to drop an item at the target */
 public record DropItemFluidEffect(ItemOutput item) implements FluidEffect<FluidEffectContext> {
@@ -31,7 +32,8 @@ public record DropItemFluidEffect(ItemOutput item) implements FluidEffect<FluidE
     int count = (int)(level.value() * item.getCount());
     if (count > 0) {
       if (action.execute()) {
-        ModifierUtil.dropItem(context.getLevel(), context.getLocation(), ItemHandlerHelper.copyStackWithSize(item.get(), count * item.getCount()));
+        Vec3 loc = context.getLocation();
+        ModifierUtil.dropItem(context.getLevel(), loc.x(), loc.y(), loc.z(), ItemHandlerHelper.copyStackWithSize(item.get(), count * item.getCount()));
       }
       return (float) count / item.getCount();
     }

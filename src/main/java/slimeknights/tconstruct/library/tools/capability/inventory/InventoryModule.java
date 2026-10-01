@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -44,8 +46,10 @@ import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.ToolNbtSnapshots;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -123,8 +127,14 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
   }
 
   @Override
-  public boolean isItemValid(IToolStackView tool, ModifierEntry modifier, int slot, ItemStack stack) {
+  public boolean isItemValid(IToolStackView tool, ModifierEntry modifier, int slot, ItemVariant stack) {
     return condition.matches(tool, modifier) && filter.matches(stack.getItem());
+  }
+
+  @Override
+  public void updateSnapshots(IToolStackView tool, ModifierEntry modifier, int slot, TransactionContext transaction) {
+    // the stacks live in the tool's persistent NBT, so the whole data needs a snapshot to be rolled back
+    ToolNbtSnapshots.updateSnapshots(tool, transaction);
   }
 
   @Nullable

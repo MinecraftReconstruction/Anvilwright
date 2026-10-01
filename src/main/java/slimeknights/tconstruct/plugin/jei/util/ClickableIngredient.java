@@ -19,19 +19,4 @@ public record ClickableIngredient<T>(IIngredientType<T> getType, T getIngredient
   public ITypedIngredient<T> getTypedIngredient() {
     return this;
   }
-
-  @Override
-  public ClickableIngredient<T> normalize(IIngredientHelper<T> ingredientHelper) {
-    T normalized = ingredientHelper.normalizeIngredient(getIngredient);
-    return normalized == getIngredient ? this : new ClickableIngredient<>(getType, normalized, getArea);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public @Nullable <V> ClickableIngredient<V> cast(IIngredientType<V> ingredientType) {
-    if (getType.equals(ingredientType)) {
-      return (ClickableIngredient<V>) this;
-    }
-    return null;
-  }
 }

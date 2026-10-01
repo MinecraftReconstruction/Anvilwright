@@ -26,6 +26,7 @@ import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.library.tools.part.IToolPart;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 import slimeknights.tconstruct.plugin.jei.util.CategoryUtil;
 import slimeknights.tconstruct.tools.TinkerTools;
 
@@ -63,9 +64,9 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, ToolBuildingRecipe recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(74, 22);
+    builder.addRecipeArrow().setPosition(74, 22);
     if (recipe.requiresAnvil()) {
-      builder.addDrawableWidget(anvil).setPosition(76, 44).setTooltip(ANVIL);
+      TooltipWidget.add(builder, anvil, 76, 44, List.of(ANVIL));
     }
   }
 

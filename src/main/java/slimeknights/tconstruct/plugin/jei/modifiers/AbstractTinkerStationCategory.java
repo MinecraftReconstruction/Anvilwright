@@ -105,7 +105,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(71, 33);
+    builder.addRecipeArrow().setPosition(71, 33);
 
     Component levelText = getVariantText(recipe);
     if (levelText != null) {

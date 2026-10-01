@@ -30,9 +30,11 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 
 /** Manager for spilling fluids for spilling, slurping, and wetting */
-public class FluidEffectManager extends SimpleJsonResourceReloadListener {
+public class FluidEffectManager extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
   /** Recipe folder */
   public static final String FOLDER = "tinkering/fluid_effects";
 
@@ -47,9 +49,6 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
 
   /** Empty spilling fluid instance */
   private static final FluidEffects EMPTY = new FluidEffects(FluidIngredient.EMPTY, List.of(), List.of(), true);
-
-  /** Condition context for recipe loading */
-  private DataLoadedConditionContext conditionContext = DataLoadedConditionContext.INSTANCE;
 
   private FluidEffectManager() {
     super(JsonHelper.DEFAULT_GSON, FOLDER);
@@ -85,10 +84,10 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
         JsonObject json = GsonHelper.convertToJsonObject(entry.getValue(), "fluid_effect");
 
         // want to parse condition without parsing effects, as the effect serializer may be missing
-        if (!CraftingHelper.processConditions(json, "conditions", conditionContext)) {
+        if (!ResourceConditions.objectMatchesConditions(json)) {
           continue;
         }
-        fluids.add(new FluidEffects.Entry(key, FluidEffects.LOADABLE.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build())));
+        fluids.add(new FluidEffects.Entry(key, FluidEffects.LOADABLE.deserialize(json, contextBuilder(key).build())));
       } catch (JsonSyntaxException e) {
         TConstruct.LOG.error("Failed to load fluid effect {}", key, e);
       }
@@ -125,5 +124,10 @@ public class FluidEffectManager extends SimpleJsonResourceReloadListener {
    */
   public FluidEffects find(Fluid fluid) {
     return cache.computeIfAbsent(fluid, FIND_UNCACHED);
+  }
+
+  @Override
+  public ResourceLocation getFabricId() {
+    return TConstruct.getResource("fluid_effect_manager");
   }
 }

@@ -27,8 +27,10 @@ public class IndestructibleItemEntity extends ItemEntity {
   public IndestructibleItemEntity(EntityType<? extends IndestructibleItemEntity> entityType, Level world) {
     super(entityType, world);
     // using setUnlimitedLifetime() makes the item no longer spin, dumb design
-    // since age is a short, this value should never be reachable so the item will never despawn
-    this.lifespan = Integer.MAX_VALUE;
+    // upstream instead raises Forge's lifespan to Integer.MAX_VALUE, which only stops the despawn timer; vanilla has
+    // no lifespan field, so start the age at the other end of the int range: it never reaches the 6000 despawn
+    // threshold, but the age keeps ticking, which is what drives the spin on the client
+    this.age = Integer.MIN_VALUE;
   }
 
   public IndestructibleItemEntity(Level worldIn, double x, double y, double z, ItemStack stack) {
@@ -60,7 +62,7 @@ public class IndestructibleItemEntity extends ItemEntity {
   @Override
   public boolean isInvulnerableTo(DamageSource pSource) {
     // prevent any damage besides out of world
-    return source.getMsgId().equals(damageSources().fellOutOfWorld().getMsgId());
+    return !pSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
   }
 
   /** Checks if the given stack has a custom entity */

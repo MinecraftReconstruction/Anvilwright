@@ -33,6 +33,7 @@ import slimeknights.tconstruct.smeltery.block.entity.ITankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity;
 import slimeknights.tconstruct.smeltery.block.entity.component.TankBlockEntity.ITankBlock;
 import slimeknights.tconstruct.smeltery.item.TankItem;
+import slimeknights.mantle.util.BlockEntityHelper;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
@@ -46,14 +47,17 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
   public static final IntegerProperty LIGHT = IntegerProperty.create("light", 0, 15);
   /** Gets the light level from a block state */
   public static final ToIntFunction<BlockState> LIGHT_GETTER = state -> state.getValue(SearedTankBlock.LIGHT);
-  public SearedTankBlock(Properties properties, long capacity) {
-    super(properties);
+  /** How pistons treat this block */
+  private final PushReaction pushReaction;
+  public SearedTankBlock(Properties properties, long capacity, PushReaction pushReaction) {
+    // vanilla has no overridable piston reaction method (Forge patches one in), so bake it into the properties
+    super(properties.pushReaction(pushReaction), true);
     this.capacity = capacity;
     this.pushReaction = pushReaction;
     registerDefaultState(defaultBlockState().setValue(LIGHT, 0));
   }
 
-  public SearedTankBlock(Properties properties, int capacity) {
+  public SearedTankBlock(Properties properties, long capacity) {
     this(properties, capacity, PushReaction.BLOCK);
   }
 
@@ -61,11 +65,6 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
     super.createBlockStateDefinition(builder);
     builder.add(LIGHT);
-  }
-
-  @Override
-  public PushReaction getPistonPushReaction(BlockState pState) {
-    return pushReaction;
   }
 
   @Deprecated

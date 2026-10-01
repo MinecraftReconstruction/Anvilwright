@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.modules.armor;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -72,7 +73,9 @@ public record SoulSpeedModule(LevelingInt level, ModifierCondition<IToolStackVie
     if (level.isEmptyBlock(pos)) {
       BlockPos below = pos.below();
       BlockState blockstate = level.getBlockState(below);
-      if (blockstate.collisionExtendsVertically(level, below, living)) {
+      // NOTE(porting): upstream calls Forge's IForgeBlockState#collisionExtendsVertically here; its default body is
+      //  exactly this check, and vanilla has no hook for blocks to override it
+      if (blockstate.isFaceSturdy(level, below, Direction.UP)) {
         return below;
       }
     }

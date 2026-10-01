@@ -105,8 +105,8 @@ public class ModifierClientEvents {
     //  See docs/BEHAVIOUR-DIFFERENCES.md #24.
 
     // if the data is set, render the empty offhand
-    if (offhand.isEmpty()) {
-      if (!player.isInvisible() && mainhand.getItem() != Items.FILLED_MAP && ModifierUtil.getTotalModifierLevel(player, TinkerDataKeys.SHOW_EMPTY_OFFHAND) > 0) {
+    if (held.isEmpty() && hand == InteractionHand.OFF_HAND) {
+      if (!player.isInvisible() && player.getMainHandItem().getItem() != Items.FILLED_MAP && ModifierUtil.getTotalModifierLevel(player, TinkerDataKeys.SHOW_EMPTY_OFFHAND) > 0) {
         PoseStack matrices = event.getPoseStack();
         matrices.pushPose();
         Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer().renderPlayerArm(matrices, event.getMultiBufferSource(), event.getPackedLight(), event.getEquipProgress(), event.getSwingProgress(), player.getMainArm().getOpposite());

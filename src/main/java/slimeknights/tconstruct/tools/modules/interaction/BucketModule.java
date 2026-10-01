@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
+import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.BucketItemAccessor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
@@ -194,7 +195,9 @@ public record BucketModule(IJsonPredicate<Fluid> fluids) implements ModifierModu
     if (state.getBlock() instanceof BucketPickup bucketPickup) {
       ItemStack bucket = bucketPickup.pickupBlock(world, target, state);
       if (!bucket.isEmpty() && bucket.getItem() instanceof BucketItem bucketItem) {
-        Fluid pickedUpFluid = bucketItem.getFluid();
+        // vanilla BucketItem keeps its fluid private; Forge exposes it through an access transformer, Porting Lib
+        // through this accessor (same accessor the fluid transfer helper uses)
+        Fluid pickedUpFluid = ((BucketItemAccessor) bucketItem).port_lib$getContent();
         if (pickedUpFluid != Fluids.EMPTY) {
           player.playSound(Objects.requireNonNullElse(pickedUpFluid.getFluidType().getSound(SoundActions.BUCKET_FILL), SoundEvents.BUCKET_FILL), 1.0F, 1.0F);
           // set the fluid if empty, increase the fluid if filled

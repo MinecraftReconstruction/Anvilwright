@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import slimeknights.tconstruct.plugin.jei.util.TooltipWidget;
 
 import static slimeknights.mantle.plugin.jei.MantleJEIConstants.getCraftingIndex;
 import static slimeknights.tconstruct.plugin.jei.modifiers.AbstractTinkerStationCategory.RESULT_TOOL_SLOT;
@@ -123,7 +124,7 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
   public void createRecipeExtras(IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
     // add title and tooltip via an icon
     if (information != null) {
-      builder.addDrawableWidget(information).setPosition(56, 0).setTooltip(recipe.getInformation());
+      TooltipWidget.add(builder, information, 56, 0, recipe.getInformation());
     }
     Component variantText = recipe.getVariant();
     if (variantText != null) {

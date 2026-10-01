@@ -93,6 +93,7 @@ import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayCraftingTink
 import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayToolTinkering;
 import slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe;
 import slimeknights.tconstruct.library.recipe.worktable.IModifierWorktableRecipe;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.SlotType;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
 import slimeknights.tconstruct.library.tools.definition.module.build.ToolTraitHook;
@@ -100,6 +101,7 @@ import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
+import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -135,6 +137,7 @@ import slimeknights.tconstruct.plugin.jei.util.TankHidingIngredientListener;
 import slimeknights.tconstruct.plugin.jei.util.ToolPartSubtypeInterpreter;
 import slimeknights.tconstruct.plugin.jei.util.ToolSubtypeInterpreter;
 import slimeknights.tconstruct.plugin.jei.util.manager.SimpleItemRecipeManager;
+import slimeknights.tconstruct.shared.TinkerMaterials;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
 import slimeknights.tconstruct.smeltery.client.screen.AlloyerScreen;
@@ -147,12 +150,15 @@ import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tables.recipe.CraftingTableRepairKitRecipe;
 import slimeknights.tconstruct.tables.recipe.TinkerStationRepairRecipe;
 import slimeknights.tconstruct.tools.TinkerModifiers;
+import slimeknights.tconstruct.tools.TinkerTools;
+import slimeknights.tconstruct.tools.item.ArmorSlotType;
 import slimeknights.tconstruct.tools.client.ToolContainerScreen;
 import slimeknights.tconstruct.tools.item.CreativeSlotItem;
 import slimeknights.tconstruct.tools.item.ModifierCrystalItem;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -407,9 +413,11 @@ public class JEIPlugin implements IModPlugin {
       list.add(stack);
       return false;
     }, table, tag);
-    Consumer<IIngredientAcceptor<?>> ingredientAdder = acceptor -> acceptor.addItemStacks(list);
+    // JEI 15.20 has no "ingredient acceptor" overload for catalysts, so each variant is registered on its own
     for (mezz.jei.api.recipe.RecipeType<?> type : types) {
-      registry.addRecipeCatalyst(type, ingredientAdder);
+      for (ItemStack variant : list) {
+        registry.addRecipeCatalyst(variant, type);
+      }
     }
   }
 
@@ -424,7 +432,7 @@ public class JEIPlugin implements IModPlugin {
     registry.addRecipeCatalyst(item, ownCategory);
     assert Minecraft.getInstance().level != null;
     if (!((RecipeManagerAccessor)Minecraft.getInstance().level.getRecipeManager()).port_lib$byType(type).isEmpty()) {
-      registry.addRecipeCatalyst(stack, TConstructJEIConstants.MOLDING);
+      registry.addRecipeCatalyst(item, TConstructJEIConstants.MOLDING);
     }
   }
 
@@ -454,7 +462,7 @@ public class JEIPlugin implements IModPlugin {
     // modifiers
     for (Holder<Item> item : Objects.requireNonNull(BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.MELEE))) {
       // add any tools with a severing trait
-      if (item instanceof IModifiable modifiable && modifiable.getToolDefinition().getData().getTraits().stream().anyMatch(entry -> entry.matches(TinkerModifiers.severing.getId()))) {
+      if (item.value() instanceof IModifiable modifiable && ToolTraitHook.getTraits(modifiable.getToolDefinition(), MaterialNBT.EMPTY).has(TinkerTags.Modifiers.SEVERING)) {
         registry.addRecipeCatalyst(IModifiableDisplay.getDisplayStack(item.value()), TConstructJEIConstants.SEVERING);
       }
     }
@@ -503,7 +511,7 @@ public class JEIPlugin implements IModPlugin {
 
     // parts
     for (Holder<Item> item : getTag(TinkerTags.Items.TOOL_PARTS)) {
-      registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item.value(), toolPartInterpreter);
+      registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item.value(), ToolPartSubtypeInterpreter.INSTANCE);
     }
 
     // tools
@@ -635,7 +643,7 @@ public class JEIPlugin implements IModPlugin {
     for (SmelteryCompat compat : SmelteryCompat.values()) {
       Iterable<Holder<Item>> ingot = getTag(new ResourceLocation("c", compat.getName() + "_ingots"));
       if (Iterables.isEmpty(ingot)) {
-        removeFluid(manager, fluidHelper, compat.getFluid().get(), compat.getBucket());
+        removeFluid(manager, fluidHelper, compat.getFluid().get(), compat.getFluid().getBucket());
       }
     }
     if (!FabricLoader.getInstance().isModLoaded("ceramics")) {

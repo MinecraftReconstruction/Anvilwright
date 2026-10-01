@@ -53,6 +53,17 @@ public class TinkerDamageTypes {
   /** Damage source for a "non-projectile" with {@link #FISHING_HOOK}. Used in enderference. */
   public static final ResourceKey<DamageType> MELEE_FISHING_HOOK = create("melee_fishing_hook");
 
+  /* Spilling */
+  /** Player/mob variants of the vanilla flavors used by the spilling effects, so protection and death messages behave */
+  public static final ResourceKey<DamageType> PLAYER_ATTACK_BYPASS_ARMOR = create("player_attack_bypass_armor");
+  public static final ResourceKey<DamageType> MOB_ATTACK_BYPASS_ARMOR = create("mob_attack_bypass_armor");
+  public static final ResourceKey<DamageType> PLAYER_ATTACK_EXPLOSION = create("player_attack_explosion");
+  public static final ResourceKey<DamageType> MOB_ATTACK_EXPLOSION = create("mob_attack_explosion");
+  public static final ResourceKey<DamageType> PLAYER_ATTACK_FIRE = create("player_attack_fire");
+  public static final ResourceKey<DamageType> MOB_ATTACK_FIRE = create("mob_attack_fire");
+  public static final ResourceKey<DamageType> PLAYER_ATTACK_MAGIC = create("player_attack_magic");
+  public static final ResourceKey<DamageType> MOB_ATTACK_MAGIC = create("mob_attack_magic");
+
   /** Damage source for an explosion that does not scale with difficulty */
   public static final DamageTypePair EXPLOSION = createPair("explosion");
   /** Damage source for an entity caused explosion that does not scale with difficulty */

@@ -1,18 +1,19 @@
 package slimeknights.tconstruct.tools.data.material;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialRenderInfoProvider;
 import slimeknights.tconstruct.library.client.data.material.AbstractMaterialSpriteProvider;
 import slimeknights.tconstruct.library.materials.definition.MaterialId;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.shared.block.SlimeType;
-import net.minecraft.data.PackOutput;
+import javax.annotation.Nullable;
 import net.minecraft.world.item.DyeColor;
 
 public class MaterialRenderInfoProvider extends AbstractMaterialRenderInfoProvider {
-  public MaterialRenderInfoProvider(FabricDataOutput output, AbstractMaterialSpriteProvider spriteProvider) {
-    super(output, spriteProvider);
+  public MaterialRenderInfoProvider(FabricDataOutput output, AbstractMaterialSpriteProvider spriteProvider, @Nullable ExistingFileHelper existingFileHelper) {
+    super(output, spriteProvider, existingFileHelper);
   }
 
   @Override

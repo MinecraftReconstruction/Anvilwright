@@ -16,10 +16,10 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
-import slimeknights.mantle.client.book.data.JsonCondition;
-import slimeknights.mantle.client.book.data.deserializer.ConditionDeserializer;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.exception.TinkerJSONException;
+import slimeknights.tconstruct.library.json.ConditionSerializer;
+import slimeknights.tconstruct.library.json.JsonCondition;
 import slimeknights.tconstruct.library.json.JsonRedirect;
 import slimeknights.tconstruct.library.materials.json.MaterialJson;
 import slimeknights.tconstruct.library.utils.GenericTagUtil;
@@ -66,8 +66,8 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
   /** GSON for loading materials */
   public static final Gson GSON = (new GsonBuilder())
     .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-    .registerTypeAdapter(JsonCondition.class, ConditionDeserializer.DESERIALIZER)
-    .registerTypeAdapter(JsonCondition.class, ConditionDeserializer.SERIALIZER)
+    .registerTypeAdapter(JsonCondition.class, ConditionSerializer.DESERIALIZER)
+    .registerTypeAdapter(JsonCondition.class, ConditionSerializer.SERIALIZER)
     .setPrettyPrinting()
     .disableHtmlEscaping()
     .create();
@@ -82,7 +82,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
   private List<IMaterial> sortedMaterials = Collections.emptyList();
 
   /** Modifier tags loaded from JSON */
-  private Map<ResourceLocation,Collection<IMaterial>> tags = Collections.emptyMap();
+  private Map<TagKey<IMaterial>,List<IMaterial>> tags = Collections.emptyMap();
   /** Map from modifier to tags on the modifier */
   private Map<MaterialId,Set<TagKey<IMaterial>>> reverseTags = Collections.emptyMap();
   /** Context for conditions */
@@ -169,8 +169,13 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
    * @param tag  Tag instance
    * @return  Contained values
    */
-  public Collection<IMaterial> getValues(TagKey<Modifier> tag) {
-    return tags.getOrDefault(tag.location(), Collections.emptySet());
+  public List<IMaterial> getValues(TagKey<IMaterial> tag) {
+    return tags.getOrDefault(tag, List.of());
+  }
+
+  /** Gets a stream of all tag ID to tag value mappings */
+  public Stream<Entry<TagKey<IMaterial>,List<IMaterial>>> getAllTags() {
+    return tags.entrySet().stream();
   }
 
 
@@ -187,7 +192,7 @@ public class MaterialManager extends SimpleJsonResourceReloadListener implements
   /**
    * Updates the material list from the server.list. Should only be called client side
    */
-  public void updateMaterialsFromServer(Map<MaterialId,IMaterial> materials, Map<MaterialId,MaterialId> redirects, Map<ResourceLocation,Collection<IMaterial>> tags) {
+  public void updateMaterialsFromServer(Map<MaterialId,IMaterial> materials, Map<MaterialId,MaterialId> redirects, Map<TagKey<IMaterial>,List<IMaterial>> tags) {
     this.materials = materials;
     this.redirects = redirects;
     this.tags = tags;

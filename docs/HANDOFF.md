@@ -385,3 +385,207 @@ Mantle 的 `FluidTransferHelper` 缺 `interactWithStack(...)` 与 `handleUIResul
 - **改 accesswidener 之后必须重新生成 classpath**，否则测得的是旧 MC jar。
 - 本轮为了编译通过，有几处是"先让它能编译"的保守处理（例如 `Modifier.getModule(Class)` 返回 null、
   若干 Forge 专属钩子退化成普通方法），**这些都需要在冒烟测试里逐条确认**，必要时补行为差异条目。
+
+---
+
+## 14. 2026-09-30 中午：`--gen` 只剩 6 条，但都是在"铸造配方 long 化"上（本轮交接）
+
+> 数字与逐项清单见 [NUMBERS.md](NUMBERS.md) 最后一节。HEAD 见 `git log -1`。
+
+### 14.1 一句话
+
+Handoff 第 13 节说的"缺 Mantle 的 `interactWithStack` / `handleUIResult`"**是误判**——那两个方法在已发布的
+`1.11.DEV.0f373c6d` 里就有；当时真正的 1 条错误是 TCon 侧 `ToolContainerMenu:257` 把 `ToolFluidHandler`
+传给了要 `Storage<FluidVariant>` 的方法。修好它之后是一连串"每轮只暴露 1 条"的连锁（共 12 轮），
+现在 `--gen` 剩 **6 条**，全部集中在铸造配方的 `long` 化。
+
+### 14.2 这一轮做了什么
+
+见 [NUMBERS.md](NUMBERS.md) 的"本轮修掉的东西"：流体 hook 全面改到 Fabric 签名、新增 `ToolNbtSnapshots`
+与 `SoundTypeHelper`、物品/实体/附魔/声音/桶/TNT 的 Forge 钩子逐个换掉、datagen 基类对齐。
+Mantle 侧发了两个版本（`78ffdf1a`、`292ad3e8`），`mantle_version` 已跟到后者。
+
+### 14.3 下一个 agent 从哪继续
+
+1. **继续"单点连锁"**：`scripts/port/fastcompile.sh --gen .port/gen_cur.txt`，修当前那一条（现在在
+   `library/recipe/casting/**` 的 `getFluidAmount` 返回类型上），再跑一次。**每轮都要跑**，因为一次只会暴露
+   一小批。⚠️ 别只看总数：整树 `--gen` **会漏报**（`TinkerGadgets` 的 5 条实体错误在只改过别的文件的日志里
+   根本没出现），所以刚碰过的文件要单独编译复核：
+   ```bash
+   out=$(mktemp -d); javac -nowarn -proc:full -Xmaxerrs 100000 \
+     -processorpath "$(cat .port/ap-cp.txt)" -cp "$(cat .port/compile-cp.txt)" \
+     -sourcepath src/main/java -d "$out" <文件.java> 2>&1 | grep "error:"
+   ```
+2. **long 化是成片的**：`IOreRate`、`FluidStack#getAmount()`、`MeltingFuel#getAmount`、`ICastingRecipe#getFluidAmount`
+   这些接口在本移植里都是 `long`，上游那些把它们当 `int` 的调用点会一条条冒出来。判据是"下游用得上的量"：
+   流体用 long（droplet），物品/伤害/时长仍用 int；溢出风险点加显式 `(int)` 转换并留注释。
+3. **改 `tinkers.accesswidener` 后必须重跑** `./gradlew -I scripts/port/printcp.gradle printCompileCp --offline`，
+   否则测的是旧 MC jar（本轮加过 `ItemEntity.age/pickupDelay`、`IntegerProperty.min/max`）。
+4. 之后才是第 13.4 节的 2→4 步：真 Gradle 构建、冒烟测试、canonical 仓库两分支。
+
+### 14.4 本轮新增的行为差异（都在 docs/BEHAVIOUR-DIFFERENCES.md）
+
+- #27 `SimpleFluidTank` 现在是 `Storage<FluidVariant>`（API 结构改动，语义等价）
+- #28 物品创造栏用 `ItemGroupEvents`（构造器多一个 tab 参数）
+- #29 `Config.COMMON.toolTweaks` 恒为空（上游两条附魔槽位扩展需要给 `Enchantment.slots` 加 AW）
+- #30 弩炮的 `ArrowNockEvent` 扩展点丢失（与 #10 同源）
+- #31 灵魂疾行用 `isFaceSturdy(..., UP)` 取代 `collisionExtendsVertically`
+
+---
+
+## 15. 2026-09-30 下午：long 化收尾，停在 datagen 的 `ToolsRecipeProvider`（本轮交接）
+
+- `--gen` 从 6 → 44，但那是**换了个领域**：铸造配方的 `long` 化已经修完（`AbstractMaterialCastingRecipe.getFluidAmount`
+  改 `long`、`PartSwapCastingRecipe` 用 `mapToLong`），暴露出来的是 datagen 的 `ToolsRecipeProvider`。
+- 对这个文件跑了配方 1：`python3 scripts/port/upstreamtake.py --apply src/main/java/slimeknights/tconstruct/tools/data/ToolsRecipeProvider.java`
+  → 该文件自身 **55 → 4**，整树 **55 → 44**，脚本 KEPT。**注意**：upstreamtake 之后文件里还是 Forge 的
+  import/调用，需要按 [NUMBERS.md](NUMBERS.md) 里那 6 条把管线换成 Fabric（ArmorSlotType、Porting Lib Tags、
+  `DefaultCustomIngredients`/`DefaultResourceConditions`、`FabricDataOutput`、`buildRecipes` 签名、`Pattern` 重载、
+  `addProvider` 歧义）。
+- **热测试还跑不了**：编译没到 0，`runServer`/`runClient` 无从谈起；第 13.4 节的第 2–4 步（真 Gradle 构建、
+  冒烟、canonical 仓库两分支）仍未开始。
+- 提醒：`ToolsRecipeProvider` 是 datagen 文件，改完除了 javac 还要跑一次 `./gradlew runData`（或 `build`）看
+  条件/原料写法是否真的能被 Fabric 接受。
+
+---
+
+## 16. 2026-09-30 傍晚：datagen 集群已清，停在 fork 独有的伤害类型（本轮交接）
+
+- `--gen`：44 → **8**。`ToolsRecipeProvider` 的 6 类 Fabric 管线问题全部修完（`ArmorSlotType`、
+  Porting Lib `Tags`、`DefaultCustomIngredients`、`DefaultResourceConditions.allModsLoaded`、`FabricDataOutput`、
+  `buildRecipes` 公开签名、4 参 `toolBuilding` 重载、`addProvider` 显式 `FabricDataGenerator.Pack.Factory`）。
+  注意 `TinkerToolParts.plating` / `TinkerSmeltery.dummyPlating` 仍然是 `ArmorItem.Type` 键（只在这 4 行里用），
+  所以那两个 `EnumObject` **没有**跟着改成 `ArmorSlotType`。
+- 现在剩下 8 条全在 `library/modifiers/spilling/effects/DamageSpillingEffect.java`：它是 fork 独有文件，
+  引用了 8 个本树不存在的伤害类型常量。细节与补法见 [NUMBERS.md](NUMBERS.md) 最后一节。
+- 修完这 8 条后按第 13.4 节继续：真 Gradle 构建（`./gradlew build --offline`，datagen 建议再跑一次
+  `runData`）→ `runServer` → `runClient` 热测试。
+
+---
+
+## 17. 2026-09-30 夜：伤害类型已补，队列里还有一批"同源 datagen 文件"（本轮交接）
+
+- `--gen`：8 → 5 → **81**。前两步是收尾（补 8 个伤害类型常量与 JSON；删掉两个 fork 遗留的 spilling provider），
+  第三步是"javac 走得更远"暴露出的新集群：`tools/data/ModifierRecipeProvider.java` 81 条。
+- 处理方式照抄上一轮验证过的配方：`scripts/port/upstreamtake.py --apply <文件>`（KEPT/REVERTED 自判），
+  然后按 `NUMBERS.md` 的方式补 Fabric 管线（Porting Lib `Tags`、`DefaultCustomIngredients`、
+  `DefaultResourceConditions`、`FabricDataOutput`、`buildRecipes` 公开、`modResource`→`location`）。
+- ⚠️ 每修完一个 datagen 文件都会再翻出一批同级文件，**数字先涨后落是正常的**；判据始终是"文件自身的错误数"，
+  不要看整树总数。最后才轮到 `./gradlew build --offline` → `runData` → `runServer` → `runClient`。
+
+---
+
+## 18. 2026-09-30 深夜：datagen 家族按"取上游"策略连消（81 → 36，本轮交接）
+
+**关键结论（省时间的那个）**：本树的这批 datagen 文件是 **1.18 时代的旧 fork 代码**（`bronzeReinforcement`、
+`MaterialIds.bloodbone`、`ArmorItem.Type`、`modResource(...)`、`saveThing(...)` 全是那个时代的），
+而 `--gen` 报出的错误条数与"与上游 3.12.1 的 diff 行数"高度相关。所以
+**`git checkout v3.12.1.231 -- <file>` 再补 Fabric 管线**，比在 fork 版上逐个改快得多，也和
+`ToolsRecipeProvider` 那一轮的结论一致。本轮按这个策略连消了 8 个文件（明细见 [NUMBERS.md](NUMBERS.md) 最后一节）。
+
+本轮修完（全部已编译验证）：`ModifierRecipeProvider`、`AbstractEnchantmentToModifierProvider`、
+`ArmorModelProvider`、`TrimMaterialPaletteGenerator`(+`Tinker…`)、`ToolItemModelProvider`(+`AbstractToolItemModelProvider`)、
+`ModifierModelMapProvider`、`ModifierModel.EMPTY`、`AbstractMaterialDataProvider`、`MaterialDataProvider`、
+`AbstractMaterialStatsDataProvider`。
+
+**顺手修掉一个真 bug**：Forge `CompoundIngredient` 是 OR，不是 AND；上一轮把它映射成了
+`DefaultCustomIngredients.all`。映射应为 `CompoundIngredient`→`any`、`IntersectionIngredient`→`all`、
+`DifferenceIngredient`→`difference`。`ToolsRecipeProvider` 两处已改。
+
+**下一步**：`--gen` 现在 **36 条全在 `tools/data/material/MaterialRecipeProvider.java`**（同一个套路），
+之后大概率还有 `tables/data/TableRecipeProvider`、`smeltery/data/SmelteryRecipeProvider` 等。全部到 0 之后才是
+第 13.4 节的 `./gradlew build --offline` → `runData` → `runServer` → `runClient`。
+
+⚠️ 另外记一笔**待补的注册**（编译不会报，但 datagen 会少文件）：`TinkerTools.gatherData` 目前只注册了
+8 个 provider，上游注册了 13 个 —— 缺 `ToolItemModelProvider`、`MaterialPaletteDebugGenerator`、
+`ArmorModelProvider`、`TinkerTrimMaterialPaletteGenerator`、`ModifierModelMapProvider`；
+`MaterialRenderInfoProvider` 也少了 `existingFileHelper` 参数（上游是 3 参）。这些类本轮都已经能编译，
+补注册本身是几行的事，但要等 `runData` 才能验证产物。
+
+---
+
+## 19. 2026-09-30 深夜（二）：**整树口径已经骗人了**，改用分块口径（本轮交接）
+
+**一句话**：整树 `--gen` 已经掉到 1 条，但那是假象 —— 分块编译（`scripts/port/truecount.sh`）
+跑到一半就有 **49 个包 / 417 条**。**不要再拿整树数字当进度条。**
+
+原因（老坑，这次量化了）：javac 一旦在某个类上报错，就不再给同一批里的其它类做归因，
+**整个文件的错误可以一条都不出现**。本轮翻出来的例子：`GuiTankModule` 里 `this.horizontal` 字段根本
+没声明、`NormalModifierModel` 里的 `textures[index]` 变量早就删了、`MaterialModel.getPartQuads`
+返回值类型和 `return` 语句不匹配 —— 这些在整树日志里**一条都没有**。
+
+**接手建议（省时间）**：
+
+1. 先跑 `scripts/port/truecount.sh .port/true_now.txt`（约 20 分钟）拿到**按包的完整错误清单**，
+   然后按清单成批修，不要再用整树日志一条条钓。
+2. 每次改完仍然跑一次 `scripts/port/fastcompile.sh --gen`，确认**没有新增**即可。
+3. 本轮已验证的两条高效套路：
+   - 数据生成器/`*Provider` 类：`git checkout v3.12.1.231 -- <文件>` → 补 4 类管线
+     （`FabricDataOutput`、`DefaultCustomIngredients`、`DefaultResourceConditions`、Porting Lib `Tags`）
+   - 客户端模型类：接口是 fork 的 `Mesh getQuads(...)`，把 `addQuads` 改写回去，
+     vanilla quads 一律用 `ToolModel.ofQuads(...)` 包成 Mesh
+4. Mantle 侧本轮修了 `mantle:tag_filled` 反相的真 bug（342 个 JSON 受影响），
+   版本推进到 `1.11.DEV.1e53afad`；**动了 Mantle 就要重新 `publishToMavenLocal` + bump + 重跑
+   `printCompileCp`**（本轮已做过）。
+5. 本轮新增两条 accesswidener（对应上游 `accesstransformer.cfg`）：
+   `FishingHookRenderer.stringVertex`、`SpriteSources.register`；**改 AW 必须重跑 `printCompileCp`**。
+
+---
+
+## 20. 2026-10-01 凌晨：整树数字已经彻底不可信，请用分块口径（本轮交接）
+
+**本轮最重要的一句话**：整树 `--gen` 在 1～20 之间来回跳，**不代表进度**。javac 每归因成功一个文件，
+就会把下一个"从没被检查过"的文件暴露出来。要看真实剩余量必须跑
+`scripts/port/truecount.sh`（分块编译，约 20 分钟）。
+
+**本轮结束时的状态**：
+- 已 push 的 checkpoint：`32f391871f` → `ca2544e034` → `05a08b41f1` → `8044d90de8` → `7207abf7c7`
+- 目录：`src/rei-unsupported/java/**`（停用的 REI 插件，见行为差异 #32）
+- Mantle 版本：`1.11.DEV.1e53afad`（修了 `mantle:tag_filled` 反相）
+- AW 新增：`FishingHookRenderer.stringVertex`、`SpriteSources.register`、
+  `MangroveRootPlacer.mangroveRootPlacement`
+- 当前阻塞的簇（接手时直接从这里开始）：`BlockModelSkullRenderer`（`renderModelLists` 私有 → AWS）、
+  `BuddingCrystalBlock`（多余的 `@Override`）、`FluidEffectManager`（`CraftingHelper.processConditions`
+  → Fabric 的 `ResourceConditions`）、`GenericNBTProvider`（已删掉用 `DataGenerator#getPackOutput` 的 ctor，
+  要检查还有没有人调用那种构造）
+
+**给接手的你（或下一个 agent）的最小流程**：
+1. `scripts/port/truecount.sh .port/true_now.txt`（拿全量清单）
+2. 按清单逐包修；每修完一轮跑 `scripts/port/fastcompile.sh --gen`（只看"有没有新增"）
+3. 每 1～2 个簇 commit + push（用 `git ls-remote` 复核，别信管道退出码）
+4. 非语义等价改动 → `docs/BEHAVIOUR-DIFFERENCES.md`
+5. 编译 0 之后：`./gradlew build --offline` → `runData` → 与上游 3.12.1 的 `src/generated` 做 diff
+   （**这是最能抓语义错误的验收手段**）→ `runServer` → `runClient`
+
+**已知的、必须靠"看"而不是靠"编译"确认的地方**（信心最低的三块）：
+- 流体单位：本移植是 droplet（1 桶 = 81000），上游是 mB（1000），行为差异 #20/#23
+- 渲染链路：`IBakedModifierModel` 是 fork 的 `Mesh getQuads(...)`，本轮把若干 `addQuads` 改回 `getQuads`
+  并用 `ToolModel.ofQuads` 包 vanilla quads —— 编译过 ≠ 画面对
+- 那些 fork 独有内容（血史莱姆、geode、bonus chest、REI、JEI 自写 tooltip widget）与上游数据集的一致性
+
+---
+
+## 21. 2026-10-01 凌晨（二）：第二轮清理（本轮交接）
+
+**已 push 的 checkpoint（全部用 `git ls-remote` 复核）**：
+`32f391871f` → `ca2544e034` → `05a08b41f1` → `8044d90de8` → `7207abf7c7` → `18827a42d8` → `6e70c5aa8b` → `324e8879e5` → `33e4f3da59`
+
+**Mantle 又推进了两版**（都要 publish + bump + 重跑 `printCompileCp`）：
+- `1.11.DEV.1e53afad`：修 `mantle:tag_filled` 注册反相（342 个 JSON 受影响）
+- `1.11.DEV.31f6e9eb`：`RecipeHelper.readItem/writeItem`（Forge 的 `RegistryHelper` 那套）
+
+**这一轮换掉的 Forge 独占钩子（都有注释 + 部分记入行为差异）**：
+`curePotionEffects`（两处 → 内联 vanilla 牛奶疗法）、`doesSneakBypassUse`、`onItemUseFirst`、
+`invalidateCaps`、`BlockPlaceContext(任意 LivingEntity)`、`ItemRenderer.renderModelLists`（→ AW）、
+`Enchantment.slots`（→ AW）、`LivingEntity.spawnItemParticles`（→ AW）、
+`ForgeHooks.getCriticalHit`（→ Porting Lib 事件）、`Holder#get`（→ `#value`）。
+
+**新发现的坑（重要）**：分块口径里有很多**级联错误**。比如 `common/data/tags` 这个 chunk 单编译时报 81 条，
+其中 `ToolStack` 的 10 条、`ModifierNBT`/`ModDataNBT` 的二十多条都是"根因类缺成员"的连带噪声。
+⇒ 修完根因务必重跑同一个 chunk 验证，不要按条数排优先级。
+
+**下一步的推荐顺序（基于第二轮快照）**：
+1. `common/data/tags`（`ItemTagProvider` 48 + `BlockTagProvider` 22；都是 tag provider 管线，套路已成熟）
+2. `library/recipe/casting/*`（PotionCastingRecipe / 材料铸造 / 铸造 builder，约 80 条）
+3. `shared`、`library/client/model/block`、`library/recipe/ingredient`
+4. 全树 0 → `./gradlew build --offline` → `runData` → 与上游 `src/generated` diff → `runServer` → `runClient`

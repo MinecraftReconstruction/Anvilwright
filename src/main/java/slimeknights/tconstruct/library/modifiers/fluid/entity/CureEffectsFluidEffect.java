@@ -11,6 +11,8 @@ import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffectContext.Entity;
+import net.minecraft.world.effect.MobEffectInstance;
+import java.util.List;
 
 /**
  * Effect to clear all effects using the given stack
@@ -32,7 +34,18 @@ public record CureEffectsFluidEffect(ItemStack stack) implements FluidEffect<Flu
       if (action.simulate()) {
         return target.getActiveEffects().stream().anyMatch(effect -> effect.isCurativeItem(stack)) ? 1 : 0;
       }
-      return target.curePotionEffects(stack) ? 1 : 0;
+      // Forge's LivingEntity#curePotionEffects hook does not exist on Fabric, so apply the vanilla milk cure
+      // ourselves: remove every effect the stack cures. Behaviour difference: addons can no longer veto it.
+      boolean cured = false;
+      if (!target.level().isClientSide) {
+        for (MobEffectInstance effect : List.copyOf(target.getActiveEffects())) {
+          if (effect.isCurativeItem(stack)) {
+            target.removeEffect(effect.getEffect());
+            cured = true;
+          }
+        }
+      }
+      return cured ? 1 : 0;
     }
     return 0;
   }

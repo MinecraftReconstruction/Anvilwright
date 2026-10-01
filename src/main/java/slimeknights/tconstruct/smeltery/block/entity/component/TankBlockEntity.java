@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.mantle.client.model.ModelData;
 import slimeknights.mantle.util.RetexturedHelper;
+import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.library.fluid.FluidTankAnimated;
 import slimeknights.tconstruct.library.utils.NBTTags;
@@ -111,6 +113,19 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
       updateLight(this, tank);
       // refresh the render data; Forge's requestModelDataUpdate() does not exist on Fabric
       RetexturedHelper.onTextureUpdated(this);
+    }
+  }
+
+  /** Updates the light level of the given tank block based on the contained fluid */
+  public static void updateLight(BlockEntity be, FluidTankAnimated tank) {
+    Level level = be.getLevel();
+    if (level != null && !level.isClientSide) {
+      FluidStack fluid = tank.getFluid();
+      int light = fluid.isEmpty() ? 0 : FluidVariantAttributes.getLuminance(FluidVariant.of(fluid.getFluid()));
+      BlockState state = be.getBlockState();
+      if (light != state.getValue(SearedTankBlock.LIGHT)) {
+        level.setBlock(be.getBlockPos(), state.setValue(SearedTankBlock.LIGHT, light), Block.UPDATE_CLIENTS);
+      }
     }
   }
 

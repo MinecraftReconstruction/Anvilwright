@@ -24,11 +24,6 @@ public class BuddingCrystalBlock extends CrystalBlock {
   }
 
   @Override
-  public PushReaction getPistonPushReaction(BlockState pState) {
-    return PushReaction.DESTROY;
-  }
-
-  @Override
   public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
     if (pRandom.nextInt(5) == 0) {
       Direction direction = DIRECTIONS[pRandom.nextInt(DIRECTIONS.length)];

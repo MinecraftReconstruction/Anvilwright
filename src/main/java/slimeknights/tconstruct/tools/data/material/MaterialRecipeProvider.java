@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tools.data.material;
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +17,8 @@ import net.minecraft.world.item.Instruments;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import slimeknights.mantle.datagen.MantleTags;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -43,16 +46,13 @@ import slimeknights.tconstruct.world.TinkerWorld;
 
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.data.PackOutput;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
+
 import static slimeknights.mantle.Mantle.COMMON;
 import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
-@SuppressWarnings("removal")
 public class MaterialRecipeProvider extends BaseRecipeProvider implements IMaterialRecipeHelper {
-  public MaterialRecipeProvider(FabricDataOutput output) {
-    super(output);
+  public MaterialRecipeProvider(FabricDataOutput packOutput) {
+    super(packOutput);
   }
 
   @Override
@@ -71,31 +71,30 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     // tier 1
     materialRecipe(consumer, MaterialIds.wood,   Ingredient.of(Tags.Items.RODS_WOODEN), 1, 2, folder + "wood/sticks");
     // planks
-    materialRecipe(consumer, MaterialIds.oak,     Ingredient.of(Items.OAK_PLANKS),      1, 1, folder + "wood/planks/oak");
-    materialRecipe(consumer, MaterialIds.spruce,  Ingredient.of(Items.SPRUCE_PLANKS),   1, 1, folder + "wood/planks/spruce");
-    materialRecipe(consumer, MaterialIds.birch,   Ingredient.of(Items.BIRCH_PLANKS),    1, 1, folder + "wood/planks/birch");
-    materialRecipe(consumer, MaterialIds.jungle,  Ingredient.of(Items.JUNGLE_PLANKS),   1, 1, folder + "wood/planks/jungle");
-    materialRecipe(consumer, MaterialIds.darkOak, Ingredient.of(Items.DARK_OAK_PLANKS), 1, 1, folder + "wood/planks/dark_oak");
-    materialRecipe(consumer, MaterialIds.acacia,  Ingredient.of(Items.ACACIA_PLANKS),   1, 1, folder + "wood/planks/acacia");
-    materialRecipe(consumer, MaterialIds.crimson, Ingredient.of(Items.CRIMSON_PLANKS),  1, 1, folder + "wood/planks/crimson");
-    materialRecipe(consumer, MaterialIds.warped,  Ingredient.of(Items.WARPED_PLANKS),   1, 1, folder + "wood/planks/warped");
-    materialRecipe(consumer, MaterialIds.mangrove,  Ingredient.of(Items.MANGROVE_PLANKS),   1, 1, folder + "wood/planks/mangrove");
-    materialRecipe(consumer, MaterialIds.cherry,  Ingredient.of(Items.CHERRY_PLANKS),   1, 1, folder + "wood/planks/cherry");
-    materialRecipe(consumer, MaterialIds.bamboo,  Ingredient.of(Items.BAMBOO_PLANKS),   1, 1, folder + "wood/planks/bamboo");
-    materialRecipe(withCondition(consumer, TagDifferencePresentCondition.ofKeys(ItemTags.PLANKS, TinkerTags.Items.VARIANT_PLANKS)), MaterialIds.wood,
+    materialRecipe(consumer, MaterialIds.crimson,  Ingredient.of(Items.CRIMSON_PLANKS),  1, 1, folder + "wood/planks/crimson");
+    materialRecipe(consumer, MaterialIds.warped,   Ingredient.of(Items.WARPED_PLANKS),   1, 1, folder + "wood/planks/warped");
+    materialRecipe(withCondition(consumer, TagCombinationCondition.difference(ItemTags.PLANKS, TinkerTags.Items.VARIANT_PLANKS)), MaterialIds.wood,
                    DefaultCustomIngredients.difference(Ingredient.of(ItemTags.PLANKS), Ingredient.of(TinkerTags.Items.VARIANT_PLANKS)), 1, 1, folder + "wood/planks/default");
     // logs
-    materialRecipe(consumer, MaterialIds.oak,     Ingredient.of(ItemTags.OAK_LOGS),      4, 1, ItemOutput.fromStack(new ItemStack(Blocks.OAK_PLANKS)),      folder + "wood/logs/oak");
-    materialRecipe(consumer, MaterialIds.spruce,  Ingredient.of(ItemTags.SPRUCE_LOGS),   4, 1, ItemOutput.fromStack(new ItemStack(Blocks.SPRUCE_PLANKS)),   folder + "wood/logs/spruce");
-    materialRecipe(consumer, MaterialIds.birch,   Ingredient.of(ItemTags.BIRCH_LOGS),    4, 1, ItemOutput.fromStack(new ItemStack(Blocks.BIRCH_PLANKS)),    folder + "wood/logs/birch");
-    materialRecipe(consumer, MaterialIds.jungle,  Ingredient.of(ItemTags.JUNGLE_LOGS),   4, 1, ItemOutput.fromStack(new ItemStack(Blocks.JUNGLE_PLANKS)),   folder + "wood/logs/jungle");
-    materialRecipe(consumer, MaterialIds.darkOak, Ingredient.of(ItemTags.DARK_OAK_LOGS), 4, 1, ItemOutput.fromStack(new ItemStack(Blocks.DARK_OAK_PLANKS)), folder + "wood/logs/dark_oak");
-    materialRecipe(consumer, MaterialIds.acacia,  Ingredient.of(ItemTags.ACACIA_LOGS),   4, 1, ItemOutput.fromStack(new ItemStack(Blocks.ACACIA_PLANKS)),   folder + "wood/logs/acacia");
-    materialRecipe(consumer, MaterialIds.crimson, Ingredient.of(ItemTags.CRIMSON_STEMS), 4, 1, ItemOutput.fromStack(new ItemStack(Blocks.CRIMSON_PLANKS)),  folder + "wood/logs/crimson");
-    materialRecipe(consumer, MaterialIds.warped,  Ingredient.of(ItemTags.WARPED_STEMS),  4, 1, ItemOutput.fromStack(new ItemStack(Blocks.WARPED_PLANKS)),   folder + "wood/logs/warped");
-    materialRecipe(withCondition(consumer, TagDifferencePresentCondition.ofKeys(ItemTags.LOGS, TinkerTags.Items.VARIANT_LOGS)), MaterialIds.wood,
+    // standard wood, different recipes just swap the leftovers
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.OAK_LOGS),      4, 1, ItemOutput.fromItem(Blocks.OAK_PLANKS),      folder + "wood/logs/oak");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.SPRUCE_LOGS),   4, 1, ItemOutput.fromItem(Blocks.SPRUCE_PLANKS),   folder + "wood/logs/spruce");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.BIRCH_LOGS),    4, 1, ItemOutput.fromItem(Blocks.BIRCH_PLANKS),    folder + "wood/logs/birch");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.JUNGLE_LOGS),   4, 1, ItemOutput.fromItem(Blocks.JUNGLE_PLANKS),   folder + "wood/logs/jungle");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.DARK_OAK_LOGS), 4, 1, ItemOutput.fromItem(Blocks.DARK_OAK_PLANKS), folder + "wood/logs/dark_oak");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.ACACIA_LOGS),   4, 1, ItemOutput.fromItem(Blocks.ACACIA_PLANKS),   folder + "wood/logs/acacia");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.MANGROVE_LOGS), 4, 1, ItemOutput.fromItem(Blocks.MANGROVE_PLANKS), folder + "wood/logs/mangrove");
+    materialRecipe(consumer, MaterialIds.wood, Ingredient.of(ItemTags.CHERRY_LOGS),   4, 1, ItemOutput.fromItem(Blocks.CHERRY_PLANKS),   folder + "wood/logs/cherry");
+    // variant wood, swaps the variant as well
+    materialRecipe(consumer, MaterialIds.crimson,  Ingredient.of(ItemTags.CRIMSON_STEMS), 4, 1, ItemOutput.fromItem(Blocks.CRIMSON_PLANKS),  folder + "wood/logs/crimson");
+    materialRecipe(consumer, MaterialIds.warped,   Ingredient.of(ItemTags.WARPED_STEMS),  4, 1, ItemOutput.fromItem(Blocks.WARPED_PLANKS),   folder + "wood/logs/warped");
+    materialRecipe(withCondition(consumer, TagCombinationCondition.difference(ItemTags.LOGS, TinkerTags.Items.VARIANT_LOGS)), MaterialIds.wood,
                    DefaultCustomIngredients.difference(Ingredient.of(ItemTags.LOGS), Ingredient.of(TinkerTags.Items.VARIANT_LOGS)), 4, 1,
-                   ItemOutput.fromStack(new ItemStack(Items.STICK, 2)), folder + "wood/logs/default");
+                   ItemOutput.fromItem(Items.STICK, 2), folder + "wood/logs/default");
+    // bamboo
+    materialRecipe(consumer, MaterialIds.bamboo, Ingredient.of(Items.BAMBOO),           1, 9, folder + "wood/bamboo/stick");
+    materialRecipe(consumer, MaterialIds.bamboo, Ingredient.of(ItemTags.BAMBOO_BLOCKS), 1, 1, folder + "wood/bamboo/block");
+    materialRecipe(consumer, MaterialIds.bamboo, Ingredient.of(Blocks.BAMBOO_PLANKS),   1, 2, folder + "wood/bamboo/planks");
     // stone
     materialRecipe(consumer, MaterialIds.stone,      Ingredient.of(TinkerTags.Items.STONE),      1, 1, folder + "rock/stone");
     materialRecipe(consumer, MaterialIds.andesite,   Ingredient.of(TinkerTags.Items.ANDESITE),   1, 1, folder + "rock/andesite");
@@ -110,7 +109,7 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     ItemOutput copperIngot = ItemOutput.fromTag(Tags.Items.INGOTS_COPPER);
     materialRecipe(consumer, MaterialIds.copper, Ingredient.of(TinkerTags.Items.NUGGETS_COPPER), 1, 9, folder + "copper/nugget");
     materialRecipe(consumer, MaterialIds.copper, Ingredient.of(Tags.Items.INGOTS_COPPER),        1, 1, folder + "copper/ingot");
-    materialRecipe(consumer, MaterialIds.copper, CompoundIngredient.of(Ingredient.of(Tags.Items.STORAGE_BLOCKS_COPPER), Ingredient.of(Blocks.WAXED_COPPER_BLOCK)), 9, 1, copperIngot, folder + "copper/block");
+    materialRecipe(consumer, MaterialIds.copper, DefaultCustomIngredients.any(Ingredient.of(Tags.Items.STORAGE_BLOCKS_COPPER), Ingredient.of(Blocks.WAXED_COPPER_BLOCK)), 9, 1, copperIngot, folder + "copper/block");
     materialRecipe(consumer, MaterialIds.oxidizedCopper, Ingredient.of(Blocks.EXPOSED_COPPER, Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_OXIDIZED_COPPER), 9, 1, copperIngot, folder + "copper/oxidized");
     // other tier 1
     materialRecipe(consumer, MaterialIds.bone,         Ingredient.of(TinkerTags.Items.BONES),    1, 1, folder + "bone");
@@ -232,7 +231,10 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     metalMaterialRecipe(consumer, MaterialIds.bronze, folder, "bronze", true);
     metalMaterialRecipe(consumer, MaterialIds.constantan, folder, "constantan", true);
     metalMaterialRecipe(consumer, MaterialIds.invar, folder, "invar", true);
-    materialRecipe(withCondition(consumer, tagCondition("uranium_ingots")), MaterialIds.necronium, Ingredient.of(TinkerMaterials.necroniumBone), 1, 1, folder + "necronium");
+    metalMaterialRecipe(consumer, MaterialIds.pewter, folder, "pewter", true);
+    materialRecipe(
+      withCondition(consumer, DefaultResourceConditions.or(ConfigEnabledCondition.FORCE_INTEGRATION_MATERIALS, tagCondition("ingots/uranium"))),
+      MaterialIds.necronium, Ingredient.of(TinkerMaterials.necroniumBone), 1, 1, folder + "necronium");
     metalMaterialRecipe(consumer, MaterialIds.electrum, folder, "electrum", true);
     metalMaterialRecipe(consumer, MaterialIds.steeleaf, folder, "steeleaf", true);
     // no plated slimewood, use repair kits
@@ -317,34 +319,98 @@ public class MaterialRecipeProvider extends BaseRecipeProvider implements IMater
     materialComposite(consumer, MaterialIds.blaze, MaterialIds.jadeite, TinkerFluids.moltenEmerald, FluidValues.GEM, folder);
 
     // tier 4
-    materialMeltingCasting(consumer, MaterialIds.queensSlime, TinkerFluids.moltenQueensSlime, false, folder);
-    materialMeltingCasting(consumer, MaterialIds.hepatizon,   TinkerFluids.moltenHepatizon,   true,  folder);
-    materialMeltingCasting(consumer, MaterialIds.manyullyn,   TinkerFluids.moltenManyullyn,   true,  folder);
-    materialComposite(consumer, MaterialIds.necroticBone, MaterialIds.blazingBone, TinkerFluids.blazingBlood, false, FluidConstants.BUCKET / 5, folder);
-    materialMeltingComposite(consumer, MaterialIds.leather, MaterialIds.ancientHide, TinkerFluids.moltenDebris, false, FluidValues.INGOT, folder);
+    materialMeltingCasting(consumer, MaterialIds.cinderslime, TinkerFluids.moltenCinderslime, folder);
+    materialMeltingCasting(consumer, MaterialIds.queensSlime, TinkerFluids.moltenQueensSlime, folder);
+    materialMeltingCasting(consumer, MaterialIds.hepatizon,   TinkerFluids.moltenHepatizon,   folder);
+    materialMeltingCasting(consumer, MaterialIds.manyullyn,   TinkerFluids.moltenManyullyn,   folder);
+    materialMeltingCasting(consumer, MaterialIds.knightmetal, TinkerFluids.moltenKnightmetal, folder);
+    materialMeltingCasting(consumer, MaterialIds.knightslime, TinkerFluids.moltenKnightslime, folder);
+    materialComposite(consumer, MaterialIds.bloodshroom,  MaterialIds.blazewood,   TinkerFluids.blazingBlood, FluidConstants.BUCKET / 5, folder);
+    materialComposite(consumer, MaterialIds.necroticBone, MaterialIds.blazingBone, TinkerFluids.blazingBlood, FluidConstants.BUCKET / 5, folder);
+    materialMeltingComposite(consumer, MaterialIds.leather, MaterialIds.jeweledHide, TinkerFluids.moltenDiamond, FluidValues.GEM, folder);
+    venomCleaning(consumer, MaterialIds.jeweledHide, folder, "jeweled_hide_cleaning");
+    materialMelting(consumer, MaterialIds.ancientHide, TinkerFluids.moltenDebris, FluidValues.INGOT, folder);
+    venomCleaning(consumer, MaterialIds.ancientHide, folder, "ancient_hide_cleaning");
 
     // tier 2 compat
     compatMeltingCasting(consumer, MaterialIds.osmium,   TinkerFluids.moltenOsmium,   folder);
     compatMeltingCasting(consumer, MaterialIds.silver,   TinkerFluids.moltenSilver,   folder);
     compatMeltingCasting(consumer, MaterialIds.lead,     TinkerFluids.moltenLead,     folder);
     compatMeltingCasting(consumer, MaterialIds.aluminum, TinkerFluids.moltenAluminum, folder);
-    materialComposite(withCondition(consumer, tagCondition("aluminum_ingots")), MaterialIds.rock, MaterialIds.whitestone, TinkerFluids.moltenAluminum, true, FluidValues.INGOT, folder, "whitestone_from_aluminum");
-    materialComposite(withCondition(consumer, tagCondition("tin_ingots")),      MaterialIds.rock, MaterialIds.whitestone, TinkerFluids.moltenTin,      true, FluidValues.INGOT, folder, "whitestone_from_tin");
-    materialComposite(withCondition(consumer, tagCondition("zinc_ingots")),     MaterialIds.rock, MaterialIds.whitestone, TinkerFluids.moltenZinc,     true, FluidValues.INGOT, folder, "whitestone_from_zinc");
+    whitestoneCasting(consumer, TinkerFluids.moltenAluminum, folder);
+    whitestoneCasting(consumer, TinkerFluids.moltenTin,      folder);
+    whitestoneCasting(consumer, TinkerFluids.moltenZinc,     folder);
+    whitestoneCasting(consumer, TinkerFluids.moltenNickel,   folder);
+    whitestoneCasting(consumer, TinkerFluids.moltenChromium, folder);
+    whitestoneCasting(consumer, TinkerFluids.moltenCadmium,  folder);
+    TagKey<Fluid> creosote = getFluidTag(COMMON, "creosote");
+    MaterialFluidRecipeBuilder.material(MaterialIds.treatedWood)
+      .setInputId(MaterialIds.wood)
+      .setFluid(FluidIngredient.of(creosote, 125))
+      .setTemperature(600)
+      .save(withCondition(consumer, new TagFilledCondition<>(creosote)), location(folder + "composite/treated_wood"));
+    MaterialMeltingRecipeBuilder.material(MaterialIds.ironwood, TinkerFluids.moltenIron, FluidValues.INGOT)
+      .addByproduct(TinkerFluids.moltenGold.result(FluidValues.NUGGET))
+      .save(withCondition(consumer, tagCondition("ingots/ironwood")), location(folder + "melting/ironwood"));
     // tier 3 compat
-    compatMeltingCasting(consumer, MaterialIds.steel,          TinkerFluids.moltenSteel,      folder);
-    compatMeltingCasting(consumer, MaterialIds.constantan,     TinkerFluids.moltenConstantan, folder);
-    compatMeltingCasting(consumer, MaterialIds.invar,          TinkerFluids.moltenInvar,      folder);
-    compatMeltingCasting(consumer, MaterialIds.electrum,       TinkerFluids.moltenElectrum,   folder);
-    compatMeltingCasting(consumer, MaterialIds.bronze,         TinkerFluids.moltenBronze,     folder);
-    materialMeltingComposite(withCondition(consumer, tagCondition("uranium_ingots")), MaterialIds.necroticBone, MaterialIds.necronium,       TinkerFluids.moltenUranium, true, FluidValues.INGOT, folder);
-    materialMeltingComposite(withCondition(consumer, tagCondition("brass_ingots")),   MaterialIds.slimewood,    MaterialIds.platedSlimewood, TinkerFluids.moltenBrass,   true, FluidValues.INGOT, folder);
+    compatMeltingCasting(consumer, MaterialIds.constantan, TinkerFluids.moltenConstantan, "nickel", folder);
+    compatMeltingCasting(consumer, MaterialIds.invar,      TinkerFluids.moltenInvar,      "nickel", folder);
+    compatMeltingCasting(consumer, MaterialIds.electrum,   TinkerFluids.moltenElectrum,   "silver", folder);
+    compatMeltingCasting(consumer, MaterialIds.bronze,     TinkerFluids.moltenBronze,     "tin", folder);
+    compatMeltingCasting(consumer, MaterialIds.steeleaf,   TinkerFluids.moltenSteeleaf, folder);
+    // pewter has two different ores that let it appear, tin and lead
+    materialMeltingCasting(
+      withCondition(consumer, DefaultResourceConditions.or(tagCondition("ingots/pewter"), tagCondition("ingots/tin"), tagCondition("ingots/lead"))),
+      MaterialIds.pewter, TinkerFluids.moltenPewter, folder);
+    materialMeltingComposite(withCondition(consumer, tagCondition("ingots/uranium")), MaterialIds.necroticBone, MaterialIds.necronium, TinkerFluids.moltenUranium, FluidValues.INGOT, folder);
+    materialMeltingComposite(withCondition(consumer, DefaultResourceConditions.or(tagCondition("ingots/brass"), tagCondition("ingots/zinc"))),
+                             MaterialIds.slimewood, MaterialIds.platedSlimewood, TinkerFluids.moltenBrass, FluidValues.INGOT, folder);
+    // tier 4 compat
+    Consumer<FinishedRecipe> fieryConsumer = withCondition(consumer, tagCondition("ingots/fiery"));
+    materialComposite(fieryConsumer, MaterialIds.iron, MaterialIds.fiery, TinkerFluids.fieryLiquid, FluidValues.BOTTLE, folder);
+    MaterialMeltingRecipeBuilder.material(MaterialIds.fiery, TinkerFluids.fieryLiquid, FluidValues.BOTTLE)
+      .addByproduct(TinkerFluids.moltenIron.result(FluidValues.INGOT))
+      .save(fieryConsumer, location(folder + "melting/fiery"));
+    // nicrosil has three different ores that let it appear, tin, nickel, and chromium
+    materialMeltingCasting(
+      withCondition(consumer, DefaultResourceConditions.or(tagCondition("ingots/nicrosil"), tagCondition("ingots/tin"), tagCondition("ingots/nickel"), tagCondition("ingots/chromium"))),
+      MaterialIds.nicrosil, TinkerFluids.moltenNicrosil, folder);
 
     // slimesuit - slime
     materialMeltingCasting(consumer, MaterialIds.earthslime, TinkerFluids.earthSlime, FluidValues.SLIMEBALL, folder);
     materialMeltingCasting(consumer, MaterialIds.skyslime,   TinkerFluids.skySlime,   FluidValues.SLIMEBALL, folder);
     materialMeltingCasting(consumer, MaterialIds.ichor,      TinkerFluids.ichor,      FluidValues.SLIMEBALL, folder);
     materialMeltingCasting(consumer, MaterialIds.enderslime, TinkerFluids.enderSlime, FluidValues.SLIMEBALL, folder);
-    //materialMeltingCasting(consumer, MaterialIds.venom, TinkerFluids.venom, FluidConstants.BUCKET / 4, folder);
+    materialMeltingCasting(consumer, MaterialIds.magma,      TinkerFluids.magma,      FluidValues.SLIMEBALL, folder);
+    materialComposite(consumer, MaterialIds.earthslime, MaterialIds.magma, TinkerFluids.blazingBlood, FluidConstants.BUCKET / 20, folder);
+    // slimesuit - pseudoslime
+    materialMeltingCasting(consumer, MaterialIds.clay,       TinkerFluids.moltenClay,  FluidValues.BRICK,     folder);
+    materialMeltingCasting(consumer, MaterialIds.enderPearl, TinkerFluids.moltenEnder, FluidValues.SLIMEBALL, folder);
+    materialMeltingCasting(consumer, MaterialIds.honey,      TinkerFluids.honey,       FluidValues.BOTTLE,    folder);
+    materialMeltingCasting(consumer, MaterialIds.venom,      TinkerFluids.venom,       FluidValues.BOTTLE,    folder);
+    // slimesuit - repair kits
+    materialMeltingCasting(consumer, MaterialIds.glass, TinkerFluids.moltenGlass, FluidValues.GLASS_PANE, folder);
+  }
+
+  /** Adds a recipe casting whitestone from the given fluid */
+  private void whitestoneCasting(Consumer<FinishedRecipe> consumer, FluidObject<?> fluid, String folder) {
+    String name = TinkerFluids.withoutMolten(fluid);
+    materialComposite(withCondition(consumer, tagCondition("ingots/" + name)), MaterialIds.rock, MaterialIds.whitestoneComposite, fluid, FluidValues.INGOT, folder, "whitestone_from_" + name);
+  }
+
+  /** Adds recipes to clean leather with venom */
+  private void venomCleaning(Consumer<FinishedRecipe> consumer, MaterialVariantId input, String folder, String name) {
+    MaterialFluidRecipeBuilder.material(MaterialIds.leather)
+      .setInputId(input)
+      .setFluid(TinkerFluids.venom.ingredient(FluidValues.SIP))
+      .setTemperature(getTemperature(TinkerFluids.venom))
+      .setHideInBook(true)
+      .save(consumer, location(folder + "composite/" + name));
+  }
+
+  /** Adds a recipe for crafting a goat horn material */
+  private void hornMaterial(Consumer<FinishedRecipe> consumer, ResourceKey<Instrument> instrument, String folder) {
+    ResourceLocation key = instrument.location();
+    materialRecipe(consumer, MaterialVariantId.create(MaterialIds.horn, key.toLanguageKey()), InstrumentIngredient.of(Items.GOAT_HORN, instrument), 4, 1, folder + "horn/" + key.getPath());
   }
 }

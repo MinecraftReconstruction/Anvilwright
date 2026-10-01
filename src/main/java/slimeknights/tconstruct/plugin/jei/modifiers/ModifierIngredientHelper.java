@@ -38,11 +38,6 @@ public class ModifierIngredientHelper implements IIngredientHelper<ModifierEntry
   }
 
   @Override
-  public Object getUid(ModifierEntry entry, UidContext context) {
-    return entry.getId();
-  }
-
-  @Override
   public ResourceLocation getResourceLocation(ModifierEntry entry) {
     return entry.getId();
   }

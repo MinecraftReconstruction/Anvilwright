@@ -1,8 +1,14 @@
 package slimeknights.tconstruct.library.fluid;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Stand-in for Forge's {@code IFluidTank} + {@code IFluidHandler} pair, for a single tank.
@@ -15,8 +21,14 @@ import javax.annotation.Nonnull;
  * Amounts are {@code long} throughout, matching Porting Lib's {@code FluidStack}/{@code FluidTank}.
  * The default {@link #fill}/{@link #drain} bodies mirror Forge's {@code FluidTank} semantics, including
  * honouring {@link FluidAction}.
+ * <p>
+ * Upstream this interface extends {@code IFluidTank, IFluidHandler}; on Fabric the same role is played by
+ * {@link Storage} of {@link FluidVariant}, so the interface extends that too. Tanks backed by Porting Lib's
+ * {@code FluidTank} inherit a real transactional implementation from the superclass; the defaults at the
+ * bottom of this file cover the hand written tanks (the tool UI tank, the empty handlers), translating the
+ * transaction based {@link Storage} calls onto the Forge shaped {@link #fill}/{@link #drain} pair.
  */
-public interface SimpleFluidTank {
+public interface SimpleFluidTank extends Storage<FluidVariant> {
   @Nonnull
   FluidStack getFluid();
 
@@ -146,5 +158,102 @@ public interface SimpleFluidTank {
       return FluidStack.EMPTY;
     }
     return drain(fluid, maxDrain, action);
+  }
+
+
+  /* Storage (Fabric Transfer API) bridge */
+
+  @Override
+  default boolean supportsInsertion() {
+    return getCapacity() > 0;
+  }
+
+  @Override
+  default boolean supportsExtraction() {
+    return getCapacity() > 0;
+  }
+
+  @Override
+  default long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+    if (maxAmount <= 0 || resource.isBlank()) {
+      return 0;
+    }
+    FluidStack resourceStack = new FluidStack(resource, maxAmount);
+    // the tank only knows how to simulate, so ask it how much it would take and commit the same amount later
+    long inserted = fill(resourceStack, FluidAction.SIMULATE);
+    if (inserted <= 0) {
+      return 0;
+    }
+    long amount = inserted;
+    if (transaction == null) {
+      fill(new FluidStack(resource, amount), FluidAction.EXECUTE);
+    } else {
+      transaction.addCloseCallback((ctx, result) -> {
+        if (result.wasCommitted()) {
+          fill(new FluidStack(resource, amount), FluidAction.EXECUTE);
+        }
+      });
+    }
+    return amount;
+  }
+
+  @Override
+  default long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+    if (maxAmount <= 0 || resource.isBlank()) {
+      return 0;
+    }
+    long drained = drain(new FluidStack(resource, maxAmount), FluidAction.SIMULATE).getAmount();
+    if (drained <= 0) {
+      return 0;
+    }
+    if (transaction == null) {
+      drain(new FluidStack(resource, drained), FluidAction.EXECUTE);
+    } else {
+      transaction.addCloseCallback((ctx, result) -> {
+        if (result.wasCommitted()) {
+          drain(new FluidStack(resource, drained), FluidAction.EXECUTE);
+        }
+      });
+    }
+    return drained;
+  }
+
+  @Override
+  default Iterator<StorageView<FluidVariant>> iterator() {
+    return Collections.<StorageView<FluidVariant>>singletonList(new TankView(this)).iterator();
+  }
+
+  /** Single view over a {@link SimpleFluidTank}, used by {@link #iterator()} */
+  final class TankView implements StorageView<FluidVariant> {
+    private final SimpleFluidTank tank;
+
+    private TankView(SimpleFluidTank tank) {
+      this.tank = tank;
+    }
+
+    @Override
+    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+      return tank.extract(resource, maxAmount, transaction);
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+      return tank.getFluid().getType().isBlank();
+    }
+
+    @Override
+    public FluidVariant getResource() {
+      return tank.getFluid().getType();
+    }
+
+    @Override
+    public long getAmount() {
+      return tank.getFluid().getAmount();
+    }
+
+    @Override
+    public long getCapacity() {
+      return tank.getCapacity();
+    }
   }
 }

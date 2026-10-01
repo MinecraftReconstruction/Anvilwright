@@ -54,8 +54,9 @@ public class OverslimeModifierModel extends NormalModifierModel {
 
   @Override
   public Mesh getQuads(IToolStackView tool, ModifierEntry entry, Function<Material,TextureAtlasSprite> spriteGetter, Transformation transforms, boolean isLarge, int startTintIndex, @Nullable ItemLayerPixels pixels) {
-    if (entry.getModifier() instanceof OverslimeModifier overslime && overslime.getOverslime(tool) == 0) {
-      return EMPTY_MESH;
+    if (OverslimeModule.INSTANCE.getAmount(tool) > 0) {
+      return super.getQuads(tool, entry, spriteGetter, transforms, isLarge, startTintIndex, pixels);
     }
+    return EMPTY_MESH;
   }
 }

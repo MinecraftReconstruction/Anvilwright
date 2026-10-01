@@ -32,8 +32,8 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.List;
 import slimeknights.tconstruct.library.recipe.melting.MeltingRecipe;
+import slimeknights.tconstruct.plugin.jei.util.FluidIngredients;
 import slimeknights.tconstruct.plugin.jei.util.FluidTooltipCallback;
-import net.minecraft.world.item.crafting.RecipeType;
 import com.mojang.datafixers.util.Either;
 
 /** Shared by melter and smeltery */
@@ -41,8 +41,6 @@ public class MeltingCategory extends AbstractMeltingCategory {
   private static final Component TITLE = TConstruct.makeTranslation("jei", "melting.title");
   private static final String KEY_TEMPERATURE = TConstruct.makeTranslationKey("jei", "temperature");
   private static final String KEY_MULTIPLIER = TConstruct.makeTranslationKey("jei", "melting.multiplier");
-  private static final Component SOLID_TEMPERATURE = Component.translatable(KEY_TEMPERATURE, FuelModule.SOLID_TEMPERATURE).withStyle(ChatFormatting.GRAY);
-  private static final Component SOLID_MULTIPLIER = Component.translatable(KEY_MULTIPLIER, FuelModule.SOLID_TEMPERATURE / 1000f).withStyle(ChatFormatting.GRAY);
   private static final Component TOOLTIP_SMELTERY = TConstruct.makeTranslation("jei", "melting.smeltery").withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE);
   private static final Component TOOLTIP_MELTER = TConstruct.makeTranslation("jei", "melting.melter").withStyle(ChatFormatting.GRAY, ChatFormatting.UNDERLINE);
 
@@ -51,12 +49,10 @@ public class MeltingCategory extends AbstractMeltingCategory {
     if (slot.getDisplayedItemStack().isEmpty()) {
       return;
     }
+    // JEI 15.20 cannot insert into the tooltip being built (upstream inserts after the item name)
     MeltingFuel solid = MeltingFuelLookup.getSolid();
-    var list = tooltip.getLines();
-    int insertAfterItemName = list.isEmpty() ? 0 : 1;
-    list.addAll(insertAfterItemName, List.of(
-      Either.left(Component.translatable(KEY_TEMPERATURE, solid.getTemperature()).withStyle(ChatFormatting.GRAY)),
-      Either.left(Component.translatable(KEY_MULTIPLIER, solid.getRate() / 10f).withStyle(ChatFormatting.GRAY))));
+    tooltip.add(Component.translatable(KEY_TEMPERATURE, solid.getTemperature()).withStyle(ChatFormatting.GRAY));
+    tooltip.add(Component.translatable(KEY_MULTIPLIER, solid.getRate() / 10f).withStyle(ChatFormatting.GRAY));
   };
 
   /** Tooltip callback for ores */
@@ -71,28 +67,18 @@ public class MeltingCategory extends AbstractMeltingCategory {
   }
 
   @Override
-  public RecipeType<MeltingRecipe> getRecipeType() {
-    return TConstructJEIConstants.MELTING;
-  }
-
-  @Override
-  public Component getTitle() {
-    return TITLE;
-  }
-
-  @Override
-  public void draw(MeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
+  public void draw(IDisplayableMeltingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics, double mouseX, double mouseY) {
     super.draw(recipe, slots, graphics, mouseX, mouseY);
 
     // solid fuel slot
     int temperature = recipe.getTemperature();
-    if (temperature <= FuelModule.SOLID_TEMPERATURE) {
+    if (temperature <= MeltingFuelLookup.getSolid().getTemperature()) {
       solidFuel.draw(graphics, 1, 19);
     }
   }
 
   @Override
-  public void setRecipe(IRecipeLayoutBuilder builder, MeltingRecipe recipe, IFocusGroup focuses) {
+  public void setRecipe(IRecipeLayoutBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
     // input
     List<ItemStack> inputs = recipe.getInputs();
     IRecipeSlotBuilder inputSlot = builder.addInputSlot(24, 18).addItemStacks(inputs);
@@ -109,10 +95,10 @@ public class MeltingCategory extends AbstractMeltingCategory {
     }
     List<FluidStack> outputs = recipe.getOutputs();
     IRecipeSlotBuilder outputSlot = builder.addOutputSlot(96, 4)
-      .addRichTooltipCallback(tooltip)
+      .addTooltipCallback(tooltip)
       .setFluidRenderer(FluidValues.METAL_BLOCK, false, 32, 32)
       .setOverlay(tankOverlay, 0, 0)
-      .addIngredient(FabricTypes.FLUID_STACK, JEITypes.toJEI(recipe.getOutput()));
+      .addIngredients(FabricTypes.FLUID_STACK, recipe.getOutputs().stream().map(FluidIngredients::of).toList());
 
     // show fuels that are valid for this recipe
     int fuelHeight = 32;

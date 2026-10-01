@@ -32,7 +32,12 @@ public class PlateArmorModel extends Model {
   private static final ResourceLocation PLATE = TConstruct.getResource("plate");
 
   /** Listener to clear caches */
-  public static final ISafeManagerReloadListener RELOAD_LISTENER = ISafeManagerReloadListener.create(TConstruct.getResource("plate_armor_cache"), manager -> MODELS.clear());
+  public static final IdentifiableISafeManagerReloadListener RELOAD_LISTENER = new IdentifiableISafeManagerReloadListener(TConstruct.getResource("plate_armor_cache")) {
+    @Override
+    public void onReloadSafe(ResourceManager manager) {
+      MODELS.clear();
+    }
+  };
 
   /**
    * Gets the model for a given entity
