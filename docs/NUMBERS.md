@@ -544,3 +544,12 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 * 大工程：TCon #32（REI 插件，约 110 处 API 适配）。
 * 不可消除：Mantle #1（Forge tag `remove`）、Mantle #21（流体单位 droplet vs mB）、TCon #3（只有 Forge 版的模组集成）。
 * 需要联网加依赖：TCon #18（能量 API）、#9（Dummmmmmy / Crafting Tweaks）。
+
+## 2026-10-02：实战验证记录（玩家实际游玩，非脚本）
+
+| 时间 | 操作 | 结果 | 覆盖到的子系统 |
+|---|---|---|---|
+| 2026-10-02 00:3x | 冶炼炉里熔化**清澈玻璃**并**浇筑成清澈玻璃板**（casting table/basin） | ✅ 正常 | 熔化配方（流体输出）、流体渲染（`SMELTERY_FLUID` 渲染层——**修 shader 前这里必崩**）、浇注方块实体与配方匹配、产物物品与贴图、流体单位换算（droplet↔配方数值） |
+
+日志证据：本次会话在 `[smoketest] summary` 之后**没有任何 WARN/ERROR**（`shaders/` 两项审计也是通过）。
+这是"熔融流体真实渲染"第一次在实战中跑通，也是 R1（Mantle 未注册 core shader）修复后的第一次实战验证。

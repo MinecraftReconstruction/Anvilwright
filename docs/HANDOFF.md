@@ -885,3 +885,10 @@ jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification
 100+ 个文件去适配它，而 1.21.11 也不是最新（26.2/26.3 已发布，社区视线在 1.21.1 与 26.x 之间）。
 所以"长期可维护"的结论没变：**把 Porting Lib 用法抽薄、换成 Fabric 原生 API**（`fabric-transfer-api-v1`、
 `fabric-rendering-fluids-v1`、`fabric-model-loading-api-v1` 到 26.2 都还在），比赌一条第三方分支更划算。
+
+### 22.1 实战验证（2026-10-02）
+
+玩家在客户端里**熔化清澈玻璃 → 浇筑成清澈玻璃板**，一次成功，日志之后无 WARN/ERROR。这条路径同时覆盖：
+熔化配方、**流体渲染层（修 shader 前必崩的那一处）**、浇注方块实体与配方匹配、产物与贴图、流体单位换算。
+**仍然"未验证"的重点**：合金/喷嘴/通道的流体渲染、工具与盔甲的模型与修饰符、书页图标、流体桶/铜罐的染色与透明度、
+焦黑燃料罐的加热结构判定（这些都是 docs/BEHAVIOUR-DIFFERENCES.md 里标注"未验证"的条目）。
