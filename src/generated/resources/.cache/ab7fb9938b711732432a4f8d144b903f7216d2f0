@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:46:16.223868	Hephaestus/Tinker's Construct Material Traits
+// 1.20.1	2026-10-01T17:16:36.290365	Hephaestus/Tinker's Construct Material Traits
 009c13603fca38fcbdbd52f7dfaf7ceb68bbc5fd data/tconstruct/tinkering/materials/traits/slimewood.json
 93bad01aaf9cad9cd93b9522b06357a6b3aac155 data/tconstruct/tinkering/materials/traits/ender_pearl.json
 e3bf9d5c9d42865e84bce8bde10c0b30fc2b468d data/tconstruct/tinkering/materials/traits/chorus.json
@@ -16,8 +16,8 @@ d3e676aea6902c44f3b03a39bc57452bf804decd data/tconstruct/tinkering/materials/tra
 e287f3e55b2c57a2166c0dbf733bc6ca401c03d5 data/tconstruct/tinkering/materials/traits/silver.json
 b8839ce4786c1bad9d81682174a4851ad4049f69 data/tconstruct/tinkering/materials/traits/invar.json
 190e32dc1e17e7f8768eb246805865c49056c416 data/tconstruct/tinkering/materials/traits/slimeball.json
-ff84817dc987eec964c50d4c56d03ebc1ae26feb data/tconstruct/tinkering/materials/traits/bamboo.json
 1d021cef17cd3ac677699da278889040aaa3ffa0 data/tconstruct/tinkering/materials/traits/whitestone.json
+ff84817dc987eec964c50d4c56d03ebc1ae26feb data/tconstruct/tinkering/materials/traits/bamboo.json
 524b14de6170518e60ec5a967955fe1806d06b56 data/tconstruct/tinkering/materials/traits/wool.json
 53df1fafc91e87562e59629c594b5eda5751729f data/tconstruct/tinkering/materials/traits/obsidian.json
 8082b5d202af382628a82a4340f39aa691bb4dd2 data/tconstruct/tinkering/materials/traits/rock.json
@@ -79,8 +79,8 @@ b9113fb2645d0a006a43b06c33fb891d140474ef data/tconstruct/tinkering/materials/tra
 5a4a5458dc2c314278ad05379017863af6ffbd91 data/tconstruct/tinkering/materials/traits/weeping_vine.json
 f6243ee0ad589edbf494baa0e00ff1e7089f06b4 data/tconstruct/tinkering/materials/traits/cheese.json
 603e4c531a89ae7b5b74017250ae078a714cd983 data/tconstruct/tinkering/materials/traits/blaze.json
-8c8315fdf2aa637aa4c8edddec31d90a768ddf35 data/tconstruct/tinkering/materials/traits/nicrosil.json
 ff33419734d8fd2f4ed4fefb3a7f7aa787acf724 data/tconstruct/tinkering/materials/traits/pig_iron.json
+8c8315fdf2aa637aa4c8edddec31d90a768ddf35 data/tconstruct/tinkering/materials/traits/nicrosil.json
 f9934c10a932a8ce9bc265482b221c70836e1dd9 data/tconstruct/tinkering/materials/traits/gold.json
 e56aeff27ff5df0b95989ceecbd0f9d8830b0956 data/tconstruct/tinkering/materials/traits/paper.json
 0e2536e35b89b4764c598c85eb3a7000925b8801 data/tconstruct/tinkering/materials/traits/scorched_stone.json

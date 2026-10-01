@@ -1,4 +1,4 @@
-// 1.20.1	2026-10-01T15:46:16.24735	Hephaestus/Tinkers' Construct Smeltery Recipes
+// 1.20.1	2026-10-01T17:16:36.324509	Hephaestus/Tinkers' Construct Smeltery Recipes
 c587454fb233d142f53ea2d12b8d585221a8fd7b data/tconstruct/recipes/smeltery/melting/slime/ender/sapling.json
 1186010b238841cca51dc06589e10d75cc140d18 data/tconstruct/recipes/smeltery/casting/metal/constantan/plate_gold_cast.json
 81fff30c6144d6d61d2ed1b8d652003ec35965c9 data/tconstruct/recipes/smeltery/seared/grout.json
@@ -1356,8 +1356,8 @@ ebd82a431b8ce831f1abe938f6897e1dd837c137 data/tconstruct/recipes/smeltery/meltin
 a9debbc02897a282ce861f6cfdb039bc47b9c7db data/tconstruct/recipes/smeltery/casting/metal/lumium/plate_gold_cast.json
 1840582bb73147352c35dac7ae602309e0a14bc1 data/tconstruct/recipes/smeltery/melting/seared/pane.json
 7dd31cf5b5a46551105fe5dc9e1be9bc3199f53d data/tconstruct/recipes/smeltery/casting/soul/pane.json
-119103f43d884fc4de15e6540e47487123d2bd64 data/tconstruct/recipes/smeltery/casting/metal/manyullyn/nugget_sand_cast.json
 064d446e0f8a76d74d4f2a26cfb8cb6109a1719a data/tconstruct/advancements/recipes/building_blocks/smeltery/seared/seared_cobble_slab_stonecutter.json
+119103f43d884fc4de15e6540e47487123d2bd64 data/tconstruct/recipes/smeltery/casting/metal/manyullyn/nugget_sand_cast.json
 f53c37018c2af2f46e63e6903b3f016c8c9c6afd data/tconstruct/recipes/smeltery/seared/seared_stone_stairs.json
 e4ab3219df0d06cbbc635f9895a4139ef040321e data/tconstruct/recipes/smeltery/casting/metal/lead/nugget_gold_cast.json
 106b1ab7f269b30ddbb6683741482157b28a2e33 data/tconstruct/recipes/smeltery/casting/slime/ichor/bottle.json
