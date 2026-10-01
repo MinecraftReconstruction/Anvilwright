@@ -783,3 +783,36 @@ fork 那条描述建议一并改掉（`gh repo edit MinecraftReconstruction/Tink
 **还没做的**：热测试（runClient/runServer）与 alpha release —— 用户要求先停。
 下次接手时建议顺序：`runData`（已绿）→ `runClient` 看 `[smoketest]` 三项审计是否全 0 →
 再发 alpha（canonical 仓库，`main` 需要先同步）。
+
+### 20.6 2026-10-01 深夜：canonical 同步 + 两个 alpha 已发布
+
+**历史形状**：canonical `MinecraftReconstruction/TinkersConstruct-Fabric`
+
+| 分支 | commit | 内容 |
+|---|---|---|
+| `checkpoints`（默认之外） | `fd6b6f3895` | 逐 checkpoint 的完整迁移历史 |
+| `main`（默认分支） | `583e83b6f9` | 同一棵树，按逻辑压成 23 个 commit（原本 20 个 + 本轮 3 个） |
+
+`git diff main checkpoints` = 空，两边内容完全一致；开发分支 `mcr/upstream-3.12.1` 也已 push 到 fork。
+
+**已发布的两个 alpha（都是 pre-release）**：
+
+1. Mantle：`v1.20.1-1.11-alpha.2` → https://github.com/MinecraftReconstruction/Mantle-Fabric/releases/tag/v1.20.1-1.11-alpha.2
+   资产 `Mantle-1.20.1-1.11.DEV.c7098eb1.jar`(+sources)。**必须用这个或更新的版本**：alpha 1（`55593e6b`）没有
+   `FluidRenderHandler` 桥接，TCon 的流体全是水贴图、桶模型会烘焙失败。
+2. Tinkers 移植（发布名 **Hephaestus**）：`v1.20.1-3.12.1-alpha.1` →
+   https://github.com/MinecraftReconstruction/TinkersConstruct-Fabric/releases/tag/v1.20.1-3.12.1-alpha.1
+   资产 `Hephaestus-1.20.1-3.12.1-alpha.1.DEV.fd6b6f3895.jar`(+sources)。发布说明里写明了"最后一个客户端验证
+   之后还有 3 项改动没有实机验证"。
+
+**命名决定**：mod 显示名用 fork 一直沿用的 **`Hephaestus`**（`Tinkers' Construct` 是 SlimeKnights 的名字，
+上游明确不希望被用；`Hephaestus` 本来就是因为这个才取的）。描述里只做**描述性署名**
+（"Unofficial Fabric port of Tinkers' Construct 3.12.1 … not affiliated with …"）。
+mod id 保持 `tconstruct`，以免破坏 data pack / 配方 / 存档里工具的命名空间。
+jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification-Title` 都跟着这个名字。
+
+**发布时用的构建命令**（`ARTIFACT_VERSION` 那条分支在 build.gradle 里写错了变量名，别用）：
+
+```bash
+./gradlew clean build -x test --offline -Pmod_version=3.12.1-alpha.1
+```
