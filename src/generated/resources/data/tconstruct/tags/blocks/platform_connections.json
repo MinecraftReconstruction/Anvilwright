@@ -1,5 +1,10 @@
 {
+  "replace": false,
   "values": [
+    {
+      "id": "#architects_palette:nubs",
+      "required": false
+    },
     "minecraft:lever",
     "minecraft:ladder",
     "minecraft:iron_bars",
@@ -9,13 +14,24 @@
     "minecraft:soul_wall_torch",
     "minecraft:redstone_wall_torch",
     "minecraft:redstone_wire",
-    "#c:glass_panes",
-    "#minecraft:buttons",
-    "#c:fences",
-    "#minecraft:walls",
-    "#minecraft:wall_signs",
     {
-      "id": "#architects_palette:nubs",
+      "id": "#c:glass_panes",
+      "required": false
+    },
+    {
+      "id": "#minecraft:buttons",
+      "required": false
+    },
+    {
+      "id": "#c:fences",
+      "required": false
+    },
+    {
+      "id": "#minecraft:walls",
+      "required": false
+    },
+    {
+      "id": "#minecraft:wall_signs",
       "required": false
     }
   ]
