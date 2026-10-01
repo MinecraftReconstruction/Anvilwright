@@ -308,7 +308,8 @@ public class ModifierEvents {
       // critical boost is defined where the base value is 150%, setting smaller amounts can reduce the critical damage
       // this event however is defined in terms of adding or subtracting critical, so just treat it as additive
       Attribute attribute = TinkerAttributes.CRITICAL_DAMAGE.get();
-      double criticalBoost = living.getAttributeValue(attribute) - attribute.getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
+      // NOTE(porting): see the note in onPotionStart - not every entity carries our attributes
+      double criticalBoost = TinkerAttributes.getValue(living, attribute) - attribute.getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
       if (criticalBoost > 0) {
         // make it critical if we meet our simpler conditions, note this does not boost attack damage
         boolean isCritical = event.isVanillaCritical() || event.getResult() == Result.ALLOW;
@@ -331,7 +332,9 @@ public class ModifierEvents {
     if (!newEffect.isInfiniteDuration() && !newEffect.getCurativeItems().isEmpty()) {
       // use two different stats based on whether the effect is beneficial
       boolean beneficial = newEffect.getEffect().isBeneficial();
-      double multiplier = entity.getAttributeValue(beneficial ? TinkerAttributes.GOOD_EFFECT_DURATION.get() : TinkerAttributes.BAD_EFFECT_DURATION.get())
+      // NOTE(porting): mobs do not carry our attributes (see BEHAVIOUR-DIFFERENCES #6), and a witch drinking a potion
+      //  runs through here, so read them through the null tolerant helper
+      double multiplier = TinkerAttributes.getValue(entity, beneficial ? TinkerAttributes.GOOD_EFFECT_DURATION.get() : TinkerAttributes.BAD_EFFECT_DURATION.get())
                         + ArmorStatModule.getStat(entity, beneficial ? TinkerDataKeys.GOOD_EFFECT_DURATION : TinkerDataKeys.BAD_EFFECT_DURATION);
       if (multiplier != 1) {
         // adjust duration as requested
