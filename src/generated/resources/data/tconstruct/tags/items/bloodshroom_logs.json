@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:bloodshroom_log",
     "tconstruct:stripped_bloodshroom_log",

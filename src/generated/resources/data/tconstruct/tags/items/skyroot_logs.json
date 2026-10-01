@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:skyroot_log",
     "tconstruct:stripped_skyroot_log",

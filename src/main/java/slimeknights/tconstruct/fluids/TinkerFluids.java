@@ -156,7 +156,10 @@ public final class TinkerFluids extends TinkerModule {
                                    .effect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 900), 1.0f)
                                    .build()).stacksTo(1).craftRemainder(Items.GLASS_BOTTLE),
       () -> new FluidStack(enderSlime.get(), FluidValues.BOTTLE))))
-    .put(SlimeType.ICHOR, ITEMS.register("ichor_bottle", () -> new ContainerFoodItem(
+    // NOTE(porting): the fork named this item "ichor_bottle", but the model, texture and language entry (which come
+    //  from upstream, where the bottles are registered as <slime>_slime_bottle) are all under "ichor_slime_bottle",
+    //  so the item rendered with the missing texture. Use the upstream id.
+    .put(SlimeType.ICHOR, ITEMS.register("ichor_slime_bottle", () -> new ContainerFoodItem(
       new Item.Properties().food(new FoodProperties.Builder().alwaysEat()
                                    .effect(new MobEffectInstance(MobEffects.ABSORPTION, 500), 1.0f)
                                    .effect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 900), 1.0f)

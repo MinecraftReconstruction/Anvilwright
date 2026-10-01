@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:gold_reinforcement",
     "tconstruct:gold_item_frame",

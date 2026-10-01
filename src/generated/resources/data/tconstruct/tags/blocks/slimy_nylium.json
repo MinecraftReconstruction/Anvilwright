@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#tconstruct:slimy_nylium/ichor",
     "#tconstruct:slimy_nylium/blood"

@@ -4,7 +4,7 @@
     "item": "minecraft:stone_brick_slab"
   },
   "cast_consumed": true,
-  "cooling_time": 42,
+  "cooling_time": 72,
   "fluid": {
     "amount": 20250,
     "tag": "tconstruct:molten_clay"

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:repair_kit_sand_cast",
     "tconstruct:repair_kit_red_sand_cast"

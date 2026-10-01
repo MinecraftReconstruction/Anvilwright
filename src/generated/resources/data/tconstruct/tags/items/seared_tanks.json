@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:seared_fuel_tank",
     "tconstruct:seared_fuel_gauge",

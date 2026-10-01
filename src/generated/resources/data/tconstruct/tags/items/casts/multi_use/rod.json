@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:rod_cast"
   ]

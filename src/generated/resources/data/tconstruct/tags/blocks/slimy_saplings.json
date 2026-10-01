@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "tconstruct:earth_slime_sapling",
     "tconstruct:sky_slime_sapling",

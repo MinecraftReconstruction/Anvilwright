@@ -1661,6 +1661,15 @@
   "block.tconstruct.blood_ender_slime_grass": "Bloody Nylium",
   "block.tconstruct.blood_ender_slime_grass.tooltip": "Lets you jump higher and produces bloodshrooms when bonemealed",
 
+  "block.tconstruct.blood_slime": "Blood Block",
+  "block.tconstruct.blood_slime.tooltip": "Bouncy, but not sticky",
+  "block.tconstruct.blood_congealed_slime": "Congealed Blood",
+  "block.tconstruct.blood_congealed_slime.tooltip": "Lets you jump really high",
+  "block.tconstruct.blood_enderbark_roots": "Slimy Enderbark Roots",
+  "item.tconstruct.blood_slime_ball": "Coagulated Blood",
+  "item.tconstruct.blood_bottle": "Bottle o' Blood",
+  "item.tconstruct.blood_bucket": "Bucket o' Blood",
+
   "block.tconstruct.ichor_vanilla_slime_grass": "Ichor Nylium",
   "block.tconstruct.ichor_vanilla_slime_grass.tooltip": "So soft! Lets you jump higher",
   "block.tconstruct.ichor_earth_slime_grass": "Ichor Nylium",
@@ -3918,6 +3927,7 @@
   "itemGroup.tconstruct.smeltery": "Tinkers' Smeltery",
   "itemGroup.tconstruct.fluids": "Tinkers' Tanks",
   "itemGroup.tconstruct.world": "Tinkers' World",
+  "itemGroup.tconstruct.gadgets": "Tinkers' Gadgets",
 
   "gui.tconstruct.crafting_station": "Crafting Station",
   "gui.tconstruct.crafting_station.uncraftable": "This item is not currently craftable by the player",

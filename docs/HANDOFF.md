@@ -762,3 +762,24 @@ fork 那条描述建议一并改掉（`gh repo edit MinecraftReconstruction/Tink
    stack tag 算（`PotionFluidAttributes` 里已有逻辑）。
 3. **`MaterialPaletteDebugGenerator`** 还没注册（debug 用，上游注册了，可忽略）。
 4. canonical 同步：`main`（压缩历史）还落后本轮 5 个 commit，需要重新 cherry-pick 或重压。
+
+### 20.5 2026-10-01 深夜追加（用户要求"改完就停、热测试暂缓"）
+
+按用户截图又修了三类问题，**只做了静态验证（编译 + `runData` 绿），没有再跑 runClient**：
+
+1. **创造栏剩下 7 个画缺失贴图的物品**：`mud_bricks`/`lavawood`（各带上 slab/stairs）和灵浆瓶。
+   前两个是 fork 遗留、上游 3.12.1 根本没有的方块，而且从 fork 时代起就没有 blockstate/模型/贴图
+   （tooltip 会显示 `block.tconstruct.lavawood_stairs` 这种原始键）→ 整组删除；
+   灵浆瓶是 fork 把 id 起成了 `ichor_bottle`，而上游的模型/贴图/语言键都叫 `ichor_slime_bottle` → id 对齐上游。
+   详见 BEHAVIOUR-DIFFERENCES #43/#44。
+2. **10 个没有翻译的物品**：血史莱姆那套（本移植保留的内容，见 #26）按旧 fork 的英文名补了语言键
+   （"Blood Block" / "Congealed Blood" / "Coagulated Blood" / "Bottle o' Blood" / "Bucket o' Blood"），
+   另加了创造栏 `itemGroup.tconstruct.gadgets` = "Tinkers' Gadgets"。
+3. **Mod Menu 卡片**：名字 `Hephaestus` → `Tinkers' Construct (Unofficial Fabric Port)`；
+   版本基准 `3.6.4` → `3.12.1`（`gradle.properties` 的 `mod_version`），现在 mod 版本是
+   `1.20.1-3.12.1.DEV.<hash>`；加了 128×128 的方形 `icon.png`（Mod Menu 要求方形，原来的 `logo.png`
+   是 600×100 所以一直显示灰色问号）；`contact` 指向 canonical 仓库；authors 补 `MinecraftReconstruction`。
+
+**还没做的**：热测试（runClient/runServer）与 alpha release —— 用户要求先停。
+下次接手时建议顺序：`runData`（已绿）→ `runClient` 看 `[smoketest]` 三项审计是否全 0 →
+再发 alpha（canonical 仓库，`main` 需要先同步）。

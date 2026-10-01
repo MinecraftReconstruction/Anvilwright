@@ -37,8 +37,6 @@ import static slimeknights.mantle.Mantle.commonResource;
 
 public class GadgetRecipeProvider extends BaseRecipeProvider {
   /** Slime types that have a slime sling item, in registration order */
-  private static final SlimeType[] SLING_TYPES = { SlimeType.EARTH, SlimeType.SKY, SlimeType.ICHOR, SlimeType.ENDER };
-
   public GadgetRecipeProvider(FabricDataOutput output) {
     super(output);
   }
@@ -50,22 +48,8 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
 
   @Override
   public void buildRecipes(Consumer<FinishedRecipe> consumer) {
-    // slime
-    String slingFolder = "gadgets/slimesling/";
-    for (SlimeType slime : SLING_TYPES) {
-      ResourceLocation name = commonResource(slingFolder + slime.getSerializedName());
-      ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerGadgets.slimeSling.get(slime))
-                         .group("tconstruct:slimesling")
-                         .define('#', Items.STRING)
-                         .define('X', TinkerWorld.congealedSlime.get(slime))
-                         .define('L', slime.getSlimeballTag())
-                         .pattern("#X#")
-                         .pattern("L L")
-                         .pattern(" L ")
-                         .unlockedBy("has_item", has(slime.getSlimeballTag()))
-                         .save(consumer, name);
-    }
-
+    // NOTE(porting): upstream 3.12.1 turned the slime slings into modifiers ("Remove slime slings - they are now
+    //  modifiers"), so this port no longer has sling items to generate recipes for
     // throw balls
     String folder = "gadgets/throwball/";
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, TinkerGadgets.efln.get())

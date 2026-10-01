@@ -439,13 +439,9 @@ public class AdvancementsProvider extends GenericDataProvider {
       }
       builder.addCriterion("magma_cream", hasItem(Items.MAGMA_CREAM));
     });
-    builder(TinkerGadgets.slimeSling.get(SlimeType.ENDER), resource("world/slime_sling"), slimes, FrameType.CHALLENGE, builder -> {
-      JsonObject boundJSON = new JsonObject();
-      boundJSON.addProperty("max", 150);
-      MinMaxBounds.Ints mojangDeletedTheMaxMethods = MinMaxBounds.Ints.fromJson(boundJSON);
-      TinkerGadgets.slimeSling.forEach((type, sling) -> builder.addCriterion(type.getSerializedName(), ItemDurabilityTrigger.TriggerInstance.changedDurability(ContextAwarePredicate.ANY, ItemPredicate.Builder.item().of(sling).build(), mojangDeletedTheMaxMethods)));
-    });
-    builder(TinkerGadgets.piggyBackpack, resource("world/piggybackpack"), tinkersGadgetry, FrameType.GOAL, builder ->
+    // NOTE(porting): upstream removed the slime sling items in 3.12.1 (they are modifiers now), so this port drops
+    //  the "slime_sling" advancement that hung off them and parents this one on the slime collector instead
+    builder(TinkerGadgets.piggyBackpack, resource("world/piggybackpack"), slimes, FrameType.GOAL, builder ->
       builder.addCriterion("used_pack", PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(ContextAwarePredicate.ANY, ItemPredicate.Builder.item().of(TinkerGadgets.piggyBackpack), EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIG).build()))));
     Advancement slimesuit = builder(TinkerTools.slimesuit.get(ArmorSlotType.CHESTPLATE).getRenderTool(), resource("world/slimesuit"), enderslimeIsland, FrameType.GOAL, builder ->
       TinkerTools.slimesuit.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getSerializedName(), hasItem(armor))));

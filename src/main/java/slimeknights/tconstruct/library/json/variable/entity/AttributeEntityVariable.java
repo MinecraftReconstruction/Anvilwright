@@ -2,6 +2,7 @@ package slimeknights.tconstruct.library.json.variable.entity;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 
@@ -17,7 +18,10 @@ public record AttributeEntityVariable(Attribute attribute) implements EntityVari
 
   @Override
   public float getValue(LivingEntity entity) {
-    return (float)entity.getAttributeValue(attribute);
+    // NOTE(porting): a data pack can point this at any attribute, including Tinkers' own (which mobs do not carry),
+    //  and AttributeMap#getValue throws for an attribute the entity type does not have
+    AttributeInstance instance = entity.getAttribute(attribute);
+    return instance == null ? 0 : (float)instance.getValue();
   }
 
   @Override
