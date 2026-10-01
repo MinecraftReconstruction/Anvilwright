@@ -28,7 +28,7 @@ public class MenuTypeTagProvider extends BuiltinRegistryTagProvider<MenuType<?>>
       TinkerTables.craftingStationContainer.get(), TinkerTables.partBuilderContainer.get(), TinkerTables.tinkerStationContainer.get(), TinkerTables.modifierWorktableContainer.get(),
       TinkerSmeltery.melterContainer.get(), TinkerSmeltery.alloyerContainer.get(), TinkerSmeltery.smelteryContainer.get()
     );
-    tag(TinkerTags.MenuTypes.TOOL_INVENTORY_REPLACEMENTS).addOptionalTag(MantleTags.MenuTypes.REPLACEABLE);
+    tag(TinkerTags.MenuTypes.TOOL_INVENTORY_REPLACEMENTS).addTag(MantleTags.MenuTypes.REPLACEABLE);
   }
 
   @Override
