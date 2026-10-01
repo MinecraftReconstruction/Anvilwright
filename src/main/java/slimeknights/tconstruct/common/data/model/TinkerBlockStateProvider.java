@@ -19,13 +19,13 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraftforge.client.model.generators.BlockModelBuilder;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile;
-import net.minecraftforge.client.model.generators.ModelProvider;
-import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.block.BlockModelBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.block.BlockStateProvider;
+import io.github.fabricators_of_create.porting_lib.models.generators.item.ItemModelBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.ModelFile;
+import io.github.fabricators_of_create.porting_lib.models.generators.ModelFile.UncheckedModelFile;
+import io.github.fabricators_of_create.porting_lib.models.generators.ModelProvider;
+import io.github.fabricators_of_create.porting_lib.models.generators.block.MultiPartBlockStateBuilder;
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
 import slimeknights.mantle.client.model.builder.ColoredModelBuilder;
 import slimeknights.mantle.client.model.builder.ConnectedModelBuilder;
@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 import java.util.function.Function;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
-import static net.minecraftforge.client.model.generators.ModelProvider.BLOCK_FOLDER;
+import static io.github.fabricators_of_create.porting_lib.models.generators.ModelProvider.BLOCK_FOLDER;
 import static slimeknights.tconstruct.TConstruct.getResource;
 
 @SuppressWarnings({"UnusedReturnValue", "SameParameterValue", "removal"})

@@ -1,27 +1,32 @@
 package slimeknights.tconstruct.tables;
 
-import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import slimeknights.mantle.item.RetexturedBlockItem;
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.SimpleRecipeSerializer;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerModule;
 import slimeknights.tconstruct.common.TinkerTags;
-import slimeknights.tconstruct.common.config.Config;
-import slimeknights.tconstruct.library.recipe.SimpleRecipeSerializer;
-import slimeknights.tconstruct.library.recipe.material.MaterialRecipeSerializer;
+import slimeknights.tconstruct.library.recipe.material.MaterialRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapedMaterialRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapedMaterialsRecipe;
+import slimeknights.tconstruct.library.recipe.material.ShapelessMaterialsRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.ItemPartRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.PartRecipe;
 import slimeknights.tconstruct.library.recipe.partbuilder.recycle.PartBuilderRecycle;
@@ -67,11 +72,6 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import slimeknights.tconstruct.library.recipe.material.MaterialRecipe;
-import slimeknights.tconstruct.library.recipe.material.ShapedMaterialRecipe;
-import slimeknights.tconstruct.library.recipe.material.ShapedMaterialsRecipe;
-import slimeknights.tconstruct.library.recipe.material.ShapelessMaterialsRecipe;
-import slimeknights.tconstruct.tables.item.TableBlockItem;
 
 /**
  * Handles all the table for tool creation
@@ -89,24 +89,22 @@ public final class TinkerTables extends TinkerModule {
   /*
    * Blocks
    */
-  private static final Block.Properties WOOD_TABLE = builder(SoundType.WOOD).mapColor(MapColor.WOOD).ignitedByLava().strength(1.0F, 5.0F).noOcclusion();
-  /** Call with .apply to set the tag type for a block item provider */
-  private static final BiFunction<TagKey<Item>,BooleanSupplier,Function<Block,RetexturedBlockItem>> RETEXTURED_BLOCK_ITEM = (tag, cond) -> block -> new TableBlockItem(block, tag, GENERAL_PROPS, cond);
-  public static final ItemObject<TableBlock> craftingStation = BLOCKS.register("crafting_station", () -> new CraftingStationBlock(WOOD_TABLE), RETEXTURED_BLOCK_ITEM.apply(ItemTags.LOGS, Config.COMMON.showAllTableVariants::get));
-  public static final ItemObject<TableBlock> tinkerStation = BLOCKS.register("tinker_station", () -> new TinkerStationBlock(WOOD_TABLE, 4), RETEXTURED_BLOCK_ITEM.apply(ItemTags.PLANKS, Config.COMMON.showAllTableVariants::get));
-  public static final ItemObject<TableBlock> partBuilder = BLOCKS.register("part_builder", () -> new GenericTableBlock(WOOD_TABLE, PartBuilderBlockEntity::new), RETEXTURED_BLOCK_ITEM.apply(ItemTags.PLANKS, Config.COMMON.showAllTableVariants::get));
-  public static final ItemObject<TableBlock> tinkersChest = BLOCKS.register("tinkers_chest", () -> new TinkersChestBlock(WOOD_TABLE, TinkersChestBlockEntity::new, true), block -> new TinkersChestBlockItem(block, GENERAL_PROPS));
-  public static final ItemObject<TableBlock> partChest = BLOCKS.register("part_chest", () -> new ChestBlock(WOOD_TABLE, PartChestBlockEntity::new, true), GENERAL_BLOCK_ITEM);
+  public static final ItemObject<TableBlock> craftingStation, tinkerStation, partBuilder, tinkersChest, partChest;
+  static {
+    Block.Properties WOOD_TABLE = builder(MapColor.WOOD, SoundType.WOOD).instrument(NoteBlockInstrument.BASS).strength(1.0F, 5.0F).noOcclusion();
+    craftingStation = BLOCKS.register("crafting_station", () -> new CraftingStationBlock(WOOD_TABLE), BLOCK_ITEM);
+    tinkerStation = BLOCKS.register("tinker_station", () -> new TinkerStationBlock(WOOD_TABLE, 4), BLOCK_ITEM);
+    partBuilder = BLOCKS.register("part_builder", () -> new GenericTableBlock(WOOD_TABLE, PartBuilderBlockEntity::new), BLOCK_ITEM);
+    tinkersChest = BLOCKS.register("tinkers_chest", () -> new TinkersChestBlock(WOOD_TABLE, TinkersChestBlockEntity::new, true), block -> new TinkersChestBlockItem(block, ITEM_PROPS));
+    partChest = BLOCKS.register("part_chest", () -> new ChestBlock(WOOD_TABLE, PartChestBlockEntity::new, true), BLOCK_ITEM);
+  }
 
-  public static final ItemObject<TableBlock> modifierWorktable = BLOCKS.register("modifier_worktable",
-    () -> new GenericTableBlock(builder(SoundType.STONE).mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.5F).noOcclusion(), ModifierWorktableBlockEntity::new),
-    RETEXTURED_BLOCK_ITEM.apply(TinkerTags.Items.WORKSTATION_ROCK, Config.COMMON.showAllTableVariants::get));
-
-  private static final Block.Properties METAL_TABLE = builder(SoundType.ANVIL).mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).noOcclusion().pushReaction(PushReaction.BLOCK);
-  public static final ItemObject<TableBlock> tinkersAnvil = BLOCKS.register("tinkers_anvil", () -> new TinkersAnvilBlock(METAL_TABLE, 6), RETEXTURED_BLOCK_ITEM.apply(TinkerTags.Items.ANVIL_METAL, Config.COMMON.showAllAnvilVariants::get));
-  public static final ItemObject<TableBlock> scorchedAnvil = BLOCKS.register("scorched_anvil", () -> new ScorchedAnvilBlock(METAL_TABLE, 6), RETEXTURED_BLOCK_ITEM.apply(TinkerTags.Items.ANVIL_METAL, Config.COMMON.showAllAnvilVariants::get));
-  private static final Block.Properties STONE_TABLE = builder(SoundType.METAL).mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(3.0F, 9.0F).noOcclusion();
-  public static final ItemObject<TableBlock> castChest = BLOCKS.register("cast_chest", () -> new ChestBlock(STONE_TABLE, CastChestBlockEntity::new, false), GENERAL_BLOCK_ITEM);
+  public static final ItemObject<TableBlock> castChest, modifierWorktable;
+  static {
+    Block.Properties STONE_TABLE = builder(MapColor.COLOR_GRAY, SoundType.METAL).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(3.0F, 9.0F).noOcclusion();
+    castChest = BLOCKS.register("cast_chest", () -> new ChestBlock(STONE_TABLE, CastChestBlockEntity::new, false), BLOCK_ITEM);
+    modifierWorktable = BLOCKS.register("modifier_worktable", () -> new GenericTableBlock(STONE_TABLE, ModifierWorktableBlockEntity::new), BLOCK_ITEM);
+  }
 
   public static final ItemObject<TableBlock> tinkersAnvil, scorchedAnvil;
   static {
@@ -166,20 +164,60 @@ public final class TinkerTables extends TinkerModule {
   public static final RegistryObject<SimpleRecipeSerializer<TinkerStationRepairRecipe>> tinkerStationRepairSerializer = RECIPE_SERIALIZERS.register("tinker_station_repair", () -> new SimpleRecipeSerializer<>(TinkerStationRepairRecipe::new));
   public static final RegistryObject<SimpleRecipeSerializer<CraftingTableRepairKitRecipe>> craftingTableRepairSerializer = RECIPE_SERIALIZERS.register("crafting_table_repair", () -> new SimpleRecipeSerializer<>(CraftingTableRepairKitRecipe::new));
 
-  public TinkerTables() {
-    commonSetup();
-  }
-
-  void commonSetup() {
-//    event.enqueueWork(() -> {
+  @SubscribeEvent
+  void commonSetup(final FMLCommonSetupEvent event) {
+    event.enqueueWork(() -> {
       StationSlotLayoutLoader loader = StationSlotLayoutLoader.getInstance();
-      loader.registerRequiredLayout(tinkerStation.getRegistryName());
-      loader.registerRequiredLayout(tinkersAnvil.getRegistryName());
-      loader.registerRequiredLayout(scorchedAnvil.getRegistryName());
-//    });
+      loader.registerRequiredLayout(tinkerStation.getId());
+      loader.registerRequiredLayout(tinkersAnvil.getId());
+      loader.registerRequiredLayout(scorchedAnvil.getId());
+    });
   }
 
-  public static void gatherData(final FabricDataGenerator.Pack pack) {
-    pack.addProvider(TableRecipeProvider::new);
+  @SubscribeEvent
+  void gatherData(final GatherDataEvent event) {
+    DataGenerator generator = event.getGenerator();
+    generator.addProvider(event.includeServer(), new TableRecipeProvider(generator.getPackOutput()));
+  }
+
+  /** Adds all relevant items to the creative tab, called in the general tab */
+  public static void addTabItems(ItemDisplayParameters itemDisplayParameters, CreativeModeTab.Output output) {
+    // add one of each standard table
+    output.accept(craftingStation);
+    output.accept(partBuilder);
+    output.accept(tinkerStation);
+    output.accept(tinkersAnvil);
+    output.accept(scorchedAnvil);
+    output.accept(modifierWorktable);
+
+    // chests, have less variants so go first
+    output.accept(tinkersChest);
+    output.accept(partChest);
+    output.accept(castChest);
+
+    // pattern last, so its below the nice row of 9
+    output.accept(pattern);
+  }
+
+  /** Adds all relevant items to the variants creative tab. */
+  private static void addTableVariants(ItemDisplayParameters itemDisplayParameters, CreativeModeTab.Output output) {
+    // put anvil variants first as they are not in another tab and have the least variants
+    Consumer<ItemStack> consumer = output::accept;
+    ((IMaterialItem) tinkersAnvil.asItem()).addVariants(consumer, "");
+    ((IMaterialItem) scorchedAnvil.asItem()).addVariants(consumer, "");
+
+    // table variants at the end as there may be a lot
+    Predicate<ItemStack> variants = stack -> {
+      output.accept(stack);
+      return false;
+    };
+    // wooden tables
+    RetexturedHelper.addTagVariants(variants, craftingStation, ItemTags.LOGS);
+    RetexturedHelper.addTagVariants(variants, partBuilder, ItemTags.PLANKS);
+    RetexturedHelper.addTagVariants(variants, tinkerStation, ItemTags.PLANKS);
+    // stone tables
+    RetexturedHelper.addTagVariants(variants, modifierWorktable, TinkerTags.Items.WORKSTATION_ROCK);
+    // end with smeltery controller and drain variants
+    TinkerSmeltery.addTableVariants(itemDisplayParameters, output);
   }
 }
