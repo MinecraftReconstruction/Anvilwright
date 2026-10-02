@@ -1,12 +1,17 @@
 > [!IMPORTANT]
-> **本仓库是非官方、由 AI 大幅生成（largely vibed）的试验性移植工程，与原作者无任何隶属或背书关系。**
+> **本仓库是非官方、由 AI 大幅辅助完成（"largely vibed"）的移植工程，与原作者无任何隶属或背书关系。**
 > 代码来源与署名请见 [ATTRIBUTION.md](ATTRIBUTION.md)；当前进度与下一步见 [docs/STATUS.md](docs/STATUS.md) 与 [docs/PLAN.md](docs/PLAN.md)。
-> 想要稳定可用的版本，请使用 [官方 Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) 或 [Hephaestus](https://github.com/Alpha-s-Stuff/TinkersConstruct)。
+> 想要稳定可用的版本，请使用 [官方 Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) 或
+> [AlphaMode 的 Fabric 移植](https://github.com/Alpha-s-Stuff/TinkersConstruct)（该项目仍在维护，本项目只是它的后继分支）。
 
 ## About this fork / 关于本仓库
 
-`MinecraftReconstruction/TinkersConstruct` is a fork of [Alpha-s-Stuff/TinkersConstruct](https://github.com/Alpha-s-Stuff/TinkersConstruct)
-(*Hephaestus*), the Fabric port of [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct).
+`MinecraftReconstruction/TinkersConstruct` is a fork of [Alpha-s-Stuff/TinkersConstruct](https://github.com/Alpha-s-Stuff/TinkersConstruct),
+AlphaMode's Fabric port of [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct).
+
+**Naming:** this project was previously published as *Hephaestus*, the name of the upstream Fabric port it continues.
+At that port author's request we renamed ours to **Anvilwright**; the mod id stays `tconstruct` so worlds and data packs
+from the older port keep working.
 
 **Goal:** bring the Fabric port from Tinkers' Construct **3.6.4** up to **3.12.1** (current upstream) and keep it in sync.
 The port's own Fabric adaptation layer — everything in the tables below — is AlphaMode's work, not ours; see [ATTRIBUTION.md](ATTRIBUTION.md).
@@ -25,7 +30,7 @@ The port's own Fabric adaptation layer — everything in the tables below — is
 the upstream sync has not been started. Contributions and corrections welcome — the whole point of this repo is to
 see how far an AI-driven reconstruction can get, in the open.
 
-# [Hephaestus](https://modrinth.com/mod/hephaestus)
+# Anvilwright
 
 Modify all the things, then do it again!   
 Melt down any metals you find. 	 
@@ -35,7 +40,7 @@ Power the world with spinning wind!
 Please include the following:
 
 * Minecraft version
-* Hephaestus version
+* Anvilwright version
 * Fabric Loader and api version/build
 * Versions of any mods potentially related to the issue 
 * Any relevant screenshots are greatly appreciated.
@@ -47,6 +52,6 @@ Please include the following:
 Code, Textures and binaries are licensed under the [MIT License](https://tldrlegal.com/license/mit-license).
 
 You are allowed to use the mod in your modpack.
-Any modpack which uses Hephaestus takes **full** responsibility for user support queries. For anyone else, we only support official builds from the main CI server, not custom built jars. We also do not take bug reports for outdated builds of Minecraft.
+Any modpack which uses Anvilwright takes **full** responsibility for user support queries. For anyone else, we only support official builds from the CI server, not custom built jars. We also do not take bug reports for outdated builds of Minecraft.
 
 Any alternate licenses are noted where appropriate.
