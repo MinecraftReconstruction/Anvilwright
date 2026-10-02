@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "tconstruct:lavawood_stairs",
+  "key": {
+    "B": {
+      "item": "tconstruct:lavawood"
+    }
+  },
+  "pattern": [
+    "B  ",
+    "BB ",
+    "BBB"
+  ],
+  "result": {
+    "count": 4,
+    "item": "tconstruct:lavawood_stairs"
+  },
+  "show_notification": true
+}

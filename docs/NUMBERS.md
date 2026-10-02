@@ -553,3 +553,19 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 
 日志证据：本次会话在 `[smoketest] summary` 之后**没有任何 WARN/ERROR**（`shaders/` 两项审计也是通过）。
 这是"熔融流体真实渲染"第一次在实战中跑通，也是 R1（Mantle 未注册 core shader）修复后的第一次实战验证。
+
+## 2026-10-02：与 AlphaMode 的 Hephaestus（3.6.4 时代）的旧存档兼容性
+
+拿他们 Modrinth 上的 `Hephaestus-1.20.1-3.6.4.305.jar` 逐项比对（解包 jar、对比语言键/模型/方块状态/配方/class 常量）：
+
+| 维度 | 结论 |
+|---|---|
+| mod id | 都是 **`tconstruct`** → 可以直接替换（也因此不能共存） |
+| 方块 id | 原本 359/367；**恢复 `mud_bricks`、`lavawood`（各含 slab/stairs）后 365/367**，只差 `piglin_head`、`silky_jewel_block` |
+| 物品 id | 260/276 = 94%；缺的 16 个都是上游 3.7→3.12 自己删/改名的（4 个弹弓、`round_plate` 三件铸模、`sign_head_cast` 三件、`silky_jewel`、`bloodbone`、`bronze_reinforcement`、`ichor_bottle`→`ichor_slime_bottle`、`slime_chestplate`→`slimy_chestplate`） |
+| 流体单位 | **一致**：他们的铁锭熔化也是 `amount: 9000`（droplet 制，1 桶 81000），与我们逐字节相同 → 罐/管里的流体量不会错位 |
+| 工具 NBT | 键名基本一致（`tic_materials`/`tic_stats`/`tic_modifiers`/`tic_upgrades`/`tic_multipliers`/`tic_broken`/`tic_volatile_data`），只有 `tic_persistent_data`（他们）**改名为** `tic_persistent`（3.12.1）→ 旧工具可用，但修饰符持久数据会丢 |
+| 数据包/配方 | 我们的整体覆盖；旧存档里用被删内容搭的自动化会失效 |
+
+恢复的 6 个方块资源全部来自他们的 jar（`textures/block/lavawood.png` 与我们仓库里那份 md5 相同，直接沿用；`mud_brick.png` 同样相同），
+另补回 4 个合成配方 + 2 个浇筑配方。冒烟验证：`models/ 0/678`、`sprites/ 0/678`、`lang/ 0/678`、配方解析错误 0。

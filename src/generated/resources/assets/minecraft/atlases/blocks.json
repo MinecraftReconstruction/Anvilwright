@@ -900,6 +900,62 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/boots_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/bow_limb"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/leggings_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/ribcage"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/large_plate"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/wire"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/maille"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/chestplate_plating"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/broad_blade"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/arrow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/tool_binding"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/lapis"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/tough_binding"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "tconstruct:gui/tinker_pattern/arrow_head"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/block"
     },
     {
@@ -1089,62 +1145,6 @@
     {
       "type": "minecraft:single",
       "resource": "tconstruct:gui/tinker_pattern/button_repair"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/boots_plating"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/bow_limb"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/leggings_plating"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/ribcage"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/large_plate"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/wire"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/maille"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/chestplate_plating"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/broad_blade"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/arrow"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tool_binding"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/lapis"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/tough_binding"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "tconstruct:gui/tinker_pattern/arrow_head"
     }
   ]
 }
