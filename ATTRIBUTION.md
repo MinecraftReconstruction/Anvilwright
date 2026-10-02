@@ -16,6 +16,10 @@
 |---|---|---|---|
 | [Tinkers' Construct](https://github.com/SlimeKnights/TinkersConstruct) | **SlimeKnights**（boni、KnightMiner 等） | MIT | 原始模组。本仓库的绝大多数逻辑代码出自这里 |
 | [Hephaestus](https://github.com/Alpha-s-Stuff/TinkersConstruct) | **AlphaMode (Alpha)** | MIT | Tinkers' Construct 的 Fabric 移植版。本仓库直接 fork 自它，现有的 Fabric 适配层主要出自 Alpha 之手 |
+
+> **命名说明**：本项目（canonical 仓库 `MinecraftReconstruction/Anvilwright`）曾经沿用了上游 Fabric 移植的名字
+> *Hephaestus*，2026-10-02 应其作者 AlphaMode 的要求改名为 **Anvilwright**。上面的链接仍然指向他的项目——那是署名，
+> 不是本项目的名字。mod id 仍为 `tconstruct`，以便从旧版移植升级上来的存档继续可用。
 | [Mantle](https://github.com/SlimeKnights/Mantle) | **SlimeKnights** | MIT | Tinkers' Construct 的强制前置库 |
 | [Mantle (Fabric)](https://github.com/Alpha-s-Stuff/Mantle) | **AlphaMode (Alpha)** | MIT | Mantle 的 Fabric 移植版；本仓库依赖它 |
 

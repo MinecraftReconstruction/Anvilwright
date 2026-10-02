@@ -3,8 +3,8 @@
   "id": "tconstruct",
   "version": "${version}",
 
-  "name": "Hephaestus",
-  "description": "Unofficial Fabric port of Tinkers' Construct 3.12.1 for Minecraft 1.20.1. Not affiliated with, reviewed by, or endorsed by SlimeKnights or AlphaMode; the upstream code and assets are theirs. Maintained by MinecraftReconstruction.",
+  "name": "Anvilwright",
+  "description": "Unofficial Fabric port of Tinkers' Construct 3.12.1 for Minecraft 1.20.1, continuing the work of AlphaMode's Fabric port. Upstream code and assets are SlimeKnights' and AlphaMode's; this project is not affiliated with, reviewed by or endorsed by them. Maintained by MinecraftReconstruction. Mod id stays 'tconstruct' so worlds from the older port keep working.",
   "authors": [
     "Slime Knights",
     "AlphaMode",

@@ -244,12 +244,12 @@ jar {
 
     manifest {
         attributes([
-            "Specification-Title"     : "Tinkers' Construct",
-            "Specification-Vendor"    : "Slime Knights",
+            "Specification-Title"     : "Anvilwright",
+            "Specification-Vendor"    : "MinecraftReconstruction",
             "Specification-Version"   : "1", // We are version 1 of ourselves
             "Implementation-Title"    : project.name,
             "Implementation-Version"  : "${version}",
-            "Implementation-Vendor"   : "Slime Knights",
+            "Implementation-Vendor"   : "MinecraftReconstruction",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
