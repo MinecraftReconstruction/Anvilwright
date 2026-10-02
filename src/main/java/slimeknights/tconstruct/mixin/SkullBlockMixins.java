@@ -28,7 +28,7 @@ public class SkullBlockMixins extends AbstractSkullBlock {
 
   @Inject(method = "getShape", at = @At("TAIL"), cancellable = true)
   private void getCustomShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext, CallbackInfoReturnable<VoxelShape> cir) {
-    if (this.getType() == TinkerHeadType.PIGLIN_BRUTE || this.getType() == TinkerHeadType.ZOMBIFIED_PIGLIN) {
+    if (this.getType() instanceof TinkerHeadType headType && headType.isPiglin()) {
       cir.setReturnValue(PIGLIN_SHAPE);
     }
   }

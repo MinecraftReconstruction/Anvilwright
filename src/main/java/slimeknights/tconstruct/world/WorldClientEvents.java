@@ -80,6 +80,7 @@ public class WorldClientEvents extends ClientEventBase {
 
     // piglin
     Supplier<LayerDefinition> piglinHead = Lazy.of(() -> LayerDefinition.create(PiglinHeadModel.createHeadModel(), 64, 64));
+    registerLayerDefinition(TinkerHeadType.PIGLIN, piglinHead);
     registerLayerDefinition(TinkerHeadType.PIGLIN_BRUTE, piglinHead);
     registerLayerDefinition(TinkerHeadType.ZOMBIFIED_PIGLIN, piglinHead);
   }
@@ -163,6 +164,7 @@ public class WorldClientEvents extends ClientEventBase {
       registerHeadModel(TinkerHeadType.SPIDER, MaterialIds.string, new ResourceLocation("textures/entity/spider/spider.png"));
       registerHeadModel(TinkerHeadType.CAVE_SPIDER, MaterialIds.darkthread, new ResourceLocation("textures/entity/spider/cave_spider.png"));
       // piglins
+      registerHeadTexture(TinkerHeadType.PIGLIN, new ResourceLocation("textures/entity/piglin/piglin.png"));
       registerHeadModel(TinkerHeadType.PIGLIN_BRUTE, MaterialIds.roseGold, new ResourceLocation("textures/entity/piglin/piglin_brute.png"));
       registerHeadModel(TinkerHeadType.ZOMBIFIED_PIGLIN, MaterialIds.pigIron, new ResourceLocation("textures/entity/piglin/zombified_piglin.png"));
 //    });
@@ -244,6 +246,11 @@ public class WorldClientEvents extends ClientEventBase {
   private static void registerPiglinHeadModel(TinkerHeadType skull, MaterialId materialId, ResourceLocation texture) {
     SkullBlockRenderer.SKIN_BY_TYPE.put(skull, texture);
     SlimeskullArmorModel.registerPiglinHeadModel(materialId, SkullModelHelper.HEAD_LAYERS.get(skull), texture);
+  }
+
+  /** Registers a skull texture without a slimeskull material, for head variants that have no Tinkers material of their own */
+  private static void registerHeadTexture(TinkerHeadType skull, ResourceLocation texture) {
+    SkullBlockRenderer.SKIN_BY_TYPE.put(skull, texture);
   }
 
   /** Register a layer without being under the minecraft domain. TODO: is this needed? */

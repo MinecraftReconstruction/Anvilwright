@@ -256,7 +256,8 @@ public class WorldEvents {
         if (creeper.canDropMobsSkull()) {
           LivingEntity dying = target;
           TinkerHeadType headType = TinkerHeadType.fromEntityType(dying.getType());
-          if (headType != null && Config.COMMON.headDrops.get(headType).get()) {
+          // piglin heads are excluded: vanilla already drops its own piglin head from a charged creeper, so dropping ours as well would hand out two
+          if (headType != null && headType != TinkerHeadType.PIGLIN && Config.COMMON.headDrops.get(headType).get()) {
             creeper.increaseDroppedSkulls();
             drops.add(dying.spawnAtLocation(TinkerWorld.heads.get(headType)));
           }

@@ -500,7 +500,7 @@ public final class TinkerWorld extends TinkerModule {
   /** Creates a skull wall block for the given head type */
   private static WallSkullBlock makeWallHead(TinkerHeadType type) {
     BlockBehaviour.Properties props = BlockBehaviour.Properties.of().pushReaction(PushReaction.DESTROY).strength(1.0F).dropsLike(heads.get(type));
-    if (type == TinkerHeadType.PIGLIN_BRUTE || type == TinkerHeadType.ZOMBIFIED_PIGLIN) {
+    if (type.isPiglin()) {
       return new PiglinWallHeadBlock(type, props);
     }
     return new WallSkullBlock(type, props);

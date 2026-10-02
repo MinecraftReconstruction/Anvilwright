@@ -2112,7 +2112,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     // and piglins gold
     EntityMeltingRecipeBuilder.melting(EntityIngredient.of(TinkerTags.EntityTypes.PIGLINS), TinkerFluids.moltenGold.result(FluidValues.NUGGET), 4)
                               .save(consumer, location(folder + "piglin"));
-    MeltingRecipeBuilder.melting(Ingredient.of(Items.PIGLIN_HEAD, TinkerWorld.heads.get(TinkerHeadType.PIGLIN_BRUTE), TinkerWorld.heads.get(TinkerHeadType.ZOMBIFIED_PIGLIN)), TinkerFluids.moltenGold, FluidValues.INGOT)
+    MeltingRecipeBuilder.melting(Ingredient.of(Items.PIGLIN_HEAD, TinkerWorld.heads.get(TinkerHeadType.PIGLIN), TinkerWorld.heads.get(TinkerHeadType.PIGLIN_BRUTE), TinkerWorld.heads.get(TinkerHeadType.ZOMBIFIED_PIGLIN)), TinkerFluids.moltenGold, FluidValues.INGOT)
                         .save(consumer, location(headFolder + "piglin"));
 
     // melt spiders into venom
