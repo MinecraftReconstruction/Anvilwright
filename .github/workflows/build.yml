@@ -50,7 +50,14 @@ jobs:
 
       - name: publish Mantle to mavenLocal
         working-directory: mantle
+        env:
+          # publish under exactly the version Tinkers pins, instead of relying on Mantle's own git short hash (the
+          # abbreviation length can differ between checkouts, which made the dependency unresolvable)
+          ARTIFACT_VERSION: ${{ steps.mantle.outputs.version }}
         run: ./gradlew publishToMavenLocal -x test --no-daemon
+
+      - name: show what Mantle published
+        run: ls -d ~/.m2/repository/slimeknights/mantle/Mantle/*/ || true
 
       - name: build
         run: ./gradlew build -x test --no-daemon
