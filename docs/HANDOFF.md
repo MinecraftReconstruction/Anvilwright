@@ -892,3 +892,15 @@ jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification
 熔化配方、**流体渲染层（修 shader 前必崩的那一处）**、浇注方块实体与配方匹配、产物与贴图、流体单位换算。
 **仍然"未验证"的重点**：合金/喷嘴/通道的流体渲染、工具与盔甲的模型与修饰符、书页图标、流体桶/铜罐的染色与透明度、
 焦黑燃料罐的加热结构判定（这些都是 docs/BEHAVIOUR-DIFFERENCES.md 里标注"未验证"的条目）。
+
+### 22.2 CI 现状（2026-10-02 修好）
+
+- 上游继承来的 `.github/workflows/build.yml` 是 `on: [push, pull_request]` + `./gradlew buildOrPublish`（构建并发布 **Forge** 版），
+  而本移植构建需要 Mantle 的**本地 mavenLocal** 构件 → 每次 push 必失败（累计 **34 条**失败运行，`main` 与 `checkpoints`
+  各推一次所以是双份）。这些失败记录已全部删除。
+- 现在的工作流：**只在 `workflow_dispatch` 与 `pull_request` 触发**（不再刷 push），并带 `concurrency` 取消重复。
+  步骤：读 `mantle_version` → 拉 `MinecraftReconstruction/Mantle-Fabric` 并 checkout 该 commit →
+  用 `ARTIFACT_VERSION=<mantle_version>` 发布到 mavenLocal（Mantle 的版本默认来自它的 git 短哈希，缩写长度可能不同，
+  所以显式覆盖）→ `./gradlew build -x test` → 上传 `build/libs/`。
+- **实测**：手动触发一次，全步骤 success（run 36944996953），构建产物已上传。
+- 注意：fork 仓库（`MinecraftReconstruction/TinkersConstruct`）没有 Actions 运行记录，不需要处理。
