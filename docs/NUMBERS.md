@@ -561,7 +561,7 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 | 维度 | 结论 |
 |---|---|
 | mod id | 都是 **`tconstruct`** → 可以直接替换（也因此不能共存） |
-| 方块 id | 原本 359/367；**恢复 `mud_bricks`、`lavawood`（各含 slab/stairs）后 365/367**，只差 `piglin_head`、`silky_jewel_block` |
+| 方块 id | 原本 359/367 → 恢复 `mud_bricks`、`lavawood`（各含 slab/stairs）后 365/367 → **再补 `piglin_head`（2026-10-02）后 366/367**，只剩 `silky_jewel_block` |
 | 物品 id | 260/276 = 94%；缺的 16 个都是上游 3.7→3.12 自己删/改名的（4 个弹弓、`round_plate` 三件铸模、`sign_head_cast` 三件、`silky_jewel`、`bloodbone`、`bronze_reinforcement`、`ichor_bottle`→`ichor_slime_bottle`、`slime_chestplate`→`slimy_chestplate`） |
 | 流体单位 | **一致**：他们的铁锭熔化也是 `amount: 9000`（droplet 制，1 桶 81000），与我们逐字节相同 → 罐/管里的流体量不会错位 |
 | 工具 NBT | 键名基本一致（`tic_materials`/`tic_stats`/`tic_modifiers`/`tic_upgrades`/`tic_multipliers`/`tic_broken`/`tic_volatile_data`），只有 `tic_persistent_data`（他们）**改名为** `tic_persistent`（3.12.1）→ 旧工具可用，但修饰符持久数据会丢 |
@@ -569,3 +569,18 @@ scripts/port/truecount.sh .port/true_now.txt    # 299 个包目录逐个显式�
 
 恢复的 6 个方块资源全部来自他们的 jar（`textures/block/lavawood.png` 与我们仓库里那份 md5 相同，直接沿用；`mud_brick.png` 同样相同），
 另补回 4 个合成配方 + 2 个浇筑配方。冒烟验证：`models/ 0/678`、`sprites/ 0/678`、`lang/ 0/678`、配方解析错误 0。
+
+## 2026-10-02：`piglin_head` 兼容补齐
+
+AlphaMode 的 Hephaestus 有 `tconstruct:piglin_head`（上游 3.12.1 没有，因为原版 1.20 自己加了 `minecraft:piglin_head`）。
+本轮把它补回来，只为旧存档不丢方块 —— **三处刻意保持原版行为**，避免变成"比上游多一套玩法"：
+
+| 项 | 处理 | 原因 |
+|---|---|---|
+| 蓄力苦力怕击杀掉落 | 仍然只掉 `minecraft:piglin_head` | 否则一次击杀掉两个头，与上游 3.12.1 明显不同 |
+| `EntityType.PIGLIN` 的斩首配方 | 仍然是原版 `minecraft:piglin_head`（上游自带那条） | 我们那条自动生成的 `tools/severing/piglin_head` 会与之**重名冲突**，实测直接让 `runData` 报 `Duplicate recipe` |
+| 头颅贴图 | 只补 `SkullBlockRenderer.SKIN_BY_TYPE` 的 `textures/entity/piglin/piglin.png` | 没有与之配套的 Tinkers 材料，不应凭空多出一个 slimeskull 材质 |
+
+生成物（datagen 自动产出，无需手写资源）：`blockstates/piglin_head.json`、`blockstates/piglin_wall_head.json`、
+`models/item/piglin_head.json`、`loot_tables/blocks/piglin_head.json`，以及 `c:heads` 标签与"融化成熔融金"的条目。
+验证：`compileJava` 绿 → `runData` 绿 → `./gradlew clean build -x test` 绿。

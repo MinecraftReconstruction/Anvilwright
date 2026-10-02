@@ -1101,6 +1101,7 @@
   "block.tconstruct.drowned_head":          "Drowned Head",
   "block.tconstruct.spider_head":           "Spider Head",
   "block.tconstruct.cave_spider_head":      "Cave Spider Head",
+  "block.tconstruct.piglin_head":           "Piglin Head",
   "block.tconstruct.piglin_brute_head":     "Piglin Brute Head",
   "block.tconstruct.zombified_piglin_head": "Zombified Piglin Head",
 
