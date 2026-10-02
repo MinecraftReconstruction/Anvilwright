@@ -57,6 +57,10 @@ public class TinkerTabs {
   }
 
   public static void buildGeneralTab(CreativeModeTab.ItemDisplayParameters params, CreativeModeTab.Output output) {
+    // blocks only kept for saves from the older Fabric port, see TinkerCommons
+    output.accept(TinkerCommons.mudBricks);
+    output.accept(TinkerCommons.mudBricks.getSlab());
+    output.accept(TinkerCommons.mudBricks.getStairs());
     output.accept(TinkerCommons.clearGlass);
     output.accept(TinkerCommons.clearTintedGlass);
     output.accept(TinkerCommons.clearGlassPane);
@@ -71,6 +75,9 @@ public class TinkerTabs {
     output.accept(TinkerMaterials.blazewood);
     output.accept(TinkerMaterials.blazewood.getSlab());
     output.accept(TinkerMaterials.blazewood.getStairs());
+    output.accept(TinkerCommons.lavawood);
+    output.accept(TinkerCommons.lavawood.getSlab());
+    output.accept(TinkerCommons.lavawood.getStairs());
     output.accept(TinkerCommons.goldBars);
     output.accept(TinkerCommons.obsidianPane);
     output.accept(TinkerCommons.goldPlatform);

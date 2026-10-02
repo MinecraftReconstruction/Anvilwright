@@ -89,6 +89,9 @@ public class BlockLootTableProvider extends ModdedBlockLootSubProvider {
     this.registerFenceBuildingLootTables(TinkerMaterials.blazewood);
     this.registerFenceBuildingLootTables(TinkerMaterials.nahuatl);
     this.dropSelf(TinkerCommons.cheeseBlock.get());
+    // compat blocks from the older Fabric port, see TinkerCommons
+    this.registerBuildingLootTables(TinkerCommons.mudBricks);
+    this.registerBuildingLootTables(TinkerCommons.lavawood);
     this.dropSelf(TinkerCommons.goldBars.get());
     this.dropSelf(TinkerCommons.goldPlatform.get());
     this.dropSelf(TinkerCommons.ironPlatform.get());

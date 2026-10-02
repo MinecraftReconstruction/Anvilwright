@@ -1,0 +1,13 @@
+{
+  "type": "tconstruct:casting_basin",
+  "cast": {
+    "item": "minecraft:dirt"
+  },
+  "cast_consumed": true,
+  "cooling_time": 27,
+  "fluid": {
+    "amount": 8100,
+    "fluid": "minecraft:water"
+  },
+  "result": "tconstruct:mud_bricks"
+}

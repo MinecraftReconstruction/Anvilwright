@@ -106,10 +106,13 @@ public final class TinkerCommons extends TinkerModule {
   /** @deprecated Use {@link #glowBlock} */
   @Deprecated(forRemoval = true)
   public static final ItemObject<GlowBlock> glow = glowBlock;
-  // NOTE(porting): the fork registered "mud_bricks" and "lavawood" blocks that upstream 3.12.1 does not have, and it
-  //  never generated blockstates, models or textures for them - they drew as the magenta missing model in the
-  //  creative tabs. Removed again rather than kept half finished (the "mud brick" and "lavawood" textures in the
-  //  resources belong to upstream's casting recipes, not to blocks).
+  // NOTE(porting): "mud_bricks" and "lavawood" are 3.6.4 era blocks that upstream 3.12.1 removed, but AlphaMode's
+  //  Hephaestus (the Fabric port this continues) ships them, so worlds coming from that port contain them. They are
+  //  kept here for save compatibility with their original blockstates, models and textures taken from that port.
+  //  See docs/BEHAVIOUR-DIFFERENCES.md.
+  public static final BuildingBlockObject mudBricks = BLOCKS.registerBuilding("mud_bricks", builder(MapColor.DIRT, SoundType.GRAVEL).requiresCorrectToolForDrops().strength(2.0F), BLOCK_ITEM);
+  /** @deprecated upstream renamed this to blazewood, kept for worlds from the older Fabric port */
+  public static final BuildingBlockObject lavawood = BLOCKS.registerBuilding("lavawood", woodBuilder(MapColor.COLOR_ORANGE).lightLevel(s -> 7), BLOCK_ITEM);
   // glass
   public static final ItemObject<GlassBlock> clearGlass = BLOCKS.register("clear_glass", () -> new GlassBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
   public static final ItemObject<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).mapColor(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
