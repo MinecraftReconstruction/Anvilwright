@@ -904,3 +904,40 @@ jar 名、`settings.gradle` 的 `rootProject.name`、manifest 的 `Specification
   所以显式覆盖）→ `./gradlew build -x test` → 上传 `build/libs/`。
 - **实测**：手动触发一次，全步骤 success（run 36944996953），构建产物已上传。
 - 注意：fork 仓库（`MinecraftReconstruction/TinkersConstruct`）没有 Actions 运行记录，不需要处理。
+
+## 23. 2026-10-02：改名 Anvilwright、两个 alpha 重发、文档英文化（本轮交接）
+
+### 23.1 改名落地的完整清单
+
+用户结论：**不能再叫 Hephaestus**（AlphaMode 明确说"Hephaestus 没被放弃，只是我最近忙"，不允许 fork 用该名）。
+新名 **`Anvilwright`**（Modrinth slug 与搜索均无占用）。**mod id 仍然是 `tconstruct`**，跨存档兼容性不受影响。
+
+| 位置 | 状态 |
+|---|---|
+| GitHub 仓库 | `MinecraftReconstruction/TinkersConstruct` → **`MinecraftReconstruction/Anvilwright`**（旧 URL 会重定向；`origin` remote 仍写着旧名，能正常 push） |
+| `fabric.mod.json` | `name` / `description` 已改；description 里**不再写 "AI Assisted"**（用户要求） |
+| `settings.gradle` | `rootProject.name = Anvilwright` |
+| jar 名与 manifest | `Anvilwright-1.20.1-3.12.1-alpha.1.DEV.<sha>.jar` |
+| 图标 | 换掉了上游 logo（旧图标里带上游名字）→ 新方形图标（焦黑砖 + 马玉灵锤头合成） |
+| 已删 | `HephaestusSchema.java`（未使用） |
+| README / ATTRIBUTION / `docs/MODRINTH.md` | 全部改名 |
+
+### 23.2 两个 release 的最终状态
+
+| release | tag | 内容 |
+|---|---|---|
+| Anvilwright 3.12.1 alpha 1 | `v1.20.1-3.12.1-alpha.1` | 标题已从 "Hephaestus …" 改成 "Anvilwright …"；资产已换成 `Anvilwright-…-DEV.e4d67ab279.jar(+sources)`，旧的 `Hephaestus-…-DEV.fd6b6f3895.jar(+sources)` 已删除；notes 要求 **Mantle alpha 3** |
+| Mantle 1.11 alpha 3 | `v1.20.1-1.11-alpha.3` | **新发**（alpha 2 缺 core shader 注册，放燃料罐必崩，不能再用）。资产 `Mantle-1.20.1-1.11.DEV.73f07beb.jar(+sources)`，Porting Lib 依赖已从 `2.3.16-beta.81` 退回 **`2.3.15`** |
+
+### 23.3 接力口径（给下一个 agent）
+
+- TCon 侧 `mantle_version=1.11.DEV.c90baefa`；Mantle 的 `mcr/mantle-1.11` 已 push 到 `73f07beb`（含 c90baefa 与 73cc17a1 两个 commit），**所以 CI 的 `git checkout c90baefa` 现在能成功**（之前没 push 的话 CI 会红）。
+- canonical 仓库 `main` / `checkpoints` 两分支内容一致（`git diff --name-only main mcr/upstream-3.12.1` = 0）。
+
+### 23.4 文档英文化（用户要求）
+
+`docs/BEHAVIOUR-DIFFERENCES.md`（44 条）与 Mantle 侧同名文件（26 条 + R1 回归表）**已全文改成英文**：
+表格列名改为 `Location / Forge upstream behaviour / Fabric behaviour / Category / Blast radius / Verification`，
+分类词统一为 `Missing feature / Approximation / Semantically equivalent / Closed / Equivalent / Aligned with upstream`。
+**其余文档（HANDOFF、NUMBERS、STATUS、PLAN）保持中文**——用户只要求行为差异改英文。
+以后新增差异条目请**用英文写**，并在提交信息里点名 "behaviour differences"。
